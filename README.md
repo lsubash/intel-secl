@@ -60,7 +60,7 @@ to build latest **v3.0.0** version of Intel<sup>®</sup> SecL-DC with as simple 
 
 example:
 
-# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v3.6.0 -m manifest/fs.xml
+# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v3.6.1 -m manifest/fs.xml
 ```
 
 ### Product Guide
