@@ -40,7 +40,7 @@ func TestGetHostsFromOpenStack(t *testing.T) {
 	configuration.Endpoint.UserName = testutility.OpenstackUserName
 	configuration.Endpoint.Password = testutility.OpenstackPassword
 	configuration.Endpoint.Type = constants.OpenStackTenant
-	configuration.AASApiUrl = server.URL + "/aas"
+	configuration.AASBaseUrl = server.URL + "/aas"
 	configuration.IHUB.Username = "admin@hub"
 	configuration.IHUB.Password = "hubAdminPass"
 	configuration.AttestationService.HVSBaseURL = server.URL + "/mtwilson/v2"
@@ -159,7 +159,7 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Testing for failures 2",
 			configuration: &config.Configuration{
-				AASApiUrl: server.URL + "/aas",
+				AASBaseUrl: server.URL + "/aas",
 				Endpoint: config.Endpoint{
 					Type:     "OPENSTACK",
 					URL:      server.URL + "/openstack/api/",
@@ -173,7 +173,7 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Testing for failures 3",
 			configuration: &config.Configuration{
-				AASApiUrl:          server.URL + "/aas",
+				AASBaseUrl:          server.URL + "/aas",
 				AttestationService: config.AttestationConfig{HVSBaseURL: server.URL + "/mtwilson/v2"},
 			},
 			wantErr: true,
@@ -182,7 +182,7 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Success with ISecl-HVS Push",
 			configuration: &config.Configuration{
-				AASApiUrl: server.URL + "/aas",
+				AASBaseUrl: server.URL + "/aas",
 				AttestationService: config.AttestationConfig{
 					HVSBaseURL: server.URL + "/mtwilson/v2"},
 				Endpoint: config.Endpoint{
@@ -199,7 +199,7 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Success with SGX-HVS Push",
 			configuration: &config.Configuration{
-				AASApiUrl: server.URL + "/aas",
+				AASBaseUrl: server.URL + "/aas",
 				AttestationService: config.AttestationConfig{
 					HVSBaseURL: server.URL + "/sgx-hvs/v2"},
 				Endpoint: config.Endpoint{

@@ -357,7 +357,7 @@ func TestKubePluginInit(t *testing.T) {
 			kPlugin.K8sClient = k8sClient
 
 			if tt.args.isSGXAttestation {
-				tt.args.configuration.AttestationService.SHVSBaseURL = server.URL + "/"
+				tt.args.configuration.AttestationService.FDSBaseURL = server.URL + "/"
 			} else {
 				tt.args.configuration.AttestationService.HVSBaseURL = server.URL + "/"
 			}

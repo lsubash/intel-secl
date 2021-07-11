@@ -336,11 +336,11 @@ func SetupMockK8sConfiguration(t *testing.T, serverUrl string) *config.Configura
 		}
 	}()
 	c, _ := config.LoadConfiguration()
-	c.AASApiUrl = serverUrl + "/aas"
+	c.AASBaseUrl = serverUrl + "/aas"
 	c.IHUB.Username = "admin@hub"
 	c.IHUB.Password = "hubAdminPass"
 	c.AttestationService.HVSBaseURL = serverUrl + "/mtwilson/v2/"
-	c.AttestationService.SHVSBaseURL = serverUrl + "/sgx-hvs/v2/"
+	c.AttestationService.FDSBaseURL = serverUrl + "/sgx-hvs/v2/"
 	c.Endpoint.Type = "KUBERNETES"
 	c.Endpoint.URL = serverUrl + "/"
 	c.Endpoint.CRDName = "custom-isecl"
@@ -361,7 +361,7 @@ func SetupMockOpenStackConfiguration(t *testing.T, serverUrl string) *config.Con
 		}
 	}()
 	c, _ := config.LoadConfiguration()
-	c.AASApiUrl = serverUrl + "/aas"
+	c.AASBaseUrl = serverUrl + "/aas"
 	c.IHUB.Username = "admin@hub"
 	c.IHUB.Password = "hubAdminPass"
 	c.Endpoint.Type = "OPENSTACK"

@@ -53,7 +53,7 @@ func (uc UpdateServiceConfig) Run() error {
 	}
 
 	(*uc.AppConfig).IHUB = uc.ServiceConfig
-	(*uc.AppConfig).AASApiUrl = uc.AASApiUrl
+	(*uc.AppConfig).AASBaseUrl = uc.AASApiUrl
 	(*uc.AppConfig).Log = commConfig.LogConfig{
 		MaxLength:    viper.GetInt("log-max-length"),
 		EnableStdout: viper.GetBool("log-enable-stdout"),

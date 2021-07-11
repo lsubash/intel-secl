@@ -17,7 +17,7 @@ import (
 
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
 type Configuration struct {
-	AASApiUrl           string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
+	AASBaseUrl          string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
 	CMSBaseURL          string `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	CmsTlsCertDigest    string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 	PollIntervalMinutes int    `yaml:"poll-interval-minutes" mapstructure:"poll-interval-minutes"`
@@ -30,8 +30,8 @@ type Configuration struct {
 }
 
 type AttestationConfig struct {
-	HVSBaseURL  string `yaml:"hvs-base-url" mapstructure:"hvs-base-url"`
-	SHVSBaseURL string `yaml:"shvs-base-url" mapstructure:"shvs-base-url"`
+	HVSBaseURL string `yaml:"hvs-base-url" mapstructure:"hvs-base-url"`
+	FDSBaseURL string `yaml:"fds-base-url" mapstructure:"fds-base-url"`
 }
 
 type Endpoint struct {

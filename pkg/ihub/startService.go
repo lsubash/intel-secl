@@ -49,10 +49,10 @@ func (app *App) startDaemon() error {
 	var o openstackplugin.OpenstackDetails
 
 	attestationHVSURL := configuration.AttestationService.HVSBaseURL
-	attestationSHVSURL := configuration.AttestationService.SHVSBaseURL
+	attestationSHVSURL := configuration.AttestationService.FDSBaseURL
 
 	if attestationHVSURL == "" && attestationSHVSURL == "" {
-		return errors.New("startService:startDaemon() Neither HVS nor SHVS Attestation URL are defined")
+		return errors.New("startService:startDaemon() Neither HVS nor FDS URL are defined")
 	}
 
 	if configuration.Endpoint.Type == constants.OpenStackTenant {

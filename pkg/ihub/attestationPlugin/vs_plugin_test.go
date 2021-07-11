@@ -60,7 +60,7 @@ func TestGetHostReports(t *testing.T) {
 			args: args{
 				h: invalidHostID,
 				c: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
 						HVSBaseURL: server.URL + "/mtwilson/v2/invalid",
 					},
@@ -84,7 +84,7 @@ func TestGetHostReports(t *testing.T) {
 			args: args{
 				h: hostID,
 				c: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
 						HVSBaseURL: server.URL + "/mtwilson/v2/",
 					},
@@ -110,7 +110,7 @@ func TestGetHostReports(t *testing.T) {
 			args: args{
 				h: hostID,
 				c: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
 						HVSBaseURL: "mtwilson/v2"},
 					Endpoint: config.Endpoint{
@@ -161,7 +161,7 @@ func TestGetCaCerts(t *testing.T) {
 			args: args{
 				domain: "SAML",
 				configuration: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
@@ -179,7 +179,7 @@ func TestGetCaCerts(t *testing.T) {
 			args: args{
 				domain: "SAML",
 				configuration: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
@@ -260,7 +260,7 @@ func Test_initializeClient(t *testing.T) {
 			args: args{
 				certDirectory: "",
 				con: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",

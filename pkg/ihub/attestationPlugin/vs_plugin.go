@@ -63,7 +63,7 @@ func initializeClient(con *config.Configuration, certDirectory string) (*vs.Clie
 		}
 	}
 
-	aasURL, err := url.Parse(con.AASApiUrl)
+	aasURL, err := url.Parse(con.AASBaseUrl)
 	if err != nil {
 		return nil, errors.Wrap(err, "attestationPlugin/vs_plugin:initializeClient() Error parsing AAS URL")
 	}

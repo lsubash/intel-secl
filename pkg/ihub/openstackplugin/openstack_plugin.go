@@ -131,7 +131,7 @@ func filterHostReportsForOpenstack(hostDetails *openstackHostDetails, openstackD
 			return errors.Wrap(err, "openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : Error in generating custom traits from trust report")
 		}
 	}
-	if openstackDetails.Config.AttestationService.SHVSBaseURL != "" {
+	if openstackDetails.Config.AttestationService.FDSBaseURL != "" {
 		platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, openstackDetails.Config, constants.TrustedCAsStoreDir)
 		if err != nil {
 			return errors.Wrap(err, "openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : Error in getting the SGX Platform Data")

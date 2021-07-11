@@ -32,7 +32,7 @@ func init() {
 func defaultConfig() *config.Configuration {
 	loadAlias()
 	return &config.Configuration{
-		AASApiUrl:           viper.GetString("aas-base-url"),
+		AASBaseUrl:          viper.GetString("aas-base-url"),
 		CMSBaseURL:          viper.GetString("cms-base-url"),
 		CmsTlsCertDigest:    viper.GetString("cms-tls-cert-sha384"),
 		PollIntervalMinutes: viper.GetInt("poll-interval-minutes"),
@@ -47,8 +47,8 @@ func defaultConfig() *config.Configuration {
 			SANList:    viper.GetString("tls-san-list"),
 		},
 		AttestationService: config.AttestationConfig{
-			HVSBaseURL:  viper.GetString("hvs-base-url"),
-			SHVSBaseURL: viper.GetString("shvs-base-url"),
+			HVSBaseURL: viper.GetString("hvs-base-url"),
+			FDSBaseURL: viper.GetString("fds-base-url"),
 		},
 		Log: commConfig.LogConfig{
 			MaxLength:    viper.GetInt("log-max-length"),

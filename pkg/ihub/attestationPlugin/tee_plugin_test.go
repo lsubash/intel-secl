@@ -5,11 +5,11 @@
 package attestationPlugin
 
 import (
-	"github.com/intel-secl/intel-secl/v5/pkg/clients/skchvsclient"
 	"io/ioutil"
 	"reflect"
 	"testing"
 
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/fds"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	testutility "github.com/intel-secl/intel-secl/v5/pkg/ihub/test"
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
@@ -40,13 +40,13 @@ func TestGetHostReportsSGX(t *testing.T) {
 			args: args{
 				hostIP: sgxHostName,
 				config: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						SHVSBaseURL: server.URL + "/sgx-hvs/v2/",
+						FDSBaseURL: server.URL + "/sgx-hvs/v2/",
 					},
 				},
 			},
@@ -87,13 +87,13 @@ func Test_initializeSKCClient(t *testing.T) {
 			args: args{
 				certDirectory: "",
 				con: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						SHVSBaseURL: server.URL + "/sgx-hvs/v2",
+						FDSBaseURL: server.URL + "/sgx-hvs/v2",
 					},
 				},
 			},
@@ -101,11 +101,11 @@ func Test_initializeSKCClient(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		SGXClient = &skchvsclient.Client{}
+		FDSClient = &fds.Client{}
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := initializeSKCClient(tt.args.con, tt.args.certDirectory)
+			_, err := initializeFDSClient(tt.args.con, tt.args.certDirectory)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("attestationPlugin/sgx_plugin_test:initializeSKCClient() Error in initializing client :error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("attestationPlugin/sgx_plugin_test:initializeFDSClient() Error in initializing client :error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

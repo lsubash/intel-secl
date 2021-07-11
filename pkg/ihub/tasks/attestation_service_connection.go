@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v5/pkg/clients/skchvsclient"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/fds"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/vs"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
@@ -30,10 +30,10 @@ func (attestationService AttestationServiceConnection) Run() error {
 	fmt.Fprintln(attestationService.ConsoleWriter, "Setting up Attestation Service Connection...")
 
 	attestationHVSURL := viper.GetString("hvs-base-url")
-	attestationSHVSURL := viper.GetString("shvs-base-url")
+	FdsUrl := viper.GetString("fds-base-url")
 
-	if attestationHVSURL == "" && attestationSHVSURL == "" {
-		return errors.New("tasks/attestation_service_connection:Run() Missing HVS and SHVS endpoint urls in environment")
+	if attestationHVSURL == "" && FdsUrl == "" {
+		return errors.New("tasks/attestation_service_connection:Run() Missing HVS and FDS endpoint urls in environment")
 	}
 
 	if attestationHVSURL != "" && !strings.HasSuffix(attestationHVSURL, "/") {
@@ -43,15 +43,15 @@ func (attestationService AttestationServiceConnection) Run() error {
 		}
 	}
 
-	if attestationSHVSURL != "" && !strings.HasSuffix(attestationSHVSURL, "/") {
-		attestationSHVSURL = attestationSHVSURL + "/"
-		if _, err := url.Parse(attestationSHVSURL); err != nil {
-			return errors.Wrap(err, "tasks/attestation_service_conection:Run() SHVS URL is invalid")
+	if FdsUrl != "" && !strings.HasSuffix(FdsUrl, "/") {
+		FdsUrl = FdsUrl + "/"
+		if _, err := url.Parse(FdsUrl); err != nil {
+			return errors.Wrap(err, "tasks/attestation_service_connection:Run() FDS URL is invalid")
 		}
 	}
 
 	attestationService.AttestationConfig.HVSBaseURL = attestationHVSURL
-	attestationService.AttestationConfig.SHVSBaseURL = attestationSHVSURL
+	attestationService.AttestationConfig.FDSBaseURL = FdsUrl
 
 	return nil
 }
@@ -59,7 +59,7 @@ func (attestationService AttestationServiceConnection) Run() error {
 // Validate checks whether or not the Attestation Service Connection setup task was completed successfully
 func (attestationService AttestationServiceConnection) Validate() error {
 
-	if attestationService.AttestationConfig.HVSBaseURL == "" && attestationService.AttestationConfig.SHVSBaseURL == "" {
+	if attestationService.AttestationConfig.HVSBaseURL == "" && attestationService.AttestationConfig.FDSBaseURL == "" {
 		return errors.New("tasks/attestation_service_connection:Validate() Attestation service Connection: HVS and SHVS url are not set")
 	}
 
@@ -85,13 +85,19 @@ func (attestationService AttestationServiceConnection) validateService() error {
 			return errors.Wrap(err, "tasks/attestation_service_connection:validateService() Error while getting response from Host Verification Service")
 		}
 	}
-	if attestationService.AttestationConfig.SHVSBaseURL != "" {
-		versionURL := attestationService.AttestationConfig.SHVSBaseURL + "version"
-		shvsClient := &skchvsclient.Client{}
-
-		_, err := shvsClient.GetSHVSVersion(versionURL)
+	if attestationService.AttestationConfig.FDSBaseURL != "" {
+		fdsbaseUrl, err := url.Parse(attestationService.AttestationConfig.FDSBaseURL)
 		if err != nil {
-			return errors.Wrap(err, "tasks/attestation_service_connection:validateService() Error while getting response from SGX Host Verification Service")
+			return errors.Wrap(err, "tasks/attestation_service_connection:validateService() Invalid FDS URL "+
+				"provided in configuration/env")
+		}
+		fdsClient := fds.NewClient(fdsbaseUrl, nil, nil,
+			"", "")
+
+		_, err = fdsClient.GetVersion()
+		if err != nil {
+			return errors.Wrap(err, "tasks/attestation_service_connection:validateService() Error while getting"+
+				" response from FDS")
 		}
 	}
 

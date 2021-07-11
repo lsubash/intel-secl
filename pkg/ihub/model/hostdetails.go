@@ -23,6 +23,8 @@ type HostDetails struct {
 	ValidTo           time.Time
 	SgxSupported      bool
 	SgxEnabled        bool
+	TdxSupported      bool
+	TdxEnabled        bool
 	FlcEnabled        bool
 	EpcSize           string
 	TcbUpToDate       bool

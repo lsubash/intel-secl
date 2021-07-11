@@ -9,7 +9,6 @@ import (
 	"crypto"
 	"crypto/sha1"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v5/pkg/ihub/util"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,6 +19,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	types "github.com/intel-secl/intel-secl/v5/pkg/ihub/model"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/fds"
 	model "github.com/intel-secl/intel-secl/v5/pkg/model/k8s"
 
 	"io/ioutil"
@@ -412,7 +412,7 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 	log.Trace("k8splugin/k8s_plugin:SendDataToEndPoint() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:SendDataToEndPoint() Leaving")
 
-	var sgxData types.PlatformDataSGX
+	var teeData []*fds.Host
 
 	log.Debug("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching hosts from Kubernetes")
 	err := GetHosts(&kubernetes)
@@ -423,7 +423,7 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 	log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Fetched %d hosts from Kubernetes", len(kubernetes.HostDetailsMap))
 	for key := range kubernetes.HostDetailsMap {
 		hvsFail := true
-		shvsFail := true
+		fdsFail := true
 
 		hostDetails := kubernetes.HostDetailsMap[key]
 
@@ -438,41 +438,58 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 				hostDetails.AgentType = "ta"
 			}
 		}
-		if kubernetes.Config.AttestationService.SHVSBaseURL != "" {
-			log.Debugf("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching PlatformData for host %s from SHVS", hostDetails.HostName)
+		if kubernetes.Config.AttestationService.FDSBaseURL != "" {
+			log.Debugf("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching PlatformData for host %s from FDS", hostDetails.HostName)
 			platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
 			if err != nil {
-				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get PlatformData for host %s from SHVS", hostDetails.HostName)
+				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get PlatformData for host %s from FDS", hostDetails.HostName)
 			} else {
-				shvsFail = false
+				fdsFail = false
 				// mark TEE agent as running on this host
 				hostDetails.AgentType = "tee"
-				err = json.Unmarshal(platformData, &sgxData)
+				err = json.Unmarshal(platformData, &teeData)
 				if err != nil {
-					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() SGX Platform data unmarshal failed")
+					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() TEE Platform data unmarshal failed")
 					continue
 				}
 
-				// need to validate contents of EpcSize
-				if !osRegexEpcSize.MatchString(sgxData[0].EpcSize) {
-					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
-					continue
+				if teeData[0].HostInfo.HardwareFeatures.SGX != nil {
+					// need to validate contents of EpcSize
+					if !osRegexEpcSize.MatchString(*teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
+						log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
+						continue
+					}
+					tcbUptoDate, err := strconv.ParseBool(*teeData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate)
+					if err != nil {
+						log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid tcbUptoDate " +
+							"value found. Setting tcbUptoDate field to false")
+					}
+					hostDetails.EpcSize = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
+					hostDetails.FlcEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
+					hostDetails.SgxEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Enabled
+					hostDetails.SgxSupported = true
+					hostDetails.TcbUpToDate = tcbUptoDate
+					hostDetails.ValidTo = teeData[0].ValidTo
 				}
-				hostDetails.EpcSize = sgxData[0].EpcSize
-				hostDetails.FlcEnabled = sgxData[0].FlcEnabled
-				hostDetails.SgxEnabled = sgxData[0].SgxEnabled
-				hostDetails.SgxSupported = sgxData[0].SgxSupported
-				hostDetails.TcbUpToDate = sgxData[0].TcbUpToDate
-				util.EvaluateValidTo(sgxData[0].ValidTo, kubernetes.Config.PollIntervalMinutes)
-				hostDetails.ValidTo = sgxData[0].ValidTo
+			}
+
+			if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
+				tcbUptoDate, err := strconv.ParseBool(*teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate)
+				if err != nil {
+					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid tcbUptoDate " +
+						"value found. Setting tcbUptoDate field to false")
+				}
+				hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
+				hostDetails.TdxSupported = true
+				hostDetails.TcbUpToDate = hostDetails.TcbUpToDate && tcbUptoDate
 			}
 		}
-		if !hvsFail && !shvsFail {
+		if !hvsFail && !fdsFail {
 			// both TEE agent and Trust agent are running on same host
 			hostDetails.AgentType = "both"
 		}
-		// cannot find this host in HVS or SHVS, remove host from map
-		if hvsFail && shvsFail {
+		// cannot find this host in HVS or FDS, remove host from map
+		if hvsFail && fdsFail {
 			delete(kubernetes.HostDetailsMap, key)
 		} else {
 			kubernetes.HostDetailsMap[key] = hostDetails
