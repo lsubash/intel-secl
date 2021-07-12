@@ -42,5 +42,5 @@ type Meta struct {
 	FlcEnabled       *bool   `json:"flc_enabled,omitempty"`
 	EpcOffset        *string `json:"epc_offset,omitempty"`
 	EpcSize          *string `json:"epc_size,omitempty"`
-	TcbUptoDate      *string `json:"tcb_upto_date,omitempty"`
+	TcbUptoDate      *bool   `json:"tcb_upto_date,omitempty"`
 }

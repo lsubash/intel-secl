@@ -459,29 +459,20 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 						log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
 						continue
 					}
-					tcbUptoDate, err := strconv.ParseBool(*teeData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate)
-					if err != nil {
-						log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid tcbUptoDate " +
-							"value found. Setting tcbUptoDate field to false")
-					}
+
 					hostDetails.EpcSize = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
 					hostDetails.FlcEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
 					hostDetails.SgxEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Enabled
 					hostDetails.SgxSupported = true
-					hostDetails.TcbUpToDate = tcbUptoDate
+					hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
 					hostDetails.ValidTo = teeData[0].ValidTo
 				}
 			}
 
 			if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
-				tcbUptoDate, err := strconv.ParseBool(*teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate)
-				if err != nil {
-					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid tcbUptoDate " +
-						"value found. Setting tcbUptoDate field to false")
-				}
 				hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
 				hostDetails.TdxSupported = true
-				hostDetails.TcbUpToDate = hostDetails.TcbUpToDate && tcbUptoDate
+				hostDetails.TcbUpToDate = hostDetails.TcbUpToDate && *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
 			}
 		}
 		if !hvsFail && !fdsFail {

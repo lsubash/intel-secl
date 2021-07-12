@@ -7,8 +7,6 @@ package openstackplugin
 import (
 	"bytes"
 	"encoding/json"
-	types "github.com/intel-secl/intel-secl/v5/pkg/ihub/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/ihub/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -20,8 +18,10 @@ import (
 	vsPlugin "github.com/intel-secl/intel-secl/v5/pkg/ihub/attestationPlugin"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
+	types "github.com/intel-secl/intel-secl/v5/pkg/ihub/model"
 	commonLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/fds"
 	model "github.com/intel-secl/intel-secl/v5/pkg/model/openstack"
 	"github.com/pkg/errors"
 )
@@ -137,28 +137,35 @@ func filterHostReportsForOpenstack(hostDetails *openstackHostDetails, openstackD
 			return errors.Wrap(err, "openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : Error in getting the SGX Platform Data")
 		}
 
-		var sgxData types.PlatformDataSGX
+		var teeData []*fds.Host
 
-		err = json.Unmarshal(platformData, &sgxData)
+		err = json.Unmarshal(platformData, &teeData)
 		if err != nil {
 			return errors.Wrap(err, "openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : unmarshal SGX platform data error")
 		}
-		if len(sgxData) == 1 {
-			// need to validate contents of EpcSize
-			if !osRegexEpcSize.MatchString(sgxData[0].EpcSize) {
-				log.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() Invalid EPC Size value")
-				hostDetails.EpcSize = constants.SgxTraitEpcSizeNotAvailable
-			} else {
-				hostDetails.EpcSize = sgxData[0].EpcSize
+		if len(teeData) == 1 {
+			if teeData[0].HostInfo.HardwareFeatures.SGX != nil {
+				// need to validate contents of EpcSize
+				if !osRegexEpcSize.MatchString(*teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
+					log.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() Invalid EPC Size value")
+					hostDetails.EpcSize = constants.SgxTraitEpcSizeNotAvailable
+				} else {
+					hostDetails.EpcSize = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
+				}
+				hostDetails.FlcEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
+				hostDetails.SgxEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Enabled
+				hostDetails.SgxSupported = true
+				hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
+				hostDetails.ValidTo = teeData[0].ValidTo
 			}
-			hostDetails.FlcEnabled = sgxData[0].FlcEnabled
-			hostDetails.SgxEnabled = sgxData[0].SgxEnabled
-			hostDetails.SgxSupported = sgxData[0].SgxSupported
-			hostDetails.TcbUpToDate = sgxData[0].TcbUpToDate
-			util.EvaluateValidTo(sgxData[0].ValidTo, openstackDetails.Config.PollIntervalMinutes)
-			hostDetails.ValidTo = sgxData[0].ValidTo
+
+			if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
+				hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
+				hostDetails.TdxSupported = true
+				hostDetails.TcbUpToDate = hostDetails.TcbUpToDate && *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
+			}
 		} else {
-			return errors.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : SGX Platform Data response has invalid length %d", len(sgxData))
+			return errors.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : SGX Platform Data response has invalid length %d", len(teeData))
 		}
 
 		err = getCustomTraitsFromPlatformData(hostDetails)
