@@ -9,7 +9,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 )
 

@@ -12,9 +12,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/util"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/util"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
 	"github.com/pkg/errors"
 )
 

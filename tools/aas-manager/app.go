@@ -15,9 +15,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/clients"
-	claas "github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	claas "github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

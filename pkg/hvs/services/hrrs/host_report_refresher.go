@@ -10,8 +10,8 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
-	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 
 	"github.com/pkg/errors"
 )

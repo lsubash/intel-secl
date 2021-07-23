@@ -7,8 +7,8 @@ package skchvsclient
 import (
 	"crypto/x509"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
-	testutility "github.com/intel-secl/intel-secl/v4/pkg/ihub/test"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
+	testutility "github.com/intel-secl/intel-secl/v5/pkg/ihub/test"
 	"net/url"
 	"testing"
 )

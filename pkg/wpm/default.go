@@ -7,9 +7,9 @@ package wpm
 import (
 	"os"
 
-	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/wpm/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/wpm/constants"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
 	"github.com/spf13/viper"
 )
 

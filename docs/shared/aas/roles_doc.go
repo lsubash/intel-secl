@@ -4,7 +4,7 @@
  */
 package aas
 
-import "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+import "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 
 // RoleCreateInfo request payload
 // swagger:parameters RoleCreateInfo

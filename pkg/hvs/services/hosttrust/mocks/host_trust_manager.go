@@ -6,8 +6,8 @@ package mocks
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/mocks"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"time"
 )
 

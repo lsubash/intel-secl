@@ -8,9 +8,9 @@ package wlsclient
 import (
 	"crypto/x509"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/util"
-	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
-	wlsModel "github.com/intel-secl/intel-secl/v4/pkg/model/wls"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/util"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
+	wlsModel "github.com/intel-secl/intel-secl/v5/pkg/model/wls"
 	"github.com/pkg/errors"
 	"net/http"
 	"net/url"

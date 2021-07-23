@@ -5,14 +5,14 @@
 package hostinfo
 
 import (
-	commonLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
-	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	commonLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
+	model "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 )
 
 var log = commonLog.GetDefaultLogger()
 
 // HostInfoParser collects the host's meta-data from the current
-// host and returns a "HostInfo" struct (see intel-secl/v4/pkg/model/ta/HostInfo structure).
+// host and returns a "HostInfo" struct (see intel-secl/v5/pkg/model/ta/HostInfo structure).
 type HostInfoParser interface {
 	// This function will always return a HostInfo structure that may be partially populated
 	// if errors occur.  Any errors that occur while HostInfo data is being collected will

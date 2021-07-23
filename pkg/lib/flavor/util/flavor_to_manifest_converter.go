@@ -6,9 +6,9 @@ package util
 
 import (
 	"encoding/xml"
-	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
-	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	cm "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
 	"reflect"
 )

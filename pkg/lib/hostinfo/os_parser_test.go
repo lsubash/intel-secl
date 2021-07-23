@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"testing"
 
-	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	model "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 )
 
 func testOsInfoParser(t *testing.T, osInfoParser *osInfoParser, expectedResults *model.HostInfo) {

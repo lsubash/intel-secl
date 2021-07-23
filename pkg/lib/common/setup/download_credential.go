@@ -7,10 +7,10 @@ package setup
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
-	types "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	types "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"

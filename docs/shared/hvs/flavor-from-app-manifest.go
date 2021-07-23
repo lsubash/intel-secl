@@ -5,7 +5,7 @@
 
 package hvs
 
-import "github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+import "github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 
 // FlavorFromAppManifest API request payload
 // swagger:parameters ManifestRequest

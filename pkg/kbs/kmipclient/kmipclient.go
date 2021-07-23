@@ -14,9 +14,9 @@ import (
 	"github.com/gemalto/kmip-go/kmip14"
 	"github.com/gemalto/kmip-go/kmip20"
 	"github.com/gemalto/kmip-go/ttlv"
-	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain/models"
-	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain/models"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/pkg/errors"
 )
 

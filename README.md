@@ -59,7 +59,7 @@ It makes use of repo tool which simplifies efforts to clone and build multiple r
 
 example:
 
-# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v4.0.0 -m manifest/fs.xml
+# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v5.0.0 -m manifest/fs.xml
 ```
 
 ### Product Guide

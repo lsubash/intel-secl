@@ -6,12 +6,12 @@ package hvs
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
-	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
-	commLogInt "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/setup"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
+	commLogInt "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

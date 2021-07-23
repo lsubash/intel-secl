@@ -7,19 +7,19 @@ package hvs
 import (
 	"crypto/x509/pkix"
 	"fmt"
-	types "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+	types "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
-	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
+	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/utils"
 	"reflect"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/tasks"
-	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hrrs"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/tasks"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )

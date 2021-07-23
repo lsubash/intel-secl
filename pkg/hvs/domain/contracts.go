@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
 type (

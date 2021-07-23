@@ -6,10 +6,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/utils"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/utils"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/ihub"
-	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 
 	"os"
 	"os/user"

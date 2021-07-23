@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 )

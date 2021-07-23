@@ -6,7 +6,7 @@ package version
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/wpm/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
 )
 
 var Version = ""

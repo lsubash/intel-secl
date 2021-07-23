@@ -8,11 +8,11 @@ package controllers_test
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/mocks"
-	hvsRoutes "github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
-	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
+	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
+	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"strings"
 
 	. "github.com/onsi/ginkgo"

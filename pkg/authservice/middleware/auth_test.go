@@ -6,8 +6,8 @@ package middleware
 
 import (
 	"errors"
-	"github.com/intel-secl/intel-secl/v4/pkg/authservice/postgres/mock"
-	"github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/authservice/postgres/mock"
+	"github.com/intel-secl/intel-secl/v5/pkg/authservice/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"

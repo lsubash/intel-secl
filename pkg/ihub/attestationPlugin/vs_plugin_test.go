@@ -11,11 +11,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/vs"
-	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
-	testutility "github.com/intel-secl/intel-secl/v4/pkg/ihub/test"
-	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/vs"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
+	testutility "github.com/intel-secl/intel-secl/v5/pkg/ihub/test"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 )
 
 var sampleSamlCertPath = testutility.SampleSamlCertPath

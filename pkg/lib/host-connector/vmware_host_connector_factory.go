@@ -6,8 +6,8 @@ package host_connector
 
 import (
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/vmware"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/vmware"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/pkg/errors"
 	"net/url"
 )

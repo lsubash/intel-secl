@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	hc "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
+	hc "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
 	"github.com/stretchr/testify/assert"
 )
 

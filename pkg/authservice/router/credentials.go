@@ -7,8 +7,8 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/authservice/controllers"
+	consts "github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/authservice/controllers"
 	"time"
 )
 

@@ -7,10 +7,10 @@ package domain
 
 import (
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
 )
 
 type HostTrustVerifierConfig struct {

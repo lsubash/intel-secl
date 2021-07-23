@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
 )
 

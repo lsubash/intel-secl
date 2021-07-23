@@ -7,13 +7,13 @@ package host_connector
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
-	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"net/url"
 	"strings"
 
-	client "github.com/intel-secl/intel-secl/v4/pkg/clients/ta"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	client "github.com/intel-secl/intel-secl/v5/pkg/clients/ta"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/pkg/errors"
 )
 

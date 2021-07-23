@@ -13,7 +13,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 	"github.com/pkg/errors"
 	"io/ioutil"
 

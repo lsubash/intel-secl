@@ -7,10 +7,10 @@ package hvs
 import (
 	"os"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
-	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hrrs"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 	"github.com/spf13/viper"
 )
 

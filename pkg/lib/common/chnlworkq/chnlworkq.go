@@ -8,7 +8,7 @@ package chnlworkq
 
 import (
 	"container/list"
-	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"runtime/debug"
 	"sync"
 )

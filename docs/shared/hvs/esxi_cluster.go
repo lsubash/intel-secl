@@ -5,7 +5,7 @@
 
 package hvs
 
-import "github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+import "github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 
 // ESXiCluster API request payload
 // swagger:parameters ESXiClusterCreateRequest

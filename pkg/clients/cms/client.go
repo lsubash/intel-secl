@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
 	"net/http"
 )
 

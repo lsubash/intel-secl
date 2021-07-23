@@ -7,7 +7,7 @@ package hostinfo
 import (
 	"runtime"
 
-	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	model "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 )
 
 // miscInfoParser currenty collects the HostInfo's NumberOfSockets field.

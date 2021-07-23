@@ -7,10 +7,10 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/authservice/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/authservice/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/authservice/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/authservice/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/authservice/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/nats-io/nkeys"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

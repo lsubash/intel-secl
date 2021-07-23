@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
+	model "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 )
 
 func testTpm2Info(t *testing.T, expectedResults *model.HostInfo) {

@@ -10,10 +10,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/skchvsclient"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/vs"
-	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/skchvsclient"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/vs"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/spf13/viper"
 
 	"github.com/pkg/errors"

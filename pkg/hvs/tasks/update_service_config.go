@@ -7,11 +7,11 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
-	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hrrs"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

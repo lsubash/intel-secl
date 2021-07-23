@@ -6,7 +6,7 @@ package hvs
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"time"
 )
 

@@ -6,7 +6,7 @@
 package hvs
 
 import (
-	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
 // DeploySoftwareManifest API request payload

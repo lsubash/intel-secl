@@ -7,9 +7,9 @@ package ihub
 import (
 	"os"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
-	commConfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 	"github.com/spf13/viper"
 )
 

@@ -17,32 +17,32 @@ import (
 	"time"
 
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/vcss"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/vcss"
 
 	"github.com/pkg/errors"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/config"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/auditlog"
-	hostfetcher "github.com/intel-secl/intel-secl/v4/pkg/hvs/services/host-fetcher"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hosttrust"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hrrs"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
-	hostconnector "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/auditlog"
+	hostfetcher "github.com/intel-secl/intel-secl/v5/pkg/hvs/services/host-fetcher"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hrrs"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	hostconnector "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
 
 	"github.com/gorilla/handlers"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/router"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
 
 	stdlog "log"
 
-	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
-	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
+	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 )
 
 var defaultLog = commLog.GetDefaultLogger()

@@ -6,8 +6,8 @@ package utils
 
 import (
 	"crypto"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 )
 
 func LoadCertificates(certificatePaths *models.CertificatesPathStore) *models.CertificatesStore {

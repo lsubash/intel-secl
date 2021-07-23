@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
-	commExec "github.com/intel-secl/intel-secl/v4/pkg/lib/common/exec"
+	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
+	commExec "github.com/intel-secl/intel-secl/v5/pkg/lib/common/exec"
 )
 
 func (app *App) executablePath() string {

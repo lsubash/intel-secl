@@ -6,8 +6,8 @@ package mocks
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/pkg/errors"
 )
 

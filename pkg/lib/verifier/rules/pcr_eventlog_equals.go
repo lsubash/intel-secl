@@ -10,11 +10,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
+	constants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
 // NewPcrEventLogEquals create the rule without the ExcludeTags,Components/labels
