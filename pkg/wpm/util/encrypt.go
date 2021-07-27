@@ -70,7 +70,7 @@ func Encrypt(imagePath string, privateKeyLocation string, encryptedFileLocation 
 	encryptionHeaderSlice := &bytes.Buffer{}
 	err = binary.Write(encryptionHeaderSlice, binary.LittleEndian, encryptionHeader)
 	if err != nil {
-		return errors.Wrap(err, "Error while writing encryption header struc values in to buffer")
+		return errors.Wrap(err, "Error while writing encryption header struct values to buffer")
 	}
 
 	// The first 44 bytes of the encrypted file is the encryption header and

@@ -14,7 +14,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/imageflavor"
-	"github.com/intel-secl/intel-secl/v5/pkg/wpm/util"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/ocicrypt-keyprovider"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -103,39 +103,6 @@ func (a *App) configureLogs(isStdOut, isFileOut bool) error {
 
 	secLog.Info(message.LogInit)
 	log.Info(message.LogInit)
-	return nil
-}
-
-func (a *App) fetchKey(args []string) error {
-	keyID := flag.String("k", "", "existing key ID")
-	flag.StringVar(keyID, "key", "", "existing key ID")
-	assetTag := flag.String("t", "", "asset tags associated with the new key")
-	flag.StringVar(assetTag, "asset-tag", "", "asset tags associated with the new key")
-	flag.Usage = func() { a.printFetchKeyUsage() }
-	err := flag.CommandLine.Parse(args[2:])
-	if err != nil {
-		a.printFetchKeyUsage()
-		return errors.Wrap(err, "Error parsing arguments")
-	}
-
-	//If the key ID is specified, make sure it's a valid UUID
-	if len(strings.TrimSpace(*keyID)) > 0 {
-		if validatekeyIDErr := validation.ValidateUUIDv4(*keyID); validatekeyIDErr != nil {
-			log.WithError(validatekeyIDErr).Errorf("app:fetchKey() %s : Error fetching key: Invalid UUID - %s\n", message.InvalidInputBadParam, *keyID)
-			a.printFetchKeyUsage()
-			return errors.Wrap(validatekeyIDErr, "Error fetching key: Invalid UUID")
-		}
-	}
-
-	keyInfo, err := util.FetchKeyForAssetTag(*keyID, *assetTag)
-	if err != nil {
-		log.WithError(err).Errorf("app:fetchKey() %s - Error fetching: %s\n", message.AppRuntimeErr, err.Error())
-		a.printFetchKeyUsage()
-		return errors.Wrap(err, "Error fetching key")
-	}
-	if len(keyInfo) > 0 {
-		fmt.Println(string(keyInfo))
-	}
 	return nil
 }
 
@@ -232,18 +199,19 @@ func (a *App) Run(args []string) error {
 			}
 			return err
 		}
-	case "fetch-key":
-		configuration := a.configuration()
-		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
-			return err
-		}
-		return a.fetchKey(os.Args[:])
+
 	case "create-image-flavor":
 		configuration := a.configuration()
 		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
 			return err
 		}
 		return a.createImageFlavor(os.Args[:])
+	case "get-ocicrypt-wrappedkey":
+		configuration := a.configuration()
+		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
+			return err
+		}
+		return ocicrypt_keyprovider.GetKey(os.Stdin)
 	}
 	return nil
 }

@@ -6,7 +6,6 @@ package util
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
 	"github.com/spf13/viper"
@@ -24,11 +23,6 @@ import (
 var (
 	assetTagReg = regexp.MustCompile(`^[a-zA-Z0-9]+:[a-zA-Z0-9]+$`)
 )
-
-type keyInfo struct {
-	KeyUrl string `json:"key_url"`
-	Key    []byte `json:"key"`
-}
 
 //FetchKey from kbs
 func FetchKey(keyID string, assetTag string) ([]byte, string, error) {
@@ -112,40 +106,4 @@ func FetchKey(keyID string, assetTag string) ([]byte, string, error) {
 		return nil, "", errors.Wrap(err, "pkg/util/fetch_key.go:FetchKey() Error decoding the image encryption key")
 	}
 	return wrappedKey, keyUrlString, nil
-}
-
-//FetchKeyForAssetTag is used to create flavor of an encrypted image
-func FetchKeyForAssetTag(keyID string, assetTag string) ([]byte, error) {
-	log.Trace("pkg/wpm/util/fetch_key.go:FetchKeyForAssetTag() Entering")
-	defer log.Trace("pkg/wpm/util/fetch_key.go:FetchKeyForAssetTag() Leaving")
-
-	var err error
-	var wrappedKey []byte
-	var keyUrlString string
-
-	//Fetch the key
-	wrappedKey, keyUrlString, err = FetchKey(keyID, assetTag)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error while fetching the key")
-	}
-
-	// unwrap
-	key, err := UnwrapKey(wrappedKey, consts.EnvelopePrivatekeyLocation)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error while unwrapping the key")
-	}
-
-	var returnKeyInfo = keyInfo{
-		KeyUrl: keyUrlString,
-		Key:    key,
-	}
-
-	//Marshall to a JSON string
-	keyJSON, err := json.Marshal(returnKeyInfo)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error while marshalling key info")
-	}
-
-	log.Info("pkg/wpm/util/fetch_key.go:FetchKeyForAssetTag() Successfully received encryption key from kbs")
-	return keyJSON, nil
 }

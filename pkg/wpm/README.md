@@ -1,6 +1,6 @@
 # Workload Policy Manager 
 
-`Workload Policy Manager` is used to create the image/container flavors and encrypt the them.
+`Workload Policy Manager` is used to create the image/container flavors and encrypt them.
 
 ## Key features
 
@@ -21,7 +21,7 @@
 - makeself
 - `go` version 1.14.4
 
-# Step By Step Build Instructions
+# Step-By-Step Build Instructions
 
 ## Install required shell commands
 
