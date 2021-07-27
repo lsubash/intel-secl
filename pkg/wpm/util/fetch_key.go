@@ -24,11 +24,6 @@ var (
 	assetTagReg = regexp.MustCompile(`^[a-zA-Z0-9]+:[a-zA-Z0-9]+$`)
 )
 
-type keyInfo struct {
-	KeyUrl string `json:"key_url"`
-	Key    []byte `json:"key"`
-}
-
 //FetchKey from kbs
 func FetchKey(keyID string, assetTag string) ([]byte, string, error) {
 	log.Trace("pkg/wpm/util/encrypt.go:FetchKey() Entering")

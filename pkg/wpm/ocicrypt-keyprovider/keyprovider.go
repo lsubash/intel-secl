@@ -61,7 +61,7 @@ func GetKey(stdInput *os.File) error {
 
 	err := json.NewDecoder(stdInput).Decode(&input)
 	if err != nil {
-		errors.Wrap(err, "Error while decoding KeyProviderKeyWrapProtocolInput")
+		return errors.Wrap(err, "Error while decoding KeyProviderKeyWrapProtocolInput")
 	}
 
 	var symKey, wrappedKey []byte
@@ -130,13 +130,13 @@ func GetKey(stdInput *os.File) error {
 	} else if input.Operation == keyprovider.OpKeyUnwrap {
 		return errors.Errorf("Operation %v not supported", input.Operation)
 	} else {
-		errors.Errorf("Operation %v not recognized", input.Operation)
+		return errors.Errorf("Operation %v not recognized", input.Operation)
 	}
 
 	// Create wrapped key blob
 	wrappedOCIKey, err := aesEncrypt(symKey, input.KeyWrapParams.OptsData)
 	if err != nil {
-		errors.Wrapf(err, "Error while encrypting key")
+		return errors.Wrap(err, "Error while encrypting key")
 	}
 
 	ap := ocicrypt_keyprovider.AnnotationPacket{
@@ -145,13 +145,17 @@ func GetKey(stdInput *os.File) error {
 		WrapType:   constants.KbsEncryptAlgo,
 	}
 
-	jsonString, _ := json.Marshal(ap)
+	jsonString, err := json.Marshal(ap)
+	if err != nil {
+		return errors.Wrap(err, "Error while serializing Annotation Packet")
+	}
+
 	keyProviderOutput := keyprovider.KeyProviderKeyWrapProtocolOutput{
 		KeyWrapResults: keyprovider.KeyWrapResults{Annotation: jsonString},
 	}
 	serializedKeyProviderOutput, err := json.Marshal(keyProviderOutput)
 	if err != nil {
-		errors.Wrapf(err, "Error while serializing KeyProviderKeyWrapProtocolOutput")
+		return errors.Wrap(err, "Error while serializing KeyProviderKeyWrapProtocolOutput")
 	}
 
 	fmt.Println(string(serializedKeyProviderOutput))
