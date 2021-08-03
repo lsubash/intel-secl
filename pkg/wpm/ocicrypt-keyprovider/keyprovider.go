@@ -95,7 +95,7 @@ func GetKey(stdInput *os.File) error {
 				if err != nil {
 					return errors.Wrap(err, "Error while unwrapping the key")
 				}
-			case constants.OcicryptKeyProvider:
+			case constants.OcicryptKeyProviderKeyId:
 				keyId := values
 				wrappedKey, keyUrlString, err = util.FetchKey(keyId, "")
 				if err != nil {
