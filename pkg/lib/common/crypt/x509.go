@@ -16,6 +16,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
+	"github.com/cloudflare/cfssl/revoke"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -554,7 +555,7 @@ func GetLeafCert(certchain []*x509.Certificate) *x509.Certificate {
 
 // VerifyEKCertChain verifies a cert chain for validity and ensures no certs have been
 // revoked
-func VerifyEKCertChain(ekCertChain []*x509.Certificate, ecPool *x509.CertPool) error {
+func VerifyEKCertChain(enableRevokeCheck bool, ekCertChain []*x509.Certificate, ecPool *x509.CertPool) error {
 	if ekCertChain == nil {
 		return errors.New("crypt/x509/VerifyEKCertChain: cert chain is empty")
 	}
@@ -633,6 +634,17 @@ func VerifyEKCertChain(ekCertChain []*x509.Certificate, ecPool *x509.CertPool) e
 	if err != nil {
 		return errors.Wrapf(err, "crypt/x509/VerifyEKCertChain: cert %v "+
 			"failed verification", lc.Subject)
+	}
+	if enableRevokeCheck {
+		for _, cert := range ekCertChain {
+			isRevoked, isOk, err := revoke.VerifyCertificateError(cert)
+			if err != nil || !isOk {
+				return errors.Errorf("crypt/x509/VerifyEKCertChain: revocation check failed for cert %v", cert.Subject)
+			}
+			if isOk && isRevoked {
+				return errors.Errorf("crypt/x509/VerifyEKCertChain: cert %v was revoked", cert.Subject)
+			}
+		}
 	}
 
 	return nil

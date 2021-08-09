@@ -173,6 +173,7 @@ func defaultConfig() *config.Configuration {
 			SkipFlavorSignatureVerification: viper.GetBool(constants.FvsSkipFlavorSignatureVerification),
 			HostTrustCacheThreshold:         viper.GetInt(constants.FvsHostTrustCacheThreshold),
 		},
+		EnableEkCertRevokeChecks: viper.GetBool(constants.EnableEKCertRevokeCheck),
 	}
 }
 

@@ -10,6 +10,7 @@ require (
 	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/handlers v1.4.2
+	github.com/cloudflare/cfssl v1.5.0
 	github.com/gorilla/mux v1.7.3
 	github.com/hashicorp/golang-lru v0.5.1
 	github.com/jinzhu/copier v0.3.0
