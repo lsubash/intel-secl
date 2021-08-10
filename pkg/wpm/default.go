@@ -22,16 +22,18 @@ func init() {
 	viper.SetDefault("flavor-signing-cert-file", constants.FlavorSigningCertFile)
 	viper.SetDefault("flavor-signing-key-file", constants.FlavorSigningKeyFile)
 	viper.SetDefault("flavor-signing-common-name", constants.DefaultWpmFlavorSigningCn)
+	viper.SetDefault("ocicrypt-keyprovider-name", constants.OcicryptKeyProviderName)
 
 }
 
 func defaultConfig() *config.Configuration {
 	loadAlias()
 	return &config.Configuration{
-		AASApiUrl:        viper.GetString("aas-base-url"),
-		CMSBaseURL:       viper.GetString("cms-base-url"),
-		CmsTlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
-		KBSApiUrl:        viper.GetString("kbs-base-url"),
+		AASApiUrl:               viper.GetString("aas-base-url"),
+		CMSBaseURL:              viper.GetString("cms-base-url"),
+		CmsTlsCertDigest:        viper.GetString("cms-tls-cert-sha384"),
+		KBSApiUrl:               viper.GetString("kbs-base-url"),
+		OcicryptKeyProviderName: viper.GetString("ocicrypt-keyprovider-name"),
 		WPM: commConfig.ServiceConfig{
 			Username: viper.GetString("wpm-service-username"),
 			Password: viper.GetString("wpm-service-password"),

@@ -9,9 +9,11 @@ import (
 	"github.com/containers/ocicrypt/keywrap/keyprovider"
 	cLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	ocicrypt_keyprovider "github.com/intel-secl/intel-secl/v4/pkg/model/ocicrypt"
+	"github.com/intel-secl/intel-secl/v4/pkg/wpm/config"
 	"github.com/intel-secl/intel-secl/v4/pkg/wpm/constants"
 	"github.com/intel-secl/intel-secl/v4/pkg/wpm/util"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"io"
 	"os"
 	"strings"
@@ -63,20 +65,24 @@ func GetKey(stdInput *os.File) error {
 	if err != nil {
 		return errors.Wrap(err, "Error while decoding KeyProviderKeyWrapProtocolInput")
 	}
-
+	viper.AddConfigPath(constants.ConfigDir)
+	cfg, err := config.LoadConfiguration()
+	if err != nil {
+		return errors.Wrap(err, "Error loading WPM configuration")
+	}
 	var symKey, wrappedKey []byte
 	var keyUrlString string
 
 	if input.Operation == keyprovider.OpKeyWrap {
 		ecParames := input.KeyWrapParams.Ec.Parameters
-		if _, ok := ecParames[constants.OcicryptKeyProvider]; !ok {
+		if _, ok := ecParames[cfg.OcicryptKeyProviderName]; !ok {
 			return errors.New("Unsupported protocol")
 		}
 
 		//For default encryption request  skopeo copy --encryption-key provider:isecl  oci:ruby oci:ruby:enc ep["isecl"] = [[]]
 		//For encryption request wjth asset tags  skopeo copy --encryption-key provider:isecl:asset-tag:country:<country-value>  oci:ruby oci:ruby:enc ep["isecl"] = [["assetTag:key:value"]]
 		//For encryption request with existing key id skopeo copy --encryption-key provider:isecl:key-id:<key-id-value>  oci:ruby oci:ruby:enc ep["isecl"] = [["keyId:id"]]
-		params := string(ecParames[constants.OcicryptKeyProvider][0])
+		params := string(ecParames[cfg.OcicryptKeyProviderName][0])
 		idx := strings.Index(params, ":")
 		if idx > 0 {
 
