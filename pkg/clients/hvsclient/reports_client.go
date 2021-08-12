@@ -15,10 +15,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 )
 
 type ReportsClient interface {
 	CreateSAMLReport(hvs.ReportCreateRequest) ([]byte, error)
+	CreateReportAsync(hvs.ReportCreateRequest) (error, *http.Response)
 }
 
 type reportsClientImpl struct {
@@ -82,4 +84,45 @@ func (client reportsClientImpl) CreateSAMLReport(reportCreateRequest hvs.ReportC
 	}
 
 	return samlReport, nil
+}
+
+func (client reportsClientImpl) CreateReportAsync(reportCreateRequest hvs.ReportCreateRequest) (error, *http.Response) {
+	log.Trace("hvsclient/reports_client:CreateReportAsync() Entering")
+	defer log.Trace("hvsclient/reports_client:CreateReportAsync() Leaving")
+
+	jsonData, err := json.Marshal(reportCreateRequest)
+	if err != nil {
+		return err, nil
+	}
+
+	parsedUrl, err := url.Parse(client.cfg.BaseURL)
+	if err != nil {
+		return errors.Wrap(err, "hvsclient/reports_client:CreateReportAsync() Configured HVS URL is malformed"), nil
+	}
+	if client.cfg.BearerToken == "" {
+		return errors.Wrap(err, "hvsclient/reports_client:CreateReportAsync() BEARER_TOKEN is not set"), nil
+	}
+
+	parsedUrl.Path = path.Join(parsedUrl.Path, "reports")
+	queryString := parsedUrl.Query()
+	queryString.Set("process", "async")
+	parsedUrl.RawQuery = queryString.Encode()
+	endpoint := parsedUrl.ResolveReference(parsedUrl)
+
+	req, err := http.NewRequest("POST", endpoint.String(), bytes.NewBuffer(jsonData))
+	if err != nil {
+		return errors.Wrap(err, "hvsclient/reports_client:CreateReportAsync() Failed to instantiate http request to HVS"), nil
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+client.cfg.BearerToken)
+
+	rsp, err := client.httpClient.Do(req)
+	if err != nil {
+		log.Error("hvsclient/reports_client:CreateReportAsync() Error while sending request from client to server")
+		log.Tracef("%+v", err)
+		return err, rsp
+	}
+	return nil, rsp
 }
