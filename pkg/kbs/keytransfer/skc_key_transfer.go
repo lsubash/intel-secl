@@ -418,7 +418,7 @@ func (keyInfo *KeyDetails) BuildChallengeJsonRequest(cfg *config.Configuration) 
 		return challengeReq, errors.Wrap(err, "Failed to generate challenge")
 	}
 	challengeReq.Challenge = challenge
-	url := cfg.EndpointURL + "/session"
+	url := strings.TrimRight(cfg.EndpointURL, "/") + "/session"
 
 	challengeReq.Link.ChallengeReply.Href = url
 	challengeReq.Link.ChallengeReply.Method = "post"
