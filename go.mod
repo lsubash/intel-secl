@@ -5,12 +5,13 @@ require (
 	github.com/Waterdrips/jwt-go v3.2.1-0.20200915121943-f6506928b72e+incompatible
 	github.com/antchfx/jsonquery v1.1.4
 	github.com/beevik/etree v1.1.0
+	github.com/cloudflare/cfssl v1.5.0
 	github.com/containers/ocicrypt v1.1.2
 	github.com/davecgh/go-spew v1.1.1
+	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
 	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/handlers v1.4.2
-	github.com/cloudflare/cfssl v1.5.0
 	github.com/gorilla/mux v1.7.3
 	github.com/hashicorp/golang-lru v0.5.1
 	github.com/jinzhu/copier v0.3.0
@@ -18,8 +19,9 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.3.0
 	github.com/mattermost/xml-roundtrip-validator v0.0.0-20201213122252-bcd7e1b9601e
-	github.com/nats-io/jwt/v2 v2.0.2
-	github.com/nats-io/nats.go v1.11.0
+	github.com/nats-io/jwt/v2 v2.0.3
+	github.com/nats-io/nats-server/v2 v2.3.4 // indirect
+	github.com/nats-io/nats.go v1.11.1-0.20210623165838-4b75fc59ae30
 	github.com/nats-io/nkeys v0.3.0
 	github.com/onsi/ginkgo v1.13.0
 	github.com/onsi/gomega v1.10.1
@@ -30,9 +32,9 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/vmware/govmomi v0.22.2
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
+	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 replace github.com/vmware/govmomi => github.com/arijit8972/govmomi fix-tpm-attestation-output

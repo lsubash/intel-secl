@@ -366,7 +366,7 @@ func mockOpenstackServer(t *testing.T) (*http.Server, string) {
 			if err != nil {
 				t.Log("openstack/client_test:mockOpenstackServer() : Unable to read file", err)
 			}
-			w.Write([]byte(authenticationResponse))
+			w.Write(authenticationResponse)
 			w.WriteHeader(201)
 		} else {
 			w.Header().Set("X-Subject-Token", "")
@@ -383,7 +383,7 @@ func mockOpenstackServer(t *testing.T) (*http.Server, string) {
 			if err != nil {
 				t.Log("openstack/client_test:mockOpenstackServer() : Unable to read file", err)
 			}
-			w.Write([]byte(allTraits))
+			w.Write(allTraits)
 			w.WriteHeader(200)
 		} else {
 			w.WriteHeader(401)

@@ -330,7 +330,7 @@ func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hcTypes.PcrManifest, 
 				}
 				if rules.PcrEquals.IsPcrEquals {
 					var EventLogExcludes []string
-					for excludeTag, _ := range rules.PcrEquals.ExcludingTags {
+					for excludeTag := range rules.PcrEquals.ExcludingTags {
 						EventLogExcludes = append(EventLogExcludes, excludeTag)
 					}
 					currPcrEx.EventlogEqual = &hcTypes.EventLogEqual{

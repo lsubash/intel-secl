@@ -14,13 +14,13 @@ TARGETS = cms kbs ihub hvs authservice wpm
 K8S_TARGETS = cms kbs ihub hvs authservice
 
 $(TARGETS):
-	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct \
+	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 %-pre-installer: %
 	mkdir -p installer
 	cp -r build/linux/$*/* installer/
-	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
+	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
 	cp pkg/lib/common/upgrades/config-upgrade installer/
 	cp pkg/lib/common/upgrades/*.sh installer/
 	cp -a upgrades/manifest/ installer/
@@ -58,7 +58,8 @@ docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 	skopeo copy docker-daemon:isecl/$*:$(VERSION) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
 
 aas-manager:
-	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
+	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && \
+	env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
 	cp tools/aas-manager/populate-users deployments/installer/populate-users.sh
 	cp build/linux/authservice/install_pgdb.sh deployments/installer/install_pgdb.sh
 	cp build/linux/authservice/create_db.sh deployments/installer/create_db.sh
@@ -75,6 +76,7 @@ download-eca:
 	rm -rf certs
 
 test:
+	env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
 	go test ./... -coverprofile cover.out
 	go tool cover -func cover.out
 	go tool cover -html=cover.out -o cover.html

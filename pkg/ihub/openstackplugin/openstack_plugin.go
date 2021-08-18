@@ -477,7 +477,7 @@ func associateTraitsForResource(hostDetails *openstackHostDetails, openstackDeta
 
 	log.Debug("openstackplugin/openstack_plugin:associateTraitsForResource() checking the response status code for associating traits to resource")
 	if res.StatusCode != http.StatusOK {
-		return errors.New("openstackplugin/openstack_plugin:associateTraitsForResource() Error in associating traits for the resource :" + string(res.StatusCode))
+		return errors.Errorf("openstackplugin/openstack_plugin:associateTraitsForResource() Error in associating traits for the resource :%d", res.StatusCode)
 	}
 
 	log.Info("openstackplugin/openstack_plugin:associateTraitsForResource() Traits are associated to the resource")

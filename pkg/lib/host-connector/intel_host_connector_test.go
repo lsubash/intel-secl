@@ -153,7 +153,7 @@ func TestGetMeasurementFromManifest(t *testing.T) {
 	manifestXml, err := ioutil.ReadFile("./test/sample_manifest.xml")
 	assert.NoError(t, err)
 
-	err = xml.Unmarshal([]byte(manifestXml), &manifest)
+	err = xml.Unmarshal(manifestXml, &manifest)
 	assert.NoError(t, err)
 
 	measurementXml, err := ioutil.ReadFile("./test/sample_measurement.xml")

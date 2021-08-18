@@ -14,6 +14,7 @@ package verifier
 import (
 	"crypto/x509"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
@@ -486,8 +487,8 @@ func (results ResultsSort) Less(i, j int) bool {
 	sortKey2 := results[j].Rule.Name
 
 	if results[i].Rule.ExpectedPcr != nil && results[j].Rule.ExpectedPcr != nil {
-		sortKey1 += ":" + string(results[i].Rule.ExpectedPcr.Pcr.Bank) + ":" + string(results[i].Rule.ExpectedPcr.Pcr.Index)
-		sortKey2 += ":" + string(results[j].Rule.ExpectedPcr.Pcr.Bank) + ":" + string(results[j].Rule.ExpectedPcr.Pcr.Index)
+		sortKey1 += fmt.Sprintf(":%s:%d", results[i].Rule.ExpectedPcr.Pcr.Bank, results[i].Rule.ExpectedPcr.Pcr.Index)
+		sortKey2 += fmt.Sprintf(":%s:%d", results[j].Rule.ExpectedPcr.Pcr.Bank, results[j].Rule.ExpectedPcr.Pcr.Index)
 	}
 
 	return sortKey1 < sortKey2

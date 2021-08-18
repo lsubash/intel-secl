@@ -265,15 +265,15 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 	//Sort the event log map so that the PCR indices are in order
 	sort.SliceStable(eventLogMap.Sha1EventLogs[:], func(i, j int) bool {
-		return string(eventLogMap.Sha1EventLogs[i].Pcr.Index) < string(eventLogMap.Sha1EventLogs[j].Pcr.Index)
+		return fmt.Sprintf("%d", eventLogMap.Sha1EventLogs[i].Pcr.Index) < fmt.Sprintf("%d", eventLogMap.Sha1EventLogs[j].Pcr.Index)
 	})
 
 	sort.SliceStable(eventLogMap.Sha256EventLogs[:], func(i, j int) bool {
-		return string(eventLogMap.Sha256EventLogs[i].Pcr.Index) < string(eventLogMap.Sha256EventLogs[j].Pcr.Index)
+		return fmt.Sprintf("%d", eventLogMap.Sha256EventLogs[i].Pcr.Index) < fmt.Sprintf("%d", eventLogMap.Sha256EventLogs[j].Pcr.Index)
 	})
 
 	sort.SliceStable(eventLogMap.Sha384EventLogs[:], func(i, j int) bool {
-		return string(eventLogMap.Sha384EventLogs[i].Pcr.Index) < string(eventLogMap.Sha384EventLogs[j].Pcr.Index)
+		return fmt.Sprintf("%d", eventLogMap.Sha384EventLogs[i].Pcr.Index) < fmt.Sprintf("%d", eventLogMap.Sha384EventLogs[j].Pcr.Index)
 	})
 
 	log.Debug("vmware_host_connector:getPcrEventLog() PCR event log created")

@@ -59,7 +59,7 @@ func (ft *FlavorTemplateStore) Retrieve(templateID uuid.UUID, includeDeleted boo
 
 	sf := flavorTemplate{}
 	row := ft.Store.Db.Model(flavorTemplate{}).Select("id,content,deleted").Where(&flavorTemplate{ID: templateID}).Row()
-	if err := row.Scan(&sf.ID, (*PGFlavorTemplateContent)(&sf.Content), &sf.Deleted); err != nil {
+	if err := row.Scan(&sf.ID, &sf.Content, &sf.Deleted); err != nil {
 		if strings.Contains(err.Error(), commErr.RowsNotFound) {
 			defaultLog.Error("postgres/flavortemplate_store:Retrieve() Failed to retrieve record from db", commErr.RowsNotFound)
 			return nil, &commErr.StatusNotFoundError{Message: "Failed to retrieve record from db"}
@@ -107,7 +107,7 @@ func (ft *FlavorTemplateStore) Search(criteria *models.FlavorTemplateFilterCrite
 	for rows.Next() {
 		template := flavorTemplate{}
 
-		if err := rows.Scan(&template.ID, (*PGFlavorTemplateContent)(&template.Content), &template.Deleted); err != nil {
+		if err := rows.Scan(&template.ID, &template.Content, &template.Deleted); err != nil {
 			return nil, errors.Wrap(err, "postgres/flavortemplate_store:Search() - Could not scan record")
 		}
 

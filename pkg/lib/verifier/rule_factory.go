@@ -189,7 +189,7 @@ func (factory *ruleFactory) getRuleBuilder() (ruleBuilder, error) {
 		}
 
 	default:
-		return nil, errors.Errorf("Vendor '%s' is not currently supported", string(vendor))
+		return nil, errors.Errorf("Vendor '%d' is not currently supported", vendor)
 	}
 
 	return builder, nil

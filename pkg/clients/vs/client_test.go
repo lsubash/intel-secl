@@ -39,7 +39,7 @@ func mockServer(t *testing.T) (*http.Server, string) {
 		if err != nil {
 			t.Log("vs/client_test:mockServer(): Unable to read file", err)
 		}
-		w.Write([]byte(samlReport))
+		w.Write(samlReport)
 	}).Methods("GET")
 
 	return serveController(t, router)

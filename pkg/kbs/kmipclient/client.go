@@ -5,7 +5,7 @@
 package kmipclient
 
 import (
-	kmip "github.com/gemalto/kmip-go"
+	"github.com/gemalto/kmip-go"
 	"github.com/gemalto/kmip-go/kmip14"
 	"github.com/gemalto/kmip-go/ttlv"
 )

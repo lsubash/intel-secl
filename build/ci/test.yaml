@@ -10,10 +10,11 @@
 
   script:
     - echo "This is the CI job that runs all unit tests"
+    - GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
     - go test ./... -coverprofile=cover.out
     - go tool cover -func cover.out
 
-test:go-1.14:
+test:go-1.16:
   retry: 2
   extends: .test-common
-  image: golang:1.14
+  image: golang:1.16

@@ -171,7 +171,7 @@ type (
 		RetrieveAsync(ctx context.Context, host hvs.Host, preferHashMatch bool, rcvrs ...HostDataReceiver) error
 
 		// TODO: ? Do we need a method that can use used to pass in a list rather than one at a time
-		// RetriveMultipleAsync(context.Context, []*hvs.Host, rcvrs ...HostDataReceiver) error
+		// RetrieveMultipleAsync(context.Context, []*hvs.Host, rcvrs ...HostDataReceiver) error
 	}
 
 	HostTrustVerifier interface {
