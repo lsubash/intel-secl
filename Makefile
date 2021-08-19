@@ -46,6 +46,7 @@ hvs-docker: hvs
 	docker build ${DOCKER_PROXY_FLAGS} -f build/image/Dockerfile-hvs -t isecl/hvs:$(VERSION) .
 
 %-swagger:
+	env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
 	mkdir -p docs/swagger
 	swagger generate spec -w ./docs/shared/$* -o ./docs/swagger/$*-openapi.yml
 	swagger validate ./docs/swagger/$*-openapi.yml
