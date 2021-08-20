@@ -223,6 +223,7 @@ func (f *JwtFactory) Create(clms interface{}, subject string, validity time.Dura
 	jwtclaim := claims{}
 	// allow for a clock skew as issuing server time might be ahead of services validating the token
 	jwtclaim.StandardClaims.IssuedAt = now.Add(-1 * gracePeriodForClockSkew).Unix()
+	jwtclaim.StandardClaims.NotBefore = jwtclaim.StandardClaims.IssuedAt
 	jwtclaim.StandardClaims.ExpiresAt = now.Add(validity).Unix()
 	jwtclaim.StandardClaims.Issuer = f.issuer
 	jwtclaim.StandardClaims.Subject = subject

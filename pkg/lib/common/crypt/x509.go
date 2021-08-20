@@ -277,13 +277,19 @@ func GetCertFromPemFile(path string) (*x509.Certificate, error) {
 
 func GetSubjectCertsMapFromPemFile(path string) ([]x509.Certificate, error) {
 	log.Debugf("crypt/x509:GetSubjectCertsMapFromPemFile() Loading certificates from  %s", path)
-	var certificates []x509.Certificate
+
 	certsBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	block, rest := pem.Decode(certsBytes)
+	return GetX509CertsFromPem(certsBytes)
+}
+
+func GetX509CertsFromPem(certBytes []byte) ([]x509.Certificate, error) {
+
+	var certificates []x509.Certificate
+	block, rest := pem.Decode(certBytes)
 	if block == nil {
 		return nil, fmt.Errorf("Unable to decode pem bytes")
 	}

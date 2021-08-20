@@ -23,25 +23,11 @@ var jwtTokenMap = sync.Map{}
 var log = commLog.GetDefaultLogger()
 var secLog = commLog.GetSecurityLogger()
 
-func addJWTToken(aasClient *aas.JwtClient, req *http.Request, aasURL, serviceUsername, servicePassword string,
-	trustedCaCerts []x509.Certificate, forceFetch bool) error {
+func addJWTToken(aasClient *aas.JwtClient, req *http.Request, serviceUsername, servicePassword string, forceFetch bool) error {
 	log.Trace("clients/send_http_request:addJWTToken() Entering")
 	defer log.Trace("clients/send_http_request:addJWTToken() Leaving")
 
 	var err error
-	if aasClient.BaseURL == "" {
-		aasClient = aas.NewJWTClient(aasURL)
-		if aasClient.HTTPClient == nil {
-			if len(trustedCaCerts) == 0 {
-				aasClient.HTTPClient = clients.HTTPClientTLSNoVerify()
-			} else {
-				aasClient.HTTPClient, err = clients.HTTPClientWithCA(trustedCaCerts)
-				if err != nil {
-					return errors.Wrap(err, "clients/send_http_request.go:addJWTToken() Error initializing http client")
-				}
-			}
-		}
-	}
 	var jwtToken []byte
 	token, ok := jwtTokenMap.Load(serviceUsername)
 	if forceFetch || !ok {
@@ -80,26 +66,9 @@ func SendRequest(req *http.Request, aasURL, serviceUsername, servicePassword str
 	log.Trace("clients/send_http_request:SendRequest() Entering")
 	defer log.Trace("clients/send_http_request:SendRequest() Leaving")
 
-	var err error
-	//This has to be done for dynamic loading or unloading of certificates
-	var aasClient = aas.NewJWTClient("")
-	if len(trustedCaCerts) == 0 {
-		aasClient.HTTPClient = clients.HTTPClientTLSNoVerify()
-	} else {
-		aasClient.HTTPClient, err = clients.HTTPClientWithCA(trustedCaCerts)
-		if err != nil {
-			return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Failed to create http client")
-		}
-	}
-	err = addJWTToken(aasClient, req, aasURL, serviceUsername, servicePassword, trustedCaCerts, false)
+	response, err := GetHTTPResponse(req, trustedCaCerts, true, aasURL, serviceUsername, servicePassword)
 	if err != nil {
-		return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Failed to add JWT token")
-	}
-
-	log.Debug("clients/send_http_request:SendRequest() AAS client successfully created")
-	response, err := aasClient.HTTPClient.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Error from response")
+		return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Error getting response")
 	}
 	defer func() {
 		derr := response.Body.Close()
@@ -107,21 +76,6 @@ func SendRequest(req *http.Request, aasURL, serviceUsername, servicePassword str
 			log.WithError(derr).Error("Error closing response body")
 		}
 	}()
-	if response.StatusCode == http.StatusUnauthorized {
-		// fetch token and try again
-		err = addJWTToken(aasClient, req, aasURL, serviceUsername, servicePassword, trustedCaCerts, true)
-		if err != nil {
-			return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Failed to add JWT token")
-		}
-		response, err = aasClient.HTTPClient.Do(req)
-		if err != nil {
-			return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Error from response")
-		}
-	}
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusNoContent {
-		return nil, errors.Wrap(errors.New("HTTP Status :"+strconv.Itoa(response.StatusCode)),
-			"clients/send_http_request.go:SendRequest() Error from response")
-	}
 
 	//create byte array of HTTP response body
 	body, err := ioutil.ReadAll(response.Body)
@@ -137,23 +91,9 @@ func SendNoAuthRequest(req *http.Request, trustedCaCerts []x509.Certificate) ([]
 	log.Trace("clients/send_http_request:SendNoAuthRequest() Entering")
 	defer log.Trace("clients/send_http_request:SendNoAuthRequest() Leaving")
 
-	var err error
-	var client *http.Client
-	//This has to be done for dynamic loading or unloading of certificates
-	if len(trustedCaCerts) == 0 {
-		client = clients.HTTPClientTLSNoVerify()
-	} else {
-		client, err = clients.HTTPClientWithCA(trustedCaCerts)
-		if err != nil {
-			return nil, errors.Wrap(err, "clients/send_http_request.go:SendNoAuthRequest() Failed to create http client")
-		}
-	}
-
-	log.Debug("clients/send_http_request:SendNoAuthRequest() HTTP client successfully created")
-
-	response, err := client.Do(req)
+	response, err := GetHTTPResponse(req, trustedCaCerts, false)
 	if err != nil {
-		return nil, errors.Wrap(err, "clients/send_http_request.go:SendNoAuthRequest() Error from response")
+		return nil, errors.Wrap(err, "clients/send_http_request.go:SendNoAuthRequest() Error getting response")
 	}
 	defer func() {
 		derr := response.Body.Close()
@@ -161,10 +101,6 @@ func SendNoAuthRequest(req *http.Request, trustedCaCerts []x509.Certificate) ([]
 			log.WithError(derr).Error("Error closing response body")
 		}
 	}()
-	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusNoContent {
-		return nil, errors.Wrap(errors.New("HTTP Status :"+strconv.Itoa(response.StatusCode)),
-			"clients/send_http_request.go:SendNoAuthRequest() Error from response")
-	}
 
 	//create byte array of HTTP response body
 	body, err := ioutil.ReadAll(response.Body)
@@ -173,4 +109,60 @@ func SendNoAuthRequest(req *http.Request, trustedCaCerts []x509.Certificate) ([]
 	}
 	log.Debug("clients/send_http_request.go:SendNoAuthRequest() Received the response successfully")
 	return body, nil
+}
+
+//GetHTTPResponse method is used to create an http client object and send the request to the server
+//cred param should have aasURL, serviceUsername, servicePassword in the said order
+func GetHTTPResponse(req *http.Request, trustedCaCerts []x509.Certificate, addToken bool, cred ...string) (*http.Response, error) {
+	log.Trace("clients/send_http_request:GetHTTPResponse() Entering")
+	defer log.Trace("clients/send_http_request:GetHTTPResponse() Leaving")
+
+	var err error
+	var client *http.Client
+	//This has to be done for dynamic loading or unloading of certificates
+	if len(trustedCaCerts) == 0 {
+		client = clients.HTTPClientTLSNoVerify()
+	} else {
+		client, err = clients.HTTPClientWithCA(trustedCaCerts)
+		if err != nil {
+			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to create http client")
+		}
+	}
+	log.Debug("clients/send_http_request:SendNoAuthRequest() HTTP client successfully created")
+
+	var aasClient *aas.JwtClient
+	if addToken {
+		aasClient = aas.NewJWTClient(cred[0])
+		aasClient.HTTPClient = client
+		client = aasClient.HTTPClient
+		log.Debug("clients/send_http_request:GetHTTPResponse() AAS client successfully created")
+
+		err = addJWTToken(aasClient, req, cred[1], cred[2], false)
+		if err != nil {
+			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to add JWT token")
+		}
+	}
+
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
+	}
+	if response.StatusCode == http.StatusUnauthorized && addToken {
+		// fetch token and try again
+		err = addJWTToken(aasClient, req, cred[1], cred[2], true)
+		if err != nil {
+			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to add JWT token")
+		}
+		response, err = client.Do(req)
+		if err != nil {
+			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
+		}
+	}
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusNoContent {
+		return response, errors.Wrap(errors.New("HTTP Status :"+strconv.Itoa(response.StatusCode)),
+			"clients/send_http_request.go:SendRequest() Error from response")
+	}
+
+	log.Debug("clients/send_http_request.go:GetHTTPResponse() Received the response successfully")
+	return response, nil
 }

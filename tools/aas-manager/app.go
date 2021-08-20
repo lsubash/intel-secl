@@ -75,6 +75,14 @@ type App struct {
 	SkcLibCN    string
 	NatsSanList string
 	NatsCN      string
+	ApsCN       string
+	ApsSanList  string
+	FdsCN       string
+	FdsSanList  string
+	QvsCN       string
+	QvsSanList  string
+	TcsCN       string
+	TcsSanList  string
 
 	InstallAdminUserName    string
 	InstallAdminPassword    string
@@ -101,6 +109,10 @@ type App struct {
 	SKCLibUsername          string
 	SKCLibUserPassword      string
 	SKCLibRoleContext       string
+	ApsServiceUserName      string
+	ApsServiceUserPassword  string
+	ApcUserName             string
+	ApcUserPassword         string
 
 	Components                    map[string]bool
 	GenPassword                   bool
@@ -221,7 +233,23 @@ func (a *App) GetServiceUsers() []UserAndRolesCreate {
 			urc.Name = a.SKCLibUsername
 			urc.Password = a.SKCLibUserPassword
 			urc.Roles = append(urc.Roles, NewRole("KBS", "KeyTransfer", a.SKCLibRoleContext, nil))
+		case "APS":
+			urc.Name = a.ApsServiceUserName
+			urc.Password = a.ApsServiceUserPassword
+			urc.Roles = append(urc.Roles, NewRole("QVS", "QuoteVerifier", "", []string{"sgx_quote:verify:*",
+				"tdx_quote:verify:*"}))
+		case "APC":
+			urc.Name = a.ApcUserName
+			urc.Password = a.ApcUserPassword
+			urc.Roles = append(urc.Roles, NewRole("KBS", "KeyManager", "", []string{"keys:create:*",
+				"keys:transfer:*"}))
+		case "KBS":
+			urc.Name = a.KbsServiceUsername
+			urc.Password = a.KbsServiceUserPassword
+			urc.Roles = append(urc.Roles, NewRole("APS", "TokenCreator", "", []string{"attestation_token:create:*"}))
+			urc.Roles = append(urc.Roles, NewRole("AAS", "UserReader", "", []string{"users:search:*", "user_roles:search:*"}))
 		}
+
 		if urc.Name != "" {
 			urs = append(urs, urc)
 		}
@@ -271,6 +299,10 @@ func (a *App) GetGlobalAdminUser() *UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, NewRole("WLS", "Administrator", "", []string{"*:*:*"}))
 		case "AAS":
 			urc.Roles = append(urc.Roles, NewRole("AAS", "Administrator", "", []string{"*:*:*"}))
+		case "APS":
+			urc.Roles = append(urc.Roles, NewRole("APS", "Administrator", "", []string{"*:*:*"}))
+		case "FDS":
+			urc.Roles = append(urc.Roles, NewRole("FDS", "Administrator", "", []string{"*:*:*"}))
 		}
 	}
 	return &urc
@@ -322,7 +354,18 @@ func (a *App) GetSuperInstallUser() UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, MakeTlsClientCertificateRole(a.SkcLibCN))
 		case "NATS":
 			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.NatsCN, a.NatsSanList))
-
+		case "APS":
+			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=APS JWT Signing Certificate;certType=Signing", nil))
+			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=APS Nonce Signing Certificate;certType=Signing", nil))
+			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.ApsCN, a.ApsSanList))
+		case "APC":
+			urc.Roles = append(urc.Roles, NewRole("CMS", "CertApprover", "CN=APC Policy Signing Certificate;certType=Signing", nil))
+		case "FDS":
+			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.FdsCN, a.FdsSanList))
+		case "QVS":
+			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.QvsCN, a.QvsSanList))
+		case "TCS":
+			urc.Roles = append(urc.Roles, MakeTlsCertificateRole(a.TcsCN, a.TcsSanList))
 		}
 	}
 	return urc
@@ -448,6 +491,18 @@ func (a *App) LoadAllVariables(envFile string) error {
 		{&a.NatsCN, "NATS_CERT_COMMON_NAME", "NATS TLS Certificate", "Nats Server TLS Certificate Common Name", false, false},
 		{&a.NatsSanList, "NATS_CERT_SAN_LIST", "", "Nats Server TLS Certificate SAN LIST", false, false},
 
+		{&a.ApsCN, "APS_CERT_COMMON_NAME", "APS TLS Certificate", "Attestation Policy Service TLS Certificate Common Name", false, false},
+		{&a.ApsSanList, "APS_CERT_SAN_LIST", "", "Attestation Policy Service TLS Certificate SAN LIST", false, false},
+
+		{&a.FdsCN, "FDS_CERT_COMMON_NAME", "FDS TLS Certificate", "Feature Discovery Service TLS Certificate Common Name", false, false},
+		{&a.FdsSanList, "FDS_CERT_SAN_LIST", "", "Feature Discovery Service TLS Certificate SAN LIST", false, false},
+
+		{&a.QvsCN, "QVS_CERT_COMMON_NAME", "QVS TLS Certificate", "Quote Verification Service TLS Certificate Common Name", false, false},
+		{&a.QvsSanList, "QVS_CERT_SAN_LIST", "", "Quote Verification Service TLS Certificate SAN LIST", false, false},
+
+		{&a.TcsCN, "TCS_CERT_COMMON_NAME", "TCS TLS Certificate", "TEE Caching Service TLS Certificate Common Name", false, false},
+		{&a.TcsSanList, "TCS_CERT_SAN_LIST", "", "TEE Caching Service TLS Certificate SAN LIST", false, false},
+
 		{&a.GlobalAdminUserName, "GLOBAL_ADMIN_USERNAME", "", "Global Admin User Name", false, false},
 		{&a.GlobalAdminPassword, "GLOBAL_ADMIN_PASSWORD", "", "Global Admin User Password", false, true},
 
@@ -485,6 +540,12 @@ func (a *App) LoadAllVariables(envFile string) error {
 
 		{&customClaimsComponent, "CUSTOM_CLAIMS_COMPONENTS", "", "Component List For Custom Claims Creation", false, false},
 		{&a.CustomClaimsTokenValiditySecs, "CUSTOM_CLAIMS_TOKEN_VALIDITY_SECS", "172800", "Custom Claims Token Validity In Seconds", false, false},
+
+		{&a.ApsServiceUserName, "APS_SERVICE_USERNAME", "", "Attestation Policy Service User Name", false, false},
+		{&a.ApsServiceUserPassword, "APS_SERVICE_PASSWORD", "", "Attestation Policy Service User Password", false, true},
+
+		{&a.ApcUserName, "APC_SERVICE_USERNAME", "", "Attestation Policy Creator User Name", false, false},
+		{&a.ApcUserPassword, "APC_SERVICE_PASSWORD", "", "Attestation Policy Creator User Password", false, true},
 	}
 
 	hasError := false
