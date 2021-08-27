@@ -16,6 +16,8 @@ import (
 	"strconv"
 )
 
+const MaxOsArgsLen = 10
+
 func openLogFiles(logDir string) (logFile *os.File, secLogFile *os.File, err error) {
 	logFilePath := logDir + LogFile
 	securityLogFilePath := logDir + SecurityLogFile
@@ -106,13 +108,15 @@ func getAppSubConfig(args []string) (string, string, string) {
 	instanceName := ""
 	configDir := ""
 	logDir := ""
-	for i, flag := range args {
-		if flag == "-i" || flag == "--instance" {
-			if i+1 < len(args) {
-				instanceName = args[i+1]
-				configDir = constants.SysConfigDir + instanceName + "/"
-				logDir = constants.SysLogDir + instanceName + "/"
-				break
+	if len(args) < MaxOsArgsLen {
+		for i, flag := range args {
+			if flag == "-i" || flag == "--instance" {
+				if i+1 < len(args) {
+					instanceName = args[i+1]
+					configDir = constants.SysConfigDir + instanceName + "/"
+					logDir = constants.SysLogDir + instanceName + "/"
+					break
+				}
 			}
 		}
 	}
