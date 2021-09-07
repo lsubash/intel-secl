@@ -16,7 +16,7 @@ type KeyTransferPolicyAttributes struct {
 	ID                                uuid.UUID `json:"id,omitempty"`
 	CreatedAt                         time.Time `json:"created_at,omitempty"`
 	SGXEnclaveIssuerAnyof             []string  `json:"sgx_enclave_issuer_anyof"`
-	SGXEnclaveIssuerProductIDAnyof    *uint16   `json:"sgx_enclave_issuer_product_id_anyof"`
+	SGXEnclaveIssuerProductID         *uint16   `json:"sgx_enclave_issuer_product_id"`
 	SGXEnclaveMeasurementAnyof        []string  `json:"sgx_enclave_measurement_anyof,omitempty"`
 	SGXEnclaveSVNMinimum              uint16    `json:"sgx_enclave_svn_minimum,omitempty"`
 	TLSClientCertificateIssuerCNAnyof []string  `json:"tls_client_certificate_issuer_cn_anyof,omitempty"`
