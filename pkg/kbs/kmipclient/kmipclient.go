@@ -108,10 +108,18 @@ func (kc *kmipClient) GetKey(id string, algorithm string, keyLength int) ([]byte
 	defer defaultLog.Trace("kmipclient/kmipclient:GetKey() Leaving")
 
 	keyID := C.CString(id)
-	defer C.free(unsafe.Pointer(keyID))
+	if keyID != nil {
+		defer C.free(unsafe.Pointer(keyID))
+	} else {
+		return nil, errors.New("failed to allocate memory for keyID")
+	}
 
 	keyAlgorithm := C.CString(algorithm)
-	defer C.free(unsafe.Pointer(keyAlgorithm))
+	if keyAlgorithm != nil {
+		defer C.free(unsafe.Pointer(keyAlgorithm))
+	} else {
+		return nil, errors.New("failed to allocate memory for keyAlgorithm")
+	}
 
 	if algorithm == constants.CRYPTOALG_AES {
 		keyLength = keyLength / 8
@@ -120,7 +128,11 @@ func (kc *kmipClient) GetKey(id string, algorithm string, keyLength int) ([]byte
 	}
 
 	keyBuffer := C.malloc(C.ulong(keyLength))
-	defer C.free(unsafe.Pointer(keyBuffer))
+	if keyBuffer != nil {
+		defer C.free(unsafe.Pointer(keyBuffer))
+	} else {
+		return nil, errors.New("failed to allocate memory for keyBuffer")
+	}
 
 	result := C.kmipw_get((*C.char)(keyID), (*C.char)(keyBuffer), (*C.char)(keyAlgorithm), (C.int)(kc.KMIPVersion))
 	if result != constants.KMIP_CLIENT_SUCCESS {

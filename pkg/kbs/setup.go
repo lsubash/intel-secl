@@ -7,10 +7,11 @@ package kbs
 import (
 	"crypto/x509/pkix"
 	"fmt"
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
 	cos "github.com/intel-secl/intel-secl/v3/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/utils"
-	"strings"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v3/pkg/kbs/tasks"

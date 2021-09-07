@@ -22,7 +22,6 @@ type QuoteData struct {
 
 // SessionCreateSwk - Function to create swk
 func SessionCreateSwk() ([]byte, error) {
-
 	defaultLog.Trace("session/session_management:SessionCreateSwk() Entering")
 	defer defaultLog.Trace("session/session_management:SessionCreateSwk() Leaving")
 

@@ -8,8 +8,9 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/intel-secl/intel-secl/v3/pkg/clients"
 	aasClient "github.com/intel-secl/intel-secl/v3/pkg/clients/aas"

@@ -7,14 +7,15 @@ package tasks
 
 import (
 	"fmt"
+	"io"
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v3/pkg/kbs/config"
 	commConfig "github.com/intel-secl/intel-secl/v3/pkg/lib/common/config"
 	"github.com/intel-secl/intel-secl/v3/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"io"
-	"strings"
 )
 
 type UpdateServiceConfig struct {

@@ -5,9 +5,10 @@
 package controllers_test
 
 import (
-	kbsRoutes "github.com/intel-secl/intel-secl/v3/pkg/kbs/router"
 	"net/http"
 	"net/http/httptest"
+
+	kbsRoutes "github.com/intel-secl/intel-secl/v3/pkg/kbs/router"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v3/pkg/kbs/controllers"
