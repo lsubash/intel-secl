@@ -57,9 +57,9 @@ func (ktpc KeyTransferPolicyController) Create(responseWriter http.ResponseWrite
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
 	}
 
-	if requestPolicy.SGXEnclaveIssuerAnyof == nil || requestPolicy.SGXEnclaveIssuerProductIDAnyof == nil {
-		secLog.Errorf("controllers/key_transfer_policy_controller:Create() %s : sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id_anyof must be specified", commLogMsg.InvalidInputBadParam)
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id_anyof must be specified"}
+	if requestPolicy.SGXEnclaveIssuerAnyof == nil || requestPolicy.SGXEnclaveIssuerProductID == nil {
+		secLog.Errorf("controllers/key_transfer_policy_controller:Create() %s : sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id must be specified", commLogMsg.InvalidInputBadParam)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id must be specified"}
 	}
 
 	for _, enclaveIssuer := range requestPolicy.SGXEnclaveIssuerAnyof {

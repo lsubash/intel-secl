@@ -479,7 +479,7 @@ func (keyInfo KeyDetails) validateSgxEnclaveIssuerProdId(stmSgxEnclaveIssuerProd
 		return false
 
 	}
-	if uint16(sgxEnclaveIssuerProdID) == *keyInfo.TransferPolicyAttributes.SGXEnclaveIssuerProductIDAnyof {
+	if uint16(sgxEnclaveIssuerProdID) == *keyInfo.TransferPolicyAttributes.SGXEnclaveIssuerProductID {
 		defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerProdId() StmSgxEnclaveIssuerProdID matches with the key transfer policy")
 		return true
 	}
