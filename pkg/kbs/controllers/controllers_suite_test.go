@@ -5,9 +5,10 @@
 package controllers_test
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"testing"
 )
 
 func TestControllers(t *testing.T) {

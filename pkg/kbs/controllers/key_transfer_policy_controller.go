@@ -6,8 +6,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"net/http"
+
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -31,7 +32,7 @@ func NewKeyTransferPolicyController(ps domain.KeyTransferPolicyStore, ks domain.
 	}
 }
 
-//Create : Function to create a key transfer policy
+// Create : Function to create a key transfer policy
 func (ktpc KeyTransferPolicyController) Create(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Create() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Create() Leaving")
@@ -78,7 +79,7 @@ func (ktpc KeyTransferPolicyController) Create(responseWriter http.ResponseWrite
 	return createdPolicy, http.StatusCreated, nil
 }
 
-//Retrieve : Function to retrieve a key transfer policy
+// Retrieve : Function to retrieve a key transfer policy
 func (ktpc KeyTransferPolicyController) Retrieve(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Retrieve() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Retrieve() Leaving")
@@ -99,7 +100,7 @@ func (ktpc KeyTransferPolicyController) Retrieve(responseWriter http.ResponseWri
 	return transferPolicy, http.StatusOK, nil
 }
 
-//Delete : Function to delete a key transfer policy
+// Delete : Function to delete a key transfer policy
 func (ktpc KeyTransferPolicyController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Delete() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Delete() Leaving")
@@ -135,7 +136,7 @@ func (ktpc KeyTransferPolicyController) Delete(responseWriter http.ResponseWrite
 	return nil, http.StatusNoContent, nil
 }
 
-//Search : Function to retrieve all the key transfer policies
+// Search : Function to retrieve all the key transfer policies
 func (ktpc KeyTransferPolicyController) Search(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Search() Leaving")

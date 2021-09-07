@@ -46,17 +46,14 @@ type ChallengeReplyToNode struct {
 }
 
 type QuoteVerifyAttributes struct {
-	Message                        string `json:"Message"`
-	ChallengeKeyType               string `json:"ChallengeKeyType"`
-	ChallengeRsaPublicKey          string `json:"ChallengeRsaPublicKey"`
-	EnclaveIssuer                  string `json:"EnclaveIssuer"`
-	EnclaveIssuerProductID         string `json:"EnclaveIssuerProdID"`
-	EnclaveIssuerExtendedProductID string `json:"EnclaveIssuerExtProdID"`
-	EnclaveMeasurement             string `json:"EnclaveMeasurement"`
-	ConfigSvn                      string `json:"ConfigSvn"`
-	IsvSvn                         string `json:"IsvSvn"`
-	ConfigID                       string `json:"ConfigId"`
-	TCBLevel                       string `json:"TcbLevel"`
+	Message                string `json:"Message"`
+	ChallengeKeyType       string `json:"ChallengeKeyType"`
+	ChallengeRsaPublicKey  string `json:"ChallengeRsaPublicKey"`
+	EnclaveIssuer          string `json:"EnclaveIssuer"`
+	EnclaveIssuerProductID string `json:"EnclaveIssuerProdID"`
+	EnclaveMeasurement     string `json:"EnclaveMeasurement"`
+	IsvSvn                 string `json:"IsvSvn"`
+	TCBLevel               string `json:"TcbLevel"`
 }
 
 type QuoteVerifyResponse struct {

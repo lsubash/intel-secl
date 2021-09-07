@@ -8,8 +8,9 @@ package session
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"net/http"
+
+	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 
 	"github.com/intel-secl/intel-secl/v4/pkg/clients/util"
 	"github.com/pkg/errors"
@@ -28,7 +29,6 @@ func VerifyQuote(quote string, nonce string, cfg *config.Configuration, caCertDi
 	defaultLog.Trace("session/quote_verifier:VerifyQuote() Entering")
 	defer defaultLog.Trace("session/quote_verifier:VerifyQuote() Leaving")
 
-	url := cfg.Skc.SQVSUrl + constants.VerifyQuote
 	var quoteData QuoteData
 	quoteData.QuoteBlob = quote
 	quoteData.UserData = nonce
@@ -44,6 +44,7 @@ func VerifyQuote(quote string, nonce string, cfg *config.Configuration, caCertDi
 		return nil, errors.Wrap(err, "session/quote_verifier:VerifyQuote() Error in encoding the quote")
 	}
 
+	url := cfg.Skc.SQVSUrl + constants.VerifyQuote
 	req, err := http.NewRequest("POST", url, buffer)
 	if err != nil {
 		return nil, errors.Wrap(err, "session/quote_verifier:VerifyQuote() Error in Creating request")
@@ -52,7 +53,6 @@ func VerifyQuote(quote string, nonce string, cfg *config.Configuration, caCertDi
 	req.Header.Set("Content-Type", "application/json")
 
 	response, err := util.SendRequest(req, cfg.AASApiUrl, cfg.KBS.UserName, cfg.KBS.Password, caCerts)
-
 	if err != nil {
 		return nil, errors.Wrap(err, "session/quote_verifier:VerifyQuote() Error getting response body")
 	}

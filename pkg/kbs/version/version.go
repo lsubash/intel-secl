@@ -6,6 +6,7 @@ package version
 
 import (
 	"fmt"
+
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/constants"
 )
 
