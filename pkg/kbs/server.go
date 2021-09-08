@@ -10,17 +10,20 @@ import (
 	"fmt"
 	stdlog "log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/gorilla/handlers"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/router"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/utils"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/pkg/errors"
@@ -54,8 +57,24 @@ func (app *App) startServer() error {
 		return err
 	}
 
+	apsBaseUrl, err := url.Parse(configuration.APSBaseUrl)
+	if err != nil {
+		defaultLog.WithError(err).Error("kbs/server:startServer() Error parsing APS url")
+		return err
+	}
+
+	//Load trusted CA certificates
+	caCerts, err := crypt.GetCertsFromDir(constants.TrustedCaCertsDir)
+	if err != nil {
+		defaultLog.WithError(err).Error("kbs/server:startServer() Error loading CA certificates")
+		return err
+	}
+
+	//Initialize the APS client
+	ac := aps.NewAPSClient(apsBaseUrl, caCerts, configuration.CustomToken)
+
 	// Initialize routes
-	routes := router.InitRoutes(configuration, kcc, km)
+	routes := router.InitRoutes(configuration, kcc, km, ac)
 
 	defaultLog.Info("kbs/server:startServer() Starting server")
 	tlsConfig := &tls.Config{
@@ -118,6 +137,7 @@ func initKeyControllerConfig() (domain.KeyControllerConfig, error) {
 	}
 
 	kcc := domain.KeyControllerConfig{
+		ApsJwtSigningCertsDir:   constants.ApsJWTSigningCertsDir,
 		SamlCertsDir:            constants.SamlCertsDir,
 		TrustedCaCertsDir:       constants.TrustedCaCertsDir,
 		TpmIdentityCertsDir:     constants.TpmIdentityCertsDir,

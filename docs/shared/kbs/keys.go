@@ -180,7 +180,7 @@ type KeyTransferAttributes struct {
 
 // ---
 
-// swagger:operation POST /keys/{id}/transfer Keys TransferKey
+// swagger:operation POST /keys/{id} Keys TransferKey
 // ---
 //
 // description: |
@@ -228,7 +228,7 @@ type KeyTransferAttributes struct {
 //   '500':
 //     description: Internal server error
 //
-// x-sample-call-endpoint: https://kbs.com:9443/kbs/v1/keys/fc0cc779-22b6-4741-b0d9-e2e69635ad1e/transfer
+// x-sample-call-endpoint: https://kbs.com:9443/kbs/v1/keys/fc0cc779-22b6-4741-b0d9-e2e69635ad1e
 // x-sample-call-input: |
 //    -----BEGIN PUBLIC KEY-----
 //    MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAwMKVKgQq1oef5rWfIPBp

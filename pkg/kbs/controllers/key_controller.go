@@ -7,11 +7,9 @@ package controllers
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
-	"encoding/xml"
 	"hash"
 	"io/ioutil"
 	"net/http"
@@ -25,7 +23,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
-	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keytransfer"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/utils"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/auth"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
@@ -34,7 +31,6 @@ import (
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
 	"github.com/pkg/errors"
@@ -59,8 +55,8 @@ var allowedAlgorithms = map[string]bool{"AES": true, "RSA": true, "EC": true, "a
 var allowedCurveTypes = map[string]bool{"secp256r1": true, "secp384r1": true, "secp521r1": true, "prime256v1": true}
 var allowedKeyLengths = map[int]bool{128: true, 192: true, 256: true, 2048: true, 3072: true, 4096: true, 7680: true}
 
-// Create : Function to create key
-func (kc KeyController) Create(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+//Create : Function to create key
+func (kc *KeyController) Create(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Create() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Create() Leaving")
 
@@ -147,8 +143,8 @@ func (kc KeyController) Create(responseWriter http.ResponseWriter, request *http
 	return createdKey, http.StatusCreated, nil
 }
 
-// Retrieve : Function to retrieve key
-func (kc KeyController) Retrieve(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+//Retrieve : Function to retrieve key
+func (kc *KeyController) Retrieve(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Retrieve() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Retrieve() Leaving")
 
@@ -168,8 +164,8 @@ func (kc KeyController) Retrieve(responseWriter http.ResponseWriter, request *ht
 	return key, http.StatusOK, nil
 }
 
-// Delete : Function to delete key
-func (kc KeyController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+//Delete : Function to delete key
+func (kc *KeyController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Delete() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Delete() Leaving")
 
@@ -189,8 +185,8 @@ func (kc KeyController) Delete(responseWriter http.ResponseWriter, request *http
 	return nil, http.StatusNoContent, nil
 }
 
-// Search : Function to search keys
-func (kc KeyController) Search(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+//Search : Function to search keys
+func (kc *KeyController) Search(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Search() Leaving")
 
@@ -217,8 +213,8 @@ func (kc KeyController) Search(responseWriter http.ResponseWriter, request *http
 	return keys, http.StatusOK, nil
 }
 
-// Transfer : Function to perform key transfer with public key
-func (kc KeyController) Transfer(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+//Transfer : Function to perform key transfer with public key
+func (kc *KeyController) Transfer(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Transfer() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Transfer() Leaving")
 
@@ -248,7 +244,13 @@ func (kc KeyController) Transfer(responseWriter http.ResponseWriter, request *ht
 
 	// Wrap key with public key
 	id := uuid.MustParse(mux.Vars(request)["id"])
-	wrappedKey, status, err := kc.wrapSecretKey(id, envelopeKey, sha512.New384(), nil)
+	secretKey, status, err := getSecretKey(kc.remoteManager, id)
+	if err != nil {
+		return nil, status, err
+	}
+
+	// Wrap secret key with public key
+	wrappedKey, status, err := wrapKey(envelopeKey, secretKey.([]byte), sha512.New384(), nil)
 	if err != nil {
 		return nil, status, err
 	}
@@ -262,73 +264,31 @@ func (kc KeyController) Transfer(responseWriter http.ResponseWriter, request *ht
 	return transferKeyResponse, http.StatusOK, nil
 }
 
-// TransferWithSaml : Function to perform key transfer with saml report
-func (kc KeyController) TransferWithSaml(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
-	defaultLog.Trace("controllers/key_controller:TransferWithSaml() Entering")
-	defer defaultLog.Trace("controllers/key_controller:TransferWithSaml() Leaving")
+func getSecretKey(remoteManager *keymanager.RemoteManager, id uuid.UUID) (interface{}, int, error) {
+	defaultLog.Trace("controllers/key_controller:getSecretKey() Entering")
+	defer defaultLog.Trace("controllers/key_controller:getSecretKey() Leaving")
 
-	if request.Header.Get("Content-Type") != constants.HTTPMediaTypeSaml {
-		return nil, http.StatusUnsupportedMediaType, &commErr.ResourceError{Message: "Invalid Content-Type"}
-	}
-
-	if request.ContentLength == 0 {
-		secLog.Error("controllers/key_controller:Create() The request body was not provided")
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
-	}
-
-	// Decode the incoming json data to note struct
-	bytes, err := ioutil.ReadAll(request.Body)
-	if err != nil {
-		secLog.WithError(err).Errorf("controllers/key_controller:TransferWithSaml() %s : Unable to read request body", commLogMsg.InvalidInputBadEncoding)
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to read request body"}
-	}
-
-	// Unmarshal saml report in request
-	var samlReport *saml.Saml
-	err = xml.Unmarshal(bytes, &samlReport)
-	if err != nil {
-		secLog.WithError(err).Errorf("controllers/key_controller:TransferWithSaml() %s : Saml report unmarshal failed", commLogMsg.InvalidInputBadParam)
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Failed to unmarshal saml report"}
-	}
-
-	// Validate saml report in request
-	id := uuid.MustParse(mux.Vars(request)["id"])
-	trusted, bindingCert := keytransfer.IsTrustedByHvs(string(bytes), samlReport, id, kc.config, kc.remoteManager)
-	if !trusted {
-		secLog.Error("controllers/key_controller:TransferWithSaml() Saml report is not trusted")
-		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Client not trusted by Hvs"}
-	}
-	envelopeKey := bindingCert.PublicKey.(*rsa.PublicKey)
-
-	// Wrap key with binding key
-	wrappedKey, status, err := kc.wrapSecretKey(id, envelopeKey, sha256.New(), []byte("TPM2\000"))
-	if err != nil {
-		return nil, status, err
-	}
-
-	secLog.WithField("Id", id).Infof("controllers/key_controller:TransferWithSaml() %s: Key transferred using saml report by: %s", commLogMsg.PrivilegeModified, request.RemoteAddr)
-	return wrappedKey, http.StatusOK, nil
-}
-
-func (kc KeyController) wrapSecretKey(id uuid.UUID, publicKey *rsa.PublicKey, hash hash.Hash, label []byte) (interface{}, int, error) {
-	defaultLog.Trace("controllers/key_controller:wrapSecretKey() Entering")
-	defer defaultLog.Trace("controllers/key_controller:wrapSecretKey() Leaving")
-
-	secretKey, err := kc.remoteManager.TransferKey(id)
+	secretKey, err := remoteManager.TransferKey(id)
 	if err != nil {
 		if err.Error() == commErr.RecordNotFound {
-			defaultLog.Error("controllers/key_controller:wrapSecretKey() Key with specified id could not be located")
+			defaultLog.Error("controllers/key_controller:getSecretKey() Key with specified id could not be located")
 			return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Key with specified id does not exist"}
 		} else {
-			defaultLog.WithError(err).Error("controllers/key_controller:wrapSecretKey() Key transfer failed")
+			defaultLog.WithError(err).Error("controllers/key_controller:getSecretKey() Key transfer failed")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to transfer Key"}
 		}
 	}
+	return secretKey, http.StatusOK, nil
+}
+
+func wrapKey(publicKey *rsa.PublicKey, secretKey []byte, hash hash.Hash, label []byte) (interface{}, int, error) {
+	defaultLog.Trace("controllers/key_controller:wrapKey() Entering")
+	defer defaultLog.Trace("controllers/key_controller:wrapKey() Leaving")
 
 	// Wrap secret key with public key
 	wrappedKey, err := rsa.EncryptOAEP(hash, rand.Reader, publicKey, secretKey, label)
 	if err != nil {
-		defaultLog.WithError(err).Error("controllers/key_controller:wrapSecretKey() Wrap key failed")
+		defaultLog.WithError(err).Error("controllers/key_controller:wrapKey() Wrap key failed")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to wrap key"}
 	}
 

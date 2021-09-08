@@ -23,13 +23,13 @@ type UpdateServiceConfig struct {
 	ServiceConfig config.KBSConfig
 	DefaultPort   int
 	AASApiUrl     string
+	APSBaseUrl    string
 	AppConfig     **config.Configuration
 	ConsoleWriter io.Writer
 }
 
 const envHelpPrompt = "Following environment variables are required for update-service-config setup:"
 
-var allowedSKCChallengeTypes = map[string]bool{"sgx": true}
 var allowedKeyManagers = map[string]bool{"kmip": true}
 
 var envHelp = map[string]string{
@@ -75,6 +75,11 @@ func (uc UpdateServiceConfig) Run() error {
 	(*uc.AppConfig).Server = uc.ServerConfig
 	(*uc.AppConfig).AASApiUrl = uc.AASApiUrl
 
+	if !strings.HasSuffix(uc.APSBaseUrl, "/") {
+		uc.APSBaseUrl = uc.APSBaseUrl + "/"
+	}
+	(*uc.AppConfig).APSBaseUrl = uc.APSBaseUrl
+
 	(*uc.AppConfig).Log = commConfig.LogConfig{
 		MaxLength:    viper.GetInt("log-max-length"),
 		EnableStdout: viper.GetBool("log-enable-stdout"),
@@ -92,11 +97,6 @@ func (uc UpdateServiceConfig) Run() error {
 		ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
 		RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
 	}
-	(*uc.AppConfig).Skc = config.SKCConfig{
-		StmLabel:          viper.GetString("skc-challenge-type"),
-		SQVSUrl:           viper.GetString("sqvs-url"),
-		SessionExpiryTime: viper.GetInt("session-expiry-time"),
-	}
 	(*uc.AppConfig).KeyManager = viper.GetString("key-manager")
 	return nil
 }
@@ -111,11 +111,6 @@ func (uc UpdateServiceConfig) Validate() error {
 	}
 	if _, validInput := allowedKeyManagers[strings.ToLower((*uc.AppConfig).KeyManager)]; !validInput {
 		return errors.New("Invalid value provided for KEY_MANAGER. Value should be kmip")
-	}
-	if (*uc.AppConfig).Skc.StmLabel != "" {
-		if _, validInput := allowedSKCChallengeTypes[strings.ToLower((*uc.AppConfig).Skc.StmLabel)]; !validInput {
-			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. allowed value is SGX")
-		}
 	}
 	return nil
 }

@@ -7,6 +7,7 @@ package domain
 import "github.com/google/uuid"
 
 type KeyControllerConfig struct {
+	ApsJwtSigningCertsDir   string
 	SamlCertsDir            string
 	TrustedCaCertsDir       string
 	TpmIdentityCertsDir     string

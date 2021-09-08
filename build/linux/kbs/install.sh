@@ -67,13 +67,14 @@ LOG_PATH=/var/log/$COMPONENT_NAME/
 CONFIG_PATH=/etc/$COMPONENT_NAME/
 CERTS_PATH=$CONFIG_PATH/certs
 CERTDIR_TRUSTEDJWTCERTS=$CERTS_PATH/trustedjwt
+CERTDIR_APSJWT=$CERTS_PATH/apsjwt
 CERTDIR_TRUSTEDCAS=$CERTS_PATH/trustedca
 KEYS_PATH=$PRODUCT_HOME/keys
 KEYS_TRANSFER_POLICY_PATH=$PRODUCT_HOME/keys-transfer-policy
 SAML_CERTS_PATH=$CERTS_PATH/saml/
 TPM_IDENTITY_CERTS_PATH=$CERTS_PATH/tpm-identity/
 
-for directory in $BIN_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDCAS $CERTDIR_TRUSTEDJWTCERTS $KEYS_PATH $KEYS_TRANSFER_POLICY_PATH $SAML_CERTS_PATH $TPM_IDENTITY_CERTS_PATH; do
+for directory in $BIN_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDCAS $CERTDIR_TRUSTEDJWTCERTS $CERTDIR_APSJWT $KEYS_PATH $KEYS_TRANSFER_POLICY_PATH $SAML_CERTS_PATH $TPM_IDENTITY_CERTS_PATH; do
     mkdir -p $directory
     if [ $? -ne 0 ]; then
         echo "Cannot create directory: $directory"
@@ -132,11 +133,11 @@ logRotate_install() {
     if [ $? -ne 0 ]; then echo "Failed to install logrotate"; exit -1; fi
   fi
   logRotate_clear; logRotate_detect;
-    if [ -z "$logrotate" ]; then
-      echo "logrotate is not installed"
-    else
-      echo  "logrotate installed in $logrotate"
-    fi
+  if [ -z "$logrotate" ]; then
+    echo "logrotate is not installed"
+  else
+    echo  "logrotate installed in $logrotate"
+  fi
 }
 
 logRotate_install
@@ -172,7 +173,6 @@ if [ "${KBS_NOSETUP,,}" == "true" ]; then
 else
     $COMPONENT_NAME setup all --force
     SETUPRESULT=$?
-    chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $CONFIG_PATH
     if [ ${SETUPRESULT} == 0 ]; then
         echo "systemctl start $COMPONENT_NAME"
         systemctl start $COMPONENT_NAME

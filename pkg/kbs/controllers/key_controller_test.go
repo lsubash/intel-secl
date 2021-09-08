@@ -10,7 +10,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -61,8 +60,6 @@ var _ = Describe("KeyController", func() {
 	validEnvelopeKey := pem.EncodeToMemory(publicKeyInPem)
 
 	invalidEnvelopeKey := strings.Replace(strings.Replace(string(validEnvelopeKey), "-----BEGIN PUBLIC KEY-----\n", "", 1), "-----END PUBLIC KEY-----", "", 1)
-	validSamlReport, _ := ioutil.ReadFile(validSamlReportPath)
-	invalidSamlReport, _ := ioutil.ReadFile(invalidSamlReportPath)
 
 	mockClient := kmipclient.NewMockKmipClient()
 	mockClient.On("CreateSymmetricKey", mock.Anything, mock.Anything).Return("1", nil)
@@ -428,81 +425,6 @@ var _ = Describe("KeyController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusNotFound))
-			})
-		})
-	})
-
-	Describe("Transfer using saml report", func() {
-		Context("Provide a valid saml report", func() {
-			It("Should transfer an existing Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
-				samlReport := string(validSamlReport)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
-					strings.NewReader(samlReport),
-				)
-				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
-				Expect(err).NotTo(HaveOccurred())
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusOK))
-			})
-		})
-		Context("Provide a saml report with overall trust false", func() {
-			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
-				samlReport := strings.ReplaceAll(string(validSamlReport), "true", "false")
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
-					strings.NewReader(samlReport),
-				)
-				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
-				Expect(err).NotTo(HaveOccurred())
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnauthorized))
-			})
-		})
-		Context("Provide a saml report with unknown signer", func() {
-			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
-				samlReport := string(invalidSamlReport)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
-					strings.NewReader(samlReport),
-				)
-				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
-				Expect(err).NotTo(HaveOccurred())
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnauthorized))
-			})
-		})
-		Context("Provide an invalid saml report", func() {
-			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
-				samlReport := `saml`
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
-					strings.NewReader(samlReport),
-				)
-				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
-				Expect(err).NotTo(HaveOccurred())
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})

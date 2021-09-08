@@ -26,6 +26,7 @@ const (
 
 	// certificates' path
 	TrustedJWTSigningCertsDir = ConfigDir + "certs/trustedjwt/"
+	ApsJWTSigningCertsDir     = ConfigDir + "certs/apsjwt/"
 	TrustedCaCertsDir         = ConfigDir + "certs/trustedca/"
 	SamlCertsDir              = ConfigDir + "certs/saml/"
 	TpmIdentityCertsDir       = ConfigDir + "certs/tpm-identity/"
@@ -74,25 +75,11 @@ const (
 	CRYPTOALG_EC  = "EC"
 
 	// kmip constants
-	KMIP_1_4           = "1.4"
-	KMIP_2_0           = "2.0"
-	KMIP_CRYPTOALG_AES = 0x03
-	KMIP_CRYPTOALG_RSA = 0x04
-	KMIP_CRYPTOALG_EC  = 0x06
+	KMIP_1_4 = "1.4"
+	KMIP_2_0 = "2.0"
 
-	NonceLength = 32
-)
-
-// SKC Specific constants
-const (
-	DefaultSGXLabel         = "SGX"
-	VerifyQuote             = "/sgx_qv_verify_quote"
-	KeyTransferOpertaion    = "transfer key"
-	SessionOperation        = "establish session key"
-	SuccessStatus           = "success"
-	FailureStatus           = "failure"
-	SGXAlgorithmType        = "AES256-GCM"
-	TransferRoleType        = "KeyTransfer"
-	ContextPermissionsRegex = "^(permissions=)(.*)$"
-	TCBLevelOutOfDate       = "OutOfDate"
+	AttestationTypeKey = "attestation_type"
+	AttestationTypeSGX = "SGX"
+	AttestationTypeTDX = "TDX"
+	TCBStatusUpToDate  = "OK"
 )

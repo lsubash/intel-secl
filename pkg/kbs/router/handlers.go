@@ -5,26 +5,20 @@
 package router
 
 import (
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
-
-	"github.com/intel-secl/intel-secl/v5/pkg/clients"
-	aasClient "github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
-	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/auth"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	comctx "github.com/intel-secl/intel-secl/v5/pkg/lib/common/context"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type privilegeError struct {
@@ -128,85 +122,6 @@ func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string)
 		}
 		secLog.Infof("router/handlers:permissionsHandler() %s - %s", commLogMsg.AuthorizedAccess, r.RequestURI)
 		return eh(w, r)
-	}
-}
-
-func permissionsHandlerUsingTLSMAuth(eh middleware.EndpointHandler, aasAPIUrl string, kbsConfig config.KBSConfig) middleware.EndpointHandler {
-	defaultLog.Trace("router/handlers:permissionsHandlerUsingTLSMAuth() Entering")
-	defer defaultLog.Trace("router/handlers:permissionsHandlerUsingTLSMAuth() Leaving")
-
-	return func(responseWriter http.ResponseWriter, request *http.Request) error {
-		//Get trusted CA certs from the directory
-		caCerts, err := crypt.GetCertsFromDir(consts.TrustedCaCertsDir)
-		if err != nil {
-			defaultLog.WithError(err).Errorf("router/handlers:permissionsHandlerUsingTLSMAuth() Error while getting certs from %s", consts.TrustedCaCertsDir)
-			return err
-		}
-
-		var intermediateCerts []x509.Certificate
-		for _, certificates := range request.TLS.PeerCertificates[1:] {
-			intermediateCerts = append(intermediateCerts, *certificates)
-		}
-
-		verifyRootCAOpts := x509.VerifyOptions{
-			Roots:         crypt.GetCertPool(caCerts),
-			Intermediates: crypt.GetCertPool(intermediateCerts),
-			KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
-		}
-
-		if _, err := request.TLS.PeerCertificates[0].Verify(verifyRootCAOpts); err != nil {
-			secLog.WithError(err).Error("router/handlers:permissionsHandlerUsingTLSMAuth() Error verifying certificate chain for TLS certificate. No " +
-				"valid certificate chain could be found")
-			return errors.New("Error verifying certificate chain for TLS certificate. No " +
-				"valid certificate chain could be found")
-		}
-
-		secLog.Debug("router/handlers:permissionsHandlerUsingTLSMAuth() TLS certificate chain verification successful")
-
-		client, err := clients.HTTPClientWithCA(caCerts)
-
-		jwtcl := aasClient.NewJWTClient(aasAPIUrl)
-		jwtcl.HTTPClient = client
-		jwtcl.AddUser(kbsConfig.UserName, kbsConfig.Password)
-		tokenBytes, err := jwtcl.FetchTokenForUser(kbsConfig.UserName)
-		if err != nil {
-			secLog.WithError(err).Error("router/handlers:permissionsHandlerUsingTLSMAuth() Could not fetch token for user " + kbsConfig.UserName)
-			return errors.New("Could not fetch token for user " + kbsConfig.UserName)
-		}
-
-		aasClient := aasClient.Client{
-			BaseURL:    aasAPIUrl,
-			JWTToken:   tokenBytes,
-			HTTPClient: client,
-		}
-		userDetails, err := aasClient.GetUsers(request.TLS.PeerCertificates[0].Subject.CommonName)
-		if err != nil {
-			defaultLog.WithError(err).Errorf("router/handlers:permissionsHandlerUsingTLSMAuth() Error while getting user details from AAS")
-			return errors.New("Error while getting user details from AAS")
-		}
-
-		userRoles, err := aasClient.GetRolesForUser(userDetails[0].ID)
-		if err != nil {
-			defaultLog.WithError(err).Errorf("router/handlers:permissionsHandlerUsingTLSMAuth() Error while getting permission details from AAS")
-			return errors.New("Error while getting permission details from AAS")
-		}
-
-		roleFound := false
-		for _, roles := range userRoles {
-			if roles.Service == consts.ServiceName && roles.Name == consts.TransferRoleType {
-				roleFound = true
-				break
-			}
-		}
-
-		if !roleFound {
-			responseWriter.WriteHeader(http.StatusUnauthorized)
-			secLog.Errorf("router/handlers:permissionsHandlerUsingTLSMAuth() %s Insufficient privileges to access %s", commLogMsg.UnauthorizedAccess, request.RequestURI)
-			return &privilegeError{Message: "Insufficient privileges to access " + request.RequestURI, StatusCode: http.StatusUnauthorized}
-		}
-
-		secLog.Infof("router/handlers:permissionsHandlerUsingTLSMAuth() %s - %s", commLogMsg.AuthorizedAccess, request.RequestURI)
-		return eh(responseWriter, request)
 	}
 }
 

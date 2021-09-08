@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
@@ -32,7 +33,7 @@ type Router struct {
 }
 
 // InitRoutes registers all routes for the application.
-func InitRoutes(cfg *config.Configuration, keyConfig domain.KeyControllerConfig, keyManager keymanager.KeyManager) *mux.Router {
+func InitRoutes(cfg *config.Configuration, keyConfig domain.KeyControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient) *mux.Router {
 	defaultLog.Trace("router/router:InitRoutes() Entering")
 	defer defaultLog.Trace("router/router:InitRoutes() Leaving")
 
@@ -43,23 +44,21 @@ func InitRoutes(cfg *config.Configuration, keyConfig domain.KeyControllerConfig,
 	router.SkipClean(true)
 
 	// Define sub routes for path /kbs/v1
-	defineSubRoutes(router, "/"+strings.ToLower(constants.ServiceName)+constants.ApiVersion, cfg, keyConfig, keyManager)
+	defineSubRoutes(router, "/"+strings.ToLower(constants.ServiceName)+constants.ApiVersion, cfg, keyConfig, keyManager, apsClient)
 
 	// Define sub routes for path /v1
-	defineSubRoutes(router, constants.ApiVersion, cfg, keyConfig, keyManager)
+	defineSubRoutes(router, constants.ApiVersion, cfg, keyConfig, keyManager, apsClient)
 
 	return router
 }
 
-func defineSubRoutes(router *mux.Router, serviceApi string, cfg *config.Configuration, keyConfig domain.KeyControllerConfig, keyManager keymanager.KeyManager) {
+func defineSubRoutes(router *mux.Router, serviceApi string, cfg *config.Configuration, keyConfig domain.KeyControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient) {
 	defaultLog.Trace("router/router:defineSubRoutes() Entering")
 	defer defaultLog.Trace("router/router:defineSubRoutes() Leaving")
 
 	subRouter := router.PathPrefix(serviceApi).Subrouter()
 	subRouter = setVersionRoutes(subRouter)
-	subRouter = setKeyTransferRoutes(subRouter, cfg.EndpointURL, keyConfig, keyManager)
-	subRouter = setSKCKeyTransferRoutes(subRouter, cfg, keyManager)
-	subRouter = setSessionRoutes(subRouter, cfg)
+	subRouter = setKeyTransferRoutes(subRouter, cfg.EndpointURL, keyConfig, keyManager, apsClient)
 	subRouter = router.PathPrefix(serviceApi).Subrouter()
 	cfgRouter := Router{cfg: cfg}
 	var cacheTime, _ = time.ParseDuration(constants.JWTCertsCacheTime)

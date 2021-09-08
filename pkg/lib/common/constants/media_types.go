@@ -12,5 +12,6 @@ const (
 	HTTPMediaTypeJson        = "application/json"
 	HTTPMediaTypeSaml        = "application/samlassertion+xml"
 	HTTPMediaTypePemFile     = "application/x-pem-file"
+	HTTPMediaTypePkixCrl     = "application/pkix-crl"
 	HTTPMediaTypeOctetStream = "application/octet-stream"
 )

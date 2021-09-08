@@ -20,6 +20,8 @@ var defaultLog = log.GetDefaultLogger()
 type Configuration struct {
 	AASApiUrl        string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
 	CMSBaseURL       string `yaml:"cms-base-url" mapstructure:"cms-base-url"`
+	APSBaseUrl       string `yaml:"aps-base-url" mapstructure:"aps-base-url"`
+	CustomToken      string `yaml:"custom-token" mapstructure:"custom-token"`
 	CmsTlsCertDigest string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 
 	KBS KBSConfig `yaml:"kbs" mapstructure:"kbs"`
@@ -32,7 +34,6 @@ type Configuration struct {
 	Server commConfig.ServerConfig  `yaml:"server" mapstructure:"server"`
 
 	Kmip KmipConfig `yaml:"kmip" mapstructure:"kmip"`
-	Skc  SKCConfig  `yaml:"skc" mapstructure:"skc"`
 }
 
 type KBSConfig struct {
@@ -50,12 +51,6 @@ type KmipConfig struct {
 	ClientKeyFilePath         string `yaml:"client-key-path" mapstructure:"client-key-path"`
 	ClientCertificateFilePath string `yaml:"client-cert-path" mapstructure:"client-cert-path"`
 	RootCertificateFilePath   string `yaml:"root-cert-path" mapstructure:"root-cert-path"`
-}
-
-type SKCConfig struct {
-	StmLabel          string `yaml:"challenge-type" mapstructure:"challenge-type"`
-	SQVSUrl           string `yaml:"sqvs-url" mapstructure:"sqvs-url"`
-	SessionExpiryTime int    `yaml:"session-expiry-time" mapstructure:"session-expiry-time"`
 }
 
 // init sets the configuration file name and type

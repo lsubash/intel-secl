@@ -25,7 +25,7 @@ var jwtCertDownloadAttempted bool
 var log = clog.GetDefaultLogger()
 var slog = clog.GetSecurityLogger()
 
-func initJwtVerifier(signingCertsDir, trustedCAsDir string, cacheTime time.Duration) error {
+func InitJwtVerifier(signingCertsDir, trustedCAsDir string, cacheTime time.Duration) (jwtauth.Verifier, error) {
 
 	certPems, err := cos.GetDirFileContents(signingCertsDir, "*.pem")
 
@@ -33,8 +33,7 @@ func initJwtVerifier(signingCertsDir, trustedCAsDir string, cacheTime time.Durat
 
 	jwtVerifier, err = jwtauth.NewVerifier(certPems, rootPems, cacheTime)
 
-	return err
-
+	return jwtVerifier, err
 }
 
 func retrieveAndSaveTrustedJwtSigningCerts() error {
@@ -80,7 +79,7 @@ func NewTokenAuth(signingCertsDir, trustedCAsDir string, fnGetJwtCerts RetrieveJ
 			for needInit, retryNeeded, looped := jwtVerifier == nil, false, false; retryNeeded || !looped; looped = true {
 
 				if needInit || retryNeeded {
-					if initErr := initJwtVerifier(signingCertsDir, trustedCAsDir, cacheTime); initErr != nil {
+					if _, initErr := InitJwtVerifier(signingCertsDir, trustedCAsDir, cacheTime); initErr != nil {
 						log.WithError(initErr).Error("attempt to initialize jwt verifier failed")
 						w.WriteHeader(http.StatusInternalServerError)
 						return

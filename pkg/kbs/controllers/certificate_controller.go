@@ -37,7 +37,7 @@ var certificateSearchParams = map[string]bool{"subjectEqualTo": true, "subjectCo
 	"validOn": true, "validBefore": true, "validAfter": true}
 
 //Import : Function to store the provided certificate in directory
-func (cc CertificateController) Import(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+func (cc *CertificateController) Import(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/certificate_controller:Import() Entering")
 	defer defaultLog.Trace("controllers/certificate_controller:Import() Leaving")
 
@@ -60,7 +60,7 @@ func (cc CertificateController) Import(responseWriter http.ResponseWriter, reque
 }
 
 //Retrieve : Function to retrieve certificate
-func (cc CertificateController) Retrieve(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+func (cc *CertificateController) Retrieve(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/certificate_controller:Retrieve() Entering")
 	defer defaultLog.Trace("controllers/certificate_controller:Retrieve() Leaving")
 
@@ -81,7 +81,7 @@ func (cc CertificateController) Retrieve(responseWriter http.ResponseWriter, req
 }
 
 //Delete : Function to delete certificate
-func (cc CertificateController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+func (cc *CertificateController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/certificate_controller:Delete() Entering")
 	defer defaultLog.Trace("controllers/certificate_controller:Delete() Leaving")
 
@@ -102,7 +102,7 @@ func (cc CertificateController) Delete(responseWriter http.ResponseWriter, reque
 }
 
 //Search : Function used to search certificates based on query parameter
-func (cc CertificateController) Search(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+func (cc *CertificateController) Search(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/certificate_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/certificate_controller:Search() Leaving")
 

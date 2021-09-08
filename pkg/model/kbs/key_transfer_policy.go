@@ -10,18 +10,48 @@ import (
 	"github.com/google/uuid"
 )
 
-// KeyTransferPolicyAttributes - used in key transfer policy create request and response.
-type KeyTransferPolicyAttributes struct {
+// KeyTransferPolicy - used in key transfer policy create request and response.
+type KeyTransferPolicy struct {
 	// swagger:strfmt uuid
-	ID                                uuid.UUID `json:"id,omitempty"`
-	CreatedAt                         time.Time `json:"created_at,omitempty"`
-	SGXEnclaveIssuerAnyof             []string  `json:"sgx_enclave_issuer_anyof"`
-	SGXEnclaveIssuerProductID         *uint16   `json:"sgx_enclave_issuer_product_id"`
-	SGXEnclaveMeasurementAnyof        []string  `json:"sgx_enclave_measurement_anyof,omitempty"`
-	SGXEnclaveSVNMinimum              uint16    `json:"sgx_enclave_svn_minimum,omitempty"`
-	TLSClientCertificateIssuerCNAnyof []string  `json:"tls_client_certificate_issuer_cn_anyof,omitempty"`
-	TLSClientCertificateSANAnyof      []string  `json:"client_permissions_anyof,omitempty"`
-	TLSClientCertificateSANAllof      []string  `json:"client_permissions_allof,omitempty"`
-	AttestationTypeAnyof              []string  `json:"attestation_type_anyof,omitempty"`
-	SGXEnforceTCBUptoDate             bool      `json:"sgx_enforce_tcb_up_to_date,omitempty"`
+	ID              uuid.UUID  `json:"id,omitempty"`
+	CreatedAt       time.Time  `json:"created_at,omitempty"`
+	AttestationType []string   `json:"attestation_type"`
+	TDX             *TdxPolicy `json:"tdx,omitempty"`
+	SGX             *SgxPolicy `json:"sgx,omitempty"`
+}
+
+type TdxPolicy struct {
+	Attributes *TdxAttributes `json:"attributes,omitempty"`
+	// swagger:strfmt uuid
+	PolicyIds []uuid.UUID `json:"policy_ids,omitempty"`
+}
+
+type TdxAttributes struct {
+	MrSignerSeam       []string `json:"mr_signer_seam,omitempty"`
+	MrSeam             []string `json:"mr_seam,omitempty"`
+	SeamSvn            *uint8   `json:"seam_svn,omitempty"`
+	MRTD               []string `json:"mr_td,omitempty"`
+	RTMR0              string   `json:"rtmr0,omitempty"`
+	RTMR1              string   `json:"rtmr1,omitempty"`
+	RTMR2              string   `json:"rtmr2,omitempty"`
+	RTMR3              string   `json:"rtmr3,omitempty"`
+	EnforceTCBUptoDate *bool    `json:"enforce_tcb_upto_date,omitempty"`
+}
+
+type SgxPolicy struct {
+	Attributes *SgxAttributes `json:"attributes,omitempty"`
+	// swagger:strfmt uuid
+	PolicyIds []uuid.UUID `json:"policy_ids,omitempty"`
+}
+
+type SgxAttributes struct {
+	MrSigner             []string `json:"mr_signer,omitempty"`
+	IsvProductId         []uint16 `json:"isv_prod_id,omitempty"`
+	IsvExtendedProductId []string `json:"isv_ext_prod_id,omitempty"`
+	MrEnclave            []string `json:"mr_enclave,omitempty"`
+	ConfigSVN            *int16   `json:"config_svn,omitempty"`
+	IsvSvn               *uint16  `json:"isv_svn,omitempty"`
+	ConfigId             []string `json:"config_id,omitempty"`
+	ClientPermissions    []string `json:"client_permissions,omitempty"`
+	EnforceTCBUptoDate   *bool    `json:"enforce_tcb_upto_date,omitempty"`
 }

@@ -36,8 +36,7 @@ func (app *App) setup(args []string) error {
 			} else {
 				return errors.New("Invalid answer file name")
 			}
-		}
-		if arg == "--force" {
+		} else if arg == "--force" {
 			force = true
 		}
 	}
@@ -148,7 +147,8 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 			UserName: viper.GetString("kbs-service-username"),
 			Password: viper.GetString("kbs-service-password"),
 		},
-		AASApiUrl: viper.GetString("aas-base-url"),
+		AASApiUrl:  viper.GetString("aas-base-url"),
+		APSBaseUrl: viper.GetString("aps-base-url"),
 		ServerConfig: commConfig.ServerConfig{
 			Port:              viper.GetInt("server-port"),
 			ReadTimeout:       viper.GetDuration("server-read-timeout"),

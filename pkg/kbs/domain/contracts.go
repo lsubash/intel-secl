@@ -19,10 +19,10 @@ type (
 	}
 
 	KeyTransferPolicyStore interface {
-		Create(attributes *kbs.KeyTransferPolicyAttributes) (*kbs.KeyTransferPolicyAttributes, error)
-		Retrieve(uuid.UUID) (*kbs.KeyTransferPolicyAttributes, error)
+		Create(attributes *kbs.KeyTransferPolicy) (*kbs.KeyTransferPolicy, error)
+		Retrieve(uuid.UUID) (*kbs.KeyTransferPolicy, error)
 		Delete(uuid.UUID) error
-		Search(criteria *models.KeyTransferPolicyFilterCriteria) ([]kbs.KeyTransferPolicyAttributes, error)
+		Search(criteria *models.KeyTransferPolicyFilterCriteria) ([]kbs.KeyTransferPolicy, error)
 	}
 
 	CertificateStore interface {

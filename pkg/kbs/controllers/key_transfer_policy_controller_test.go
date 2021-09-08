@@ -40,8 +40,13 @@ var _ = Describe("KeyTransferPolicyController", func() {
 			It("Should create a new Key Transfer Policy", func() {
 				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
 				policyJson := `{
-							"sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
-							"sgx_enclave_issuer_product_id": 0
+							"attestation_type": ["SGX"],
+							"sgx": {
+								"attributes": {
+									"mrsigner": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
+									"isvprodid": [0]
+								}
+							}
 						}`
 
 				req, err := http.NewRequest(
@@ -57,11 +62,16 @@ var _ = Describe("KeyTransferPolicyController", func() {
 				Expect(w.Code).To(Equal(http.StatusCreated))
 			})
 		})
-		Context("Provide a Create request without sgx_enclave_issuer_anyof", func() {
+		Context("Provide a Create request without mrsigner", func() {
 			It("Should fail to create new Key Transfer Policy", func() {
 				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
 				policyJson := `{
-							"sgx_enclave_issuer_product_id": 0
+							"attestation_type": ["SGX"],
+							"sgx": {
+								"attributes": {
+									"isvprodid": [0]
+								}
+							}
 						}`
 
 				req, err := http.NewRequest(
@@ -69,19 +79,24 @@ var _ = Describe("KeyTransferPolicyController", func() {
 					"/key-transfer-policies",
 					strings.NewReader(policyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
-		Context("Provide a Create request without sgx_enclave_issuer_product_id", func() {
+		Context("Provide a Create request without isvprodid", func() {
 			It("Should fail to create new Key Transfer Policy", func() {
 				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
 				policyJson := `{
-							"sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
+							"attestation_type": ["SGX"],
+							"sgx": {
+								"attributes": {
+									"mrsigner": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"]
+								}
+							}
 						}`
 
 				req, err := http.NewRequest(
@@ -89,9 +104,9 @@ var _ = Describe("KeyTransferPolicyController", func() {
 					"/key-transfer-policies",
 					strings.NewReader(policyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -171,8 +186,8 @@ var _ = Describe("KeyTransferPolicyController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var policies []kbs.KeyTransferPolicyAttributes
-				json.Unmarshal(w.Body.Bytes(), &policies)
+				var policies []kbs.KeyTransferPolicy
+				_ = json.Unmarshal(w.Body.Bytes(), &policies)
 				// Verifying mocked data of 2 key transfer policies
 				Expect(len(policies)).To(Equal(2))
 			})

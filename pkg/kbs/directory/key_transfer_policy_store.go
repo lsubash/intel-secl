@@ -27,7 +27,7 @@ func NewKeyTransferPolicyStore(dir string) *KeyTransferPolicyStore {
 	return &KeyTransferPolicyStore{dir}
 }
 
-func (ktps *KeyTransferPolicyStore) Create(policy *kbs.KeyTransferPolicyAttributes) (*kbs.KeyTransferPolicyAttributes, error) {
+func (ktps *KeyTransferPolicyStore) Create(policy *kbs.KeyTransferPolicy) (*kbs.KeyTransferPolicy, error) {
 	defaultLog.Trace("directory/key_transfer_policy_store:Create() Entering")
 	defer defaultLog.Trace("directory/key_transfer_policy_store:Create() Leaving")
 
@@ -50,7 +50,7 @@ func (ktps *KeyTransferPolicyStore) Create(policy *kbs.KeyTransferPolicyAttribut
 	return policy, nil
 }
 
-func (ktps *KeyTransferPolicyStore) Retrieve(id uuid.UUID) (*kbs.KeyTransferPolicyAttributes, error) {
+func (ktps *KeyTransferPolicyStore) Retrieve(id uuid.UUID) (*kbs.KeyTransferPolicy, error) {
 	defaultLog.Trace("directory/key_transfer_policy_store:Retrieve() Entering")
 	defer defaultLog.Trace("directory/key_transfer_policy_store:Retrieve() Leaving")
 
@@ -63,7 +63,7 @@ func (ktps *KeyTransferPolicyStore) Retrieve(id uuid.UUID) (*kbs.KeyTransferPoli
 		}
 	}
 
-	var policy kbs.KeyTransferPolicyAttributes
+	var policy kbs.KeyTransferPolicy
 	err = json.Unmarshal(bytes, &policy)
 	if err != nil {
 		return nil, errors.Wrap(err, "directory/key_transfer_policy_store:Retrieve() Failed to unmarshal key transfer policy")
@@ -87,11 +87,11 @@ func (ktps *KeyTransferPolicyStore) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (ktps *KeyTransferPolicyStore) Search(criteria *models.KeyTransferPolicyFilterCriteria) ([]kbs.KeyTransferPolicyAttributes, error) {
+func (ktps *KeyTransferPolicyStore) Search(criteria *models.KeyTransferPolicyFilterCriteria) ([]kbs.KeyTransferPolicy, error) {
 	defaultLog.Trace("directory/key_transfer_policy_store:Search() Entering")
 	defer defaultLog.Trace("directory/key_transfer_policy_store:Search() Leaving")
 
-	var policies = []kbs.KeyTransferPolicyAttributes{}
+	var policies = []kbs.KeyTransferPolicy{}
 	policyFiles, err := ioutil.ReadDir(ktps.dir)
 	if err != nil {
 		return nil, errors.New("directory/key_transfer_policy_store:Search() Unable to read the key transfer policy directory")
@@ -118,7 +118,7 @@ func (ktps *KeyTransferPolicyStore) Search(criteria *models.KeyTransferPolicyFil
 }
 
 // helper function to filter the key transfer policies based on given filter criteria.
-func filterKeyTransferPolicies(policies []kbs.KeyTransferPolicyAttributes, criteria *models.KeyTransferPolicyFilterCriteria) []kbs.KeyTransferPolicyAttributes {
+func filterKeyTransferPolicies(policies []kbs.KeyTransferPolicy, criteria *models.KeyTransferPolicyFilterCriteria) []kbs.KeyTransferPolicy {
 	defaultLog.Trace("directory/key_transfer_policy_store:filterKeyTransferPolicies() Entering")
 	defer defaultLog.Trace("directory/key_transfer_policy_store:filterKeyTransferPolicies() Leaving")
 

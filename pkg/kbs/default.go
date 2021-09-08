@@ -47,6 +47,8 @@ func defaultConfig() *config.Configuration {
 	return &config.Configuration{
 		AASApiUrl:        viper.GetString("aas-base-url"),
 		CMSBaseURL:       viper.GetString("cms-base-url"),
+		APSBaseUrl:       viper.GetString("aps-base-url"),
+		CustomToken:      viper.GetString("custom-token"),
 		CmsTlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
 
 		EndpointURL: viper.GetString("endpoint-url"),
@@ -85,11 +87,6 @@ func defaultConfig() *config.Configuration {
 			ClientKeyFilePath:         viper.GetString("kmip-client-key-path"),
 			ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
 			RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
-		},
-		Skc: config.SKCConfig{
-			StmLabel:          viper.GetString("skc-challenge-type"),
-			SQVSUrl:           viper.GetString("sqvs-url"),
-			SessionExpiryTime: viper.GetInt("session-expiry-time"),
 		},
 	}
 }
