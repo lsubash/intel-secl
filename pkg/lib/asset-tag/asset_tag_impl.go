@@ -48,7 +48,7 @@ func (aTag *atag) CreateAssetTag(tagCertConfig TagCertConfig) ([]byte, error) {
 		}
 		extensions = append(extensions, pkix.Extension{
 			Critical: false,
-			Id:       asn1.ObjectIdentifier{2, 5, 4, 78},
+			Id:       asn1.ObjectIdentifier{2, 5, 4, 789, 1},
 			Value:    derEncodedAttr,
 		})
 	}

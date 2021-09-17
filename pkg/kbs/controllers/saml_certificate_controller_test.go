@@ -191,7 +191,7 @@ var _ = Describe("SamlCertController", func() {
 		Context("When filtered by a valid SubjectEqualTo", func() {
 			It("Should get a list of SamlCertificates whose Subject is SubjectEqualTo value", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/saml-certificates?subjectEqualTo=mtwilson-saml", nil)
+				req, err := http.NewRequest("GET", "/saml-certificates?subjectEqualTo=HVS%20SAML%20Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -220,7 +220,7 @@ var _ = Describe("SamlCertController", func() {
 		Context("When filtered by a valid SubjectContains", func() {
 			It("Should get a list of SamlCertificates whose Subject contains the SubjectContains value", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/saml-certificates?subjectContains=-saml", nil)
+				req, err := http.NewRequest("GET", "/saml-certificates?subjectContains=HVS", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -230,7 +230,7 @@ var _ = Describe("SamlCertController", func() {
 				var certs []kbs.Certificate
 				err = json.Unmarshal(w.Body.Bytes(), &certs)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(certs)).To(Equal(1))
+				Expect(len(certs)).To(Equal(2))
 			})
 		})
 
