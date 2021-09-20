@@ -16,9 +16,7 @@ import (
 
 	"github.com/google/uuid"
 	faultsConst "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
@@ -49,14 +47,14 @@ type xmlMeasurementLogIntegrity struct {
 // - Otherwise, replay the events in the hostmanifest, comparing the cumulative hash against
 //   the flavor's cumulative hash, the manifest's cumulative has and the event log measurement
 //   in PCR15.
-func (rule *xmlMeasurementLogIntegrity) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *xmlMeasurementLogIntegrity) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = faultsConst.RuleXmlMeasurementLogIntegrity
 	result.Rule.FlavorName = &rule.flavorLabel
 	result.Rule.ExpectedValue = &rule.expectedCumulativeHash
-	result.Rule.Markers = append(result.Rule.Markers, common.FlavorPartSoftware)
+	result.Rule.Markers = append(result.Rule.Markers, hvs.FlavorPartSoftware)
 	result.Rule.FlavorID = &rule.flavorId
 
 	if hostManifest.MeasurementXmls == nil || len(hostManifest.MeasurementXmls) == 0 {
@@ -90,10 +88,11 @@ func (rule *xmlMeasurementLogIntegrity) Apply(hostManifest *types.HostManifest) 
 				result.Faults = append(result.Faults, fault)
 			} else {
 				// now check the pcr event logs...
-				pcrNewEventLogs, err := hostManifest.PcrManifest.GetEventLogCriteria(types.SHA256, types.PcrIndex(types.PCR15))
+				pcrNewEventLogs, err := hostManifest.PcrManifest.GetEventLogCriteria(hvs.SHA256, hvs.PCR15)
+
 				if err != nil {
 					// the event log was missing from the manifest...
-					fault := newPcrEventLogMissingFault(types.PCR15, types.SHA256)
+					fault := newPcrEventLogMissingFault(hvs.PCR15, hvs.SHA256)
 					result.Faults = append(result.Faults, fault)
 				} else {
 					// If the pcr event log is present, see if it has a measurement that

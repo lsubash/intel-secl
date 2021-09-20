@@ -6,8 +6,8 @@ package types
 
 import (
 	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	hcConstants "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
@@ -18,16 +18,16 @@ import (
 
 // GenericPlatformFlavor represents a flavor that is not specific to any hardware platform
 type GenericPlatformFlavor struct {
-	TagCertificate *cm.X509AttributeCertificate
+	TagCertificate *hvs.X509AttributeCertificate
 	Vendor         hcConstants.Vendor
 }
 
 // GetFlavorPartRaw constructs the Asset Tag flavor from the Tag Certificate of the Generic Platform Flavor
-func (gpf GenericPlatformFlavor) GetFlavorPartRaw(name cf.FlavorPart) ([]cm.Flavor, error) {
+func (gpf GenericPlatformFlavor) GetFlavorPartRaw(name hvs.FlavorPartName) ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/generic_platform_flavor:GetFlavorPartRaw() Entering")
 	defer log.Trace("flavor/types/generic_platform_flavor:GetFlavorPartRaw() Leaving")
 
-	if name == cf.FlavorPartAssetTag {
+	if name == hvs.FlavorPartAssetTag {
 		return gpf.getAssetTagFlavor()
 	}
 
@@ -35,17 +35,17 @@ func (gpf GenericPlatformFlavor) GetFlavorPartRaw(name cf.FlavorPart) ([]cm.Flav
 }
 
 // GetFlavorPartNames retrieves the list of flavor parts that can be obtained using the GetFlavorPartRaw function
-func (gpf GenericPlatformFlavor) GetFlavorPartNames() ([]cf.FlavorPart, error) {
+func (gpf GenericPlatformFlavor) GetFlavorPartNames() ([]hvs.FlavorPartName, error) {
 	log.Trace("flavor/types/generic_platform_flavor:GetFlavorPartNames() Entering")
 	defer log.Trace("flavor/types/generic_platform_flavor:GetFlavorPartNames() Leaving")
 
-	flavorPartList := []cf.FlavorPart{cf.FlavorPartAssetTag}
+	flavorPartList := []hvs.FlavorPartName{hvs.FlavorPartAssetTag}
 	return flavorPartList, nil
 }
 
 // getAssetTagFlavor Retrieves the asset tag part of the flavor including the certificate and all the key-value pairs
 // that are part of the certificate.
-func (gpf GenericPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
+func (gpf GenericPlatformFlavor) getAssetTagFlavor() ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/generic_platform_flavor:getAssetTagFlavor() Entering")
 	defer log.Trace("flavor/types/generic_platform_flavor:getAssetTagFlavor() Leaving")
 
@@ -57,7 +57,7 @@ func (gpf GenericPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 	}
 
 	// create meta section details
-	newMeta, err := pfutil.GetMetaSectionDetails(nil, gpf.TagCertificate, "", cf.FlavorPartAssetTag, gpf.Vendor)
+	newMeta, err := pfutil.GetMetaSectionDetails(nil, gpf.TagCertificate, "", hvs.FlavorPartAssetTag, gpf.Vendor)
 	if err != nil {
 		return nil, errors.Wrap(err, errorMessage+" Failure in Meta section details")
 	}
@@ -71,9 +71,9 @@ func (gpf GenericPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 	log.Debugf("flavor/types/generic_platform_flavor:getAssetTagFlavor() New External Section: %v", *newExt)
 
 	// Create flavor and
-	assetTagFlavor := cm.NewFlavor(newMeta, nil, nil, nil, newExt, nil)
+	assetTagFlavor := hvs.NewFlavor(newMeta, nil, nil, nil, newExt, nil)
 
 	log.Debugf("flavor/types/generic_platform_flavor:getAssetTagFlavor() New AssetTag Flavor: %v", assetTagFlavor)
 
-	return []cm.Flavor{*assetTagFlavor}, nil
+	return []hvs.Flavor{*assetTagFlavor}, nil
 }

@@ -19,7 +19,6 @@ import (
 	hostfetcher "github.com/intel-secl/intel-secl/v4/pkg/hvs/services/host-fetcher"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/services/hosttrust"
 	mocks2 "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/mocks"
-	hcTypes "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	libVerifier "github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/stretchr/testify/assert"
@@ -41,7 +40,7 @@ var (
 	fIds           []uuid.UUID
 	service        *hosttrust.Service
 	hwUuid, hostId uuid.UUID
-	hostManifest   hcTypes.HostManifest
+	hostManifest   hvs.HostManifest
 )
 
 func SetupManagerTests() {

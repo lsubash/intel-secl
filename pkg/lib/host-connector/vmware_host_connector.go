@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"sort"
 	"strconv"
 	"strings"
@@ -59,34 +60,34 @@ func (vc *VmwareConnector) GetHostDetails() (taModel.HostInfo, error) {
 	return hostInfo, nil
 }
 
-func (vc *VmwareConnector) GetHostManifest(pcrList []int) (types.HostManifest, error) {
+func (vc *VmwareConnector) GetHostManifest(pcrList []int) (hvs.HostManifest, error) {
 
 	log.Trace("vmware_host_connector :GetHostManifest() Entering")
 	defer log.Trace("vmware_host_connector :GetHostManifest() Leaving")
 	var err error
-	var hostManifest types.HostManifest
-	var pcrManifest types.PcrManifest
+	var hostManifest hvs.HostManifest
+	var pcrManifest hvs.PcrManifest
 	tpmAttestationReport, err := vc.client.GetTPMAttestationReport()
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "vmware_host_connector: GetHostManifest() Error getting TPM "+
+		return hvs.HostManifest{}, errors.Wrap(err, "vmware_host_connector: GetHostManifest() Error getting TPM "+
 			"attestation report from vcenter API")
 	}
 
 	//Check if TPM log is reliable
 	if !tpmAttestationReport.Returnval.TpmLogReliable {
-		return types.HostManifest{}, errors.New("vmware_host_connector: GetHostManifest() TPM log received from" +
+		return hvs.HostManifest{}, errors.New("vmware_host_connector: GetHostManifest() TPM log received from" +
 			"VMware host is not reliable")
 	}
 	pcrManifest, pcrsDigest, err := createPCRManifest(tpmAttestationReport.Returnval, pcrList)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "vmware_host_connector: GetHostManifest() Error parsing "+
+		return hvs.HostManifest{}, errors.Wrap(err, "vmware_host_connector: GetHostManifest() Error parsing "+
 			"PCR manifest from Host Attestation Report")
 	}
 
 	hostManifest.HostInfo, err = vc.client.GetHostInfo()
 	log.Debugf("Host info received : %v", hostManifest.HostInfo)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "vmware_host_connector: GetHostManifest() Error getting host "+
+		return hvs.HostManifest{}, errors.Wrap(err, "vmware_host_connector: GetHostManifest() Error getting host "+
 			"info from vcenter API")
 	}
 	hostManifest.PcrManifest = pcrManifest
@@ -117,42 +118,42 @@ func (vc *VmwareConnector) GetClusterReference(clusterName string) ([]mo.HostSys
 	return hostInfoList, nil
 }
 
-func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationReport, pcrList []int) (types.PcrManifest, string, error) {
+func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationReport, pcrList []int) (hvs.PcrManifest, string, error) {
 
 	log.Trace("vmware_host_connector :createPCRManifest() Entering")
 	defer log.Trace("vmware_host_connector :createPCRManifest() Leaving")
 
-	var pcrManifest types.PcrManifest
-	pcrManifest.Sha256Pcrs = []types.HostManifestPcrs{}
-	pcrManifest.Sha1Pcrs = []types.HostManifestPcrs{}
-	pcrManifest.Sha384Pcrs = []types.HostManifestPcrs{}
-	var pcrEventLogMap types.PcrEventLogMap
+	var pcrManifest hvs.PcrManifest
+	pcrManifest.Sha256Pcrs = []hvs.HostManifestPcrs{}
+	pcrManifest.Sha1Pcrs = []hvs.HostManifestPcrs{}
+	pcrManifest.Sha384Pcrs = []hvs.HostManifestPcrs{}
+	var pcrEventLogMap hvs.PcrEventLogMap
 	cumulativePcrsValue := ""
 
 	for _, pcrDetails := range hostTpmAttestationReport.TpmPcrValues {
-		pcrIndex, err := types.GetPcrIndexFromString(strconv.Itoa(int(pcrDetails.PcrNumber)))
+		pcrIndex, err := hvs.GetPcrIndexFromString(strconv.Itoa(int(pcrDetails.PcrNumber)))
 		if err != nil {
 			return pcrManifest, "", err
 		}
-		shaAlgorithm, err := types.GetSHAAlgorithm(pcrDetails.DigestMethod)
+		shaAlgorithm, err := hvs.GetSHAAlgorithm(pcrDetails.DigestMethod)
 		if err != nil {
 			return pcrManifest, "", err
 		}
 
 		if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA256) {
-			pcrManifest.Sha256Pcrs = append(pcrManifest.Sha256Pcrs, types.HostManifestPcrs{
+			pcrManifest.Sha256Pcrs = append(pcrManifest.Sha256Pcrs, hvs.HostManifestPcrs{
 				Index:   pcrIndex,
 				Value:   intArrayToHexString(pcrDetails.DigestValue),
 				PcrBank: shaAlgorithm,
 			})
 		} else if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA1) {
-			pcrManifest.Sha1Pcrs = append(pcrManifest.Sha1Pcrs, types.HostManifestPcrs{
+			pcrManifest.Sha1Pcrs = append(pcrManifest.Sha1Pcrs, hvs.HostManifestPcrs{
 				Index:   pcrIndex,
 				Value:   intArrayToHexString(pcrDetails.DigestValue),
 				PcrBank: shaAlgorithm,
 			})
 		} else if strings.EqualFold(pcrDetails.DigestMethod, constants.SHA384) {
-			pcrManifest.Sha384Pcrs = append(pcrManifest.Sha384Pcrs, types.HostManifestPcrs{
+			pcrManifest.Sha384Pcrs = append(pcrManifest.Sha384Pcrs, hvs.HostManifestPcrs{
 				Index:   pcrIndex,
 				Value:   intArrayToHexString(pcrDetails.DigestValue),
 				PcrBank: shaAlgorithm,
@@ -179,14 +180,14 @@ func createPCRManifest(hostTpmAttestationReport *vim25Types.HostTpmAttestationRe
 	return pcrManifest, pcrsDigest, nil
 }
 
-func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, eventLogMap types.PcrEventLogMap) (types.PcrEventLogMap, error) {
+func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, eventLogMap hvs.PcrEventLogMap) (hvs.PcrEventLogMap, error) {
 
 	log.Trace("vmware_host_connector:getPcrEventLog() Entering")
 	defer log.Trace("vmware_host_connector:getPcrEventLog() Leaving")
 
-	eventLogMap.Sha1EventLogs = []types.TpmEventLog{}
-	eventLogMap.Sha256EventLogs = []types.TpmEventLog{}
-	eventLogMap.Sha384EventLogs = []types.TpmEventLog{}
+	eventLogMap.Sha1EventLogs = []hvs.TpmEventLog{}
+	eventLogMap.Sha256EventLogs = []hvs.TpmEventLog{}
+	eventLogMap.Sha384EventLogs = []hvs.TpmEventLog{}
 
 	for _, eventLogEntry := range hostTpmEventLogEntry {
 		pcrFound := false
@@ -196,13 +197,13 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 		marshalledEntry, err := json.Marshal(eventLogEntry)
 		log.Debugf("Marshalled event log : %s", string(marshalledEntry))
 		if err != nil {
-			return types.PcrEventLogMap{}, errors.Wrap(err, "vmware_host_connector:getPcrEventLog() Error "+
+			return hvs.PcrEventLogMap{}, errors.Wrap(err, "vmware_host_connector:getPcrEventLog() Error "+
 				"unmarshalling TPM event")
 		}
 		//Unmarshal to structure to get the inaccessible fields from event details JSON
 		err = json.Unmarshal(marshalledEntry, &parsedEventLogEntry)
 		if err != nil {
-			return types.PcrEventLogMap{}, err
+			return hvs.PcrEventLogMap{}, err
 		}
 
 		//vCenter 6.5 only supports SHA1 digest and hence do not have digest method field. Also if the hash is 0 they
@@ -219,7 +220,7 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 			eventLog := getEventLogInfo(parsedEventLogEntry)
 
 			if !pcrFound {
-				eventLogMap.Sha1EventLogs = append(eventLogMap.Sha1EventLogs, types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
+				eventLogMap.Sha1EventLogs = append(eventLogMap.Sha1EventLogs, hvs.TpmEventLog{Pcr: hvs.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []hvs.EventLog{eventLog}})
 			} else {
 				eventLogMap.Sha1EventLogs[index].TpmEvent = append(eventLogMap.Sha1EventLogs[index].TpmEvent, eventLog)
 			}
@@ -237,7 +238,7 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 			if !pcrFound {
 				eventLogMap.Sha256EventLogs = append(eventLogMap.Sha256EventLogs,
-					types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
+					hvs.TpmEventLog{Pcr: hvs.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []hvs.EventLog{eventLog}})
 			} else {
 				eventLogMap.Sha256EventLogs[index].TpmEvent = append(eventLogMap.Sha256EventLogs[index].TpmEvent, eventLog)
 			}
@@ -255,7 +256,7 @@ func getPcrEventLog(hostTpmEventLogEntry []vim25Types.HostTpmEventLogEntry, even
 
 			if !pcrFound {
 				eventLogMap.Sha384EventLogs = append(eventLogMap.Sha384EventLogs,
-					types.TpmEventLog{Pcr: types.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []types.EventLog{eventLog}})
+					hvs.TpmEventLog{Pcr: hvs.Pcr{Index: parsedEventLogEntry.PcrIndex, Bank: string(parsedEventLogEntry.EventDetails.DataHashMethod)}, TpmEvent: []hvs.EventLog{eventLog}})
 			} else {
 				eventLogMap.Sha384EventLogs[index].TpmEvent = append(eventLogMap.Sha384EventLogs[index].TpmEvent, eventLog)
 			}
@@ -300,11 +301,11 @@ func intArrayToHexString(pcrDigestArray []int) string {
 }
 
 //It checks the type of TPM event and accordingly updates the event log entry values
-func getEventLogInfo(parsedEventLogEntry types.TpmEvent) types.EventLog {
+func getEventLogInfo(parsedEventLogEntry types.TpmEvent) hvs.EventLog {
 
 	log.Trace("vmware_host_connector:getEventLogInfo() Entering")
 	defer log.Trace("vmware_host_connector:getEventLogInfo() Leaving")
-	eventLog := types.EventLog{Measurement: intArrayToHexString(parsedEventLogEntry.EventDetails.DataHash)}
+	eventLog := hvs.EventLog{Measurement: intArrayToHexString(parsedEventLogEntry.EventDetails.DataHash)}
 
 	if parsedEventLogEntry.EventDetails.VibName != nil {
 		eventLog.TypeID = VIB_NAME_TYPE_ID

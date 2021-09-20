@@ -5,9 +5,8 @@
 package rules
 
 import (
-	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
 const (
@@ -20,7 +19,7 @@ var (
 	invalidAssetTagBytes  = []byte{'d', 'e', 'a', 'd'}
 	validAssetTagString   = "YmVlZg=="
 	invalidAssetTagString = "ZGVhZA=="
-	assetTags             = []asset_tag.TagKvAttribute{
+	assetTags             = []hvs.TagKvAttribute{
 		{Key: "Country", Value: "US"},
 	}
 )
@@ -28,8 +27,8 @@ var (
 var (
 	zeros           = "00000000000000000000000000000000"
 	ones            = "11111111111111111111111111111111"
-	testExpectedPcr = types.FlavorPcrs{
-		Pcr: types.Pcr{
+	testExpectedPcr = hvs.FlavorPcrs{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
@@ -37,13 +36,13 @@ var (
 		Measurement: PCR_VALID_256,
 	}
 
-	testExpectedPcrEventLogEntry = types.TpmEventLog{
-		Pcr: types.Pcr{
+	testExpectedPcrEventLogEntry = hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
 
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -57,13 +56,13 @@ var (
 )
 
 var (
-	testHostManifestPcrEventLogEntry = types.TpmEventLog{
-		Pcr: types.Pcr{
+	testHostManifestPcrEventLogEntry = hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
 
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,

@@ -2,17 +2,17 @@
  * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package model
+package hvs
 
 import (
 	"crypto"
 	"crypto/x509"
 	"encoding/asn1"
 	"encoding/base64"
-	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
+	"time"
+
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
 	"github.com/pkg/errors"
-	"time"
 )
 
 /**
@@ -42,7 +42,7 @@ type Attribute struct {
 
 // AttrObject holds the individual TagKeyValue Pair - TagKVAttribute which is decoded from ASN.1 values
 type AttrObjects struct {
-	KVPair asset_tag.TagKvAttribute `json:"objects"`
+	KVPair TagKvAttribute `json:"objects"`
 }
 
 // String returns the base64 encoded string of encoded field
@@ -57,7 +57,7 @@ func NewX509AttributeCertificate(tagCert *x509.Certificate) (*X509AttributeCerti
 
 	// check for the custom ASN1 tags in Extra Extensions and pack into the Attributes
 	for _, attrExt := range tagCert.Extensions {
-		var tagkva1 asset_tag.TagKvAttribute
+		var tagkva1 TagKvAttribute
 		var attrObjects []AttrObjects
 		var attrkva Attribute
 

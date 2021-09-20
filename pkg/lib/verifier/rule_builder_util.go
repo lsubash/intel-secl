@@ -11,8 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier/rules"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
@@ -20,7 +18,7 @@ import (
 
 //getPcrMatchesConstantRules method will create PcrMatchesConstantRule and return the rule
 //return nil if error occurs
-func getPcrMatchesConstantRules(pcrLogData *types.FlavorPcrs, marker common.FlavorPart) ([]rules.Rule, error) {
+func getPcrMatchesConstantRules(pcrLogData *hvs.FlavorPcrs, marker hvs.FlavorPartName) ([]rules.Rule, error) {
 	var pcrRules []rules.Rule
 	var rule rules.Rule
 	var err error
@@ -36,11 +34,11 @@ func getPcrMatchesConstantRules(pcrLogData *types.FlavorPcrs, marker common.Flav
 
 //getPcrEventLogEqualsRules method will create PcrEventLogEqualsRule and return the rule
 //return nil if error occurs
-func getPcrEventLogEqualsRules(pcrLogData *types.FlavorPcrs, marker common.FlavorPart) ([]rules.Rule, error) {
+func getPcrEventLogEqualsRules(pcrLogData *hvs.FlavorPcrs, marker hvs.FlavorPartName) ([]rules.Rule, error) {
 	var pcrRules []rules.Rule
 
-	expectedPcrEventLogEntry := types.TpmEventLog{
-		Pcr: types.Pcr{
+	expectedPcrEventLogEntry := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: pcrLogData.Pcr.Index,
 			Bank:  pcrLogData.Pcr.Bank,
 		},
@@ -58,11 +56,11 @@ func getPcrEventLogEqualsRules(pcrLogData *types.FlavorPcrs, marker common.Flavo
 
 //getPcrEventLogEqualsExcludingRules method will create PcrEventLogEqualsRule and return the rule
 //return nil if error occurs
-func getPcrEventLogEqualsExcludingRules(pcrLogData *types.FlavorPcrs, marker common.FlavorPart) ([]rules.Rule, error) {
+func getPcrEventLogEqualsExcludingRules(pcrLogData *hvs.FlavorPcrs, marker hvs.FlavorPartName) ([]rules.Rule, error) {
 	var pcrRules []rules.Rule
 
-	expectedPcrEventLogEntry := types.TpmEventLog{
-		Pcr: types.Pcr{
+	expectedPcrEventLogEntry := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: pcrLogData.Pcr.Index,
 			Bank:  pcrLogData.Pcr.Bank,
 		},
@@ -79,7 +77,7 @@ func getPcrEventLogEqualsExcludingRules(pcrLogData *types.FlavorPcrs, marker com
 
 //getPcrEventLogIntegrityRules method will create PcrEventLogIntegrityRule and return the rule
 //return nil if error occurs
-func getPcrEventLogIntegrityRules(pcrLogData *types.FlavorPcrs, marker common.FlavorPart) ([]rules.Rule, error) {
+func getPcrEventLogIntegrityRules(pcrLogData *hvs.FlavorPcrs, marker hvs.FlavorPartName) ([]rules.Rule, error) {
 	var pcrRules []rules.Rule
 
 	rule, err := rules.NewPcrEventLogIntegrity(pcrLogData, marker)
@@ -108,7 +106,7 @@ func getAssetTagMatchesRule(flavor *hvs.Flavor) (rules.Rule, error) {
 		return nil, errors.Wrap(err, "Could not parse asset tag certificate")
 	}
 
-	tags := make([]asset_tag.TagKvAttribute, 0)
+	tags := make([]hvs.TagKvAttribute, 0)
 	for _, extensions := range assetTagCertficate.Extensions {
 		var tagAttribute asset_tag.TagKvAttribute
 		_, err = asn1.Unmarshal(extensions.Value, &tagAttribute)
@@ -155,11 +153,11 @@ func getTagCertificateTrustedRule(assetTagCACertificates *x509.CertPool, flavor 
 
 //getPcrEventLogIncludesRules method will create PcrEventLogIncludesRule and return the rule
 //return nil if error occurs
-func getPcrEventLogIncludesRules(pcrLogData *types.FlavorPcrs, marker common.FlavorPart) ([]rules.Rule, error) {
+func getPcrEventLogIncludesRules(pcrLogData *hvs.FlavorPcrs, marker hvs.FlavorPartName) ([]rules.Rule, error) {
 	var pcrRules []rules.Rule
 
-	expectedPcrEventLogEntry := types.TpmEventLog{
-		Pcr: types.Pcr{
+	expectedPcrEventLogEntry := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: pcrLogData.Pcr.Index,
 			Bank:  pcrLogData.Pcr.Bank,
 		},

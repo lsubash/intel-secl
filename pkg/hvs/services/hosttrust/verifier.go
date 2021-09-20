@@ -11,8 +11,6 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/utils"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/saml"
 	flavorVerifier "github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
@@ -69,12 +67,12 @@ func getTrustPcrListReport(hostInfo taModel.HostInfo, report *hvs.TrustReport) [
 		}
 	}
 	if len(trustPcrList) > 0 && utils.IsLinuxHost(&hostInfo) {
-		trustPcrList = append(trustPcrList, int(types.PCR15))
+		trustPcrList = append(trustPcrList, int(hvs.PCR15))
 	}
 	return trustPcrList
 }
 
-func (v *Verifier) Verify(hostId uuid.UUID, hostData *types.HostManifest, newData bool, preferHashMatch bool) (*models.HVSReport, error) {
+func (v *Verifier) Verify(hostId uuid.UUID, hostData *hvs.HostManifest, newData bool, preferHashMatch bool) (*models.HVSReport, error) {
 	defaultLog.Trace("hosttrust/verifier:Verify() Entering")
 	defer defaultLog.Trace("hosttrust/verifier:Verify() Leaving")
 
@@ -130,10 +128,10 @@ func (v *Verifier) Verify(hostId uuid.UUID, hostData *types.HostManifest, newDat
 		return nil, errors.Wrap(err, "hosttrust/verifier:Verify() Error while retrieving host unique flavor parts")
 	}
 	// convert hostUniqueFlavorParts to a map
-	hostUniqueFlavorPartsMap := make(map[common.FlavorPart]bool)
+	hostUniqueFlavorPartsMap := make(map[hvs.FlavorPartName]bool)
 
 	for _, flavorPart := range hostUniqueFlavorParts {
-		hostUniqueFlavorPartsMap[common.FlavorPart(flavorPart)] = true
+		hostUniqueFlavorPartsMap[hvs.FlavorPartName(flavorPart)] = true
 	}
 
 	for _, fg := range flvGroups {
@@ -213,7 +211,7 @@ func (v *Verifier) getCachedFlavors(hostId uuid.UUID, flavGrpId uuid.UUID) ([]hv
 }
 
 func (v *Verifier) validateCachedFlavors(hostId uuid.UUID,
-	hostData *types.HostManifest,
+	hostData *hvs.HostManifest,
 	cachedFlavors []hvs.SignedFlavor) (hostTrustCache, error) {
 	defaultLog.Trace("hosttrust/verifier:validateCachedFlavors() Entering")
 	defer defaultLog.Trace("hosttrust/verifier:validateCachedFlavors() Leaving")

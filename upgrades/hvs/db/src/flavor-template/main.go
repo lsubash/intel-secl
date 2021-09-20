@@ -21,11 +21,9 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
 	hvsconfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	connector "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+	hvsModel "github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/intel-secl/intel-secl/v4/upgrades/hvs/db/src/flavor-template/config"
 	"github.com/intel-secl/intel-secl/v4/upgrades/hvs/db/src/flavor-template/database"
 	templateModel "github.com/intel-secl/intel-secl/v4/upgrades/hvs/db/src/flavor-template/model"
@@ -66,7 +64,7 @@ var eventIDList = map[string]string{
 
 const (
 	//Configuration file path
-	ConfigFilePath = "/etc/hvs/"
+	ConfigFilePath = "/etc/hvsModel/"
 
 	// Vendor
 	IntelVendor  = "INTEL"
@@ -99,8 +97,8 @@ var flavorTemplateConditions = map[string]string{"//host_info/tboot_installed//*
 	"//host_info/hardware_features/TPM/meta/tpm_version//*[text()='1.2']":           "//meta/description/tpm_version//*[text()='1.2']"}
 
 // findTemplatesToApply finds the correct templates to apply to convert flavor part
-func findTemplatesToApply(oldFlavorPart string, defaultFlavorTemplates []hvs.FlavorTemplate) ([]hvs.FlavorTemplate, error) {
-	var filteredTemplates []hvs.FlavorTemplate
+func findTemplatesToApply(oldFlavorPart string, defaultFlavorTemplates []hvsModel.FlavorTemplate) ([]hvsModel.FlavorTemplate, error) {
+	var filteredTemplates []hvsModel.FlavorTemplate
 	var conditionEval bool
 
 	oldFlavorPartJson, err := jsonquery.Parse(strings.NewReader(oldFlavorPart))
@@ -131,7 +129,7 @@ func findTemplatesToApply(oldFlavorPart string, defaultFlavorTemplates []hvs.Fla
 }
 
 // downloadFlavorsAndTemplates downloads flavor and flavor templates from DB
-func downloadFlavorsAndTemplates(cfg *hvsconfig.DBConfig, dataStore *postgres.DataStore) ([]templateModel.SignedFlavors, []hvs.FlavorTemplate, error) {
+func downloadFlavorsAndTemplates(cfg *hvsconfig.DBConfig, dataStore *postgres.DataStore) ([]templateModel.SignedFlavors, []hvsModel.FlavorTemplate, error) {
 
 	//Downloading old flavors directly from DB
 	signedFlavors, err := database.DownloadOldFlavors(cfg, dataStore.Db)
@@ -226,7 +224,7 @@ func main() {
 	}
 
 	fmt.Println("Converting and Updating Flavors back into database")
-	newFlavor := make([]hvs.Flavor, len(signedFlavors))
+	newFlavor := make([]hvsModel.Flavor, len(signedFlavors))
 	for flavorIndex, flavor := range signedFlavors {
 
 		//Skip converting the flavor if the flavor part is software
@@ -251,36 +249,36 @@ func main() {
 
 		// Updating BIOS section
 		if flavor.Flavor.Bios != nil {
-			newFlavor[flavorIndex].Bios = new(model.Bios)
+			newFlavor[flavorIndex].Bios = new(hvsModel.Bios)
 			copier.Copy(newFlavor[flavorIndex].Bios, flavor.Flavor.Bios)
 		}
 
 		// Updating Hardware section
 		if flavor.Flavor.Hardware != nil {
-			newFlavor[flavorIndex].Hardware = new(model.Hardware)
+			newFlavor[flavorIndex].Hardware = new(hvsModel.Hardware)
 			copier.Copy(newFlavor[flavorIndex].Hardware, flavor.Flavor.Hardware)
 
 			// TPM
-			newFlavor[flavorIndex].Hardware.Feature.TPM = new(model.TPM)
+			newFlavor[flavorIndex].Hardware.Feature.TPM = new(hvsModel.TPM)
 			newFlavor[flavorIndex].Hardware.Feature.TPM.Meta.TPMVersion = flavor.Flavor.Hardware.Feature.TPM.Version
 			newFlavor[flavorIndex].Hardware.Feature.TPM.Meta.PCRBanks = flavor.Flavor.Hardware.Feature.TPM.PcrBanks
 
 			// CBNT
 			if flavor.Flavor.Hardware.Feature.CBNT != nil {
-				newFlavor[flavorIndex].Hardware.Feature.CBNT = new(model.CBNT)
+				newFlavor[flavorIndex].Hardware.Feature.CBNT = new(hvsModel.CBNT)
 				newFlavor[flavorIndex].Hardware.Feature.CBNT.Meta.Profile = flavor.Flavor.Hardware.Feature.CBNT.Profile
 			}
 
 			// UEFI
 			if flavor.Flavor.Hardware.Feature.SUEFI != nil {
-				newFlavor[flavorIndex].Hardware.Feature.UEFI = new(model.UEFI)
+				newFlavor[flavorIndex].Hardware.Feature.UEFI = new(hvsModel.UEFI)
 				newFlavor[flavorIndex].Hardware.Feature.UEFI.Meta.SecureBootEnabled = flavor.Flavor.Hardware.Feature.SUEFI.Enabled
 			}
 		}
 
 		// Updating external section
 		if flavor.Flavor.External != nil {
-			newFlavor[flavorIndex].External = new(model.External)
+			newFlavor[flavorIndex].External = new(hvsModel.External)
 			copier.Copy(newFlavor[flavorIndex].External, flavor.Flavor.External)
 		}
 
@@ -301,7 +299,7 @@ func main() {
 			newFlavor[flavorIndex].Meta.Description[FlavorTemplateIDs] = flavorTemplateIDList
 		}
 
-		signedFlavor, err := model.NewSignedFlavor(&newFlavor[flavorIndex], flavorSignKey)
+		signedFlavor, err := hvsModel.NewSignedFlavor(&newFlavor[flavorIndex], flavorSignKey)
 		if err != nil {
 			fmt.Println("Error in getting the signed flavor")
 			os.Exit(1)
@@ -317,9 +315,9 @@ func main() {
 }
 
 // updatePcrSection method is used to update the pcr section in new flavor part
-func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hvs.PcrRules, pcrsmap map[int][]string, vendor string) []types.FlavorPcrs {
+func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hvsModel.PcrRules, pcrsmap map[int][]string, vendor string) []hvsModel.FlavorPcrs {
 
-	newFlavorPcrs := make([]types.FlavorPcrs, len(pcrsmap))
+	newFlavorPcrs := make([]hvsModel.FlavorPcrs, len(pcrsmap))
 
 	for bank, pcrMap := range Pcrs {
 		for index, rule := range rules {
@@ -327,7 +325,7 @@ func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hv
 				if mapIndex != rule.Pcr.Index {
 					continue
 				}
-				pcrIndex := types.PcrIndex(mapIndex)
+				pcrIndex := hvsModel.PcrIndex(mapIndex)
 				// check if flavor contains measurements for atleast one of the banks mentioned in the template
 				if !containsBank(templateBanks, bank) {
 					break
@@ -339,20 +337,20 @@ func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hv
 					if rule.PcrMatches != nil {
 						newFlavorPcrs[index].PCRMatches = *rule.PcrMatches
 					}
-					var newTpmEvents []types.EventLog
+					var newTpmEvents []hvsModel.EventLog
 					if rule.Pcr.Index == newFlavorPcrs[index].Pcr.Index &&
 						rule.EventlogEquals != nil && expectedPcrEx.Event != nil && !reflect.ValueOf(rule.EventlogEquals).IsZero() {
-						newFlavorPcrs[index].EventlogEqual = new(types.EventLogEqual)
+						newFlavorPcrs[index].EventlogEqual = new(hvsModel.EventLogEqual)
 						if rule.EventlogEquals.ExcludingTags != nil {
 							newFlavorPcrs[index].EventlogEqual.ExcludeTags = rule.EventlogEquals.ExcludingTags
 						}
-						newTpmEvents = make([]types.EventLog, len(expectedPcrEx.Event))
+						newTpmEvents = make([]hvsModel.EventLog, len(expectedPcrEx.Event))
 						newTpmEvents = updateTpmEvents(expectedPcrEx.Event, newTpmEvents, vendor)
 						newFlavorPcrs[index].EventlogEqual.Events = newTpmEvents
 						newTpmEvents = nil
 					}
 					if rule.Pcr.Index == newFlavorPcrs[index].Pcr.Index && rule.EventlogIncludes != nil && expectedPcrEx.Event != nil && !reflect.ValueOf(rule.EventlogIncludes).IsZero() {
-						newTpmEvents = make([]types.EventLog, len(expectedPcrEx.Event))
+						newTpmEvents = make([]hvsModel.EventLog, len(expectedPcrEx.Event))
 						newTpmEvents = updateTpmEvents(expectedPcrEx.Event, newTpmEvents, vendor)
 						newFlavorPcrs[index].EventlogIncludes = newTpmEvents
 						newTpmEvents = nil
@@ -366,9 +364,9 @@ func updatePcrSection(Pcrs map[string]map[string]templateModel.PcrEx, rules []hv
 }
 
 // getPcrRules method is used to get the pcr rules defined in the flavor template
-func getPcrRules(flavorName string, template hvs.FlavorTemplate) ([]hvs.PcrRules, map[int][]string) {
+func getPcrRules(flavorName string, template hvsModel.FlavorTemplate) ([]hvsModel.PcrRules, map[int][]string) {
 	pcrsmap := make(map[int][]string)
-	var rules []hvs.PcrRules
+	var rules []hvsModel.PcrRules
 
 	if flavorName == PlatformFlavor && template.FlavorParts.Platform != nil {
 		for _, rules := range template.FlavorParts.Platform.PcrRules {
@@ -394,7 +392,7 @@ func getPcrRules(flavorName string, template hvs.FlavorTemplate) ([]hvs.PcrRules
 }
 
 // updateTpmEvents method is used to update the tpm events
-func updateTpmEvents(expectedPcrEvent []templateModel.EventLog, newTpmEvents []types.EventLog, vendor string) []types.EventLog {
+func updateTpmEvents(expectedPcrEvent []templateModel.EventLog, newTpmEvents []hvsModel.EventLog, vendor string) []hvsModel.EventLog {
 	// Updating the old event format into new event format
 	for eventIndex, oldEvents := range expectedPcrEvent {
 		if vendor == IntelVendor {
@@ -452,35 +450,35 @@ func getPrivateKey(signingKeyFilePath string) *rsa.PrivateKey {
 
 // updateDescription method is used to update the description section in flavor
 func updateDescription(description map[string]interface{}, meta templateModel.Meta, hardware *templateModel.Hardware) map[string]interface{} {
-	description[model.TbootInstalled] = meta.Description.TbootInstalled
-	description[model.Label] = meta.Description.Label
-	description[model.FlavorPart] = meta.Description.FlavorPart
-	description[model.Source] = meta.Description.Source
+	description[hvsModel.TbootInstalled] = meta.Description.TbootInstalled
+	description[hvsModel.Label] = meta.Description.Label
+	description[hvsModel.FlavorPartDescription] = meta.Description.FlavorPart
+	description[hvsModel.Source] = meta.Description.Source
 
 	switch meta.Description.FlavorPart {
 	case PlatformFlavor:
-		description[model.BiosName] = meta.Description.BiosName
-		description[model.BiosVersion] = meta.Description.BiosVersion
+		description[hvsModel.BiosName] = meta.Description.BiosName
+		description[hvsModel.BiosVersion] = meta.Description.BiosVersion
 	case OsFlavor:
-		description[model.OsName] = meta.Description.OsName
-		description[model.OsVersion] = meta.Description.OsVersion
-		description[model.VmmName] = meta.Description.VmmName
-		description[model.VmmVersion] = meta.Description.VmmVersion
-		description[model.TpmVersion] = meta.Description.TpmVersion
+		description[hvsModel.OsName] = meta.Description.OsName
+		description[hvsModel.OsVersion] = meta.Description.OsVersion
+		description[hvsModel.VmmName] = meta.Description.VmmName
+		description[hvsModel.VmmVersion] = meta.Description.VmmVersion
+		description[hvsModel.TpmVersion] = meta.Description.TpmVersion
 	case HostUniqueFlavor:
-		description[model.HardwareUUID] = meta.Description.HardwareUUID
-		description[model.BiosName] = meta.Description.BiosName
-		description[model.BiosVersion] = meta.Description.BiosVersion
-		description[model.OsName] = meta.Description.OsName
-		description[model.OsVersion] = meta.Description.OsVersion
-		description[model.TpmVersion] = meta.Description.TpmVersion
+		description[hvsModel.HardwareUUID] = meta.Description.HardwareUUID
+		description[hvsModel.BiosName] = meta.Description.BiosName
+		description[hvsModel.BiosVersion] = meta.Description.BiosVersion
+		description[hvsModel.OsName] = meta.Description.OsName
+		description[hvsModel.OsVersion] = meta.Description.OsVersion
+		description[hvsModel.TpmVersion] = meta.Description.TpmVersion
 	case AssetTagFlavor:
-		description[model.HardwareUUID] = meta.Description.HardwareUUID
-		description[model.TpmVersion] = meta.Description.TpmVersion
+		description[hvsModel.HardwareUUID] = meta.Description.HardwareUUID
+		description[hvsModel.TpmVersion] = meta.Description.TpmVersion
 	}
 
 	if hardware != nil {
-		description[model.TpmVersion] = hardware.Feature.TPM.Version
+		description[hvsModel.TpmVersion] = hardware.Feature.TPM.Version
 		if hardware.Feature.CBNT != nil && hardware.Feature.CBNT.Enabled {
 			description[CbntEnabled] = true
 		} else if hardware.Feature.SUEFI != nil && hardware.Feature.SUEFI.Enabled {
@@ -494,7 +492,7 @@ func updateDescription(description map[string]interface{}, meta templateModel.Me
 // containsBank is used to check if a particular PCRbank is among one of the banks listed in the template
 func containsBank(pcrBanks []string, pcrBank string) bool {
 	for _, bank := range pcrBanks {
-		if types.SHAAlgorithm(pcrBank) == types.SHAAlgorithm(bank) {
+		if hvsModel.SHAAlgorithm(pcrBank) == hvsModel.SHAAlgorithm(bank) {
 			return true
 		}
 	}

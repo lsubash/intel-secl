@@ -12,6 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
@@ -59,7 +60,7 @@ func (micf MockIntelConnectorFactory) GetHostConnector(vendorConnector types.Ven
 	mhc.On("GetHostDetails").Return(hostInfo, nil)
 
 	// Mock GetHostManifest
-	var hm types.HostManifest
+	var hm hvs.HostManifest
 	hmBytes, _ := ioutil.ReadFile("../../lib/host-connector/test/sample_host_manifest.json")
 	_ = json.Unmarshal(hmBytes, &hm)
 	mhc.On("GetHostManifest").Return(hm, nil)

@@ -10,14 +10,12 @@ package rules
 
 import (
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
 //NewPcrMatchesConstant collects the expected PCR values
-func NewPcrMatchesConstant(expectedPcr *types.FlavorPcrs, marker common.FlavorPart) (Rule, error) {
+func NewPcrMatchesConstant(expectedPcr *hvs.FlavorPcrs, marker hvs.FlavorPartName) (Rule, error) {
 	var rule pcrMatchesConstant
 
 	if expectedPcr == nil {
@@ -37,13 +35,13 @@ func NewPcrMatchesConstant(expectedPcr *types.FlavorPcrs, marker common.FlavorPa
 }
 
 type pcrMatchesConstant struct {
-	expectedPcr types.FlavorPcrs
-	marker      common.FlavorPart
+	expectedPcr hvs.FlavorPcrs
+	marker      hvs.FlavorPartName
 }
 
 //Compare both the final hash of the expected and actual values
 //If it mismatches,raise the faults
-func (rule *pcrMatchesConstant) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *pcrMatchesConstant) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 	result := hvs.RuleResult{}
 	result.Trusted = true // default to true, set to false in fault logic
 	result.Rule.Name = constants.RulePcrMatchesConstant
@@ -55,15 +53,15 @@ func (rule *pcrMatchesConstant) Apply(hostManifest *types.HostManifest) (*hvs.Ru
 	if hostManifest.PcrManifest.IsEmpty() {
 		result.Faults = append(result.Faults, newPcrManifestMissingFault())
 	} else {
-		actualPcr, err := hostManifest.PcrManifest.GetPcrValue(types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), types.PcrIndex(rule.expectedPcr.Pcr.Index))
+		actualPcr, err := hostManifest.PcrManifest.GetPcrValue(hvs.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), hvs.PcrIndex(rule.expectedPcr.Pcr.Index))
 		if err != nil {
 			return nil, errors.Wrap(err, "Error in getting actual Pcr in Pcr Matches constant rule")
 		}
 
 		if actualPcr == nil || actualPcr.Value == "" || rule.expectedPcr.Measurement == "" {
-			result.Faults = append(result.Faults, newPcrValueMissingFault(types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), types.PcrIndex(rule.expectedPcr.Pcr.Index)))
+			result.Faults = append(result.Faults, newPcrValueMissingFault(hvs.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), hvs.PcrIndex(rule.expectedPcr.Pcr.Index)))
 		} else if rule.expectedPcr.Measurement != actualPcr.Value {
-			result.Faults = append(result.Faults, newPcrValueMismatchFault(types.PcrIndex(rule.expectedPcr.Pcr.Index), types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), rule.expectedPcr, *actualPcr))
+			result.Faults = append(result.Faults, newPcrValueMismatchFault(hvs.PcrIndex(rule.expectedPcr.Pcr.Index), hvs.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), rule.expectedPcr, *actualPcr))
 		}
 	}
 

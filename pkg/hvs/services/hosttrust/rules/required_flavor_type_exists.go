@@ -8,16 +8,15 @@ package rules
 import (
 	"fmt"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
 //TODO move to verifier
 type RequiredFlavorTypeExists struct {
-	FlavorPart cf.FlavorPart
+	FlavorPart hvs.FlavorPartName
 }
 
-func NewRequiredFlavorTypeExists(flavorPart cf.FlavorPart) *RequiredFlavorTypeExists {
+func NewRequiredFlavorTypeExists(flavorPart hvs.FlavorPartName) *RequiredFlavorTypeExists {
 	return &RequiredFlavorTypeExists{
 		FlavorPart: flavorPart,
 	}
@@ -25,7 +24,7 @@ func NewRequiredFlavorTypeExists(flavorPart cf.FlavorPart) *RequiredFlavorTypeEx
 
 func (r *RequiredFlavorTypeExists) Apply(trustReport hvs.TrustReport) *hvs.TrustReport {
 
-	var markers []cf.FlavorPart
+	var markers []hvs.FlavorPartName
 	//RequiredFlavorTypeExists.java 36
 	if r.isFlavorPartMissing(trustReport) {
 		ruleResult := hvs.RuleResult{

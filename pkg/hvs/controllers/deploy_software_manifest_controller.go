@@ -15,8 +15,6 @@ import (
 	consts "github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
 	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	flavormodel "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/util"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
@@ -80,7 +78,7 @@ func (controller *DeploySoftwareManifestController) DeployManifest(w http.Respon
 		}
 	}
 
-	if signedFlavor.Flavor.Meta.Description[flavormodel.FlavorPart].(string) != string(common.FlavorPartSoftware) {
+	if signedFlavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string) != string(hvs.FlavorPartSoftware) {
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Flavor associated with the provided flavor " +
 			"id is not a SOFTWARE flavor"}
 	}

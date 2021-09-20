@@ -7,7 +7,7 @@ package model
 
 import (
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
 // OldFlavorPart is a list of SignedFlavor objects
@@ -25,14 +25,14 @@ type SignedFlavors struct {
 // measurements will be considered “trusted.”
 type Flavor struct {
 	// Meta section is mandatory for all Flavor types
-	Meta Meta        `json:"meta"`
-	Bios *model.Bios `json:"bios,omitempty"`
+	Meta Meta      `json:"meta"`
+	Bios *hvs.Bios `json:"bios,omitempty"`
 	// Hardware section is unique to Platform Flavor type
 	Hardware *Hardware                   `json:"hardware,omitempty"`
 	Pcrs     map[string]map[string]PcrEx `json:"pcrs,omitempty"`
 	// External section is unique to AssetTag Flavor type
-	External *model.External `json:"external,omitempty"`
-	Software *model.Software `json:"software,omitempty"`
+	External *hvs.External `json:"external,omitempty"`
+	Software *hvs.Software `json:"software,omitempty"`
 }
 
 // Meta holds metadata information related to the Flavor

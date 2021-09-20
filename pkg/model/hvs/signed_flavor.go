@@ -2,15 +2,15 @@
  * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package model
+package hvs
 
 import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
+
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 /**

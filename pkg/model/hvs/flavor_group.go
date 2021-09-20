@@ -7,8 +7,8 @@ package hvs
 
 import (
 	"encoding/json"
+
 	"github.com/google/uuid"
-	cf "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
 )
 
 type FlavorgroupCollection struct {
@@ -34,8 +34,8 @@ type FlavorGroup struct {
 }
 
 type FlavorMatchPolicy struct {
-	FlavorPart  cf.FlavorPart `json:"flavor_part,omitempty"`
-	MatchPolicy MatchPolicy   `json:"match_policy,omitempty"`
+	FlavorPart  FlavorPartName `json:"flavor_part,omitempty"`
+	MatchPolicy MatchPolicy    `json:"match_policy,omitempty"`
 }
 
 type MatchPolicy struct {
@@ -66,7 +66,7 @@ func (req FlavorRequiredPolicy) String() string {
 	return string(req)
 }
 
-func NewFlavorMatchPolicy(fp cf.FlavorPart, mp MatchPolicy) FlavorMatchPolicy {
+func NewFlavorMatchPolicy(fp FlavorPartName, mp MatchPolicy) FlavorMatchPolicy {
 	return FlavorMatchPolicy{
 		FlavorPart:  fp,
 		MatchPolicy: mp,
@@ -123,19 +123,19 @@ func (r *FlavorGroup) UnmarshalJSON(b []byte) error {
 // over and over again trying to look for information. Everything is gathered in one fell swoop
 func (r *FlavorGroup) GetMatchPolicyMaps() (
 
-	// Map to determine what is the match policy for each individual flavor part
-	// eg : map["SOFTWARE"] = MatchPolicy{MatchType: "ANY_OF", Required: "Required_if_defined"}
-	map[cf.FlavorPart]MatchPolicy,
-	// A map for match type to all the flavor part that has the particular match type
-	// eg : map["AL_OF"] = []{"SOFTWARE", "PLATFORM"}
-	map[MatchType][]cf.FlavorPart,
-	// A map for required/ required if defined policy to all the flavor part
-	// eg : map["Required_if_defined"] = {Software}
-	map[FlavorRequiredPolicy][]cf.FlavorPart) {
+// Map to determine what is the match policy for each individual flavor part
+// eg : map["SOFTWARE"] = MatchPolicy{MatchType: "ANY_OF", Required: "Required_if_defined"}
+	map[FlavorPartName]MatchPolicy,
+// A map for match type to all the flavor part that has the particular match type
+// eg : map["AL_OF"] = []{"SOFTWARE", "PLATFORM"}
+	map[MatchType][]FlavorPartName,
+// A map for required/ required if defined policy to all the flavor part
+// eg : map["Required_if_defined"] = {Software}
+	map[FlavorRequiredPolicy][]FlavorPartName) {
 
-	fpMap := make(map[cf.FlavorPart]MatchPolicy)
-	mtMap := make(map[MatchType][]cf.FlavorPart)
-	plcyMap := make(map[FlavorRequiredPolicy][]cf.FlavorPart)
+	fpMap := make(map[FlavorPartName]MatchPolicy)
+	mtMap := make(map[MatchType][]FlavorPartName)
+	plcyMap := make(map[FlavorRequiredPolicy][]FlavorPartName)
 
 	for _, plcy := range r.MatchPolicies {
 		fpMap[plcy.FlavorPart] = plcy.MatchPolicy

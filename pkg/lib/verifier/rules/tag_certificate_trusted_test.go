@@ -7,8 +7,7 @@ package rules
 import (
 	"crypto/x509"
 	faultsConst "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -31,7 +30,7 @@ func TestTagCertificateTrustedNoFault(t *testing.T) {
 	tagCertificateBytes, err := getCertificateBytes(tagCertificate, caPrivateKey)
 	assert.NoError(t, err)
 
-	attributeCertificate := model.X509AttributeCertificate{
+	attributeCertificate := hvs.X509AttributeCertificate{
 		Encoded:   tagCertificateBytes,
 		NotBefore: time.Now().AddDate(-1, 0, 0),
 		NotAfter:  time.Now().AddDate(1, 0, 0),
@@ -42,7 +41,7 @@ func TestTagCertificateTrustedNoFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on TagCertificateTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, len(result.Faults), 0)
@@ -64,7 +63,7 @@ func TestTagCertificateTrustedMissingFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on TagCertificateTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, len(result.Faults), 1)
@@ -87,7 +86,7 @@ func TestTagCertificateTrustedNotTrusted(t *testing.T) {
 	tagCertificateBytes, err := getCertificateBytes(tagCertificate, caPrivateKey)
 	assert.NoError(t, err)
 
-	attributeCertificate := model.X509AttributeCertificate{
+	attributeCertificate := hvs.X509AttributeCertificate{
 		Encoded:   tagCertificateBytes,
 		NotBefore: time.Now().AddDate(-1, 0, 0),
 		NotAfter:  time.Now().AddDate(1, 0, 0),
@@ -98,7 +97,7 @@ func TestTagCertificateTrustedNotTrusted(t *testing.T) {
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on TagCertificateTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, len(result.Faults), 1)
@@ -124,7 +123,7 @@ func TestTagCertificateTrustedExpiredFault(t *testing.T) {
 	tagCertificateBytes, err := getCertificateBytes(tagCertificate, caPrivateKey)
 	assert.NoError(t, err)
 
-	attributeCertificate := model.X509AttributeCertificate{
+	attributeCertificate := hvs.X509AttributeCertificate{
 		Encoded:   tagCertificateBytes,
 		NotBefore: time.Now().AddDate(-1, 0, 0),
 		NotAfter:  time.Now().AddDate(-11, 0, 0),
@@ -135,7 +134,7 @@ func TestTagCertificateTrustedExpiredFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on TagCertificateTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, len(result.Faults), 1)
@@ -161,7 +160,7 @@ func TestTagCertificateTrustedNotYetValidFault(t *testing.T) {
 	tagCertificateBytes, err := getCertificateBytes(tagCertificate, caPrivateKey)
 	assert.NoError(t, err)
 
-	attributeCertificate := model.X509AttributeCertificate{
+	attributeCertificate := hvs.X509AttributeCertificate{
 		Encoded:   tagCertificateBytes,
 		NotBefore: time.Now().AddDate(1, 0, 0),
 		NotAfter:  time.Now().AddDate(1, 0, 0),
@@ -172,7 +171,7 @@ func TestTagCertificateTrustedNotYetValidFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on TagCertificateTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, len(result.Faults), 1)

@@ -5,12 +5,11 @@
 package rules
 
 import (
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"testing"
 
 	"github.com/google/uuid"
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,20 +17,20 @@ import (
 // Provide the same event logs in the manifest and to the PcrEventLogEquals rule, expecting
 // no faults.
 func TestPcrEventLogEqualsNoFault(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, testHostManifestPcrEventLogEntry)
-	rule, err := NewPcrEventLogEquals(&testHostManifestPcrEventLogEntry, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEquals(&testHostManifestPcrEventLogEntry, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -45,20 +44,20 @@ func TestPcrEventLogEqualsNoFault(t *testing.T) {
 func TestPcrEventLogEqualsExcludingNoFault(t *testing.T) {
 	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
 
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, testExpectedPcrEventLogEntry)
-	rule, err := NewPcrEventLogEqualsExcluding(&testExpectedPcrEventLogEntry, excludetag, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEqualsExcluding(&testExpectedPcrEventLogEntry, excludetag, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -69,11 +68,11 @@ func TestPcrEventLogEqualsExcludingNoFault(t *testing.T) {
 // Provide the empty pcr manifest values in the host manifest and when applying PcrEventLogEquals rule, expecting
 // 'PcrManifestMissing' fault.
 func TestEqualsExcludingPcrManifestMissingFault(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{},
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{},
 	}
 
-	rule, err := NewPcrEventLogEquals(&testHostManifestPcrEventLogEntry, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEquals(&testHostManifestPcrEventLogEntry, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -86,24 +85,24 @@ func TestEqualsExcludingPcrManifestMissingFault(t *testing.T) {
 func TestPcrEventLogEqualsExcludingUnsupportedSHAFault(t *testing.T) {
 	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
 
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA512",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -111,12 +110,12 @@ func TestPcrEventLogEqualsExcludingUnsupportedSHAFault(t *testing.T) {
 		},
 	}
 
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -125,7 +124,7 @@ func TestPcrEventLogEqualsExcludingUnsupportedSHAFault(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.Error(t, err)
 	assert.Nil(t, result)
@@ -136,24 +135,24 @@ func TestPcrEventLogEqualsExcludingUnsupportedSHAFault(t *testing.T) {
 func TestPcrEventLogEqualsExcludingMismatchFields(t *testing.T) {
 	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
 
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA1,
 				Measurement: zeros,
@@ -161,12 +160,12 @@ func TestPcrEventLogEqualsExcludingMismatchFields(t *testing.T) {
 		},
 	}
 
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -175,7 +174,7 @@ func TestPcrEventLogEqualsExcludingMismatchFields(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -189,24 +188,24 @@ func TestPcrEventLogEqualsExcludingMismatchFields(t *testing.T) {
 func TestPcrEventLogEqualsExcludingPcrEventLogMissingFault(t *testing.T) {
 	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
 
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -215,12 +214,12 @@ func TestPcrEventLogEqualsExcludingPcrEventLogMissingFault(t *testing.T) {
 	}
 
 	// Put something in PCR1 (not PCR0) to invoke PcrMissingEventLog fault
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 1,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: ones,
@@ -229,7 +228,7 @@ func TestPcrEventLogEqualsExcludingPcrEventLogMissingFault(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEqualsExcluding(&flavorEventsLog, excludetag, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -243,32 +242,32 @@ func TestPcrEventLogEqualsExcludingPcrEventLogMissingFault(t *testing.T) {
 func TestPcrEventLogEqualsExcludingPcrEventLogContainsUnexpectedEntriesFault(t *testing.T) {
 	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
 
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	unexpectedPcrEventLogs := types.TpmEventLog{
-		Pcr: types.Pcr{
+	unexpectedPcrEventLogs := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: testHostManifestPcrEventLogEntry.Pcr.Index,
 			Bank:  testHostManifestPcrEventLogEntry.Pcr.Bank,
 		},
 	}
 	unexpectedPcrEventLogs.TpmEvent = append(unexpectedPcrEventLogs.TpmEvent, testHostManifestPcrEventLogEntry.TpmEvent...)
-	unexpectedPcrEventLogs.TpmEvent = append(unexpectedPcrEventLogs.TpmEvent, types.EventLog{
+	unexpectedPcrEventLogs.TpmEvent = append(unexpectedPcrEventLogs.TpmEvent, hvs.EventLog{
 		TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 		Measurement: "x",
 	})
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, unexpectedPcrEventLogs)
-	rule, err := NewPcrEventLogEqualsExcluding(&testExpectedPcrEventLogEntry, excludetag, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEqualsExcluding(&testExpectedPcrEventLogEntry, excludetag, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -283,20 +282,20 @@ func TestPcrEventLogEqualsExcludingPcrEventLogContainsUnexpectedEntriesFault(t *
 func TestPcrEventLogEqualsExcludingPcrEventLogMissingExpectedEntriesFault(t *testing.T) {
 	var excludetag = []string{"commandLine.", "LCP_CONTROL_HASH", "initrd", "vmlinuz", "componentName.imgdb.tgz", "componentName.onetime.tgz"}
 
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	unexpectedPcrEventLogs := types.TpmEventLog{
-		Pcr: types.Pcr{
+	unexpectedPcrEventLogs := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: testHostManifestPcrEventLogEntry.Pcr.Index,
 			Bank:  testHostManifestPcrEventLogEntry.Pcr.Bank,
 		},
@@ -304,7 +303,7 @@ func TestPcrEventLogEqualsExcludingPcrEventLogMissingExpectedEntriesFault(t *tes
 
 	unexpectedPcrEventLogs.TpmEvent = append(unexpectedPcrEventLogs.TpmEvent, testHostManifestPcrEventLogEntry.TpmEvent[1:]...)
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, unexpectedPcrEventLogs)
-	rule, err := NewPcrEventLogEqualsExcluding(&testExpectedPcrEventLogEntry, excludetag, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEqualsExcluding(&testExpectedPcrEventLogEntry, excludetag, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)

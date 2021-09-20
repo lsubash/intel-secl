@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: BSD-3-Clause
  */
 
-package types
+package hvs
 
 import (
 	"crypto/sha1"
@@ -50,7 +50,7 @@ type eventLogKeyAttr struct {
 
 type TpmEventLog struct {
 	Pcr      Pcr        `json:"pcr"`
-	TpmEvent []EventLog `json:"tpm_events"`
+	TpmEvent []EventLog `json:"tpm_events"` // KWT:  TpmEvents
 }
 
 //PCR - To store PCR index with respective PCR bank.

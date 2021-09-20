@@ -8,22 +8,20 @@ package rules
 import (
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
 	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	flavorVerifier "github.com/intel-secl/intel-secl/v4/pkg/lib/verifier"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
 type AllOfFlavors struct {
-	AllOfFlavors                    []model.SignedFlavor
+	AllOfFlavors                    []hvs.SignedFlavor
 	Result                          *hvs.RuleResult
-	Markers                         []common.FlavorPart
+	Markers                         []hvs.FlavorPartName
 	SkipFlavorSignatureVerification bool
 	verifierCerts                   flavorVerifier.VerifierCertificates
 }
 
-func NewAllOfFlavors(flavors []model.SignedFlavor, markers []common.FlavorPart, skipFlavorSignatureVerification bool, verifierCerts flavorVerifier.VerifierCertificates) AllOfFlavors {
+func NewAllOfFlavors(flavors []hvs.SignedFlavor, markers []hvs.FlavorPartName, skipFlavorSignatureVerification bool, verifierCerts flavorVerifier.VerifierCertificates) AllOfFlavors {
 	return AllOfFlavors{
 		AllOfFlavors:                    flavors,
 		Markers:                         markers,
@@ -60,8 +58,9 @@ func (aof *AllOfFlavors) AddFaults(report *hvs.TrustReport) (*hvs.TrustReport, e
 				report.AddResult(*result)
 				if !result.Trusted {
 					faultsExist = true
-					aofMissingFlavorParts[flavor.Flavor.Meta.Description[model.FlavorPart].(string)] = true
-					defaultLog.Infof("All of Flavor types missing for flavor id: %s and flavor part: %s", result.FlavorId, flavor.Flavor.Meta.Description[model.FlavorPart].(string))
+					aofMissingFlavorParts[flavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string)] = true
+					defaultLog.Infof("All of Flavor types missing for flavor id: %s and flavor part: %s",
+						result.FlavorId, flavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string))
 				}
 			}
 

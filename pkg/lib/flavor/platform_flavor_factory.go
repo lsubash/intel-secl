@@ -9,10 +9,8 @@ import (
 
 	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/types"
 	hcConstants "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
-	hcTypes "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
@@ -33,24 +31,24 @@ type FlavorProvider interface {
 // PlatformFlavorProvider is a factory for the PlatformFlavor which is responsible for instantiating
 // an appropriate platform flavor implementation, based on the target host.
 type PlatformFlavorProvider struct {
-	hostManifest         *hcTypes.HostManifest
-	attributeCertificate *model.X509AttributeCertificate
+	hostManifest         *hvs.HostManifest
+	attributeCertificate *hvs.X509AttributeCertificate
 	FlavorTemplates      []hvs.FlavorTemplate
 }
 
 // NewPlatformFlavorProvider returns an instance of PlaformFlavorProvider
-func NewPlatformFlavorProvider(hostManifest *hcTypes.HostManifest, tagCertificate *x509.Certificate, flvrTemplates []hvs.FlavorTemplate) (FlavorProvider, error) {
+func NewPlatformFlavorProvider(hostManifest *hvs.HostManifest, tagCertificate *x509.Certificate, flvrTemplates []hvs.FlavorTemplate) (FlavorProvider, error) {
 	log.Trace("flavor/platform_flavor_factory:NewPlatformFlavorProvider() Entering")
 	defer log.Trace("flavor/platform_flavor_factory:NewPlatformFlavorProvider() Leaving")
 
 	var pfp FlavorProvider
-	var tc *model.X509AttributeCertificate
+	var tc *hvs.X509AttributeCertificate
 	var err error
 
 	// we can skip the check for hostManifest nil, since it will not be required for GenericPlatformFlavor
 	// check if attributeCertificate is populated and get the corresponding X509AttributeCertificate
 	if tagCertificate != nil {
-		tc, err = model.NewX509AttributeCertificate(tagCertificate)
+		tc, err = hvs.NewX509AttributeCertificate(tagCertificate)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error while generating X509AttributeCertificate from TagCertificate")
 		}

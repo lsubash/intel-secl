@@ -14,9 +14,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
-	cm "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
-	hcTypes "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 )
@@ -60,8 +57,8 @@ func getFlavorTemplates(osName string, templatePath string) []hvs.FlavorTemplate
 
 func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 
-	var hm *hcTypes.HostManifest
-	var tagCert *cm.X509AttributeCertificate
+	var hm *hvs.HostManifest
+	var tagCert *hvs.X509AttributeCertificate
 
 	hmBytes, err := ioutil.ReadFile(ManifestPath)
 	if err != nil {
@@ -97,7 +94,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 		}
 
 		if tagCertificate != nil {
-			tagCert, err = model.NewX509AttributeCertificate(tagCertificate)
+			tagCert, err = hvs.NewX509AttributeCertificate(tagCertificate)
 			if err != nil {
 				fmt.Println("flavor/util/host_platform_flavor_test:TestLinuxPlatformFlavor_GetPcrDetails() Error while generating X509AttributeCertificate from TagCertificate")
 			}
@@ -114,7 +111,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 		fmt.Println("flavor/util/host_platform_flavor_test:TestLinuxPlatformFlavor_GetPcrDetails() failed to unmarshall tagcertificate : ", err)
 	}
 
-	testPcrList := make(map[hcTypes.PcrIndex]hvs.PcrListRules)
+	testPcrList := make(map[hvs.PcrIndex]hvs.PcrListRules)
 	testPcrList[17] = hvs.PcrListRules{
 		PcrBank:    []string{"SHA384", "SHA256", "SHA1"},
 		PcrMatches: true,
@@ -134,14 +131,14 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 	}
 
 	type fields struct {
-		HostManifest    *hcTypes.HostManifest
+		HostManifest    *hvs.HostManifest
 		HostInfo        *taModel.HostInfo
-		TagCertificate  *cm.X509AttributeCertificate
+		TagCertificate  *hvs.X509AttributeCertificate
 		FlavorTemplates []hvs.FlavorTemplate
 	}
 	type args struct {
-		pcrManifest     hcTypes.PcrManifest
-		pcrList         map[hcTypes.PcrIndex]hvs.PcrListRules
+		pcrManifest     hvs.PcrManifest
+		pcrList         map[hvs.PcrIndex]hvs.PcrListRules
 		includeEventLog bool
 	}
 
@@ -155,7 +152,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    []hcTypes.FlavorPcrs
+		want    []hvs.FlavorPcrs
 		wantErr bool
 	}{
 		{
@@ -178,7 +175,7 @@ func TestLinuxPlatformFlavor_GetPcrDetails(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		var got []hcTypes.FlavorPcrs
+		var got []hvs.FlavorPcrs
 		t.Run(tt.name, func(t *testing.T) {
 			rhelpf := HostPlatformFlavor{
 				HostManifest:    tt.fields.HostManifest,

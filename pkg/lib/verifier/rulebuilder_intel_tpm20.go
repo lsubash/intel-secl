@@ -12,9 +12,6 @@ import (
 	"reflect"
 
 	hvsconstants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	flavormodel "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier/rules"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
@@ -23,12 +20,12 @@ import (
 
 type ruleBuilderIntelTpm20 struct {
 	verifierCertificates VerifierCertificates
-	hostManifest         *types.HostManifest
+	hostManifest         *hvs.HostManifest
 	signedFlavor         *hvs.SignedFlavor
 	rules                []rules.Rule
 }
 
-func newRuleBuilderIntelTpm20(verifierCertificates VerifierCertificates, hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor) (ruleBuilder, error) {
+func newRuleBuilderIntelTpm20(verifierCertificates VerifierCertificates, hostManifest *hvs.HostManifest, signedFlavor *hvs.SignedFlavor) (ruleBuilder, error) {
 	builder := ruleBuilderIntelTpm20{
 		verifierCertificates: verifierCertificates,
 		hostManifest:         hostManifest,
@@ -45,7 +42,7 @@ func (builder *ruleBuilderIntelTpm20) GetName() string {
 // From 'design' repo at isecl/libraries/verifier/verifier.md...
 // AikCertificateTrusted
 // FlavorTrusted (added in verifierimpl)
-func (builder *ruleBuilderIntelTpm20) GetAikCertificateTrustedRule(flavorPart common.FlavorPart) ([]rules.Rule, error) {
+func (builder *ruleBuilderIntelTpm20) GetAikCertificateTrustedRule(flavorPart hvs.FlavorPartName) ([]rules.Rule, error) {
 
 	var results []rules.Rule
 
@@ -107,11 +104,11 @@ func (builder *ruleBuilderIntelTpm20) GetSoftwareRules() ([]rules.Rule, error) {
 	// Add 'XmlEventLogDigestEquals' rule...
 	//
 	meta := builder.signedFlavor.Flavor.Meta
-	if reflect.DeepEqual(meta, flavormodel.Meta{}) {
+	if reflect.DeepEqual(meta, hvs.Meta{}) {
 		return nil, errors.New("'Meta' was not present in the flavor")
 	}
 
-	xmlMeasurementLogDigestEqualsRule, err := rules.NewXmlMeasurementLogDigestEquals(meta.Description[flavormodel.DigestAlgorithm].(string), meta.ID)
+	xmlMeasurementLogDigestEqualsRule, err := rules.NewXmlMeasurementLogDigestEquals(meta.Description[hvs.DigestAlgorithm].(string), meta.ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error in getting xmlMeasurementLogDigestEquals rule")
 	}
@@ -125,7 +122,7 @@ func (builder *ruleBuilderIntelTpm20) GetSoftwareRules() ([]rules.Rule, error) {
 		return nil, errors.New("'Software' was not present in the flavor")
 	}
 
-	xmlMeasurementLogIntegrityRule, err := rules.NewXmlMeasurementLogIntegrity(meta.ID, meta.Description[flavormodel.Label].(string), builder.signedFlavor.Flavor.Software.CumulativeHash)
+	xmlMeasurementLogIntegrityRule, err := rules.NewXmlMeasurementLogIntegrity(meta.ID, meta.Description[hvs.Label].(string), builder.signedFlavor.Flavor.Software.CumulativeHash)
 	results = append(results, xmlMeasurementLogIntegrityRule)
 
 	//

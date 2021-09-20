@@ -2,11 +2,12 @@
  *  Copyright (C) 2020 Intel Corporation
  *  SPDX-License-Identifier: BSD-3-Clause
  */
-package types
+package hvs
 
 import (
 	"crypto/x509"
 	"encoding/base64"
+
 	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
 )

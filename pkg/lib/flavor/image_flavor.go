@@ -13,7 +13,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"io/ioutil"
 
@@ -28,7 +28,7 @@ import (
 // ImageFlavor is a flavor for an image with the encryption requirement information
 // and key details of an encrypted image.
 type ImageFlavor struct {
-	Image model.Image `json:"flavor"`
+	Image hvs.Image `json:"flavor"`
 }
 
 // GetImageFlavor is used to create a new image flavor with the specified label, encryption policy,
@@ -36,14 +36,14 @@ type ImageFlavor struct {
 func GetImageFlavor(label string, encryptionRequired bool, keyURL string, digest string) (*ImageFlavor, error) {
 	log.Trace("flavor/image_flavor:GetImageFlavor() Entering")
 	defer log.Trace("flavor/image_flavor:GetImageFlavor() Leaving")
-	var encryption *model.Encryption
+	var encryption *hvs.Encryption
 
 	description := map[string]interface{}{
-		model.Label:      label,
-		model.FlavorPart: "IMAGE",
+		hvs.Label:                 label,
+		hvs.FlavorPartDescription: "IMAGE",
 	}
 
-	meta := model.Meta{
+	meta := hvs.Meta{
 		Description: description,
 	}
 	newUuid, err := uuid.NewRandom()
@@ -53,13 +53,13 @@ func GetImageFlavor(label string, encryptionRequired bool, keyURL string, digest
 	meta.ID = newUuid
 
 	if encryptionRequired {
-		encryption = &model.Encryption{
+		encryption = &hvs.Encryption{
 			KeyURL: keyURL,
 			Digest: digest,
 		}
 	}
 
-	imageflavor := model.Image{
+	imageflavor := hvs.Image{
 		Meta:               meta,
 		EncryptionRequired: encryptionRequired,
 		Encryption:         encryption,
@@ -76,19 +76,19 @@ func GetImageFlavor(label string, encryptionRequired bool, keyURL string, digest
 func GetContainerImageFlavor(label string, encryptionRequired bool, keyURL string, integrityEnforced bool, notaryURL string) (*ImageFlavor, error) {
 	log.Trace("flavor/image_flavor:GetContainerImageFlavor() Entering")
 	defer log.Trace("flavor/image_flavor:GetContainerImageFlavor() Leaving")
-	var encryption *model.Encryption
-	var integrity *model.Integrity
+	var encryption *hvs.Encryption
+	var integrity *hvs.Integrity
 
 	if label == "" {
 		return nil, errors.Errorf("label cannot be empty")
 	}
 
 	description := map[string]interface{}{
-		model.Label:      label,
-		model.FlavorPart: "CONTAINER_IMAGE",
+		hvs.Label:                 label,
+		hvs.FlavorPartDescription: "CONTAINER_IMAGE",
 	}
 
-	meta := model.Meta{
+	meta := hvs.Meta{
 		Description: description,
 	}
 	newUuid, err := uuid.NewRandom()
@@ -97,15 +97,15 @@ func GetContainerImageFlavor(label string, encryptionRequired bool, keyURL strin
 	}
 	meta.ID = newUuid
 
-	encryption = &model.Encryption{
+	encryption = &hvs.Encryption{
 		KeyURL: keyURL,
 	}
 
-	integrity = &model.Integrity{
+	integrity = &hvs.Integrity{
 		NotaryURL: notaryURL,
 	}
 
-	containerImageFlavor := model.Image{
+	containerImageFlavor := hvs.Image{
 		Meta:               meta,
 		EncryptionRequired: encryptionRequired,
 		Encryption:         encryption,

@@ -10,9 +10,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 
 	client "github.com/intel-secl/intel-secl/v4/pkg/clients/ta"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/util"
 	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/pkg/errors"
@@ -31,19 +31,19 @@ func (ic *IntelConnector) GetHostDetails() (taModel.HostInfo, error) {
 	return hostInfo, err
 }
 
-func (ic *IntelConnector) GetHostManifest(pcrList []int) (types.HostManifest, error) {
+func (ic *IntelConnector) GetHostManifest(pcrList []int) (hvs.HostManifest, error) {
 	log.Trace("intel_host_connector:GetHostManifest() Entering")
 	defer log.Trace("intel_host_connector:GetHostManifest() Leaving")
 
 	nonce, err := util.GenerateNonce(20)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifest() Error generating "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifest() Error generating "+
 			"nonce for TPM quote request")
 	}
 
 	hostManifest, err := ic.GetHostManifestAcceptNonce(nonce, pcrList)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifest() Error creating "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifest() Error creating "+
 			"host manifest")
 	}
 	return hostManifest, nil
@@ -51,12 +51,12 @@ func (ic *IntelConnector) GetHostManifest(pcrList []int) (types.HostManifest, er
 
 //Separate function has been created that accepts nonce to support unit test.
 //Else it would be difficult to mock random nonce.
-func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int) (types.HostManifest, error) {
+func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int) (hvs.HostManifest, error) {
 	log.Trace("intel_host_connector:GetHostManifestAcceptNonce() Entering")
 	defer log.Trace("intel_host_connector:GetHostManifestAcceptNonce() Leaving")
 
 	var verificationNonce string
-	var hostManifest types.HostManifest
+	var hostManifest hvs.HostManifest
 
 	//Hardcoded pcr list here since there is no use case for customized pcr list
 	if pcrList == nil || len(pcrList) == 0 {
@@ -67,38 +67,38 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	//check if AIK Certificate is present on host before getting host manifest
 	aikInDER, err := ic.client.GetAIK()
 	if err != nil || len(aikInDER) == 0 {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Invalid AIK"+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Invalid AIK"+
 			"certificate returned by TA")
 	}
 	secLog.Debug("intel_host_connector:GetHostManifestAcceptNonce() Successfully received AIK certificate in DER format")
 
 	hostManifest.HostInfo, err = ic.client.GetHostInfo()
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting "+
 			"host details from TA")
 	}
 
 	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, []string{})
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting TPM "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting TPM "+
 			"quote response")
 	}
 
 	nonceInBytes, err := base64.StdEncoding.DecodeString(nonce)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Base64 decode of TPM "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Base64 decode of TPM "+
 			"nonce failed")
 	}
 
 	verificationNonce, err = util.GetVerificationNonce(nonceInBytes, tpmQuoteResponse)
 	if err != nil {
-		return types.HostManifest{}, err
+		return hvs.HostManifest{}, err
 	}
 	secLog.Debug("intel_host_connector:GetHostManifestAcceptNonce() Updated Verification nonce is : ", verificationNonce)
 
 	aikCertInBytes, err := base64.StdEncoding.DecodeString(tpmQuoteResponse.Aik)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error decoding"+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error decoding"+
 			"AIK certificate to bytes")
 	}
 
@@ -107,19 +107,19 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	aikCertificate, err := x509.ParseCertificate(aikPem.Bytes)
 
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error parsing "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error parsing "+
 			"AIK certicate")
 	}
 
 	tpmQuoteInBytes, err := base64.StdEncoding.DecodeString(tpmQuoteResponse.Quote)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
 			"tpm quote to bytes")
 	}
 
 	verificationNonceInBytes, err := base64.StdEncoding.DecodeString(verificationNonce)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
 			"nonce to bytes")
 	}
 	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Verifying quote and retrieving PCR manifest from TPM quote " +
@@ -127,14 +127,14 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	pcrManifest, pcrsDigest, err := util.VerifyQuoteAndGetPCRManifest(tpmQuoteResponse.EventLog, verificationNonceInBytes,
 		tpmQuoteInBytes, aikCertificate)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error verifying "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error verifying "+
 			"TPM Quote")
 	}
 	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Successfully retrieved PCR manifest from quote")
 
 	isWlaInstalled := false
 	for _, component := range hostManifest.HostInfo.InstalledComponents {
-		if component == types.HostComponentWlagent.String() {
+		if component == taModel.HostComponentWlagent.String() {
 			isWlaInstalled = true
 			break
 		}
@@ -158,18 +158,18 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	} else if isWlaInstalled {
 		bindingKeyBytes, err := ic.client.GetBindingKeyCertificate()
 		if err != nil {
-			return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() "+
+			return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() "+
 				"Error getting binding key certificate from TA")
 		}
 
 		if bindingKeyBytes == nil || len(bindingKeyBytes) == 0 {
-			return types.HostManifest{}, errors.New("intel_host_connector:GetHostManifestAcceptNonce() " +
+			return hvs.HostManifest{}, errors.New("intel_host_connector:GetHostManifestAcceptNonce() " +
 				"Empty Binding Key received")
 		}
 
 		bindingKeyCertificate, _ := pem.Decode(bindingKeyBytes)
 		if bindingKeyCertificate == nil {
-			return types.HostManifest{}, errors.New("intel_host_connector:GetHostManifestAcceptNonce() - " +
+			return hvs.HostManifest{}, errors.New("intel_host_connector:GetHostManifestAcceptNonce() - " +
 				"Could not decode Binding key certificate. Unexpected response from client")
 		}
 		bindingKeyCertificateBase64 = base64.StdEncoding.EncodeToString(bindingKeyCertificate.Bytes)
@@ -185,7 +185,7 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 
 	hostManifestJson, err := json.Marshal(hostManifest)
 	if err != nil {
-		return types.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error "+
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error "+
 			"marshalling host manifest to JSON")
 	}
 	log.Debugf("intel_host_connector:GetHostManifestAcceptNonce() Host Manifest : %s", string(hostManifestJson))

@@ -26,8 +26,6 @@ import (
 	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor"
-	fc "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/util"
 	hostConnector "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
@@ -123,7 +121,7 @@ func (controller TagCertificateController) Create(w http.ResponseWriter, r *http
 	var tagCACert = tagCA.Certificates[0]
 
 	// Initialize the TagCertConfig
-	newTCConfig := asset_tag.TagCertConfig{
+	newTCConfig := hvs.TagCertConfig{
 		SubjectUUID:       reqTCCriteria.HardwareUUID.String(),
 		PrivateKey:        tagCA.Key,
 		TagCACert:         &tagCACert,
@@ -146,7 +144,7 @@ func (controller TagCertificateController) Create(w http.ResponseWriter, r *http
 	}
 
 	// put this in an X509AttributeCert to extract the properties easily
-	tempX509AttrCert, err := model.NewX509AttributeCertificate(newX509TC)
+	tempX509AttrCert, err := hvs.NewX509AttributeCertificate(newX509TC)
 	if err != nil {
 		defaultLog.Errorf("controllers/tagcertificate_controller:Create() %s : Error during Tag Certificate creation: %s", commLogMsg.AppRuntimeErr, err.Error())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Creation failure"}
@@ -492,7 +490,7 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 	var flavorSignKey = controller.CertStore[models.CertTypesFlavorSigning.String()].Key
 
 	// get the signed flavor
-	unsignedFlavors, err := (*assetTagFlavor).GetFlavorPartRaw(fc.FlavorPartAssetTag)
+	unsignedFlavors, err := (*assetTagFlavor).GetFlavorPartRaw(hvs.FlavorPartAssetTag)
 	if err != nil {
 		defaultLog.WithField("Certid", dtcReq.CertID).Errorf("controllers/tagcertificate_controller:Deploy() %s : Error while getting unsigned Flavor %s", commLogMsg.AppRuntimeErr, err.Error())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Deploy failure"}
@@ -505,8 +503,8 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 	}
 
 	// Link signed asset tag flavor to the Host Unique FlavorGroup
-	var flavorPartMap = make(map[fc.FlavorPart][]hvs.SignedFlavor)
-	flavorPartMap[fc.FlavorPartAssetTag] = []hvs.SignedFlavor{*sf}
+	var flavorPartMap = make(map[hvs.FlavorPartName][]hvs.SignedFlavor)
+	flavorPartMap[hvs.FlavorPartAssetTag] = []hvs.SignedFlavor{*sf}
 
 	linkedSf, err := controller.FlavorController.addFlavorToFlavorgroup(flavorPartMap, nil)
 	if err != nil || linkedSf == nil {
