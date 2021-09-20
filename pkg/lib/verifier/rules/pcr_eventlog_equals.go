@@ -12,14 +12,12 @@ import (
 
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
 
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
 // NewPcrEventLogEquals create the rule without the ExcludeTags,Components/labels
 // so that all events are evaluated (i.e. no 'excludes').
-func NewPcrEventLogEquals(expectedPcrEventLogEntry *types.TpmEventLog, flavorID uuid.UUID, marker common.FlavorPart) (Rule, error) {
+func NewPcrEventLogEquals(expectedPcrEventLogEntry *hvs.TpmEventLog, flavorID uuid.UUID, marker hvs.FlavorPartName) (Rule, error) {
 	var rule pcrEventLogEquals
 
 	rule = pcrEventLogEquals{
@@ -34,7 +32,7 @@ func NewPcrEventLogEquals(expectedPcrEventLogEntry *types.TpmEventLog, flavorID 
 
 //NewPcrEventLogEqualsExcluding create the rule providing the Exclude tags,Components and labels
 //so they are not included for evaluation during 'Apply'.
-func NewPcrEventLogEqualsExcluding(expectedPcrEventLogEntry *types.TpmEventLog, excludedEvents []string, flavorID uuid.UUID, marker common.FlavorPart) (Rule, error) {
+func NewPcrEventLogEqualsExcluding(expectedPcrEventLogEntry *hvs.TpmEventLog, excludedEvents []string, flavorID uuid.UUID, marker hvs.FlavorPartName) (Rule, error) {
 	var rule pcrEventLogEquals
 
 	rule = pcrEventLogEquals{
@@ -49,9 +47,9 @@ func NewPcrEventLogEqualsExcluding(expectedPcrEventLogEntry *types.TpmEventLog, 
 }
 
 type pcrEventLogEquals struct {
-	expectedPcrEventLogEntry *types.TpmEventLog
+	expectedPcrEventLogEntry *hvs.TpmEventLog
 	flavorID                 *uuid.UUID
-	marker                   common.FlavorPart
+	marker                   hvs.FlavorPartName
 	ruleName                 string
 	excludeTags              []string
 }
@@ -63,7 +61,7 @@ type pcrEventLogEquals struct {
 //   PcrEventLogContainsUnexpectedEntries fault.
 // - Also report the missing events by subtracting 'actual' from 'expected' and raising a
 //   PcrEventLogMissingExpectedEntries fault.
-func (rule *pcrEventLogEquals) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *pcrEventLogEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = rule.ruleName
@@ -81,9 +79,9 @@ func (rule *pcrEventLogEquals) Apply(hostManifest *types.HostManifest) (*hvs.Rul
 		}
 
 		if actualEventLogCriteria == nil {
-			result.Faults = append(result.Faults, newPcrEventLogMissingFault(types.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index), types.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)))
+			result.Faults = append(result.Faults, newPcrEventLogMissingFault(hvs.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index), hvs.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)))
 		} else {
-			actualEventLog := &types.TpmEventLog{}
+			actualEventLog := &hvs.TpmEventLog{}
 			actualEventLog.TpmEvent = actualEventLogCriteria
 			actualEventLog.Pcr.Index = pIndex
 			actualEventLog.Pcr.Bank = bank
@@ -110,8 +108,8 @@ func (rule *pcrEventLogEquals) Apply(hostManifest *types.HostManifest) (*hvs.Rul
 
 			if len(unexpectedFields.TpmEvent) > 0 {
 				log.Debug("Unexpected eventlog fields in pcreventlog equals rule :", unexpectedFields.TpmEvent)
-				pcrIndex := types.PcrIndex(actualEventLog.Pcr.Index)
-				pcrBank := types.SHAAlgorithm(actualEventLog.Pcr.Bank)
+				pcrIndex := hvs.PcrIndex(actualEventLog.Pcr.Index)
+				pcrBank := hvs.SHAAlgorithm(actualEventLog.Pcr.Bank)
 
 				mismatchInfo := hvs.MismatchField{
 					Name:              constants.PcrEventLogUnexpectedFields,
@@ -136,8 +134,8 @@ func (rule *pcrEventLogEquals) Apply(hostManifest *types.HostManifest) (*hvs.Rul
 
 			if len(missingFields.TpmEvent) > 0 {
 				log.Debug("Missing eventlog fields in pcreventlog equals rule :", missingFields.TpmEvent)
-				pcrIndex := types.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index)
-				pcrBank := types.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)
+				pcrIndex := hvs.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index)
+				pcrBank := hvs.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)
 
 				mismatchInfo := hvs.MismatchField{
 					Name:           constants.PcrEventLogMissingFields,
@@ -156,10 +154,10 @@ func (rule *pcrEventLogEquals) Apply(hostManifest *types.HostManifest) (*hvs.Rul
 
 // Creates a new EventLogEntry without events given in excludetags
 
-func (rule *pcrEventLogEquals) removeExcludedEvents(pcrEventLogEntry *types.TpmEventLog) (*types.TpmEventLog, error) {
-	var pcrEventLogs *types.TpmEventLog
+func (rule *pcrEventLogEquals) removeExcludedEvents(pcrEventLogEntry *hvs.TpmEventLog) (*hvs.TpmEventLog, error) {
+	var pcrEventLogs *hvs.TpmEventLog
 
-	var eventsWithoutComponentName []types.EventLog
+	var eventsWithoutComponentName []hvs.EventLog
 
 	// Loop through the each eventlog and see if it contains the tag given in excludetags[]
 	// and if so, do not add it to the results eventlog.
@@ -189,8 +187,8 @@ func (rule *pcrEventLogEquals) removeExcludedEvents(pcrEventLogEntry *types.TpmE
 
 	}
 
-	pcrEventLogs = &types.TpmEventLog{
-		Pcr: types.Pcr{
+	pcrEventLogs = &hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: pcrEventLogEntry.Pcr.Index,
 			Bank:  pcrEventLogEntry.Pcr.Bank,
 		},

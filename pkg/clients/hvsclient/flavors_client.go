@@ -8,13 +8,13 @@ package hvsclient
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 
 	"github.com/pkg/errors"
 )
@@ -24,7 +24,7 @@ import (
 //-------------------------------------------------------------------------------------------------
 
 type FlavorsClient interface {
-	CreateFlavor(flavorCreateRequest *models.FlavorCreateRequest) (hvs.FlavorCollection, error)
+	CreateFlavor(flavorCreateRequest *hvs.FlavorCreateRequest) (hvs.FlavorCollection, error)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ type flavorsClientImpl struct {
 	cfg        *hvsClientConfig
 }
 
-func (client *flavorsClientImpl) CreateFlavor(flavorCreateRequest *models.FlavorCreateRequest) (hvs.FlavorCollection, error) {
+func (client *flavorsClientImpl) CreateFlavor(flavorCreateRequest *hvs.FlavorCreateRequest) (hvs.FlavorCollection, error) {
 	log.Trace("hvsclient/flavors_client:CreateFlavor() Entering")
 	defer log.Trace("hvsclient/flavors_client:CreateFlavor() Leaving")
 

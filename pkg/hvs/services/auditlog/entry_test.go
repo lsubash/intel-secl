@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
@@ -31,7 +30,7 @@ func TestStructDiff(t *testing.T) {
 		HostID: hostId,
 		TrustReport: hvs.TrustReport{
 			PolicyName: policyId.String(),
-			HostManifest: types.HostManifest{
+			HostManifest: hvs.HostManifest{
 				AIKCertificate:        aikId.String(),
 				BindingKeyCertificate: bkId.String(),
 			},
@@ -50,7 +49,7 @@ func TestStructDiff(t *testing.T) {
 		HostID: hostId,
 		TrustReport: hvs.TrustReport{
 			PolicyName: policyId.String(),
-			HostManifest: types.HostManifest{
+			HostManifest: hvs.HostManifest{
 				AIKCertificate:        aikId.String(),
 				BindingKeyCertificate: bkId.String(),
 			},
@@ -65,7 +64,7 @@ func TestStructDiff(t *testing.T) {
 	hssx := &hvs.HostStatus{
 		ID:     newId,
 		HostID: idNoChange,
-		HostManifest: types.HostManifest{
+		HostManifest: hvs.HostManifest{
 			AIKCertificate:        aikId.String(),
 			BindingKeyCertificate: bkId.String(),
 		},
@@ -82,7 +81,7 @@ func TestStructDiff(t *testing.T) {
 	hssy := &hvs.HostStatus{
 		ID:     newId,
 		HostID: idNoChange,
-		HostManifest: types.HostManifest{
+		HostManifest: hvs.HostManifest{
 			AIKCertificate:        aikId.String(),
 			BindingKeyCertificate: bkId.String(),
 		},

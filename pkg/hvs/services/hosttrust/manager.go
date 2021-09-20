@@ -17,7 +17,6 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models/taskstage"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/chnlworkq"
 	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/syncmap"
@@ -37,7 +36,7 @@ type verifyTrustJob struct {
 type newHostFetch struct {
 	ctx             context.Context
 	hostId          uuid.UUID
-	data            *types.HostManifest
+	data            *hvs.HostManifest
 	preferHashMatch bool
 }
 
@@ -119,7 +118,7 @@ func (svc *Service) startWorkers(workers int) {
 }
 
 func (svc *Service) VerifyHost(hostId uuid.UUID, fetchHostData bool, preferHashMatch bool) (*models.HVSReport, error) {
-	var hostData *types.HostManifest
+	var hostData *hvs.HostManifest
 
 	if fetchHostData {
 		var host *hvs.Host
@@ -423,7 +422,7 @@ func (svc *Service) doWork() {
 	// Fetch work context from the map.
 	for {
 		var hostId uuid.UUID
-		var hostData *types.HostManifest
+		var hostData *hvs.HostManifest
 		newData := false
 		preferHashMatch := false
 
@@ -482,7 +481,7 @@ func (svc *Service) doWork() {
 }
 
 // This function kicks of the verification process given a manifest
-func (svc *Service) verifyHostData(hostId uuid.UUID, data *types.HostManifest, newData bool, preferHashMatch bool) {
+func (svc *Service) verifyHostData(hostId uuid.UUID, data *hvs.HostManifest, newData bool, preferHashMatch bool) {
 	defaultLog.Trace("hosttrust/manager:verifyHostData() Entering")
 	defer defaultLog.Trace("hosttrust/manager:verifyHostData() Leaving")
 
@@ -515,7 +514,7 @@ func (svc *Service) verifyHostData(hostId uuid.UUID, data *types.HostManifest, n
 
 // This function is the implementation of the HostDataReceiver interface method. Just create a new request
 // to process the newly obtained data and it will be submitted to the verification queue
-func (svc *Service) ProcessHostData(ctx context.Context, host hvs.Host, data *types.HostManifest, preferHashMatch bool, err error) error {
+func (svc *Service) ProcessHostData(ctx context.Context, host hvs.Host, data *hvs.HostManifest, preferHashMatch bool, err error) error {
 	defaultLog.Trace("hosttrust/manager:ProcessHostData() Entering")
 	defer defaultLog.Trace("hosttrust/manager:ProcessHostData() Leaving")
 

@@ -65,3 +65,27 @@ const (
 	OsTypeVMWare  = "vmware"
 	OsTypeWindows = "windows"
 )
+
+type OsName string
+
+const (
+	OsWindows       OsName = "WINDOWS"
+	OsWindows2k16   OsName = "MICROSOFT WINDOWS SERVER 2016 STANDARD"
+	OsWindows2k16dc OsName = "MICROSOFT WINDOWS SERVER 2016 DATACENTER"
+	OsVMware        OsName = "VMWARE ESXI"
+)
+
+func (on OsName) String() string {
+	return string(on)
+}
+
+type HostComponent string
+
+const (
+	HostComponentTagent  HostComponent = "tagent"
+	HostComponentWlagent HostComponent = "wlagent"
+)
+
+func (hc HostComponent) String() string {
+	return string(hc)
+}

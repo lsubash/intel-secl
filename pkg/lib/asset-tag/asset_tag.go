@@ -5,11 +5,14 @@
 
 package asset_tag
 
-import hc "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
+import (
+	hc "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
+)
 
 // AssetTag interface is used to create and deploy an asset tag certificate on a host
 type AssetTag interface {
-	CreateAssetTag(TagCertConfig) ([]byte, error)
+	CreateAssetTag(hvs.TagCertConfig) ([]byte, error)
 	DeployAssetTag(hc.HostConnector, string, string) error
 }
 

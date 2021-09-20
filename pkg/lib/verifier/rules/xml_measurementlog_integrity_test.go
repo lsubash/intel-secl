@@ -8,11 +8,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/xml"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"testing"
 
 	"github.com/google/uuid"
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,16 +29,16 @@ func TestXmlMeasurementLogIntegrityNoFault(t *testing.T) {
 
 	// create the manifest that contains the measurement xml and the
 	// pcr event log with the correct cumulative measurement
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{testIntegrityMeasurementsXml},
 	}
 
-	eventLogEntry := types.TpmEventLog{
-		Pcr: types.Pcr{
+	eventLogEntry := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 15,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				Measurement: getSha256String(testExpectedMeasurement.CumulativeHash),
 				Tags:        []string{testExpectedMeasurement.Label + "-" + testExpectedMeasurement.Uuid},
@@ -66,7 +66,7 @@ func TestXmlMeasurementLogIntegrityXmlEventLogMissingFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// provide an empty manifest without xml and expect FaultXmlMeasurementLogMissing/untrusted
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, 1, len(result.Faults))
@@ -85,7 +85,7 @@ func TestXmlMeasurementLogIntegrityXmlMeasurementLogInvalidFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// provide the rule a manifest with invalid xml and expect FaultXmlMeasurementLogInvalid
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{"invalid xml"},
 	}
 
@@ -118,7 +118,7 @@ func TestXmlMeasurementLogIntegrityXmlMissingFromBadId(t *testing.T) {
 	invalidMeasurementsXml, err := xml.Marshal(invalidMeasurements)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(invalidMeasurementsXml)},
 	}
 
@@ -150,7 +150,7 @@ func TestXmlMeasurementLogIntegrityValueMismatchFromInvalidActualHash(t *testing
 	invalidMeasurementsXml, err := xml.Marshal(invalidMeasurements)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(invalidMeasurementsXml)},
 	}
 
@@ -182,7 +182,7 @@ func TestXmlMeasurementLogIntegrityValueMismatchFromInvalidReplay(t *testing.T) 
 	invalidMeasurementsXml, err := xml.Marshal(invalidMeasurements)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(invalidMeasurementsXml)},
 	}
 
@@ -206,16 +206,16 @@ func TestXmlMeasurementLogIntegrityValueMismatchFromInvalidPcrEventLog(t *testin
 
 	// create a manifest with valid event log xml but a pcr event log with
 	// an invalid mesurement (expect FaultXmlMeasurementValueMismatch)
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{testIntegrityMeasurementsXml},
 	}
 
-	eventLogEntry := types.TpmEventLog{
-		Pcr: types.Pcr{
+	eventLogEntry := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 15,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				Measurement: "0000000000000000000000000000000000", // ==> NOT RIGHT
 				Tags:        []string{testExpectedMeasurement.Label + "-" + testExpectedMeasurement.Uuid},
@@ -245,7 +245,7 @@ func TestXmlMeasurementLogIntegrityValueMismatchFromMissingPcrEventLog(t *testin
 
 	// create a manifest with valid event log xml but without pcr event log
 	// and expect FaultPcrValueMissing
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{testIntegrityMeasurementsXml},
 	}
 
@@ -269,16 +269,16 @@ func TestXmlMeasurementLogIntegrityValueMismatchFromMissingPcrEventLabel(t *test
 
 	// create a manifest with a pcr event log that does not contain a
 	// matching 'label'  (expect FaultXmlMeasurementValueMismatch)
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{testIntegrityMeasurementsXml},
 	}
 
-	eventLogEntry := types.TpmEventLog{
-		Pcr: types.Pcr{
+	eventLogEntry := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 15,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				Measurement: getSha256String(testExpectedMeasurement.CumulativeHash),
 				Tags:        []string{"invalid labor"}, // ==> won't match the flavor

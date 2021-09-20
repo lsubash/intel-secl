@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-package asset_tag
+package hvs
 
 import (
 	"crypto/x509"

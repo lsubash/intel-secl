@@ -12,6 +12,7 @@ import (
 	"encoding/asn1"
 	"fmt"
 	hc "github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"math/big"
 	"reflect"
@@ -22,7 +23,7 @@ type atag struct {
 }
 
 // CreateAssetTag implements the interface AssetTag to create an asset tag certificate for a particular host with custom tag attributes
-func (aTag *atag) CreateAssetTag(tagCertConfig TagCertConfig) ([]byte, error) {
+func (aTag *atag) CreateAssetTag(tagCertConfig hvs.TagCertConfig) ([]byte, error) {
 	err := validateTagCertConfig(tagCertConfig)
 	if err != nil {
 		return nil, err
@@ -53,7 +54,7 @@ func (aTag *atag) CreateAssetTag(tagCertConfig TagCertConfig) ([]byte, error) {
 		})
 	}
 
-	certConfig := TagCertBuilderConfig{
+	certConfig := hvs.TagCertBuilderConfig{
 		TagCertConfig:    tagCertConfig,
 		SerialNumber:     serialNumber,
 		ValidityDuration: time.Duration(tagCertConfig.ValidityInSeconds) * time.Second,
@@ -66,7 +67,7 @@ func (aTag *atag) CreateAssetTag(tagCertConfig TagCertConfig) ([]byte, error) {
 	return tagCertificateBuilder(certConfig)
 }
 
-func tagCertificateBuilder(certConfig TagCertBuilderConfig) ([]byte, error) {
+func tagCertificateBuilder(certConfig hvs.TagCertBuilderConfig) ([]byte, error) {
 
 	if certConfig.SerialNumber == nil || certConfig.SubjectName.CommonName == "" || certConfig.TagCertConfig.TagCACert == nil ||
 		certConfig.Extensions == nil || certConfig.ValidityDuration.Seconds() < 0 {
@@ -106,7 +107,7 @@ func (aTag *atag) DeployAssetTag(connector hc.HostConnector, tagCertDigest, host
 }
 
 // validateTagCertConfig function is used to validate the CreateAssetTag input
-func validateTagCertConfig(tagCertConfig TagCertConfig) error {
+func validateTagCertConfig(tagCertConfig hvs.TagCertConfig) error {
 	if tagCertConfig.TagCACert == nil || tagCertConfig.TagCACert.Raw == nil {
 		return errors.New("Tag CA-Certificate is required to be set to fetch issuer configuration information to create an asset tag certificate")
 	}

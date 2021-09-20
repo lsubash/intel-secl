@@ -2,7 +2,7 @@
  * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package model
+package hvs
 
 import (
 	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"

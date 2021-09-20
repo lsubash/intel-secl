@@ -6,10 +6,10 @@
 package hvs
 
 import (
-	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"time"
+
+	"github.com/google/uuid"
+	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 )
 
 type ReportCollection struct {
@@ -30,8 +30,8 @@ type Report struct {
 }
 
 type TrustInformation struct {
-	Overall     bool                                    `json:"OVERALL"`
-	FlavorTrust map[common.FlavorPart]FlavorTrustStatus `json:"flavors_trust"`
+	Overall     bool                                 `json:"OVERALL"`
+	FlavorTrust map[FlavorPartName]FlavorTrustStatus `json:"flavors_trust"`
 }
 
 type FlavorTrustStatus struct {

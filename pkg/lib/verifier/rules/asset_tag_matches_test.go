@@ -5,16 +5,16 @@
 package rules
 
 import (
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"testing"
 
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAssetTagMatchesNotProvisionedFault(t *testing.T) {
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AssetTagDigest: validAssetTagString, // valid tag in host
 	}
 
@@ -33,7 +33,7 @@ func TestAssetTagMatchesNotProvisionedFault(t *testing.T) {
 
 func TestAssetTagMissingFromManifest(t *testing.T) {
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AssetTagDigest: "", // not in host manifest
 	}
 
@@ -52,7 +52,7 @@ func TestAssetTagMissingFromManifest(t *testing.T) {
 
 func TestAssetTagMismatch(t *testing.T) {
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AssetTagDigest: invalidAssetTagString, // in valid from the host
 	}
 
@@ -71,7 +71,7 @@ func TestAssetTagMismatch(t *testing.T) {
 
 func TestAssetTagMatchesNoFault(t *testing.T) {
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AssetTagDigest: validAssetTagString, // valid tag in host
 	}
 

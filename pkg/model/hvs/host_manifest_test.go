@@ -3,19 +3,20 @@
  *  SPDX-License-Identifier: BSD-3-Clause
  */
 
-package types
+package hvs
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHostManifestParsing(t *testing.T) {
 
 	var hostManifest HostManifest
-	readBytes, err := ioutil.ReadFile("../test/sample_host_manifest.json")
+	readBytes, err := ioutil.ReadFile("../../lib/host-connector/test/sample_host_manifest.json")
 	assert.NoError(t, err)
 	err = json.Unmarshal(readBytes, &hostManifest)
 	assert.NoError(t, err)

@@ -10,12 +10,10 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 )
 
-func NewFlavorTrusted(signedFlavor *hvs.SignedFlavor, flavorSigningCertificate *x509.Certificate, flavorCaCertificates *x509.CertPool, marker common.FlavorPart) (Rule, error) {
+func NewFlavorTrusted(signedFlavor *hvs.SignedFlavor, flavorSigningCertificate *x509.Certificate, flavorCaCertificates *x509.CertPool, marker hvs.FlavorPartName) (Rule, error) {
 
 	return &flavorTrusted{
 		signedFlavor:             signedFlavor,
@@ -31,14 +29,14 @@ type flavorTrusted struct {
 	flavorId                 uuid.UUID
 	flavorSigningCertificate *x509.Certificate
 	flavorCaCertificates     *x509.CertPool
-	marker                   common.FlavorPart
+	marker                   hvs.FlavorPartName
 }
 
 // - If the flavor does not have a signature create a FaultFlavorSignatureMissing
 // - If the flavor's signature does not verify with the signing certificate and CAs, create a
 //   FaultFlavorSignatureNotTrusted
 // - If any errors occur during verification, create FaultFlavorSignatureVerificationFailed
-func (rule *flavorTrusted) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *flavorTrusted) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 
 	result := hvs.RuleResult{}
 	result.Trusted = true

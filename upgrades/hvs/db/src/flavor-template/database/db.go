@@ -8,11 +8,11 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/postgres"
 	hvsconfig "github.com/intel-secl/intel-secl/v4/pkg/lib/common/config"
-	flavorModel "github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v4/upgrades/hvs/db/src/flavor-template/model"
 	"github.com/jinzhu/gorm"
 )
@@ -61,7 +61,7 @@ func DownloadOldFlavors(cfg *hvsconfig.DBConfig, db *gorm.DB) ([]model.SignedFla
 }
 
 //UpdateFlavor updates flavor table with converted flavor and signature
-func UpdateFlavor(cfg *hvsconfig.DBConfig, db *gorm.DB, id uuid.UUID, flavor flavorModel.Flavor, signature string) error {
+func UpdateFlavor(cfg *hvsconfig.DBConfig, db *gorm.DB, id uuid.UUID, flavor hvs.Flavor, signature string) error {
 
 	updateStmt := `update "flavor" set "content"=$1, "signature"=$2 where "id"=$3`
 	updateResponse := db.Exec(updateStmt, postgres.PGFlavorContent(flavor), signature, id)

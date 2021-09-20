@@ -2,12 +2,13 @@
  * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package common
+package hvs
 
 import (
+	"strings"
+
 	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 var log = commLog.GetDefaultLogger()
@@ -18,26 +19,26 @@ var log = commLog.GetDefaultLogger()
  */
 
 // FlavorPart
-type FlavorPart string
+type FlavorPartName string
 
 const (
-	FlavorPartPlatform   FlavorPart = "PLATFORM"
-	FlavorPartOs         FlavorPart = "OS"
-	FlavorPartHostUnique FlavorPart = "HOST_UNIQUE"
-	FlavorPartSoftware   FlavorPart = "SOFTWARE"
-	FlavorPartAssetTag   FlavorPart = "ASSET_TAG"
+	FlavorPartPlatform   FlavorPartName = "PLATFORM"
+	FlavorPartOs         FlavorPartName = "OS"
+	FlavorPartHostUnique FlavorPartName = "HOST_UNIQUE"
+	FlavorPartSoftware   FlavorPartName = "SOFTWARE"
+	FlavorPartAssetTag   FlavorPartName = "ASSET_TAG"
 )
 
 // GetFlavorTypes returns a list of flavor types
-func GetFlavorTypes() []FlavorPart {
+func GetFlavorTypes() []FlavorPartName {
 	log.Trace("flavor/common/flavor_part:GetFlavorTypes() Entering")
 	defer log.Trace("flavor/common/flavor_part:GetFlavorTypes() Leaving")
 
-	return []FlavorPart{FlavorPartPlatform, FlavorPartOs, FlavorPartHostUnique, FlavorPartSoftware, FlavorPartAssetTag}
+	return []FlavorPartName{FlavorPartPlatform, FlavorPartOs, FlavorPartHostUnique, FlavorPartSoftware, FlavorPartAssetTag}
 }
 
 // GetFlavorTypesString returns a list of flavor types as strings for given flavor types
-func GetFlavorTypesString(flavorParts []FlavorPart) []string {
+func GetFlavorTypesString(flavorParts []FlavorPartName) []string {
 	log.Trace("flavor/common/flavor_part:GetFlavorTypesString() Entering")
 	defer log.Trace("flavor/common/flavor_part:GetFlavorTypesString() Leaving")
 	var flavorTypes []string
@@ -47,16 +48,16 @@ func GetFlavorTypesString(flavorParts []FlavorPart) []string {
 	return flavorTypes
 }
 
-func (fp FlavorPart) String() string {
+func (fp FlavorPartName) String() string {
 	return string(fp)
 }
 
 // Parse Converts a string to a FlavorPart.  If the string does
 // not match a supported FlavorPart, an error is returned and the
 // FlavorPart value 'UNKNOWN'.
-func (flavorPart *FlavorPart) Parse(flavorPartString string) error {
+func (flavorPart *FlavorPartName) Parse(flavorPartString string) error {
 
-	var result FlavorPart
+	var result FlavorPartName
 	var err error
 
 	switch strings.ToUpper(flavorPartString) {
@@ -79,10 +80,10 @@ func (flavorPart *FlavorPart) Parse(flavorPartString string) error {
 }
 
 // Filter Unique flavor parts from input slice of flavor parts
-func FilterUniqueFlavorParts(flavorParts []FlavorPart) []FlavorPart {
+func FilterUniqueFlavorParts(flavorParts []FlavorPartName) []FlavorPartName {
 	if flavorParts != nil && len(flavorParts) > 0 {
 		flavorPartMap := make(map[string]bool)
-		filteredParts := []FlavorPart{}
+		filteredParts := []FlavorPartName{}
 		for _, entry := range flavorParts {
 			flavorPart := entry.String()
 			if _, value := flavorPartMap[flavorPart]; !value {

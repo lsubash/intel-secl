@@ -16,7 +16,6 @@ import (
 	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"net/http"
@@ -421,8 +420,8 @@ func ConvertToReport(hvsReport *models.HVSReport) *hvs.Report {
 
 func buildTrustInformation(trustReport hvs.TrustReport) *hvs.TrustInformation {
 
-	flavorParts := common.GetFlavorTypes()
-	flavorsTrustStatus := make(map[common.FlavorPart]hvs.FlavorTrustStatus)
+	flavorParts := hvs.GetFlavorTypes()
+	flavorsTrustStatus := make(map[hvs.FlavorPartName]hvs.FlavorTrustStatus)
 	tr := hvs.NewTrustReport(trustReport)
 	for _, flavorPart := range flavorParts {
 		if len(tr.GetResultsForMarker(flavorPart.String())) > 0 {

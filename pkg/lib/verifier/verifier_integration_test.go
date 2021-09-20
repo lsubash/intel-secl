@@ -18,9 +18,7 @@ import (
 	"io/ioutil"
 
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/constants"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -31,7 +29,7 @@ import (
 
 func TestMockExample(t *testing.T) {
 
-	hostManifest := types.HostManifest{}
+	hostManifest := hvs.HostManifest{}
 	signedFlavor := hvs.SignedFlavor{}
 	certficates := VerifierCertificates{}
 	trustReport := hvs.TrustReport{}
@@ -193,7 +191,7 @@ func runVerifierIntegrationTest(t *testing.T,
 	trustReportFile string,
 	verifierCertificates VerifierCertificates) {
 
-	var hostManifest types.HostManifest
+	var hostManifest hvs.HostManifest
 	var signedFlavors []hvs.SignedFlavor
 	var javaTrustReports map[string]hvs.TrustReport
 
@@ -235,11 +233,11 @@ func runVerifierIntegrationTest(t *testing.T,
 	// loop over all of the signed flavors and compare them against
 	// an actual trust-report from java/hvs.
 	for _, signedFlavor := range signedFlavors {
-		t.Logf("==> Verifying flavor %s...", signedFlavor.Flavor.Meta.Description[model.FlavorPart].(string))
+		t.Logf("==> Verifying flavor %s...", signedFlavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string))
 
 		// This test uses real data from java/hvs in the 'test_data' directory.  It will not
 		// be possible to apply the FlavorTrusted rule due to differences in json serialization
-		// betweek go/java.  So, disable flavor signature verification by seeting
+		// between go/java.  So, disable flavor signature verification by setting
 		// 'skipFlavorSignatureVerification' to true.
 		trustReport, err := v.Verify(&hostManifest, &signedFlavor, true)
 		if err != nil {
@@ -289,7 +287,7 @@ func runVerifierIntegrationTestVendorFault(t *testing.T,
 	trustReportFile string,
 	verifierCertificates VerifierCertificates) {
 
-	var hostManifest types.HostManifest
+	var hostManifest hvs.HostManifest
 	var signedFlavors []hvs.SignedFlavor
 
 	manifestJSON, err := ioutil.ReadFile(hostManifestFile)
@@ -317,7 +315,7 @@ func runVerifierIntegrationTestFault(t *testing.T,
 	trustReportFile string,
 	verifierCertificates VerifierCertificates) {
 
-	var hostManifest types.HostManifest
+	var hostManifest hvs.HostManifest
 	var signedFlavors []hvs.SignedFlavor
 	var javaTrustReports map[string]hvs.TrustReport
 
@@ -358,7 +356,7 @@ func runVerifierIntegrationTestFault(t *testing.T,
 
 	//unknown vendor
 	for _, signedFlavor := range signedFlavors {
-		t.Logf("==> Verifying flavor %s...", signedFlavor.Flavor.Meta.Description[model.FlavorPart].(string))
+		t.Logf("==> Verifying flavor %s...", signedFlavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string))
 		signedFlavor.Flavor.Meta.Vendor = constants.VendorUnknown
 		_, err := v.Verify(&hostManifest, &signedFlavor, true)
 		assert.Error(t, err)
@@ -367,8 +365,8 @@ func runVerifierIntegrationTestFault(t *testing.T,
 
 	//Invalid Tpm version
 	for _, signedFlavor := range signedFlavors {
-		t.Logf("==> Verifying flavor %s...", signedFlavor.Flavor.Meta.Description[model.FlavorPart].(string))
-		signedFlavor.Flavor.Meta.Description[model.TpmVersion] = "3.0"
+		t.Logf("==> Verifying flavor %s...", signedFlavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string))
+		signedFlavor.Flavor.Meta.Description[hvs.TpmVersion] = "3.0"
 		_, err := v.Verify(&hostManifest, &signedFlavor, true)
 		assert.Error(t, err)
 		break
@@ -462,7 +460,7 @@ func NewMockVerifier(certificates VerifierCertificates) (*MockVerifier, error) {
 	return &MockVerifier{certificates: certificates}, nil
 }
 
-func (v *MockVerifier) Verify(hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor, skipFlavorSignatureVerification bool) (*hvs.TrustReport, error) {
+func (v *MockVerifier) Verify(hostManifest *hvs.HostManifest, signedFlavor *hvs.SignedFlavor, skipFlavorSignatureVerification bool) (*hvs.TrustReport, error) {
 	args := v.Called(hostManifest, signedFlavor, skipFlavorSignatureVerification)
 	return args.Get(0).(*hvs.TrustReport), args.Error(1)
 }

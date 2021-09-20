@@ -11,16 +11,14 @@ package hvs
 import (
 	"github.com/google/uuid"
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 )
 
 type TrustReport struct {
-	PolicyName   string             `json:"policy_name"`
-	Results      []RuleResult       `json:"results"`
-	Trusted      bool               `json:"trusted"`
-	HostManifest types.HostManifest `json:"host_manifest"`
+	PolicyName   string       `json:"policy_name"`
+	Results      []RuleResult `json:"results"`
+	Trusted      bool         `json:"trusted"`
+	HostManifest HostManifest `json:"host_manifest"`
 }
 
 type RuleResult struct {
@@ -32,26 +30,26 @@ type RuleResult struct {
 }
 
 type MismatchField struct {
-	Name              string              `json:"name"`
-	Description       string              `json:"description"`
-	PcrIndex          *types.PcrIndex     `json:"pcr_index,omitempty"`
-	PcrBank           *types.SHAAlgorithm `json:"pcr_bank,omitempty"`
-	MissingEntries    []types.EventLog    `json:"missing_entries,omitempty"`
-	UnexpectedEntries []types.EventLog    `json:"unexpected_entries,omitempty"`
+	Name              string        `json:"name"`
+	Description       string        `json:"description"`
+	PcrIndex          *PcrIndex     `json:"pcr_index,omitempty"`
+	PcrBank           *SHAAlgorithm `json:"pcr_bank,omitempty"`
+	MissingEntries    []EventLog    `json:"missing_entries,omitempty"`
+	UnexpectedEntries []EventLog    `json:"unexpected_entries,omitempty"`
 }
 
 type RuleInfo struct {
 	Name                     string                 `json:"rule_name,omitempty"`
-	Markers                  []common.FlavorPart    `json:"markers,omitempty"`
-	ExpectedPcr              *types.FlavorPcrs      `json:"expected_pcr,omitempty"`
-	PCR                      *types.Pcr             `json:"pcr,omitempty"`
+	Markers                  []FlavorPartName       `json:"markers,omitempty"`
+	ExpectedPcr              *FlavorPcrs            `json:"expected_pcr,omitempty"`
+	PCR                      *Pcr                   `json:"pcr,omitempty"`
 	Measurement              string                 `json:"measurement,omitempty"` //required
 	PCRMatches               bool                   `json:"pcr_matches,omitempty"`
 	FlavorID                 *uuid.UUID             `json:"flavor_id,omitempty"`
 	FlavorName               *string                `json:"flavor_name,omitempty"`
 	ExpectedValue            *string                `json:"expected_value,omitempty"`
 	ExpectedMeasurements     []ta.FlavorMeasurement `json:"expected_measurements,omitempty"`
-	ExpectedPcrEventLogEntry *types.TpmEventLog     `json:"expected_pcrvalues,omitempty"`
+	ExpectedPcrEventLogEntry *TpmEventLog           `json:"expected_pcrvalues,omitempty"`
 	Exclude_Tags             []string               `json:"excluding_tag,omitempty"`
 	ExpectedTag              []byte                 `json:"expected_tag,omitempty"`
 	Tags                     map[string]string      `json:"tags,omitempty"`
@@ -60,12 +58,12 @@ type RuleInfo struct {
 type Fault struct {
 	Name                   string                 `json:"fault_name"`
 	Description            string                 `json:"description"`
-	PcrIndex               *types.PcrIndex        `json:"pcr_index,omitempty"`
-	PcrBank                *types.SHAAlgorithm    `json:"pcr_bank,omitempty"`
+	PcrIndex               *PcrIndex              `json:"pcr_index,omitempty"`
+	PcrBank                *SHAAlgorithm          `json:"pcr_bank,omitempty"`
 	ExpectedPcrValue       *string                `json:"expected_pcrvalue,omitempty"`
 	ActualPcrValue         *string                `json:"actual_pcrvalue,omitempty"`
-	MissingEntries         []types.EventLog       `json:"missing_entries,omitempty"`
-	UnexpectedEntries      []types.EventLog       `json:"unexpected_entries,omitempty"`
+	MissingEntries         []EventLog             `json:"missing_entries,omitempty"`
+	UnexpectedEntries      []EventLog             `json:"unexpected_entries,omitempty"`
 	ExcludeTags            []string               `json:"exclude_tags,omitempty"`
 	FlavorId               *uuid.UUID             `json:"flavor_id,omitempty"`
 	UnexpectedMeasurements []ta.FlavorMeasurement `json:"unexpected_measurements,omitempty"`
@@ -163,7 +161,7 @@ func (t *TrustReport) AddResult(ruleResult RuleResult) {
 	}
 }
 
-func find(slice []common.FlavorPart, val string) bool {
+func find(slice []FlavorPartName, val string) bool {
 	for _, item := range slice {
 		if item.String() == val {
 			return true

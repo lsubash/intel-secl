@@ -12,14 +12,12 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"time"
 )
 
-func NewAikCertificateTrusted(privacyCACertificates *x509.CertPool, marker common.FlavorPart) (Rule, error) {
+func NewAikCertificateTrusted(privacyCACertificates *x509.CertPool, marker hvs.FlavorPartName) (Rule, error) {
 
 	if privacyCACertificates == nil {
 		return nil, errors.New("The privacy CAs cannot be nil")
@@ -34,14 +32,14 @@ func NewAikCertificateTrusted(privacyCACertificates *x509.CertPool, marker commo
 
 type aikCertTrusted struct {
 	privacyCACertificates *x509.CertPool
-	marker                common.FlavorPart
+	marker                hvs.FlavorPartName
 }
 
 // - if the aik is not present in the manifest, raise 'aik missing' fault
 // - if the host cert is not valid, raise 'aik expired' or 'aik not yet valid' faults
 // - check the host's aik against the trustedAuthority certs and raise 'not trusted' fault
 //   if none are valid
-func (rule *aikCertTrusted) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *aikCertTrusted) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 
 	var fault *hvs.Fault
 	result := hvs.RuleResult{}

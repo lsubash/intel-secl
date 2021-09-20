@@ -5,11 +5,12 @@
 package utils
 
 import (
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v4/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
+	//	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	model "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
-	"strings"
 )
 
 func IsLinuxHost(hostInfo *model.HostInfo) bool {
@@ -18,8 +19,8 @@ func IsLinuxHost(hostInfo *model.HostInfo) bool {
 
 	osName := strings.ToUpper(strings.TrimSpace(hostInfo.OSName))
 	// true when running on a linux host that is not a docker container
-	if osName != types.OsWindows.String() && osName != types.OsWindows2k16.String() &&
-		osName != types.OsWindows2k16dc.String() && osName != types.OsVMware.String() &&
+	if osName != model.OsWindows.String() && osName != model.OsWindows2k16.String() &&
+		osName != model.OsWindows2k16dc.String() && osName != model.OsVMware.String() &&
 		!hostInfo.IsDockerEnvironment {
 		return true
 	}
@@ -32,9 +33,9 @@ func GetDefaultSoftwareFlavorGroups(components []string) []string {
 
 	var fgNames []string
 	for _, component := range components {
-		if component == types.HostComponentTagent.String() {
+		if component == model.HostComponentTagent.String() {
 			fgNames = append(fgNames, models.FlavorGroupsPlatformSoftware.String())
-		} else if component == types.HostComponentWlagent.String() {
+		} else if component == model.HostComponentWlagent.String() {
 			fgNames = append(fgNames, models.FlavorGroupsWorkloadSoftware.String())
 		}
 	}

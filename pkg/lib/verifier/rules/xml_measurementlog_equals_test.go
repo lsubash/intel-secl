@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	constants "github.com/intel-secl/intel-secl/v4/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	ta "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +30,7 @@ func TestXmlMeasurementLogEqualsNoFault(t *testing.T) {
 	var testExpectedMeasurement ta.Measurement
 	err = xml.Unmarshal([]byte(testMeasurementXml), &testExpectedMeasurement)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{testMeasurementXml},
 	}
 
@@ -63,7 +62,7 @@ func TestXmlMeasurementLogEqualsMeasurementLogMissingFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// apply the manifest without xml to the rule and expect XmlEventLogMissingFault, untrusted
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, 1, len(result.Faults))
@@ -90,7 +89,7 @@ func TestXmlMeasurementLogEqualsMeasurementLogMissingFaultWrongId(t *testing.T) 
 	wrongId.Uuid = newUuid.String()
 	wrongLabelXml, err := xml.Marshal(wrongId)
 	assert.NoError(t, err)
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(wrongLabelXml)},
 	}
 
@@ -114,7 +113,7 @@ func TestXmlMeasurementLogEqualsMeasurementLogInvalidFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	// manifest with invalid measurement xml
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{"invalidxml"},
 	}
 
@@ -159,7 +158,7 @@ func TestXmlMeasurementLogEqualsUnexpectedEntriesFault(t *testing.T) {
 
 	unexpectedMeasurementsXml, err := xml.Marshal(unexpectedMeasurements)
 	assert.NoError(t, err)
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(unexpectedMeasurementsXml)},
 	}
 
@@ -193,7 +192,7 @@ func TestXmlMeasurementLogEqualsMissingExpectedEntriesFault(t *testing.T) {
 
 	missingMeasurementsXml, err := xml.Marshal(missingMeasurements)
 	assert.NoError(t, err)
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(missingMeasurementsXml)},
 	}
 
@@ -228,7 +227,7 @@ func TestXmlMeasurementLogEqualsMismatchEntriesFault(t *testing.T) {
 
 	missingMeasurementsXml, err := xml.Marshal(mismatchMeasurements)
 	assert.NoError(t, err)
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(missingMeasurementsXml)},
 	}
 
@@ -267,7 +266,7 @@ func TestXmlMeasurementLogEqualsMultipleComparisonFaults(t *testing.T) {
 
 	multipleFaultMeasurementsXml, err := xml.Marshal(multipleFaultMeasurements)
 	assert.NoError(t, err)
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(multipleFaultMeasurementsXml)},
 	}
 
