@@ -17,13 +17,8 @@ import (
 )
 
 func TestAttestationServiceConnectionRun(t *testing.T) {
-	server, port := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
 	time.Sleep(1 * time.Second)
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
@@ -43,7 +38,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"HVS_BASE_URL": "http://localhost" + port + "/mtwilson/v2/",
+				"HVS_BASE_URL": server.URL + "/mtwilson/v2/",
 			},
 
 			wantErr: false,
@@ -56,7 +51,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"SHVS_BASE_URL": "http://localhost" + port + "/sgx-hvs/v2/",
+				"SHVS_BASE_URL": server.URL + "/sgx-hvs/v2/",
 			},
 
 			wantErr: false,
@@ -109,13 +104,8 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 
 func TestAttestationServiceConnectionValidate(t *testing.T) {
 
-	server, port := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
 	time.Sleep(1 * time.Second)
 
@@ -129,7 +119,7 @@ func TestAttestationServiceConnectionValidate(t *testing.T) {
 			name: "attestation-service-connection-validate valid test",
 			attestationService: AttestationServiceConnection{
 				AttestationConfig: &config.AttestationConfig{
-					HVSBaseURL: "http://localhost" + port + "/mtwilson/v2/",
+					HVSBaseURL: server.URL + "/mtwilson/v2/",
 				},
 				ConsoleWriter: os.Stdout,
 			},

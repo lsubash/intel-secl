@@ -30,26 +30,20 @@ var (
 
 func TestGetHostsFromOpenStack(t *testing.T) {
 
-	server, port := testutility.MockServer(t)
-
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
 	configuration := config.Configuration{}
-	openstackIP := "localhost"
-	configuration.Endpoint.URL = constants.HTTP + "://" + openstackIP + port + "/"
-	configuration.Endpoint.AuthURL = constants.HTTP + "://" + openstackIP + port + "/" + constants.OpenStackAuthenticationAPI
+	openstackIP := server.URL
+	configuration.Endpoint.URL = openstackIP
+	configuration.Endpoint.AuthURL = openstackIP + "/" + constants.OpenStackAuthenticationAPI
 	configuration.Endpoint.UserName = testutility.OpenstackUserName
 	configuration.Endpoint.Password = testutility.OpenstackPassword
 	configuration.Endpoint.Type = constants.OpenStackTenant
-	configuration.AASApiUrl = "http://localhost" + port + "/aas"
+	configuration.AASApiUrl = server.URL + "/aas"
 	configuration.IHUB.Username = "admin@hub"
 	configuration.IHUB.Password = "hubAdminPass"
-	configuration.AttestationService.HVSBaseURL = "http://localhost" + port + "/mtwilson/v2"
+	configuration.AttestationService.HVSBaseURL = server.URL + "/mtwilson/v2"
 
 	authURL := configuration.Endpoint.AuthURL
 	apiURL := configuration.Endpoint.URL
@@ -105,16 +99,10 @@ func TestGetHostsFromOpenStack(t *testing.T) {
 }
 
 func mockGetHostReports(h string, c *config.Configuration, t *testing.T) (*saml.Saml, error) {
-	server, port := testutility.MockServer(t)
+	server := testutility.MockServer(t)
+	defer server.Close()
 
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
-
-	osurl := "http://localhost" + port + "/mtwilson/v2/reports?latestPerHost=true&hostName=%s"
+	osurl := server.URL + "/mtwilson/v2/reports?latestPerHost=true&hostName=%s"
 	method := "GET"
 
 	osurl = fmt.Sprintf(osurl, strings.ToLower(h))
@@ -154,14 +142,8 @@ func mockGetHostReports(h string, c *config.Configuration, t *testing.T) (*saml.
 }
 
 func TestOpenstackPluginInit(t *testing.T) {
-	server, port := testutility.MockServer(t)
-
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
 	tests := []struct {
 		name          string
@@ -177,11 +159,11 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Testing for failures 2",
 			configuration: &config.Configuration{
-				AASApiUrl: "http://localhost" + port + "/aas",
+				AASApiUrl: server.URL + "/aas",
 				Endpoint: config.Endpoint{
 					Type:     "OPENSTACK",
-					URL:      "http://localhost" + port + "/openstack/api/",
-					AuthURL:  "http://localhost" + port + "/v3/auth/tokens",
+					URL:      server.URL + "/openstack/api/",
+					AuthURL:  server.URL + "/v3/auth/tokens",
 					UserName: testutility.OpenstackUserName,
 					Password: testutility.OpenstackPassword,
 				},
@@ -191,8 +173,8 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Testing for failures 3",
 			configuration: &config.Configuration{
-				AASApiUrl:          "http://localhost" + port + "/aas",
-				AttestationService: config.AttestationConfig{HVSBaseURL: "http://localhost" + port + "/mtwilson/v2"},
+				AASApiUrl:          server.URL + "/aas",
+				AttestationService: config.AttestationConfig{HVSBaseURL: server.URL + "/mtwilson/v2"},
 			},
 			wantErr: true,
 		},
@@ -200,13 +182,13 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Success with ISecl-HVS Push",
 			configuration: &config.Configuration{
-				AASApiUrl: "http://localhost" + port + "/aas",
+				AASApiUrl: server.URL + "/aas",
 				AttestationService: config.AttestationConfig{
-					HVSBaseURL: "http://localhost" + port + "/mtwilson/v2"},
+					HVSBaseURL: server.URL + "/mtwilson/v2"},
 				Endpoint: config.Endpoint{
 					Type:     "OPENSTACK",
-					URL:      "http://localhost" + port + "/openstack/api/",
-					AuthURL:  "http://localhost" + port + "/v3/auth/tokens",
+					URL:      server.URL + "/openstack/api/",
+					AuthURL:  server.URL + "/v3/auth/tokens",
 					UserName: testutility.OpenstackUserName,
 					Password: testutility.OpenstackPassword,
 				},
@@ -217,13 +199,13 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Success with SGX-HVS Push",
 			configuration: &config.Configuration{
-				AASApiUrl: "http://localhost" + port + "/aas",
+				AASApiUrl: server.URL + "/aas",
 				AttestationService: config.AttestationConfig{
-					HVSBaseURL: "http://localhost" + port + "/sgx-hvs/v2"},
+					HVSBaseURL: server.URL + "/sgx-hvs/v2"},
 				Endpoint: config.Endpoint{
 					Type:     "OPENSTACK",
-					URL:      "http://localhost" + port + "/openstack/api/",
-					AuthURL:  "http://localhost" + port + "/v3/auth/tokens",
+					URL:      server.URL + "/openstack/api/",
+					AuthURL:  server.URL + "/v3/auth/tokens",
 					UserName: testutility.OpenstackUserName,
 					Password: testutility.OpenstackPassword,
 				},
@@ -272,15 +254,10 @@ func TestOpenstackPluginInit(t *testing.T) {
 
 func Test_deleteNonAssociatedTraits(t *testing.T) {
 
-	server, port := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
-	openstackIP := "localhost"
+	openstackIP := server.URL
 
 	type args struct {
 		o *OpenstackDetails
@@ -297,8 +274,8 @@ func Test_deleteNonAssociatedTraits(t *testing.T) {
 					AllCustomTraits: []string{"CUSTOM_ISECL_INDIA", "CUSTOM_ISECL_USA"},
 					Config: &config.Configuration{
 						Endpoint: config.Endpoint{
-							URL:      constants.HTTP + "://" + openstackIP + port + "/",
-							AuthURL:  constants.HTTP + "://" + openstackIP + port + "/" + constants.OpenStackAuthenticationAPI,
+							URL:      openstackIP + "/",
+							AuthURL:  openstackIP + "/" + constants.OpenStackAuthenticationAPI,
 							Type:     constants.OpenStackTenant,
 							UserName: testutility.OpenstackUserName,
 							Password: testutility.OpenstackPassword,

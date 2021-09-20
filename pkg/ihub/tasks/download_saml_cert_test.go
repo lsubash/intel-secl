@@ -21,15 +21,10 @@ import (
 
 func TestDownloadSamlCertValidate(t *testing.T) {
 
-	server, port := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 	time.Sleep(1 * time.Second)
-	c1 := testutility.SetupMockK8sConfiguration(t, port)
+	c1 := testutility.SetupMockK8sConfiguration(t, server.URL)
 	c1.AttestationService.HVSBaseURL = c1.AttestationService.HVSBaseURL + "/e"
 
 	temp, err := ioutil.TempFile("", "samlCert.pem")
@@ -75,13 +70,8 @@ func TestDownloadSamlCertValidate(t *testing.T) {
 }
 
 func TestDownloadSamlCertRun(t *testing.T) {
-	server, port := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 	time.Sleep(1 * time.Second)
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
@@ -118,7 +108,7 @@ func TestDownloadSamlCertRun(t *testing.T) {
 
 	conf, _ := config.LoadConfiguration()
 
-	conf.AttestationService.HVSBaseURL = "http://localhost" + port + "/mtwilson/v2/"
+	conf.AttestationService.HVSBaseURL = server.URL + "/mtwilson/v2/"
 
 	tests := []struct {
 		name    string

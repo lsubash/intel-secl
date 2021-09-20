@@ -6,9 +6,8 @@
 package k8s
 
 import (
-	"fmt"
-	"net"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
@@ -19,7 +18,7 @@ var k8sURL = "https://localhost:8771/"
 
 var k8scertFilePath = "../../ihub/test/resources/k8scert.pem"
 
-func mockServer(t *testing.T) (*http.Server, string) {
+func mockServer(t *testing.T) *httptest.Server {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
@@ -28,31 +27,8 @@ func mockServer(t *testing.T) (*http.Server, string) {
 		w.Write([]byte("12345"))
 	}).Methods("GET")
 
-	return serveController(t, r)
+	return httptest.NewServer(r)
 
-}
-
-func serveController(t *testing.T, r http.Handler) (*http.Server, string) {
-
-	//Listener Implementations
-	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		t.Log("k8s/client_test:ServeController() : Unable to initiate Listener", err)
-	}
-	port := listener.Addr().(*net.TCPAddr).Port
-	err = listener.Close()
-	if err != nil {
-		t.Log("k8s/client_test:ServeController() : Unable to close Listener", err)
-	}
-	portString := fmt.Sprintf(":%d", port)
-
-	h := &http.Server{
-		Addr:    portString,
-		Handler: r,
-	}
-	go h.ListenAndServe()
-
-	return h, portString
 }
 
 func TestNewK8sClient(t *testing.T) {
@@ -118,16 +94,11 @@ func TestNewK8sClient(t *testing.T) {
 }
 
 func TestSendRequest(t *testing.T) {
-	server, portString := mockServer(t)
+	server := mockServer(t)
 	var err error
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			log.WithError(derr).Error("Error closing server")
-		}
-	}()
+	defer server.Close()
 
-	urlPath := "http://localhost" + portString + "/test"
+	urlPath := server.URL + "/test"
 	parsedUrl, err := url.Parse(urlPath)
 	if err != nil {
 		t.Errorf("k8s/client_test:TestSendRequest(): Unable to parse the url,error = %v", err)
