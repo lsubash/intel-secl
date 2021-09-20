@@ -251,11 +251,11 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 	}
 }
 
-func (kc *KeyTransferController) authenticateAttestationToken(attestationToken string, cacheTime time.Duration) (*kbs.AttestationTokenClaim, error) {
+func (kc *KeyTransferController) authenticateAttestationToken(attestationToken string, cacheTime time.Duration) (*aps.AttestationTokenClaim, error) {
 	defaultLog.Trace("controllers/key_transfer_controller:authenticateAttestationToken() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:authenticateAttestationToken() Leaving")
 
-	claims := kbs.AttestationTokenClaim{}
+	claims := aps.AttestationTokenClaim{}
 	var err error
 	var initErr error
 
@@ -314,7 +314,7 @@ func (kc *KeyTransferController) fnGetApsJwtSigningCerts() error {
 	return nil
 }
 
-func (kc *KeyTransferController) validateClaimsAndGetKey(tokenClaims *kbs.AttestationTokenClaim, transferPolicy *kbs.KeyTransferPolicy, keyAlgorithm, userData string, keyId uuid.UUID) (interface{}, int, error) {
+func (kc *KeyTransferController) validateClaimsAndGetKey(tokenClaims *aps.AttestationTokenClaim, transferPolicy *kbs.KeyTransferPolicy, keyAlgorithm, userData string, keyId uuid.UUID) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_controller:validateClaimsAndGetKey() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateClaimsAndGetKey() Leaving")
 
@@ -331,7 +331,7 @@ func (kc *KeyTransferController) validateClaimsAndGetKey(tokenClaims *kbs.Attest
 	return response, httpStatus, nil
 }
 
-func validateAttestationTokenClaims(tokenClaims *kbs.AttestationTokenClaim, transferPolicy *kbs.KeyTransferPolicy) error {
+func validateAttestationTokenClaims(tokenClaims *aps.AttestationTokenClaim, transferPolicy *kbs.KeyTransferPolicy) error {
 	defaultLog.Trace("controllers/key_transfer_controller:validateAttestationTokenClaims() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateAttestationTokenClaims() Leaving")
 
@@ -372,7 +372,7 @@ func isPolicyIdMatched(tokenPolicyIds, keyPolicyIds []uuid.UUID) bool {
 	return false
 }
 
-func validateSGXTokenClaims(tokenClaims *kbs.AttestationTokenClaim, sgxAttributes *kbs.SgxAttributes) error {
+func validateSGXTokenClaims(tokenClaims *aps.AttestationTokenClaim, sgxAttributes *kbs.SgxAttributes) error {
 	defaultLog.Trace("controllers/key_transfer_controller:validateSGXTokenClaims() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateSGXTokenClaims() Leaving")
 
@@ -468,7 +468,7 @@ func validateTcbStatus(tcbStatus string, enforceTcbUptoDate bool) bool {
 	return true
 }
 
-func validateTDXTokenClaims(tokenClaims *kbs.AttestationTokenClaim, tdxAttributes *kbs.TdxAttributes) error {
+func validateTDXTokenClaims(tokenClaims *aps.AttestationTokenClaim, tdxAttributes *kbs.TdxAttributes) error {
 	defaultLog.Trace("controllers/key_transfer_controller:validateTDXTokenClaims() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateTDXTokenClaims() Leaving")
 

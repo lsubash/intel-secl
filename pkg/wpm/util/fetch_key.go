@@ -52,7 +52,7 @@ func FetchKey(keyID string, assetTag string) ([]byte, string, error) {
 	}
 
 	//Initialize the KBS client
-	kc := kbsc.NewKBSClient(aasUrl, kbsUrl, cfg.WPM.Username, cfg.WPM.Password, caCerts)
+	kc := kbsc.NewKBSClient(aasUrl, kbsUrl, cfg.WPM.Username, cfg.WPM.Password, "", caCerts)
 
 	var keyUrlString string
 	//If key ID is not specified, create a new key
@@ -94,7 +94,7 @@ func FetchKey(keyID string, assetTag string) ([]byte, string, error) {
 		return nil, "", errors.Wrap(err, "pkg/util/fetch_key.go:FetchKey() Error reading envelop public key")
 	}
 	//Retrieve key using key ID
-	keyValue, err := kc.TransferKey(keyID, string(pubKey))
+	keyValue, err := kc.GetKey(keyID, string(pubKey))
 	if err != nil {
 		return nil, "", errors.Wrap(err, "pkg/wpm/util/fetch_key.go:FetchKey() Error retrieving the image encryption key")
 	}

@@ -7,7 +7,6 @@ package kbs
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -18,7 +17,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// CreateKey sends a POST to /keys to create a new Key with the specified parameters
+// CreateKey sends a POST to /keys to create a new Key with specified parameters
 func (k *kbsClient) CreateKey(keyRequest *kbs.KeyRequest) (*kbs.KeyResponse, error) {
 	log.Trace("kbs/client:CreateKey() Entering")
 	defer log.Trace("kbs/client:CreateKey() Leaving")
@@ -53,20 +52,16 @@ func (k *kbsClient) CreateKey(keyRequest *kbs.KeyRequest) (*kbs.KeyResponse, err
 	return &keyResponse, nil
 }
 
-// TransferKey performs a POST to /keys/{id}/transfer to retrieve the actual key data from the KBS
-func (k *kbsClient) TransferKey(keyId, pubKey string) (*kbs.KeyTransferAttributes, error) {
+// GetKey performs a POST to /keys/{id} to retrieve the actual key data from the KBS
+func (k *kbsClient) GetKey(keyId, pubKey string) (*kbs.KeyTransferAttributes, error) {
 	log.Trace("kbs/client:TransferKey() Entering")
 	defer log.Trace("kbs/client:TransferKey() Leaving")
 
-	keyXferURL, err := url.Parse(fmt.Sprintf("keys/%s/transfer", keyId))
+	keyURL, _ := url.Parse("keys/" + keyId)
+	reqURL := k.BaseURL.ResolveReference(keyURL)
+	req, err := http.NewRequest("POST", reqURL.String(), strings.NewReader(pubKey))
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed parsing key transfer URL")
-	}
-
-	reqURL := k.BaseURL.ResolveReference(keyXferURL)
-	req, err := http.NewRequest(http.MethodPost, reqURL.String(), strings.NewReader(pubKey))
-	if err != nil {
-		return nil, errors.Wrap(err, "Error initializing key transfer request")
+		return nil, errors.Wrap(err, "Error initializing key retrieval request")
 	}
 
 	// Set the request headers
@@ -74,42 +69,82 @@ func (k *kbsClient) TransferKey(keyId, pubKey string) (*kbs.KeyTransferAttribute
 	req.Header.Set("Content-Type", constants.HTTPMediaTypePlain)
 	rsp, err := util.SendRequest(req, k.AasURL.String(), k.UserName, k.Password, k.CaCerts)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error response from key transfer request")
+		return nil, errors.Wrap(err, "Error response from key retrieval request")
 	}
 
 	// Parse response
 	var key kbs.KeyTransferAttributes
 	err = json.Unmarshal(rsp, &key)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error unmarshalling key transfer response")
+		return nil, errors.Wrap(err, "Error unmarshalling key retrieval response")
 	}
 
 	return &key, nil
 }
 
-// TransferKeyWithSaml performs a POST to /keys/{id}/transfer to retrieve the actual key data from the KBS
-func (k *kbsClient) TransferKeyWithSaml(keyId, saml string) ([]byte, error) {
-	log.Trace("kbs/client:TransferKeyWithSaml() Entering")
-	defer log.Trace("kbs/client:TransferKeyWithSaml() Leaving")
+// TransferKey performs a POST to /keys/{key_id}/transfer to retrieve the challenge data from the KBS
+func (k *kbsClient) TransferKey(keyId string) (string, string, error) {
+	log.Trace("kbs/key:TransferKey() Entering")
+	defer log.Trace("kbs/key:TransferKey() Leaving")
 
-	keyXferURL, err := url.Parse(fmt.Sprintf("keys/%s/transfer", keyId))
+	keyURL, _ := url.Parse("keys/" + keyId + "/transfer")
+	reqURL := k.BaseURL.ResolveReference(keyURL)
+	req, err := http.NewRequest("POST", reqURL.String(), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed parsing key transfer URL")
+		return "", "", errors.Wrap(err, "Error initializing key transfer request")
 	}
 
-	reqURL := k.BaseURL.ResolveReference(keyXferURL)
-	req, err := http.NewRequest(http.MethodPost, reqURL.String(), strings.NewReader(saml))
+	// Set the request headers
+	req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+	req.Header.Set("Authorization", "Bearer "+k.JwtToken)
+	rsp, err := util.GetHTTPResponse(req, k.CaCerts, false)
+	if err != nil {
+		return "", "", errors.Wrap(err, "Error response from key transfer request")
+	}
+	defer func() {
+		derr := rsp.Body.Close()
+		if derr != nil {
+			log.WithError(derr).Error("kbs/key:TransferKey() Error closing response body")
+		}
+	}()
+
+	// Parse response headers
+	return rsp.Header.Get("Nonce"), rsp.Header.Get("Attestation-Type"), nil
+}
+
+// TransferKeyWithEvidence performs a POST to /keys/{key_id}/transfer to retrieve the actual key data from the KBS
+func (k *kbsClient) TransferKeyWithEvidence(keyId, nonce, attestationType string, request *kbs.KeyTransferRequest) (*kbs.KeyTransferResponse, error) {
+	log.Trace("kbs/key:TransferKeyWithEvidence() Entering")
+	defer log.Trace("kbs/key:TransferKeyWithEvidence() Leaving")
+
+	reqBytes, err := json.Marshal(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error marshalling key transfer request")
+	}
+
+	keyURL, _ := url.Parse("keys/" + keyId + "/transfer")
+	reqURL := k.BaseURL.ResolveReference(keyURL)
+	req, err := http.NewRequest("POST", reqURL.String(), bytes.NewBuffer(reqBytes))
 	if err != nil {
 		return nil, errors.Wrap(err, "Error initializing key transfer request")
 	}
 
 	// Set the request headers
-	req.Header.Set("Accept", constants.HTTPMediaTypeOctetStream)
-	req.Header.Set("Content-Type", constants.HTTPMediaTypeSaml)
+	req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+	req.Header.Set("Authorization", "Bearer "+k.JwtToken)
+	req.Header.Set("Content-Type", constants.HTTPMediaTypeJson)
+	req.Header.Set("Attestation-Type", attestationType)
+	req.Header.Set("Nonce", nonce)
 	rsp, err := util.SendNoAuthRequest(req, k.CaCerts)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error response from key transfer request")
 	}
 
-	return rsp, nil
+	var response kbs.KeyTransferResponse
+	err = json.Unmarshal(rsp, &response)
+	if err != nil {
+		return nil, errors.New("Error unmarshalling key transfer response")
+	}
+
+	return &response, nil
 }

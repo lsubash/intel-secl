@@ -16,16 +16,18 @@ var log = commLog.GetDefaultLogger()
 
 type KBSClient interface {
 	CreateKey(*kbs.KeyRequest) (*kbs.KeyResponse, error)
-	TransferKey(string, string) (*kbs.KeyTransferAttributes, error)
-	TransferKeyWithSaml(string, string) ([]byte, error)
+	GetKey(string, string) (*kbs.KeyTransferAttributes, error)
+	TransferKey(string) (string, string, error)
+	TransferKeyWithEvidence(string, string, string, *kbs.KeyTransferRequest) (*kbs.KeyTransferResponse, error)
 }
 
-func NewKBSClient(aasURL, kbsURL *url.URL, username, password string, certs []x509.Certificate) KBSClient {
+func NewKBSClient(aasURL, kbsURL *url.URL, username, password, token string, certs []x509.Certificate) KBSClient {
 	return &kbsClient{
 		AasURL:   aasURL,
 		BaseURL:  kbsURL,
 		UserName: username,
 		Password: password,
+		JwtToken: token,
 		CaCerts:  certs,
 	}
 }
@@ -35,5 +37,6 @@ type kbsClient struct {
 	BaseURL  *url.URL
 	UserName string
 	Password string
+	JwtToken string
 	CaCerts  []x509.Certificate
 }
