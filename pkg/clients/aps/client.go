@@ -16,7 +16,7 @@ var defaultLog = commLog.GetDefaultLogger()
 
 type APSClient interface {
 	GetJwtSigningCertificate() ([]byte, error)
-	GetNonce() (string, error)
+	GetNonce() (string, int, error)
 	GetAttestationToken(string, *aps.AttestationTokenRequest) ([]byte, int, error)
 }
 

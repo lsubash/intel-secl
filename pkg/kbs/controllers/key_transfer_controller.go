@@ -150,10 +150,10 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 	var cacheTime, _ = time.ParseDuration(consts.JWTCertsCacheTime)
 	if request.Header.Get("Nonce") == "" {
 		if request.ContentLength == 0 {
-			nonce, err := kc.client.GetNonce()
+			nonce, httpStatus, err := kc.client.GetNonce()
 			if err != nil {
 				defaultLog.WithError(err).Error("controllers/key_transfer_controller:Transfer() Error retrieving nonce from APS")
-				return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error retrieving nonce from APS"}
+				return nil, httpStatus, &commErr.ResourceError{Message: "Error retrieving nonce from APS"}
 			}
 			responseWriter.Header().Set("Nonce", nonce)
 			responseWriter.Header().Set("Attestation-Type", transferPolicy.AttestationType[0])
@@ -230,10 +230,10 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 			PolicyIds: policyIds,
 		}
 
-		token, status, err := kc.client.GetAttestationToken(request.Header.Get("Nonce"), &tokenRequest)
+		token, httpStatus, err := kc.client.GetAttestationToken(request.Header.Get("Nonce"), &tokenRequest)
 		if err != nil {
 			defaultLog.WithError(err).Error("controllers/key_transfer_controller:Transfer() Error retrieving token from APS")
-			return nil, status, &commErr.ResourceError{Message: "Error retrieving token from APS"}
+			return nil, httpStatus, &commErr.ResourceError{Message: "Error retrieving token from APS"}
 		}
 
 		tokenClaims, err := kc.authenticateAttestationToken(string(token), cacheTime)
