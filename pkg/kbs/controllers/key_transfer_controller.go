@@ -230,10 +230,10 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 			PolicyIds: policyIds,
 		}
 
-		token, err := kc.client.GetAttestationToken(request.Header.Get("Nonce"), &tokenRequest)
+		token, status, err := kc.client.GetAttestationToken(request.Header.Get("Nonce"), &tokenRequest)
 		if err != nil {
 			defaultLog.WithError(err).Error("controllers/key_transfer_controller:Transfer() Error retrieving token from APS")
-			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error retrieving token from APS"}
+			return nil, status, &commErr.ResourceError{Message: "Error retrieving token from APS"}
 		}
 
 		tokenClaims, err := kc.authenticateAttestationToken(string(token), cacheTime)
@@ -379,7 +379,6 @@ func validateSGXTokenClaims(tokenClaims *kbs.AttestationTokenClaim, sgxAttribute
 	if validateMrSigner(tokenClaims.MrSigner, sgxAttributes.MrSigner) &&
 		validateIsvProdId(tokenClaims.IsvProductId, sgxAttributes.IsvProductId) &&
 		validateMrEnclave(tokenClaims.MrEnclave, sgxAttributes.MrEnclave) &&
-		validateConfigId(tokenClaims.MrConfigId, sgxAttributes.ConfigId) &&
 		validateIsvSvn(tokenClaims.IsvSvn, *sgxAttributes.IsvSvn) &&
 		validateTcbStatus(tokenClaims.TcbStatus, *sgxAttributes.EnforceTCBUptoDate) {
 		defaultLog.Debug("controllers/key_transfer_controller:validateSGXTokenClaims() All sgx attributes in attestation token matches with attributes in key transfer policy")
@@ -441,24 +440,6 @@ func validateMrEnclave(tokenMrEnclave string, policyMrEnclave []string) bool {
 	}
 
 	defaultLog.Error("controllers/key_transfer_controller:validateMrEnclave() Enclave Measurement in attestation token does not match with the key transfer policy")
-	return false
-}
-
-// validateConfigId - Function to Validate ConfigId
-func validateConfigId(tokenConfigID string, policyConfigIDs []string) bool {
-	defaultLog.Trace("controllers/key_transfer_controller:validateConfigId() Entering")
-	defer defaultLog.Trace("controllers/key_transfer_controller:validateConfigId() Leaving")
-
-	if tokenConfigID == "" && len(policyConfigIDs) == 0 {
-		return true
-	}
-
-	if slice.Contains(policyConfigIDs, tokenConfigID) {
-		defaultLog.Debug("controllers/key_transfer_controller:validateConfigId() Config ID in attestation token matches with the key transfer policy")
-		return true
-	}
-
-	defaultLog.Error("controllers/key_transfer_controller:validateConfigId() Config ID in attestation token does not match with the key transfer policy")
 	return false
 }
 

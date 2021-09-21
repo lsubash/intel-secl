@@ -27,10 +27,10 @@ type TdxPolicy struct {
 }
 
 type TdxAttributes struct {
-	MrSignerSeam       []string `json:"mr_signer_seam,omitempty"`
-	MrSeam             []string `json:"mr_seam,omitempty"`
-	SeamSvn            *uint8   `json:"seam_svn,omitempty"`
-	MRTD               []string `json:"mr_td,omitempty"`
+	MrSignerSeam       []string `json:"mrsignerseam,omitempty"`
+	MrSeam             []string `json:"mrseam,omitempty"`
+	SeamSvn            *uint8   `json:"seamsvn,omitempty"`
+	MRTD               []string `json:"mrtd,omitempty"`
 	RTMR0              string   `json:"rtmr0,omitempty"`
 	RTMR1              string   `json:"rtmr1,omitempty"`
 	RTMR2              string   `json:"rtmr2,omitempty"`
@@ -45,13 +45,10 @@ type SgxPolicy struct {
 }
 
 type SgxAttributes struct {
-	MrSigner             []string `json:"mr_signer,omitempty"`
-	IsvProductId         []uint16 `json:"isv_prod_id,omitempty"`
-	IsvExtendedProductId []string `json:"isv_ext_prod_id,omitempty"`
-	MrEnclave            []string `json:"mr_enclave,omitempty"`
-	ConfigSVN            *int16   `json:"config_svn,omitempty"`
-	IsvSvn               *uint16  `json:"isv_svn,omitempty"`
-	ConfigId             []string `json:"config_id,omitempty"`
-	ClientPermissions    []string `json:"client_permissions,omitempty"`
-	EnforceTCBUptoDate   *bool    `json:"enforce_tcb_upto_date,omitempty"`
+	MrSigner           []string `json:"mrsigner,omitempty"`
+	IsvProductId       []uint16 `json:"isvprodid,omitempty"`
+	MrEnclave          []string `json:"mrenclave,omitempty"`
+	IsvSvn             *uint16  `json:"isvsvn,omitempty"`
+	ClientPermissions  []string `json:"client_permissions,omitempty"`
+	EnforceTCBUptoDate *bool    `json:"enforce_tcb_upto_date,omitempty"`
 }

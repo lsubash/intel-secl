@@ -195,26 +195,10 @@ func ValidateSGXAttributes(sgxPolicyAttributes *kbs.SgxAttributes) error {
 		}
 	}
 
-	if sgxPolicyAttributes.IsvExtendedProductId != nil {
-		for _, extProdId := range sgxPolicyAttributes.IsvExtendedProductId {
-			if err := validation.ValidateIsvExtProdIdString(extProdId); err != nil {
-				return errors.Wrap(err, "Input validation failed for ISV extended product Id")
-			}
-		}
-	}
-
 	if sgxPolicyAttributes.MrEnclave != nil {
 		for _, mrEnclave := range sgxPolicyAttributes.MrEnclave {
 			if err := validation.ValidateSha256HexString(mrEnclave); err != nil {
 				return errors.Wrap(err, "Input validation failed for MR Enclave")
-			}
-		}
-	}
-
-	if sgxPolicyAttributes.ConfigId != nil {
-		for _, configId := range sgxPolicyAttributes.ConfigId {
-			if err := validation.ValidateConfigIdString(configId); err != nil {
-				return errors.Wrap(err, "Input validation failed for Config Id")
 			}
 		}
 	}

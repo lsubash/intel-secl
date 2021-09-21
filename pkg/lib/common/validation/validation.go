@@ -33,8 +33,6 @@ var (
 	stringReg           = regexp.MustCompile("(^[a-zA-Z0-9_ \\/.-]*$)")
 	hexStringReg        = regexp.MustCompile("^[a-fA-F0-9]+$")
 	sha256HexStringReg  = regexp.MustCompile("^[a-fA-F0-9]{64}$")
-	isvExtProdIdReg     = regexp.MustCompile("^[a-fA-F0-9]{32}$")
-	configIdReg         = regexp.MustCompile("^[a-fA-F0-9]{128}$")
 	sha384HexStringReg  = regexp.MustCompile("^[a-fA-F0-9]{96}$")
 	pemEncodedKeyReg    = regexp.MustCompile("(^[-a-zA-Z0-9//=+\012 ]*$)")
 	dateReg             = regexp.MustCompile("[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]")
@@ -223,22 +221,6 @@ func ValidateHexString(value string) error {
 // ValidateSha256HexString method checks if a string is a valid hex string of 32 bytes
 func ValidateSha256HexString(value string) error {
 	if !sha256HexStringReg.MatchString(value) {
-		return errors.New("invalid hex string format")
-	}
-	return nil
-}
-
-// ValidateIsvExtProdIdString method checks if a string is a valid hex string of 16 bytes
-func ValidateIsvExtProdIdString(value string) error {
-	if !isvExtProdIdReg.MatchString(value) {
-		return errors.New("invalid hex string format")
-	}
-	return nil
-}
-
-// ValidateConfigIdString method checks if a string is a valid hex string of 64 bytes
-func ValidateConfigIdString(value string) error {
-	if !configIdReg.MatchString(value) {
 		return errors.New("invalid hex string format")
 	}
 	return nil

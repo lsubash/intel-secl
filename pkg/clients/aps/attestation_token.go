@@ -7,6 +7,7 @@ package aps
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -47,20 +48,20 @@ func (a *apsClient) GetNonce() (string, error) {
 }
 
 // GetAttestationToken sends a POST to /attestation-token to create a new Attestation token with the specified quote attributes
-func (a *apsClient) GetAttestationToken(nonce string, tokenRequest *aps.AttestationTokenRequest) ([]byte, error) {
+func (a *apsClient) GetAttestationToken(nonce string, tokenRequest *aps.AttestationTokenRequest) ([]byte, int, error) {
 	defaultLog.Trace("aps/attestation_token:GetAttestationToken() Entering")
 	defer defaultLog.Trace("aps/attestation_token:GetAttestationToken() Leaving")
 
 	reqBytes, err := json.Marshal(tokenRequest)
 	if err != nil {
-		return nil, errors.Wrap(err, "aps/attestation_token:GetAttestationToken() Error marshalling attestation token request")
+		return nil, http.StatusInternalServerError, errors.Wrap(err, "aps/attestation_token:GetAttestationToken() Error marshalling attestation token request")
 	}
 
 	tokenURL, _ := url.Parse("attestation-token")
 	reqURL := a.BaseURL.ResolveReference(tokenURL)
 	req, err := http.NewRequest("POST", reqURL.String(), bytes.NewBuffer(reqBytes))
 	if err != nil {
-		return nil, errors.Wrap(err, "aps/attestation_token:GetAttestationToken() Error initializing http request")
+		return nil, http.StatusInternalServerError, errors.Wrap(err, "aps/attestation_token:GetAttestationToken() Error initializing http request")
 	}
 
 	// Set the request headers
@@ -68,10 +69,23 @@ func (a *apsClient) GetAttestationToken(nonce string, tokenRequest *aps.Attestat
 	req.Header.Set("Authorization", "Bearer "+a.JwtToken)
 	req.Header.Set("Content-Type", constants.HTTPMediaTypeJson)
 	req.Header.Set("Nonce", nonce)
-	rsp, err := util.SendNoAuthRequest(req, a.CaCerts)
+	rsp, err := util.GetHTTPResponse(req, a.CaCerts, false)
 	if err != nil {
-		return nil, errors.Wrap(err, "aps/attestation_token:GetAttestationToken() Error response received from APS")
+		return nil, rsp.StatusCode, errors.Wrap(err, "aps/attestation_token:GetAttestationToken() Error response received from APS")
 	}
 
-	return rsp, nil
+	defer func() {
+		derr := rsp.Body.Close()
+		if derr != nil {
+			defaultLog.WithError(derr).Error("Error closing response body")
+		}
+	}()
+
+	//create byte array of HTTP response body
+	body, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, http.StatusInternalServerError, errors.Wrap(err, "clients/send_http_request.go:SendNoAuthRequest() Error from response")
+	}
+
+	return body, rsp.StatusCode, nil
 }

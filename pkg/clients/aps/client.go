@@ -17,7 +17,7 @@ var defaultLog = commLog.GetDefaultLogger()
 type APSClient interface {
 	GetJwtSigningCertificate() ([]byte, error)
 	GetNonce() (string, error)
-	GetAttestationToken(string, *aps.AttestationTokenRequest) ([]byte, error)
+	GetAttestationToken(string, *aps.AttestationTokenRequest) ([]byte, int, error)
 }
 
 func NewAPSClient(apsURL *url.URL, certs []x509.Certificate, token string) APSClient {
