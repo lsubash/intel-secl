@@ -42,7 +42,7 @@ func TestDefaultFlavorTemplateDes(t *testing.T) {
 	}
 	flavorTemplates, err := ft.getTemplates()
 	assert.NoError(t, err)
-	for template, _ := range flavorTemplates {
+	for template := range flavorTemplates {
 		t.Log(template)
 	}
 }

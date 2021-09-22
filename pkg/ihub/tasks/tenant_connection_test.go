@@ -19,20 +19,14 @@ import (
 
 func TestTenantConnectionRun(t *testing.T) {
 
-	server, portString := testutility.MockServer(t)
-	port := strings.Trim(portString, ":")
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
 
-	openstackConfig := testutility.SetupMockOpenStackConfiguration(t, portString)
-	k8sConfig := testutility.SetupMockK8sConfiguration(t, portString)
+	openstackConfig := testutility.SetupMockOpenStackConfiguration(t, server.URL)
+	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)
 	k8sConfig.Endpoint.CertFile = constants.DefaultK8SCertFile
 
 	type args struct {
@@ -71,7 +65,7 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":               k8sConfig.Endpoint.Type,
-					"KUBERNETES_URL":       "https://localhost:" + port + "/",
+					"KUBERNETES_URL":       server.URL + "/",
 					"KUBERNETES_CRD":       "custom-isecl",
 					"KUBERNETES_TOKEN":     "",
 					"KUBERNETES_CERT_FILE": k8sConfig.Endpoint.CertFile,
@@ -88,7 +82,7 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":               k8sConfig.Endpoint.Type,
-					"KUBERNETES_URL":       "https://localhost:" + port + "/",
+					"KUBERNETES_URL":       server.URL + "/",
 					"KUBERNETES_CRD":       "",
 					"KUBERNETES_TOKEN":     k8sConfig.Endpoint.Token,
 					"KUBERNETES_CERT_FILE": "",
@@ -105,7 +99,7 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":               k8sConfig.Endpoint.Type,
-					"KUBERNETES_URL":       "https://localhost:" + port + "/",
+					"KUBERNETES_URL":       server.URL + "/",
 					"KUBERNETES_CRD":       "custom-isecl",
 					"KUBERNETES_TOKEN":     k8sConfig.Endpoint.Token,
 					"KUBERNETES_CERT_FILE": k8sConfig.Endpoint.CertFile,
@@ -121,7 +115,7 @@ func TestTenantConnectionRun(t *testing.T) {
 			},
 			args: args{
 				EnvValues: map[string]string{
-					"KUBERNETES_URL":       "https://localhost:" + port + "/",
+					"KUBERNETES_URL":       server.URL + "/",
 					"KUBERNETES_CRD":       "custom-isecl",
 					"KUBERNETES_TOKEN":     k8sConfig.Endpoint.Token,
 					"KUBERNETES_CERT_FILE": k8sConfig.Endpoint.CertFile,
@@ -138,8 +132,8 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "http://localhost:" + port,
-					"OPENSTACK_PLACEMENT_URL": "http://localhost:" + port,
+					"OPENSTACK_AUTH_URL":      server.URL,
+					"OPENSTACK_PLACEMENT_URL": server.URL,
 					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
 					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
 				},
@@ -155,7 +149,7 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":             openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL": "http://localhost:" + port,
+					"OPENSTACK_AUTH_URL": server.URL,
 					"OPENSTACK_USERNAME": openstackConfig.Endpoint.UserName,
 					"OPENSTACK_PASSWORD": openstackConfig.Endpoint.Password,
 				},
@@ -171,7 +165,7 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_PLACEMENT_URL": "http://localhost:" + port,
+					"OPENSTACK_PLACEMENT_URL": server.URL,
 					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
 					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
 				},
@@ -202,8 +196,8 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "http://localhost:" + port,
-					"OPENSTACK_PLACEMENT_URL": "http://localhost:" + port,
+					"OPENSTACK_AUTH_URL":      server.URL,
+					"OPENSTACK_PLACEMENT_URL": server.URL,
 					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
 				},
 			},
@@ -218,8 +212,8 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "http://localhost:" + port,
-					"OPENSTACK_PLACEMENT_URL": "http://localhost:" + port,
+					"OPENSTACK_AUTH_URL":      server.URL,
+					"OPENSTACK_PLACEMENT_URL": server.URL,
 					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
 				},
 			},
@@ -234,8 +228,8 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "http://localhost:" + port,
-					"OPENSTACK_PLACEMENT_URL": "http://localhost:" + port,
+					"OPENSTACK_AUTH_URL":      server.URL,
+					"OPENSTACK_PLACEMENT_URL": server.URL,
 					"OPENSTACK_USERNAME":      "",
 					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
 				},
@@ -251,8 +245,8 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "http://localhost:" + port,
-					"OPENSTACK_PLACEMENT_URL": "http://localhost:" + port,
+					"OPENSTACK_AUTH_URL":      server.URL,
+					"OPENSTACK_PLACEMENT_URL": server.URL,
 					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
 					"OPENSTACK_PASSWORD":      "",
 				},
@@ -268,8 +262,8 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "_________________________________abc:localhost1234:" + port,
-					"OPENSTACK_PLACEMENT_URL": "http://localhost:" + port,
+					"OPENSTACK_AUTH_URL":      "_________________________________abc:localhost1234:",
+					"OPENSTACK_PLACEMENT_URL": server.URL,
 					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
 					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
 				},
@@ -285,8 +279,8 @@ func TestTenantConnectionRun(t *testing.T) {
 			args: args{
 				EnvValues: map[string]string{
 					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "http://localhost:" + port,
-					"OPENSTACK_PLACEMENT_URL": "_________________________________abc:localhost1234:" + port,
+					"OPENSTACK_AUTH_URL":      server.URL,
+					"OPENSTACK_PLACEMENT_URL": "_________________________________abc:localhost1234:",
 					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
 					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
 				},
@@ -330,15 +324,10 @@ func TestTenantConnectionRun(t *testing.T) {
 
 func TestTenantConnectionValidate(t *testing.T) {
 
-	server, portString := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
-	k8sConfig := testutility.SetupMockK8sConfiguration(t, portString)
+	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)
 
 	tests := []struct {
 		name             string
@@ -350,8 +339,8 @@ func TestTenantConnectionValidate(t *testing.T) {
 			tenantConnection: TenantConnection{
 				TenantConfig: &config.Endpoint{
 					Type:     constants.OpenStackTenant,
-					AuthURL:  "http://localhost" + portString + "/v3/auth/tokens",
-					URL:      "http://localhost" + portString + "/",
+					AuthURL:  server.URL + "/v3/auth/tokens",
+					URL:      server.URL + "/",
 					UserName: "admin",
 					Password: "password",
 				},
@@ -400,16 +389,11 @@ func TestTenantConnectionValidate(t *testing.T) {
 
 func TestTenantConnection_validateService(t *testing.T) {
 
-	server, portString := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
-	openstackConfig := testutility.SetupMockOpenStackConfiguration(t, portString)
-	k8sConfig := testutility.SetupMockK8sConfiguration(t, portString)
+	openstackConfig := testutility.SetupMockOpenStackConfiguration(t, server.URL)
+	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)
 
 	t1 := TenantConnection{
 		TenantConfig:  &openstackConfig.Endpoint,

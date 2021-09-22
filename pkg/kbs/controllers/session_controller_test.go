@@ -99,7 +99,7 @@ var _ = Describe("SessionController", func() {
 	})
 
 	AfterEach(func() {
-		server.Close()
+		defer server.Close()
 	})
 
 	// Specs for HTTP Post to "/session"

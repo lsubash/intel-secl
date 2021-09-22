@@ -18,6 +18,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	authorityKeyIdOid = "2.5.29.35"
+)
+
 //getPcrMatchesConstantRules method will create PcrMatchesConstantRule and return the rule
 //return nil if error occurs
 func getPcrMatchesConstantRules(pcrLogData *types.FlavorPcrs, marker common.FlavorPart) ([]rules.Rule, error) {
@@ -110,6 +114,16 @@ func getAssetTagMatchesRule(flavor *hvs.Flavor) (rules.Rule, error) {
 
 	tags := make([]asset_tag.TagKvAttribute, 0)
 	for _, extensions := range assetTagCertficate.Extensions {
+		/* Per go1.15 release notes https://golang.org/doc/go1.15:
+		CreateCertificate now automatically generates the SubjectKeyId if the template is a CA
+		and doesn't explicitly specify one: defaults to SHA1 hash of Public component of parent CA.
+		AuthKeyId defaults to SubjectKeyId. And this is always added to Certificate.Extensions.
+		ASN1 unmarshalling for extension with oid 2.5.29.35 for AuthorityKeyId always seems to fail.
+		We skip the verification of this ASN1 to avoid conflicts.*/
+		if extensions.Id.String() == authorityKeyIdOid {
+			log.Warnf("lib/verifier/getAssetTagMatchesRule: Skipping ASN1 unmarshal for AuthorityKeyId")
+			continue
+		}
 		var tagAttribute asset_tag.TagKvAttribute
 		_, err = asn1.Unmarshal(extensions.Value, &tagAttribute)
 		if err != nil {

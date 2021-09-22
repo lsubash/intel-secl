@@ -23,7 +23,7 @@ var (
 	ErrCmdParse      = errors.New("Failed to parse command line input")
 	ErrCmdArgMissing = errors.New("Invalid command line arguments, something missing")
 	ErrCmdArgUndef   = errors.New("Invalid command line arguments, something undefined")
-	ErrEnvArg        = errors.New("Failed to retrive all argument from env")
+	ErrEnvArg        = errors.New("Failed to retrieve all argument from env")
 )
 
 // ValidateCmd checks if the command line arguments are valid

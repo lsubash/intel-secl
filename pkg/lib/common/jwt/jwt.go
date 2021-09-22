@@ -19,12 +19,12 @@ import (
 	"sync"
 	"time"
 
-	jwt "github.com/Waterdrips/jwt-go"
+	"github.com/Waterdrips/jwt-go"
 )
 
 const (
-	defaultTokenValidity    time.Duration = 24 * time.Hour
-	gracePeriodForClockSkew time.Duration = 30 * time.Second
+	defaultTokenValidity    = 24 * time.Hour
+	gracePeriodForClockSkew = 30 * time.Second
 )
 
 type MatchingCertNotFoundError struct {

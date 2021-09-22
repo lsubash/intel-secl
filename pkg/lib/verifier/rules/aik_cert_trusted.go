@@ -58,7 +58,7 @@ func (rule *aikCertTrusted) Apply(hostManifest *types.HostManifest) (*hvs.RuleRe
 
 		aik, err := hostManifest.GetAIKCertificate()
 		if err != nil {
-			return nil, errors.Wrap(err, "Could not retrive the HostManifest's AIK to validate rule AikCertificateTrusted")
+			return nil, errors.Wrap(err, "Could not retrieve the HostManifest's AIK to validate rule AikCertificateTrusted")
 		}
 
 		if time.Now().After(aik.NotAfter) {

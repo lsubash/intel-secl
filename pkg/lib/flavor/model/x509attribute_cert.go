@@ -20,6 +20,10 @@ import (
  * @author mullas
  */
 
+const (
+	authorityKeyIdOid = "2.5.29.35"
+)
+
 // X509AttributeCertificate holds a subset of x509.Certificate that has relevant information for Flavor
 type X509AttributeCertificate struct {
 	Encoded           []byte      `json:"encoded"`
@@ -64,7 +68,14 @@ func NewX509AttributeCertificate(tagCert *x509.Certificate) (*X509AttributeCerti
 		// fill in the ID
 		attrkva.AttrType.ID = attrExt.Id.String()
 
-		// fill in the values
+		// check if the attribute tags can be unmarshalled
+		// but skip if this is an AuthorityKeyID - OID 2.5.29.35 as the unmarshal will fail
+		// this change affects all versions of go >=1.15 caused by:
+		//
+		if attrkva.AttrType.ID == authorityKeyIdOid {
+			continue
+		}
+
 		_, err := asn1.Unmarshal(attrExt.Value, &tagkva1)
 		if err != nil {
 			return nil, errors.Wrap(err, "Failure unmarshalling ASN1 Attributes")

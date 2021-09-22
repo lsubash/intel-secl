@@ -6,11 +6,10 @@ package testutility
 
 import (
 	"encoding/json"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"net"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -80,7 +79,7 @@ var OpenstackHostID = "2f309eb2-71fa-4d67-83a4-de5ca3fc2e05"
 var InvalidOpenstackHostID = "2g309dc2-71gb-4d67-83a4-de5ca3fc2e05"
 
 // MockServer for IHUB unit testing
-func MockServer(t *testing.T) (*http.Server, string) {
+func MockServer(t *testing.T) *httptest.Server {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/aas/token", func(w http.ResponseWriter, r *http.Request) {
@@ -323,35 +322,11 @@ func MockServer(t *testing.T) (*http.Server, string) {
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 	}).Methods("GET")
 
-	return ServeController(t, r)
-}
-
-//ServeController serves the router and port
-func ServeController(t *testing.T, r http.Handler) (*http.Server, string) {
-
-	//Listener Implementations
-	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		t.Log("test/test_utility:mockServer() : Unable to initiate Listener", err)
-	}
-	port := listener.Addr().(*net.TCPAddr).Port
-	err = listener.Close()
-	if err != nil {
-		t.Log("test/test_utility:mockServer() : Unable to close Listener", err)
-	}
-	portString := fmt.Sprintf(":%d", port)
-
-	h := &http.Server{
-		Addr:    portString,
-		Handler: r,
-	}
-	go h.ListenAndServe()
-
-	return h, portString
+	return httptest.NewServer(r)
 }
 
 //SetupMockK8sConfiguration setting up mock k8s configurations
-func SetupMockK8sConfiguration(t *testing.T, port string) *config.Configuration {
+func SetupMockK8sConfiguration(t *testing.T, serverUrl string) *config.Configuration {
 
 	temp, _ := ioutil.TempFile("", "config.yml")
 	defer func() {
@@ -361,13 +336,13 @@ func SetupMockK8sConfiguration(t *testing.T, port string) *config.Configuration 
 		}
 	}()
 	c, _ := config.LoadConfiguration()
-	c.AASApiUrl = "http://localhost" + port + "/aas"
+	c.AASApiUrl = serverUrl + "/aas"
 	c.IHUB.Username = "admin@hub"
 	c.IHUB.Password = "hubAdminPass"
-	c.AttestationService.HVSBaseURL = "http://localhost" + port + "/mtwilson/v2/"
-	c.AttestationService.SHVSBaseURL = "http://localhost" + port + "/sgx-hvs/v2/"
+	c.AttestationService.HVSBaseURL = serverUrl + "/mtwilson/v2/"
+	c.AttestationService.SHVSBaseURL = serverUrl + "/sgx-hvs/v2/"
 	c.Endpoint.Type = "KUBERNETES"
-	c.Endpoint.URL = "http://localhost" + port + "/"
+	c.Endpoint.URL = serverUrl + "/"
 	c.Endpoint.CRDName = "custom-isecl"
 	c.Endpoint.CertFile = K8scertFilePath
 	c.Endpoint.Token = K8sToken
@@ -376,7 +351,7 @@ func SetupMockK8sConfiguration(t *testing.T, port string) *config.Configuration 
 }
 
 //SetupMockOpenStackConfiguration setting up mock opentstack configurations
-func SetupMockOpenStackConfiguration(t *testing.T, port string) *config.Configuration {
+func SetupMockOpenStackConfiguration(t *testing.T, serverUrl string) *config.Configuration {
 
 	temp, _ := ioutil.TempFile("", "config.yml")
 	defer func() {
@@ -386,12 +361,12 @@ func SetupMockOpenStackConfiguration(t *testing.T, port string) *config.Configur
 		}
 	}()
 	c, _ := config.LoadConfiguration()
-	c.AASApiUrl = "http://localhost" + port + "/aas"
+	c.AASApiUrl = serverUrl + "/aas"
 	c.IHUB.Username = "admin@hub"
 	c.IHUB.Password = "hubAdminPass"
 	c.Endpoint.Type = "OPENSTACK"
-	c.Endpoint.AuthURL = "http://localhost" + port + "/v3/auth/tokens"
-	c.Endpoint.URL = "http://localhost" + port + "/"
+	c.Endpoint.AuthURL = serverUrl + "/v3/auth/tokens"
+	c.Endpoint.URL = serverUrl + "/"
 	c.Endpoint.UserName = OpenstackUserName
 	c.Endpoint.Password = OpenstackPassword
 

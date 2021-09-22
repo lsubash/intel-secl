@@ -26,8 +26,10 @@ var invalidHostID = testutility.InvalidOpenstackHostID
 
 func TestGetHostReports(t *testing.T) {
 
-	server, portString := testutility.MockServer(t)
-	c := testutility.SetupMockK8sConfiguration(t, portString)
+	server := testutility.MockServer(t)
+	defer server.Close()
+
+	c := testutility.SetupMockK8sConfiguration(t, server.URL)
 	report, err := ioutil.ReadFile(sampleSamlReportPath)
 	if err != nil {
 		t.Log("attestationPlugin/vs_plugin_test:TestGetHostReports() : Unable to read file")
@@ -36,12 +38,6 @@ func TestGetHostReports(t *testing.T) {
 	samlReport := &saml.Saml{}
 	err = xml.Unmarshal(report, samlReport)
 
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
 	type args struct {
 		h string
 		c *config.Configuration
@@ -64,14 +60,14 @@ func TestGetHostReports(t *testing.T) {
 			args: args{
 				h: invalidHostID,
 				c: &config.Configuration{
-					AASApiUrl: "http://localhost" + portString + "/aas",
+					AASApiUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
-						HVSBaseURL: "http://localhost" + portString + "/mtwilson/v2/invalid",
+						HVSBaseURL: server.URL + "/mtwilson/v2/invalid",
 					},
 					Endpoint: config.Endpoint{
 						Type:     "OPENSTACK",
-						URL:      "http://localhost" + portString + "/openstack/api/",
-						AuthURL:  "http://localhost" + portString + "/v3/auth/tokens",
+						URL:      server.URL + "/openstack/api/",
+						AuthURL:  server.URL + "/v3/auth/tokens",
 						UserName: testutility.OpenstackUserName,
 						Password: testutility.OpenstackPassword,
 					},
@@ -88,14 +84,14 @@ func TestGetHostReports(t *testing.T) {
 			args: args{
 				h: hostID,
 				c: &config.Configuration{
-					AASApiUrl: "http://localhost" + portString + "/aas",
+					AASApiUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
-						HVSBaseURL: "http://localhost" + portString + "/mtwilson/v2/",
+						HVSBaseURL: server.URL + "/mtwilson/v2/",
 					},
 					Endpoint: config.Endpoint{
 						Type:     "OPENSTACK",
-						URL:      "http://localhost" + portString + "/openstack/api/",
-						AuthURL:  "http://localhost" + portString + "/v3/auth/tokens",
+						URL:      server.URL + "/openstack/api/",
+						AuthURL:  server.URL + "/v3/auth/tokens",
 						UserName: testutility.OpenstackUserName,
 						Password: testutility.OpenstackPassword,
 					},
@@ -114,7 +110,7 @@ func TestGetHostReports(t *testing.T) {
 			args: args{
 				h: hostID,
 				c: &config.Configuration{
-					AASApiUrl: "http://localhost" + portString + "/aas",
+					AASApiUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
 						HVSBaseURL: "mtwilson/v2"},
 					Endpoint: config.Endpoint{
@@ -148,14 +144,8 @@ func TestGetCaCerts(t *testing.T) {
 		t.Log("attestationPlugin/vs_plugin_test:TestGetCaCerts() : Unable to read file")
 	}
 
-	server, portString := testutility.MockServer(t)
-
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 
 	type args struct {
 		domain        string
@@ -171,7 +161,7 @@ func TestGetCaCerts(t *testing.T) {
 			args: args{
 				domain: "SAML",
 				configuration: &config.Configuration{
-					AASApiUrl: "http://localhost" + portString + "/aas",
+					AASApiUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
@@ -189,13 +179,13 @@ func TestGetCaCerts(t *testing.T) {
 			args: args{
 				domain: "SAML",
 				configuration: &config.Configuration{
-					AASApiUrl: "http://localhost" + portString + "/aas",
+					AASApiUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						HVSBaseURL: "http://localhost" + portString + "/mtwilson/v2/",
+						HVSBaseURL: server.URL + "/mtwilson/v2/",
 					},
 				},
 			},
@@ -252,13 +242,9 @@ func Test_initializeCert(t *testing.T) {
 }
 
 func Test_initializeClient(t *testing.T) {
-	server, portString := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
+
 	type args struct {
 		con           *config.Configuration
 		certDirectory string
@@ -274,13 +260,13 @@ func Test_initializeClient(t *testing.T) {
 			args: args{
 				certDirectory: "",
 				con: &config.Configuration{
-					AASApiUrl: "http://localhost" + portString + "/aas",
+					AASApiUrl: server.URL + "/aas",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						HVSBaseURL: "http://localhost" + portString + "/mtwilson/v2",
+						HVSBaseURL: server.URL + "/mtwilson/v2",
 					},
 				},
 			},

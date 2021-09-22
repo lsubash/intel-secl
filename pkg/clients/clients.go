@@ -66,7 +66,7 @@ func GetCertPool(trustedCACerts []x509.Certificate) *x509.CertPool {
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
 	}
-	for i, _ := range trustedCACerts {
+	for i := range trustedCACerts {
 		rootCAs.AddCert(&trustedCACerts[i])
 	}
 	return rootCAs

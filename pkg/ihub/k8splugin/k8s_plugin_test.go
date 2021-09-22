@@ -57,14 +57,9 @@ func setupMockValues(t *testing.T, portString string) (*KubernetesDetails, *type
 }
 
 func TestGetHostsFromKubernetes(t *testing.T) {
-	server, portString := testutility.MockServer(t)
-	k1, _ := setupMockValues(t, portString)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	k1, _ := setupMockValues(t, server.URL)
+	defer server.Close()
 
 	urlPath := k1.Config.Endpoint.URL
 	token := k1.Config.Endpoint.Token
@@ -111,14 +106,9 @@ func TestGetHostsFromKubernetes(t *testing.T) {
 }
 
 func TestFilterHostReportsForKubernetes(t *testing.T) {
-	server, port := testutility.MockServer(t)
-	k1, h1 := setupMockValues(t, port)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	k1, h1 := setupMockValues(t, server.URL)
+	defer server.Close()
 
 	type args struct {
 		k *KubernetesDetails
@@ -150,14 +140,9 @@ func TestFilterHostReportsForKubernetes(t *testing.T) {
 }
 
 func TestUpdateCRD(t *testing.T) {
-	server, port := testutility.MockServer(t)
-	k1, _ := setupMockValues(t, port)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	k1, _ := setupMockValues(t, server.URL)
+	defer server.Close()
 	time.Sleep(1 * time.Second)
 
 	var err error
@@ -280,14 +265,9 @@ func TestUpdateCRD(t *testing.T) {
 }
 
 func TestKubePluginInit(t *testing.T) {
-	server, port := testutility.MockServer(t)
-	c := testutility.SetupMockK8sConfiguration(t, port)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	c := testutility.SetupMockK8sConfiguration(t, server.URL)
+	defer server.Close()
 
 	type args struct {
 		configuration      *config.Configuration
@@ -376,9 +356,9 @@ func TestKubePluginInit(t *testing.T) {
 			kPlugin.K8sClient = k8sClient
 
 			if tt.args.isSGXAttestation {
-				tt.args.configuration.AttestationService.SHVSBaseURL = "http://localhost" + port + "/"
+				tt.args.configuration.AttestationService.SHVSBaseURL = server.URL + "/"
 			} else {
-				tt.args.configuration.AttestationService.HVSBaseURL = "http://localhost" + port + "/"
+				tt.args.configuration.AttestationService.HVSBaseURL = server.URL + "/"
 			}
 			err = SendDataToEndPoint(kPlugin)
 
@@ -392,14 +372,9 @@ func TestKubePluginInit(t *testing.T) {
 }
 
 func TestPostCRD(t *testing.T) {
-	server, port := testutility.MockServer(t)
-	k1, _ := setupMockValues(t, port)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	k1, _ := setupMockValues(t, server.URL)
+	defer server.Close()
 
 	c := k1.Config
 	crdName := c.Endpoint.CRDName
@@ -606,13 +581,8 @@ func TestPutCRD(t *testing.T) {
 	crdResponse.Metadata.Name = "custom-isecl"
 	crdResponse.Metadata.Namespace = "default"
 
-	server, port := testutility.MockServer(t)
-	defer func() {
-		derr := server.Close()
-		if derr != nil {
-			t.Errorf("Error closing mock server: %v", derr)
-		}
-	}()
+	server := testutility.MockServer(t)
+	defer server.Close()
 	type args struct {
 		k   *KubernetesDetails
 		crd *model.CRD
@@ -648,7 +618,7 @@ func TestPutCRD(t *testing.T) {
 					AuthToken: "",
 					Config: &config.Configuration{
 						Endpoint: config.Endpoint{
-							URL:      "http://localhost" + port + "/",
+							URL:      server.URL + "/",
 							Token:    k8sToken,
 							CertFile: "k8sCert.pem",
 							CRDName:  "custom-isecl",

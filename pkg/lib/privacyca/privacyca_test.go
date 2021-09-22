@@ -112,7 +112,7 @@ func TestProcessMakeCredential(t *testing.T) {
 	buf = bytes.NewBuffer(symmetricBlob)
 	iv = tpm2IdentityProofReq.TpmSymmetricKeyParams.IV
 
-	//Decrypt the credential secret to retrive identityChallengeNonce
+	//Decrypt the credential secret to retrieve identityChallengeNonce
 	dataBlob, err := tpm2utils.DecryptSym(symmetricBlob, key, iv, "CBC", consts.TPM_ALG_AES)
 	assert.NoError(t, err)
 

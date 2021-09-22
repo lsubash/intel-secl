@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"time"
 
@@ -306,7 +307,7 @@ var _ = Describe("TpmIdentityCertController", func() {
 		Context("When filtered by a valid ValidOn date", func() {
 			It("Should get a list of TpmIdentityCertificates which are valid on the ValidOn date", func() {
 				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validOn="+time.Now().Format(time.RFC3339), nil)
+				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validOn="+url.QueryEscape(time.Now().Format(time.RFC3339)), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -323,7 +324,7 @@ var _ = Describe("TpmIdentityCertController", func() {
 		Context("When filtered by invalid ValidOn date", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
 				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validOn="+time.Now().Format(time.RFC3339)+"0000000000000", nil)
+				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validOn="+url.QueryEscape(time.Now().Format(time.RFC3339)+"0000000000000"), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -335,7 +336,7 @@ var _ = Describe("TpmIdentityCertController", func() {
 		Context("When filtered by valid ValidBefore date", func() {
 			It("Should get a list of TpmIdentityCertificates which are valid before the ValidBefore date", func() {
 				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validBefore="+time.Now().AddDate(-1, 0, 0).Format(time.RFC3339), nil)
+				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validBefore="+url.QueryEscape(time.Now().AddDate(-1, 0, 0).Format(time.RFC3339)), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -364,7 +365,7 @@ var _ = Describe("TpmIdentityCertController", func() {
 		Context("When filtered by valid ValidAfter date", func() {
 			It("Should get a list of TpmIdentityCertificates which are valid after the ValidAfter date", func() {
 				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validAfter="+time.Now().AddDate(1, 0, 0).Format(time.RFC3339), nil)
+				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validAfter="+url.QueryEscape(time.Now().AddDate(1, 0, 0).Format(time.RFC3339)), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()

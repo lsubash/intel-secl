@@ -7,10 +7,9 @@ package openstack
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
@@ -27,13 +26,8 @@ var traitsUrl *url.URL
 var emptyUrl *url.URL
 
 func TestNewOpenstackClient(t *testing.T) {
-	httpServer, portString := mockOpenstackServer(t)
-	defer func() {
-		derr := httpServer.Close()
-		if derr != nil {
-			log.WithError(derr).Error("Error closing server")
-		}
-	}()
+	server := mockOpenstackServer(t)
+	defer server.Close()
 
 	type args struct {
 		authRL   string
@@ -52,8 +46,8 @@ func TestNewOpenstackClient(t *testing.T) {
 		{
 			name: "Test For New client with Valid data",
 			args: args{
-				authRL:   "http://localhost" + portString + "/v3/auth/tokens",
-				apiURL:   "http://localhost" + portString + "/",
+				authRL:   server.URL + "/v3/auth/tokens",
+				apiURL:   server.URL + "/",
 				userName: userName,
 				password: password,
 			},
@@ -63,8 +57,8 @@ func TestNewOpenstackClient(t *testing.T) {
 		{
 			name: "Test For New client with Valid but incorrect password",
 			args: args{
-				authRL:   "http://localhost" + portString + "/v3/auth/tokens",
-				apiURL:   "http://localhost" + portString + "/",
+				authRL:   server.URL + "/v3/auth/tokens",
+				apiURL:   server.URL + "/",
 				userName: userName,
 				password: "423",
 			},
@@ -111,25 +105,19 @@ func TestNewOpenstackClient(t *testing.T) {
 }
 
 func TestSendRequest(t *testing.T) {
-	h, portString := mockOpenstackServer(t)
-	defer func() {
-		derr := h.Close()
-		if derr != nil {
-			log.WithError(derr).Error("Error closing server")
-		}
-	}()
+	server := mockOpenstackServer(t)
 
-	authUrl, err := url.Parse("http://localhost" + portString + "/v3/auth/tokens")
+	authUrl, err := url.Parse(server.URL + "/v3/auth/tokens")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestSendRequest(): unable to parse the auth url,error = %v", err)
 		return
 	}
-	apiUrl, err := url.Parse("http://localhost" + portString + "/")
+	apiUrl, err := url.Parse(server.URL + "/")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestSendRequest(): unable to parse the api url,error = %v", err)
 		return
 	}
-	traitsUrl, err = url.Parse("http://localhost" + portString + "/traits")
+	traitsUrl, err = url.Parse(server.URL + "/traits")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestSendRequest(): unable to parse the traits url,error = %v", err)
 		return
@@ -140,7 +128,7 @@ func TestSendRequest(t *testing.T) {
 		return
 	}
 
-	errAuthUrl, err := url.Parse("http://localhost" + portString + "/v5/auth/tok")
+	errAuthUrl, err := url.Parse(server.URL + "/v4/auth/tok")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestSendRequest(): unable to parse the err auth url,error = %v", err)
 		return
@@ -215,20 +203,15 @@ func TestSendRequest(t *testing.T) {
 
 func TestUpdateOpenstackToken(t *testing.T) {
 
-	h, portString := mockOpenstackServer(t)
-	defer func() {
-		derr := h.Close()
-		if derr != nil {
-			log.WithError(derr).Error("Error closing server")
-		}
-	}()
+	server := mockOpenstackServer(t)
+	defer server.Close()
 
-	authUrl, err := url.Parse("http://localhost" + portString + "/v3/auth/tokens")
+	authUrl, err := url.Parse(server.URL + "/v3/auth/tokens")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestUpdateOpenstackToken(): unable to parse the auth url,error = %v", err)
 		return
 	}
-	apiUrl, err := url.Parse("http://localhost" + portString + "/")
+	apiUrl, err := url.Parse(server.URL + "/")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestUpdateOpenstackToken(): unable to parse the api url,error = %v", err)
 		return
@@ -292,21 +275,16 @@ func TestUpdateOpenstackToken(t *testing.T) {
 
 func TestGetOpenstackHTTPClient(t *testing.T) {
 
-	h, portString := mockOpenstackServer(t)
-	defer func() {
-		derr := h.Close()
-		if derr != nil {
-			log.WithError(derr).Error("Error closing server")
-		}
-	}()
+	server := mockOpenstackServer(t)
+	defer server.Close()
 
-	authUrl, err := url.Parse("http://localhost" + portString + "/v3/auth/tokens")
+	authUrl, err := url.Parse(server.URL + "/v3/auth/tokens")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestUpdateOpenstackToken(): unable to parse the auth url,error = %v", err)
 		return
 	}
 
-	apiUrl, err := url.Parse("http://localhost" + portString + "/")
+	apiUrl, err := url.Parse(server.URL + "/")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestUpdateOpenstackToken(): unable to parse the api url,error = %v", err)
 		return
@@ -352,7 +330,7 @@ func TestGetOpenstackHTTPClient(t *testing.T) {
 	}
 }
 
-func mockOpenstackServer(t *testing.T) (*http.Server, string) {
+func mockOpenstackServer(t *testing.T) *httptest.Server {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/v3/auth/tokens", func(w http.ResponseWriter, r *http.Request) {
@@ -366,7 +344,7 @@ func mockOpenstackServer(t *testing.T) (*http.Server, string) {
 			if err != nil {
 				t.Log("openstack/client_test:mockOpenstackServer() : Unable to read file", err)
 			}
-			w.Write([]byte(authenticationResponse))
+			w.Write(authenticationResponse)
 			w.WriteHeader(201)
 		} else {
 			w.Header().Set("X-Subject-Token", "")
@@ -383,36 +361,13 @@ func mockOpenstackServer(t *testing.T) (*http.Server, string) {
 			if err != nil {
 				t.Log("openstack/client_test:mockOpenstackServer() : Unable to read file", err)
 			}
-			w.Write([]byte(allTraits))
+			w.Write(allTraits)
 			w.WriteHeader(200)
 		} else {
 			w.WriteHeader(401)
 		}
 	}).Methods("GET")
 
-	return serveController(t, r)
+	return httptest.NewServer(r)
 
-}
-
-func serveController(t *testing.T, r http.Handler) (*http.Server, string) {
-
-	//Listener Implementations
-	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		t.Log("openstack/client_test:ServeController() : Unable to initiate Listener", err)
-	}
-	port := listener.Addr().(*net.TCPAddr).Port
-	err = listener.Close()
-	if err != nil {
-		t.Log("openstack/client_test:ServeController() : Unable to close Listener", err)
-	}
-	portString := fmt.Sprintf(":%d", port)
-
-	h := &http.Server{
-		Addr:    portString,
-		Handler: r,
-	}
-	go h.ListenAndServe()
-
-	return h, portString
 }

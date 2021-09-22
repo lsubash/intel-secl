@@ -48,9 +48,9 @@ func retrieveAndSaveTrustedJwtSigningCerts() error {
 	return nil
 }
 
-type RetriveJwtCertFn func() error
+type RetrieveJwtCertFn func() error
 
-func NewTokenAuth(signingCertsDir, trustedCAsDir string, fnGetJwtCerts RetriveJwtCertFn, cacheTime time.Duration) mux.MiddlewareFunc {
+func NewTokenAuth(signingCertsDir, trustedCAsDir string, fnGetJwtCerts RetrieveJwtCertFn, cacheTime time.Duration) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

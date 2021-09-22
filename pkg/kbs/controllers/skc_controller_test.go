@@ -66,7 +66,7 @@ var _ = Describe("SKCKeyTransferController", func() {
 	})
 
 	AfterEach(func() {
-		server.Close()
+		defer server.Close()
 	})
 
 	// Specs for HTTP GET to "/dhsm2-transfer"

@@ -34,6 +34,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-replace github.com/vmware/govmomi => github.com/arijit8972/govmomi v0.22.2-0.20210618070400-c203a7ed3d26
-
-go 1.13
+replace github.com/vmware/govmomi => github.com/arijit8972/govmomi fix-tpm-attestation-output

@@ -121,7 +121,7 @@ func TestAikCertificateTrustedNoFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	hostManifest := types.HostManifest{
-		AIKCertificate: base64.StdEncoding.EncodeToString([]byte(aikBytes)),
+		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 
 	rule, err := NewAikCertificateTrusted(trustedAuthorityCerts, "PLATFORM")
@@ -171,7 +171,7 @@ func TestAikCertificateTrustedExpiredFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	hostManifest := types.HostManifest{
-		AIKCertificate: base64.StdEncoding.EncodeToString([]byte(aikBytes)),
+		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 
 	rule, err := NewAikCertificateTrusted(&trustedAuthorityCerts, "PLATFORM")
@@ -202,7 +202,7 @@ func TestAikCertificateTrustedNotBeforeFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	hostManifest := types.HostManifest{
-		AIKCertificate: base64.StdEncoding.EncodeToString([]byte(aikBytes)),
+		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 
 	rule, err := NewAikCertificateTrusted(&trustedAuthorityCerts, "PLATFORM")
@@ -228,7 +228,7 @@ func TestAikCertificateTrustedNotTrustedFault(t *testing.T) {
 	assert.NoError(t, err)
 
 	hostManifest := types.HostManifest{
-		AIKCertificate: base64.StdEncoding.EncodeToString([]byte(aikBytes)),
+		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 
 	rule, err := NewAikCertificateTrusted(&trustedAuthorityCerts, "PLATFORM")

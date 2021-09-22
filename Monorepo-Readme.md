@@ -9,7 +9,7 @@ This repository is planned to be monorepo to hold all services and libraries.
 ## Software requirements
 - git
 - makeself
-- `go` version == `go1.14.4`
+- `go` version == `go1.16.7`
 
 # Step By Step Build Instructions
 ## Install required shell commands
@@ -23,11 +23,11 @@ export HTTPS_PROXY=https://<proxy>:<port>
 $ sudo yum install -y wget git makeself
 ```
 
-### Install `go` version = `go1.14.4`
-Services requires Go version 1.14.4 that has support for `go modules`. The build was validated with the latest version go1.14.4 of `go`. It is recommended that you use go1.14.4 version of `go`. You can use the following to install `go`.
+### Install `go` version = `go1.16.7`
+Services requires Go version 1.16.7 that has support for `go modules`. The build was validated with the latest version go1.16.7 of `go`. It is recommended that you use go1.16.7 version of `go`. You can use the following to install `go`.
 ```shell
-wget https://dl.google.com/go/go1.14.4.linux-amd64.tar.gz
-tar -xzf go1.14.4.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
+tar -xzf go1.16.7.linux-amd64.tar.gz
 sudo mv go /usr/local
 export GOROOT=/usr/local/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH

@@ -40,7 +40,7 @@ func ValidateCertificateRequest(conf *config.Configuration, csr *x509.Certificat
 	sanListsFromToken := []string{}
 	isCnPresentInToken := false
 
-	for k, _ := range *ctxMap {
+	for k := range *ctxMap {
 		params := strings.Split(k, ";")
 		// Check if Subject matches with CN
 		if len(params) > 0 && (strings.EqualFold(params[0], subjectFromCsr) || search.WildcardMatched(params[0], subjectFromCsr)) {
