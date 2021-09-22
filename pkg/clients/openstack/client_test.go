@@ -128,7 +128,7 @@ func TestSendRequest(t *testing.T) {
 		return
 	}
 
-	errAuthUrl, err := url.Parse(server.URL + "/v4/auth/tok")
+	errAuthUrl, err := url.Parse(server.URL + "/v3/auth/tok")
 	if err != nil {
 		t.Errorf("openstack/client_test:TestSendRequest(): unable to parse the err auth url,error = %v", err)
 		return
