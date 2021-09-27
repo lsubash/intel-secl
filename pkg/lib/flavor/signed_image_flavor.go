@@ -4,7 +4,9 @@
  */
 package flavor
 
-import "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
+import (
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+)
 
 /**
  *
@@ -14,6 +16,6 @@ import "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 // SignedImageFlavor struct defines the image flavor and
 // its corresponding signature
 type SignedImageFlavor struct {
-	ImageFlavor model.Image `json:"flavor"`
-	Signature   string      `json:"signature"`
+	ImageFlavor hvs.Image `json:"flavor"`
+	Signature   string    `json:"signature"`
 }

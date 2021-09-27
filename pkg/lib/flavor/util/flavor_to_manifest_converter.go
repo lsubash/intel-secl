@@ -6,7 +6,6 @@ package util
 
 import (
 	"encoding/xml"
-	cm "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
@@ -45,8 +44,8 @@ func (fmc FlavorToManifestConverter) GetManifestFromFlavor(flavor hvs.Flavor) ta
 	defer log.Trace("flavor/util/flavor_to_manifest_converter:getManifestFromFlavor() Leaving")
 
 	var manifest taModel.Manifest
-	manifest.DigestAlg = flavor.Meta.Description[cm.DigestAlgorithm].(string)
-	manifest.Label = flavor.Meta.Description[cm.Label].(string)
+	manifest.DigestAlg = flavor.Meta.Description[hvs.DigestAlgorithm].(string)
+	manifest.Label = flavor.Meta.Description[hvs.Label].(string)
 	manifest.Uuid = flavor.Meta.ID.String()
 	// extract the manifest types from the flavor based on the measurement types
 	var allMeasurements []taModel.FlavorMeasurement

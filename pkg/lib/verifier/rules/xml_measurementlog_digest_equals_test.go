@@ -8,7 +8,7 @@ import (
 	"encoding/xml"
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	ta "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -21,20 +21,20 @@ var (
 func TestXmlMeasurementLogDigestEqualsNoFault(t *testing.T) {
 
 	// create the rule
-	rule, err := NewXmlMeasurementLogDigestEquals(string(types.SHA384), testUuid)
+	rule, err := NewXmlMeasurementLogDigestEquals(string(hvs.SHA384), testUuid)
 	assert.NoError(t, err)
 
 	// create a host manifest with a single measurement containing a valid SHA384
 	// digest --> expect 'no faults'
 	measurement := ta.Measurement{
-		DigestAlg: string(types.SHA384),
+		DigestAlg: string(hvs.SHA384),
 		Uuid:      testUuid.String(),
 	}
 
 	measurementsXml, err := xml.Marshal(measurement)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{string(measurementsXml)},
 	}
 
@@ -49,13 +49,13 @@ func TestXmlMeasurementLogDigestEqualsNoFault(t *testing.T) {
 func TestXmlMeasurementLogDigestEqualsFaultDigestValueMismatchFault(t *testing.T) {
 
 	// create the rule
-	rule, err := NewXmlMeasurementLogDigestEquals(string(types.SHA384), testUuid)
+	rule, err := NewXmlMeasurementLogDigestEquals(string(hvs.SHA384), testUuid)
 	assert.NoError(t, err)
 
 	// create a host manifest with a one valid measurement and two invalid
 	// measurements --> expect 2 XmlManifestDigetValueMismatch faults
 	measurement := ta.Measurement{
-		DigestAlg: string(types.SHA384),
+		DigestAlg: string(hvs.SHA384),
 		Uuid:      testUuid.String(),
 	}
 
@@ -63,14 +63,14 @@ func TestXmlMeasurementLogDigestEqualsFaultDigestValueMismatchFault(t *testing.T
 	assert.NoError(t, err)
 
 	invalidMeasurement := ta.Measurement{
-		DigestAlg: string(types.SHA1),
+		DigestAlg: string(hvs.SHA1),
 		Uuid:      testUuid.String(),
 	}
 
 	invalidMeasurementsXml, err := xml.Marshal(invalidMeasurement)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		MeasurementXmls: []string{
 			string(measurementsXml),
 			string(invalidMeasurementsXml),

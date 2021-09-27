@@ -9,12 +9,12 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"encoding/xml"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"io/ioutil"
 	"net/url"
 	"testing"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/ta"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -133,8 +133,8 @@ func TestEventReplay256(t *testing.T) {
 		"pcr_matches": true
 	}`
 
-	var eventLogEntry types.TpmEventLog
-	var pcr18 types.FlavorPcrs
+	var eventLogEntry hvs.TpmEventLog
+	var pcr18 hvs.FlavorPcrs
 
 	assert.NoError(t, json.Unmarshal([]byte(eventLogJson), &eventLogEntry))
 	assert.NoError(t, json.Unmarshal([]byte(pcr18json), &pcr18))

@@ -11,7 +11,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
@@ -69,7 +68,7 @@ func getTrustReport(
 	trustReportFile string,
 	verifierCertificates *verifier.VerifierCertificates) *hvs.TrustReport {
 
-	var hostManifest types.HostManifest
+	var hostManifest hvs.HostManifest
 	var signedFlavors []hvs.SignedFlavor
 	var javaTrustReports map[string]hvs.TrustReport
 

@@ -8,15 +8,13 @@ import (
 	"fmt"
 
 	constants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
 // NewPcrEventLogIntegrity creates a rule that will check if a PCR (in the host-manifest only)
 // has a "calculated hash" (i.e. from event log replay) that matches its actual hash.
-func NewPcrEventLogIntegrity(expectedPcr *types.FlavorPcrs, marker common.FlavorPart) (Rule, error) {
+func NewPcrEventLogIntegrity(expectedPcr *hvs.FlavorPcrs, marker hvs.FlavorPartName) (Rule, error) {
 	var rule pcrEventLogIntegrity
 
 	if expectedPcr == nil {
@@ -32,8 +30,8 @@ func NewPcrEventLogIntegrity(expectedPcr *types.FlavorPcrs, marker common.Flavor
 }
 
 type pcrEventLogIntegrity struct {
-	expectedPcr types.FlavorPcrs
-	marker      common.FlavorPart
+	expectedPcr hvs.FlavorPcrs
+	marker      hvs.FlavorPartName
 }
 
 // - If the hostmanifest's PcrManifest is not present, create PcrManifestMissing fault.
@@ -42,7 +40,7 @@ type pcrEventLogIntegrity struct {
 //   PcrEventLogMissing fault.
 // - Otherwise, replay the hostmanifest's event log at 'expected' bank/index and verify the
 //   the calculated hash matches the pcr value in the host-manifest.  If not, create a PcrEventLogInvalid fault.
-func (rule *pcrEventLogIntegrity) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *pcrEventLogIntegrity) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = constants.RulePcrEventLogIntegrity
@@ -53,13 +51,13 @@ func (rule *pcrEventLogIntegrity) Apply(hostManifest *types.HostManifest) (*hvs.
 	if hostManifest.PcrManifest.IsEmpty() {
 		result.Faults = append(result.Faults, newPcrManifestMissingFault())
 	} else {
-		actualPcr, err := hostManifest.PcrManifest.GetPcrValue(types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), types.PcrIndex(rule.expectedPcr.Pcr.Index))
+		actualPcr, err := hostManifest.PcrManifest.GetPcrValue(hvs.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), hvs.PcrIndex(rule.expectedPcr.Pcr.Index))
 		if err != nil {
 			return nil, errors.Wrap(err, "Error in getting actual Pcr in Pcr Eventlog Integrity rule")
 		}
 
 		if actualPcr == nil {
-			result.Faults = append(result.Faults, newPcrValueMissingFault(types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), types.PcrIndex(rule.expectedPcr.Pcr.Index)))
+			result.Faults = append(result.Faults, newPcrValueMissingFault(hvs.SHAAlgorithm(rule.expectedPcr.Pcr.Bank), hvs.PcrIndex(rule.expectedPcr.Pcr.Index)))
 		} else {
 			actualEventLogCriteria, pIndex, bank, err := hostManifest.PcrManifest.PcrEventLogMap.GetEventLogNew(rule.expectedPcr.Pcr.Bank, rule.expectedPcr.Pcr.Index)
 			if err != nil {
@@ -67,9 +65,9 @@ func (rule *pcrEventLogIntegrity) Apply(hostManifest *types.HostManifest) (*hvs.
 			}
 
 			if actualEventLogCriteria == nil {
-				result.Faults = append(result.Faults, newPcrEventLogMissingFault(types.PcrIndex(rule.expectedPcr.Pcr.Index), types.SHAAlgorithm(rule.expectedPcr.Pcr.Bank)))
+				result.Faults = append(result.Faults, newPcrEventLogMissingFault(hvs.PcrIndex(rule.expectedPcr.Pcr.Index), hvs.SHAAlgorithm(rule.expectedPcr.Pcr.Bank)))
 			} else {
-				actualEventLog := &types.TpmEventLog{}
+				actualEventLog := &hvs.TpmEventLog{}
 				actualEventLog.TpmEvent = actualEventLogCriteria
 				actualEventLog.Pcr.Index = pIndex
 				actualEventLog.Pcr.Bank = bank
@@ -80,7 +78,7 @@ func (rule *pcrEventLogIntegrity) Apply(hostManifest *types.HostManifest) (*hvs.
 				}
 
 				if calculatedValue != actualPcr.Value {
-					PI := types.PcrIndex(rule.expectedPcr.Pcr.Index)
+					PI := hvs.PcrIndex(rule.expectedPcr.Pcr.Index)
 					fault := hvs.Fault{
 						Name:            constants.FaultPcrEventLogInvalid,
 						Description:     fmt.Sprintf("PCR %d Event Log is invalid,mismatches between calculated event log values %s and actual pcr values %s", rule.expectedPcr.Pcr.Index, calculatedValue, actualPcr.Value),

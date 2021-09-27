@@ -8,12 +8,9 @@ import (
 	"reflect"
 
 	hvsconstants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	flavormodel "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier/rules"
-	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+	flavormodel "github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
@@ -21,7 +18,7 @@ import (
 // vendor (ex. intel TPM2.0 vs. vmware TPM1.2 vs. vmware TPM2.0)
 type ruleBuilder interface {
 	GetAssetTagRules() ([]rules.Rule, error)
-	GetAikCertificateTrustedRule(common.FlavorPart) ([]rules.Rule, error)
+	GetAikCertificateTrustedRule(flavormodel.FlavorPartName) ([]rules.Rule, error)
 	GetSoftwareRules() ([]rules.Rule, error)
 	GetName() string
 }
@@ -31,14 +28,14 @@ type ruleBuilder interface {
 // in 'GetVerificationRules'.
 type ruleFactory struct {
 	verifierCertificates         VerifierCertificates
-	hostManifest                 *types.HostManifest
-	signedFlavor                 *hvs.SignedFlavor
+	hostManifest                 *flavormodel.HostManifest
+	signedFlavor                 *flavormodel.SignedFlavor
 	skipSignedFlavorVerification bool
 }
 
 func NewRuleFactory(verifierCertificates VerifierCertificates,
-	hostManifest *types.HostManifest,
-	signedFlavor *hvs.SignedFlavor,
+	hostManifest *flavormodel.HostManifest,
+	signedFlavor *flavormodel.SignedFlavor,
 	skipSignedFlavorVerification bool) *ruleFactory {
 
 	return &ruleFactory{
@@ -52,7 +49,7 @@ func NewRuleFactory(verifierCertificates VerifierCertificates,
 //GetVerificationRules method is used to get the verification rules dynamically for pcr/event log rules
 //Other rules like aik certificate,asset tag rules will be hardcoded based on vendor and flavor part
 func (factory *ruleFactory) GetVerificationRules() ([]rules.Rule, string, error) {
-	var flavorPart common.FlavorPart
+	var flavorPartName flavormodel.FlavorPartName
 	var requiredRules, pcrRules []rules.Rule
 
 	ruleBuilder, err := factory.getRuleBuilder()
@@ -63,20 +60,20 @@ func (factory *ruleFactory) GetVerificationRules() ([]rules.Rule, string, error)
 
 	log.Info("rule builder name:", ruleBuilder.GetName())
 
-	err = (&flavorPart).Parse(factory.signedFlavor.Flavor.Meta.Description[flavormodel.FlavorPart].(string))
+	err = (&flavorPartName).Parse(factory.signedFlavor.Flavor.Meta.Description[flavormodel.FlavorPartDescription].(string))
 	if err != nil {
 		return nil, "", errors.Wrap(err, "Could not retrieve flavor part name")
 	}
 
-	switch flavorPart {
-	case common.FlavorPartPlatform, common.FlavorPartOs, common.FlavorPartHostUnique:
-		requiredRules, err = ruleBuilder.GetAikCertificateTrustedRule(flavorPart)
-	case common.FlavorPartAssetTag:
+	switch flavorPartName {
+	case flavormodel.FlavorPartPlatform, flavormodel.FlavorPartOs, flavormodel.FlavorPartHostUnique:
+		requiredRules, err = ruleBuilder.GetAikCertificateTrustedRule(flavorPartName)
+	case flavormodel.FlavorPartAssetTag:
 		requiredRules, err = ruleBuilder.GetAssetTagRules()
-	case common.FlavorPartSoftware:
+	case flavormodel.FlavorPartSoftware:
 		requiredRules, err = ruleBuilder.GetSoftwareRules()
 	default:
-		return nil, "", errors.Errorf("Cannot build requiredRules for unknown flavor part %s", flavorPart)
+		return nil, "", errors.Errorf("Cannot build requiredRules for unknown flavor part %s", flavorPartName)
 
 	}
 
@@ -95,26 +92,26 @@ func (factory *ruleFactory) GetVerificationRules() ([]rules.Rule, string, error)
 				eventsPresent = true
 				//call method to create pcr event log equals rule
 				if len(rule.EventlogEqual.ExcludeTags) == 0 {
-					pcrRules, err = getPcrEventLogEqualsRules(&rule, flavorPart)
+					pcrRules, err = getPcrEventLogEqualsRules(&rule, flavorPartName)
 				} else {
-					pcrRules, err = getPcrEventLogEqualsExcludingRules(&rule, flavorPart)
+					pcrRules, err = getPcrEventLogEqualsExcludingRules(&rule, flavorPartName)
 				}
 				requiredRules = append(requiredRules, pcrRules...)
 			} else if value.Type().Field(i).Name == hvsconstants.EventlogIncludesRule && len(rule.EventlogIncludes) > 0 {
 				eventsPresent = true
 				//call method to create pcr event log includes rule
-				pcrRules, err = getPcrEventLogIncludesRules(&rule, flavorPart)
+				pcrRules, err = getPcrEventLogIncludesRules(&rule, flavorPartName)
 				requiredRules = append(requiredRules, pcrRules...)
 			} else if value.Type().Field(i).Name == hvsconstants.PCRMatchesRule && rule.PCRMatches {
 				//call method to create pcr matches constant rule
-				pcrRules, err = getPcrMatchesConstantRules(&rule, flavorPart)
+				pcrRules, err = getPcrMatchesConstantRules(&rule, flavorPartName)
 				requiredRules = append(requiredRules, pcrRules...)
 			}
 
 			if eventsPresent == true && integrityRuleAdded == false {
 				//add Integrity rules//
 				integrityRuleAdded = true
-				pcrRules, err = getPcrEventLogIntegrityRules(&rule, flavorPart)
+				pcrRules, err = getPcrEventLogIntegrityRules(&rule, flavorPartName)
 				requiredRules = append(requiredRules, pcrRules...)
 			}
 			if err != nil {
@@ -125,8 +122,8 @@ func (factory *ruleFactory) GetVerificationRules() ([]rules.Rule, string, error)
 
 	// if skip flavor signing verification is enabled, add the FlavorTrusted.
 	if !factory.skipSignedFlavorVerification {
-		var flavorPart common.FlavorPart
-		err := (&flavorPart).Parse(factory.signedFlavor.Flavor.Meta.Description[flavormodel.FlavorPart].(string))
+		var flavorPart flavormodel.FlavorPartName
+		err := (&flavorPart).Parse(factory.signedFlavor.Flavor.Meta.Description[flavormodel.FlavorPartDescription].(string))
 		if err != nil {
 			return nil, "", errors.Wrap(err, "Could not retrieve flavor part name")
 		}

@@ -16,13 +16,14 @@ import (
 
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
 type Configuration struct {
-	AASApiUrl        string                       `yaml:"aas-base-url" mapstructure:"aas-base-url"`
-	CMSBaseURL       string                       `yaml:"cms-base-url" mapstructure:"cms-base-url"`
-	CmsTlsCertDigest string                       `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
-	KBSApiUrl        string                       `yaml:"kbs-base-url" mapstructure:"kbs-base-url"`
-	WPM              commConfig.ServiceConfig     `yaml:"wpm" mapstructure:"wpm"`
-	Log              commConfig.LogConfig         `yaml:"log" mapstructure:"log"`
-	FlavorSigning    commConfig.SigningCertConfig `yaml:"flavor-signing" mapstructure:"flavor-signing"`
+	AASApiUrl               string                       `yaml:"aas-base-url" mapstructure:"aas-base-url"`
+	CMSBaseURL              string                       `yaml:"cms-base-url" mapstructure:"cms-base-url"`
+	CmsTlsCertDigest        string                       `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
+	KBSApiUrl               string                       `yaml:"kbs-base-url" mapstructure:"kbs-base-url"`
+	WPM                     commConfig.ServiceConfig     `yaml:"wpm" mapstructure:"wpm"`
+	Log                     commConfig.LogConfig         `yaml:"log" mapstructure:"log"`
+	FlavorSigning           commConfig.SigningCertConfig `yaml:"flavor-signing" mapstructure:"flavor-signing"`
+	OcicryptKeyProviderName string                       `yaml:"ocicrypt-keyprovider-name" mapstructure:"ocicrypt-keyprovider-name"`
 }
 
 // this function sets the configure file name and type

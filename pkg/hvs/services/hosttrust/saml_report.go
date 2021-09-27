@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	faultsConst "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
@@ -83,7 +82,7 @@ func getMarkersMap(t *hvs.TrustReport) map[string]string {
 
 	trustedPrefix := "TRUST_"
 	markersMap := make(map[string]string)
-	for _, flavorType := range common.GetFlavorTypes() {
+	for _, flavorType := range hvs.GetFlavorTypes() {
 		marker := flavorType.String()
 		if len(t.GetResultsForMarker(marker)) > 0 {
 			markersMap[trustedPrefix+strings.ToUpper(marker)] = strconv.FormatBool(t.IsTrustedForMarker(marker))
@@ -146,7 +145,7 @@ func getTags(trustReport *hvs.TrustReport) map[string]string {
 
 	tagPrefix := "TAG_"
 	tagsMap := make(map[string]string)
-	for _, result := range trustReport.GetResultsForMarker(common.FlavorPartAssetTag.String()) {
+	for _, result := range trustReport.GetResultsForMarker(hvs.FlavorPartAssetTag.String()) {
 		if result.Rule.Name == faultsConst.RuleAssetTagMatches && len(result.Rule.Tags) > 0 {
 			for key, value := range result.Rule.Tags {
 				tagsMap[tagPrefix+key] = value

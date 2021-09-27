@@ -5,7 +5,6 @@
 package hvsclient
 
 import (
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/stretchr/testify/mock"
 )
@@ -62,7 +61,7 @@ type MockedHostsClient struct {
 // Can be mocked in unit tests similar to...
 // mockedHostsClient := new(hvsclient.MockedHostsClient)
 // mockedHostsClient.On("SearchHosts", mock.Anything).Return(&hvsclient.HostCollection {Hosts: []hvsclient.Host{}}, nil)
-func (mock MockedHostsClient) SearchHosts(hostFilterCriteria *models.HostFilterCriteria) (*hvs.HostCollection, error) {
+func (mock MockedHostsClient) SearchHosts(hostFilterCriteria *hvs.HostFilterCriteria) (*hvs.HostCollection, error) {
 	args := mock.Called(hostFilterCriteria)
 	return args.Get(0).(*hvs.HostCollection), args.Error(1)
 }
@@ -87,7 +86,7 @@ type MockedFlavorsClient struct {
 	mock.Mock
 }
 
-func (mock MockedFlavorsClient) CreateFlavor(flavorCreateRequest *models.FlavorCreateRequest) (hvs.FlavorCollection, error) {
+func (mock MockedFlavorsClient) CreateFlavor(flavorCreateRequest *hvs.FlavorCreateRequest) (hvs.FlavorCollection, error) {
 	args := mock.Called(flavorCreateRequest)
 	return args.Get(0).(hvs.FlavorCollection), args.Error(0)
 }

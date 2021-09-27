@@ -14,7 +14,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +21,7 @@ import (
 type (
 	PGJsonStrMap            map[string]interface{}
 	PGFlavorMatchPolicies   hvs.FlavorMatchPolicies
-	PGHostManifest          types.HostManifest
+	PGHostManifest          hvs.HostManifest
 	PGHostStatusInformation hvs.HostStatusInformation
 	PGFlavorContent         hvs.Flavor
 	PGFlavorTemplateContent hvs.FlavorTemplate

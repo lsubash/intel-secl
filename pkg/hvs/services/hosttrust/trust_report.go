@@ -14,9 +14,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust/rules"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	flavormodel "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
@@ -27,7 +24,7 @@ import (
 // renamed to CreateFlavorGroupReport and made it a receiver function since we need certificates
 // from the config
 func (v *Verifier) CreateFlavorGroupReport(hostId uuid.UUID, reqs flvGrpHostTrustReqs,
-	hostData *types.HostManifest,
+	hostData *hvs.HostManifest,
 	trustCache hostTrustCache) (hvs.TrustReport, error) {
 	defaultLog.Trace("hosttrust/trust_report:CreateFlavorGroupReport() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:CreateFlavorGroupReport() Leaving")
@@ -59,10 +56,10 @@ func areAllOfFlavorsMissingInCachedTrustReport(cachedTrustReport hvs.TrustReport
 	return len(ruleAllOfFlavors.AllOfFlavors) != 0 && !ruleAllOfFlavors.CheckAllOfFlavorsExist(&cachedTrustReport)
 }
 
-func getMissingRequiredFlavorPartsWithLatest(hostId uuid.UUID, reqs flvGrpHostTrustReqs, reqAndDefFlavorTypes map[cf.FlavorPart]bool, cachedTrustReport hvs.TrustReport) map[cf.FlavorPart]bool {
+func getMissingRequiredFlavorPartsWithLatest(hostId uuid.UUID, reqs flvGrpHostTrustReqs, reqAndDefFlavorTypes map[hvs.FlavorPartName]bool, cachedTrustReport hvs.TrustReport) map[hvs.FlavorPartName]bool {
 	defaultLog.Trace("hosttrust/trust_report:getMissingRequiredFlavorPartsWithLatest() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:getMissingRequiredFlavorPartsWithLatest() Leaving")
-	missingRequiredFlavorPartsWithLatest := make(map[cf.FlavorPart]bool)
+	missingRequiredFlavorPartsWithLatest := make(map[hvs.FlavorPartName]bool)
 	for flavorPart := range reqAndDefFlavorTypes {
 		defaultLog.Debugf("hosttrust/trust_report:getMissingRequiredFlavorPartsWithLatest() Checking if required flavor type %s for host %s is missing", flavorPart.String(), hostId.String())
 		if areRequiredFlavorsMissing(cachedTrustReport, flavorPart) {
@@ -78,16 +75,16 @@ func getMissingRequiredFlavorPartsWithLatest(hostId uuid.UUID, reqs flvGrpHostTr
 	return missingRequiredFlavorPartsWithLatest
 }
 
-func areRequiredFlavorsMissing(cachedTrustReport hvs.TrustReport, flavorPart cf.FlavorPart) bool {
+func areRequiredFlavorsMissing(cachedTrustReport hvs.TrustReport, flavorPart hvs.FlavorPartName) bool {
 	return cachedTrustReport.GetResultsForMarker(flavorPart.String()) == nil && len(cachedTrustReport.GetResultsForMarker(flavorPart.String())) == 0
 }
 
 // FlavorVerify.java: 529
-func (v *Verifier) createTrustReport(hostId uuid.UUID, hostData *types.HostManifest, reqs flvGrpHostTrustReqs, trustCache hostTrustCache, latestReqAndDefFlavorTypes map[cf.FlavorPart]bool) (hvs.TrustReport, error) {
+func (v *Verifier) createTrustReport(hostId uuid.UUID, hostData *hvs.HostManifest, reqs flvGrpHostTrustReqs, trustCache hostTrustCache, latestReqAndDefFlavorTypes map[hvs.FlavorPartName]bool) (hvs.TrustReport, error) {
 	defaultLog.Trace("hosttrust/trust_report:createTrustReport() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:createTrustReport() Leaving")
 
-	flavorParts := []cf.FlavorPart{}
+	flavorParts := []hvs.FlavorPartName{}
 	for flavorPart := range latestReqAndDefFlavorTypes {
 		flavorParts = append(flavorParts, flavorPart)
 	}
@@ -122,7 +119,7 @@ func (v *Verifier) createTrustReport(hostId uuid.UUID, hostData *types.HostManif
 	return *trustReport, nil
 }
 
-func getMatchPolicy(flvMatchPolicies hvs.FlavorMatchPolicies, part cf.FlavorPart) *hvs.MatchPolicy {
+func getMatchPolicy(flvMatchPolicies hvs.FlavorMatchPolicies, part hvs.FlavorPartName) *hvs.MatchPolicy {
 	defaultLog.Trace("hosttrust/trust_report:getMatchPolicy() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:getMatchPolicy() Leaving")
 
@@ -137,13 +134,13 @@ func getMatchPolicy(flvMatchPolicies hvs.FlavorMatchPolicies, part cf.FlavorPart
 // structure to hold the Flavor Report that is obtained from the verifier library
 type flavorReport struct {
 	id         uuid.UUID
-	flavorPart cf.FlavorPart
+	flavorPart hvs.FlavorPartName
 	report     *hvs.TrustReport
 	faultCount int
 }
 
 // FlavorVerify.java: 405
-func (v *Verifier) verifyFlavors(hostID uuid.UUID, flavors []hvs.SignedFlavor, hostData *types.HostManifest, hostTrustReqs flvGrpHostTrustReqs) (*hvs.TrustReport, error) {
+func (v *Verifier) verifyFlavors(hostID uuid.UUID, flavors []hvs.SignedFlavor, hostData *hvs.HostManifest, hostTrustReqs flvGrpHostTrustReqs) (*hvs.TrustReport, error) {
 	defaultLog.Trace("hosttrust/trust_report:verifyFlavors() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:verifyFlavors() Leaving")
 
@@ -152,10 +149,10 @@ func (v *Verifier) verifyFlavors(hostID uuid.UUID, flavors []hvs.SignedFlavor, h
 	// need to create a map to hold all the untrusted individual reports and group them by the flavor part/type.
 	untrusted := struct {
 		report        hvs.TrustReport
-		flavorPartMap map[cf.FlavorPart][]flavorReport
+		flavorPartMap map[hvs.FlavorPartName][]flavorReport
 	}{
 		report:        hvs.TrustReport{},
-		flavorPartMap: make(map[cf.FlavorPart][]flavorReport),
+		flavorPartMap: make(map[hvs.FlavorPartName][]flavorReport),
 	}
 
 	newTrustCaches := make([]uuid.UUID, 0, len(flavors))
@@ -164,7 +161,7 @@ func (v *Verifier) verifyFlavors(hostID uuid.UUID, flavors []hvs.SignedFlavor, h
 			// TODO
 			// check nil pointer for Meta, Description
 			// if these field are not changed to value type
-			flvPart := signedFlavor.Flavor.Meta.Description[flavormodel.FlavorPart].(string)
+			flvPart := signedFlavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string)
 			if flvPart == flvMatchPolicy.FlavorPart.String() {
 
 				individualTrustReport, err := v.FlavorVerifier.Verify(hostData, &signedFlavor, v.SkipFlavorSignatureVerification)
@@ -249,7 +246,7 @@ func (v *Verifier) verifyFlavors(hostID uuid.UUID, flavors []hvs.SignedFlavor, h
 
 // FlavorVerify.java: 684
 //TODO find flavors by required key value
-func (v *Verifier) findFlavors(flavorGroupID uuid.UUID, latestReqAndDefFlavorTypes map[cf.FlavorPart]bool, hostManifestMap map[cf.FlavorPart][]models.FlavorMetaKv) ([]hvs.SignedFlavor, error) {
+func (v *Verifier) findFlavors(flavorGroupID uuid.UUID, latestReqAndDefFlavorTypes map[hvs.FlavorPartName]bool, hostManifestMap map[hvs.FlavorPartName][]models.FlavorMetaKv) ([]hvs.SignedFlavor, error) {
 	defaultLog.Trace("hosttrust/trust_report:findFlavors() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:findFlavors() Leaving")
 
@@ -269,15 +266,15 @@ func (v *Verifier) findFlavors(flavorGroupID uuid.UUID, latestReqAndDefFlavorTyp
 	return signedFlavors, nil
 }
 
-func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.FlavorPart) (map[cf.FlavorPart][]models.FlavorMetaKv, error) {
+func getHostManifestMap(hostManifest *hvs.HostManifest, flavorParts []hvs.FlavorPartName) (map[hvs.FlavorPartName][]models.FlavorMetaKv, error) {
 	defaultLog.Trace("hosttrust/trust_report:getHostManifestMap() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:getHostManifestMap() Leaving")
 
 	hostInfo := hostManifest.HostInfo
-	hostInfoValues := make(map[cf.FlavorPart][]models.FlavorMetaKv)
+	hostInfoValues := make(map[hvs.FlavorPartName][]models.FlavorMetaKv)
 	if len(flavorParts) > 0 {
 		for _, fp := range flavorParts {
-			if fp == cf.FlavorPartPlatform {
+			if fp == hvs.FlavorPartPlatform {
 				var pfQueryAttrs []models.FlavorMetaKv
 				if hostInfo.BiosName != "" {
 					pfQueryAttrs = append(pfQueryAttrs, models.FlavorMetaKv{
@@ -328,8 +325,8 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 						Value: hostInfo.HardwareFeatures.TXT.Enabled,
 					})
 				}
-				hostInfoValues[cf.FlavorPartPlatform] = pfQueryAttrs
-			} else if fp == cf.FlavorPartOs {
+				hostInfoValues[hvs.FlavorPartPlatform] = pfQueryAttrs
+			} else if fp == hvs.FlavorPartOs {
 				var osfQueryAttrs []models.FlavorMetaKv
 				if utils.IsLinuxHost(&hostInfo) {
 					osfQueryAttrs = append(osfQueryAttrs, models.FlavorMetaKv{
@@ -361,8 +358,8 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 						Value: hostInfo.VMMName,
 					})
 				}
-				hostInfoValues[cf.FlavorPartOs] = osfQueryAttrs
-			} else if fp == cf.FlavorPartHostUnique {
+				hostInfoValues[hvs.FlavorPartOs] = osfQueryAttrs
+			} else if fp == hvs.FlavorPartHostUnique {
 				var hufQueryAttrs []models.FlavorMetaKv
 				if utils.IsLinuxHost(&hostInfo) {
 					hufQueryAttrs = append(hufQueryAttrs, models.FlavorMetaKv{
@@ -376,8 +373,8 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 						Value: strings.ToLower(hostInfo.HardwareUUID),
 					})
 				}
-				hostInfoValues[cf.FlavorPartHostUnique] = hufQueryAttrs
-			} else if fp == cf.FlavorPartAssetTag {
+				hostInfoValues[hvs.FlavorPartHostUnique] = hufQueryAttrs
+			} else if fp == hvs.FlavorPartAssetTag {
 				var atfQueryAttrs []models.FlavorMetaKv
 				if hostInfo.HardwareUUID != "" {
 					atfQueryAttrs = append(atfQueryAttrs, models.FlavorMetaKv{
@@ -385,10 +382,10 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 						Value: strings.ToLower(hostInfo.HardwareUUID),
 					})
 				}
-				hostInfoValues[cf.FlavorPartAssetTag] = atfQueryAttrs
-			} else if fp == cf.FlavorPartSoftware {
+				hostInfoValues[hvs.FlavorPartAssetTag] = atfQueryAttrs
+			} else if fp == hvs.FlavorPartSoftware {
 				var sfQueryAttrs []models.FlavorMetaKv
-				if !reflect.DeepEqual(&hostManifest.PcrManifest, types.PcrManifest{}) && len(hostManifest.MeasurementXmls) >= 1 {
+				if !reflect.DeepEqual(&hostManifest.PcrManifest, hvs.PcrManifest{}) && len(hostManifest.MeasurementXmls) >= 1 {
 					measurementLabels, err := getMeasurementLabels(hostManifest)
 					if err != nil {
 						return hostInfoValues, errors.Wrap(err, "error while getting labels from measurement XML")
@@ -398,7 +395,7 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 						Value: measurementLabels,
 					})
 				}
-				hostInfoValues[cf.FlavorPartSoftware] = sfQueryAttrs
+				hostInfoValues[hvs.FlavorPartSoftware] = sfQueryAttrs
 			} else {
 				return nil, errors.New("Invalid flavor part - " + fp.String())
 			}
@@ -408,7 +405,7 @@ func getHostManifestMap(hostManifest *types.HostManifest, flavorParts []cf.Flavo
 }
 
 // get software labels from the host manifest
-func getMeasurementLabels(hostManifest *types.HostManifest) ([]string, error) {
+func getMeasurementLabels(hostManifest *hvs.HostManifest) ([]string, error) {
 	defaultLog.Trace("hosttrust/trust_report:getMeasurementLabels() Entering")
 	defer defaultLog.Trace("hosttrust/trust_report:getMeasurementLabels() Leaving")
 

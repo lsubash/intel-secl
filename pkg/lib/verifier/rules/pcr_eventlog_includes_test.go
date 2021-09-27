@@ -5,12 +5,11 @@
 package rules
 
 import (
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"testing"
 
 	"github.com/google/uuid"
 	constants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/util"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,20 +17,20 @@ import (
 // Create an event log that is used by the hostManifest and the rule,
 // expecting that they match and will not generate any faults.
 func TestPcrEventLogIncludesNoFault(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, testExpectedPcrEventLogEntry)
-	rule, err := NewPcrEventLogIncludes(&testExpectedPcrEventLogEntry, common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogIncludes(&testExpectedPcrEventLogEntry, hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -43,18 +42,18 @@ func TestPcrEventLogIncludesNoFault(t *testing.T) {
 // expecting that they match and will not generate any faults.
 func TestPcrEventLogIncludesFault(t *testing.T) {
 
-	_, err := NewPcrEventLogIncludes(nil, common.FlavorPartPlatform)
+	_, err := NewPcrEventLogIncludes(nil, hvs.FlavorPartPlatform)
 	assert.Error(t, err)
 }
 
 // Provide the empty pcr manifest values in the host manifest and when applying PcrEventLogEquals rule, expecting
 // 'PcrManifestMissing' fault.
 func TestIncludesPcrManifestMissingFault(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{},
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{},
 	}
 
-	rule, err := NewPcrEventLogEquals(&testHostManifestPcrEventLogEntry, uuid.New(), common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogEquals(&testHostManifestPcrEventLogEntry, uuid.New(), hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -65,24 +64,24 @@ func TestIncludesPcrManifestMissingFault(t *testing.T) {
 
 // Provide unsupported SHA algorithm
 func TestPcrEventLogIncludesUnsupportedSHAFault(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA512",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -90,12 +89,12 @@ func TestPcrEventLogIncludesUnsupportedSHAFault(t *testing.T) {
 		},
 	}
 
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -104,7 +103,7 @@ func TestPcrEventLogIncludesUnsupportedSHAFault(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.Error(t, err)
 	assert.Nil(t, result)
@@ -114,24 +113,24 @@ func TestPcrEventLogIncludesUnsupportedSHAFault(t *testing.T) {
 // which invokes 'mismatchfieldinformation' to the user.
 func TestPcrEventLogIncludesMismatchFields(t *testing.T) {
 
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA1,
 				Measurement: zeros,
@@ -139,12 +138,12 @@ func TestPcrEventLogIncludesMismatchFields(t *testing.T) {
 		},
 	}
 
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -153,7 +152,7 @@ func TestPcrEventLogIncludesMismatchFields(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -166,24 +165,24 @@ func TestPcrEventLogIncludesMismatchFields(t *testing.T) {
 // one to the host manifest.  Expect a 'FaultPcrEventlogMissingExpectedEntries'
 // fault.
 func TestPcrEventLogIncludesMissingMeasurement(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -195,12 +194,12 @@ func TestPcrEventLogIncludesMissingMeasurement(t *testing.T) {
 		},
 	}
 
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -209,7 +208,7 @@ func TestPcrEventLogIncludesMissingMeasurement(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -225,24 +224,24 @@ func TestPcrEventLogIncludesMissingMeasurement(t *testing.T) {
 // different measurement to nvoke the 'PcrEventlogMissingExpectedEntries'
 // fault.
 func TestPcrEventLogIncludesDifferentMeasurement(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -251,12 +250,12 @@ func TestPcrEventLogIncludesDifferentMeasurement(t *testing.T) {
 	}
 
 	// host manifest has 'ones' for the measurement (not 'zeros')
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: ones,
@@ -265,7 +264,7 @@ func TestPcrEventLogIncludesDifferentMeasurement(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -280,24 +279,24 @@ func TestPcrEventLogIncludesDifferentMeasurement(t *testing.T) {
 // Create a host event log that does not include the bank/index specified
 // in the flavor event log to invoke a 'PcrEventLogMissing' fault.
 func TestPcrEventLogIncludesPcrEventLogMissingFault(t *testing.T) {
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -306,12 +305,12 @@ func TestPcrEventLogIncludesPcrEventLogMissingFault(t *testing.T) {
 	}
 
 	// Put something in PCR1 (not PCR0) to invoke PcrMissingEventLog fault
-	hostEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	hostEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 1,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: ones,
@@ -320,7 +319,7 @@ func TestPcrEventLogIncludesPcrEventLogMissingFault(t *testing.T) {
 	}
 
 	hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs = append(hostManifest.PcrManifest.PcrEventLogMap.Sha256EventLogs, hostEventsLog)
-	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -333,24 +332,24 @@ func TestPcrEventLogIncludesPcrEventLogMissingFault(t *testing.T) {
 // 'PcrEventLogMissing' fault.
 func TestPcrEventLogIncludesNoEventLogInHostManifest(t *testing.T) {
 	// Create a HostManifest without any event logs to invoke PcrEventLogMissing fault.
-	hostManifest := types.HostManifest{
-		PcrManifest: types.PcrManifest{
-			Sha256Pcrs: []types.HostManifestPcrs{
+	hostManifest := hvs.HostManifest{
+		PcrManifest: hvs.PcrManifest{
+			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   0,
 					Value:   PCR_VALID_256,
-					PcrBank: types.SHA256,
+					PcrBank: hvs.SHA256,
 				},
 			},
 		},
 	}
 
-	flavorEventsLog := types.TpmEventLog{
-		Pcr: types.Pcr{
+	flavorEventsLog := hvs.TpmEventLog{
+		Pcr: hvs.Pcr{
 			Index: 0,
 			Bank:  "SHA256",
 		},
-		TpmEvent: []types.EventLog{
+		TpmEvent: []hvs.EventLog{
 			{
 				TypeName:    util.EVENT_LOG_DIGEST_SHA256,
 				Measurement: zeros,
@@ -358,7 +357,7 @@ func TestPcrEventLogIncludesNoEventLogInHostManifest(t *testing.T) {
 		},
 	}
 
-	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, common.FlavorPartPlatform)
+	rule, err := NewPcrEventLogIncludes(&flavorEventsLog, hvs.FlavorPartPlatform)
 	result, err := rule.Apply(&hostManifest)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)

@@ -6,8 +6,7 @@ package types
 
 import (
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	cm "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
 var log = commLog.GetDefaultLogger()
@@ -20,9 +19,9 @@ var log = commLog.GetDefaultLogger()
 // PlatformFlavor interface must be implemented by specific PlatformFlavor
 type PlatformFlavor interface {
 	// GetFlavorPartNames retrieves the list of flavor parts that can be obtained using the GetFlavorPartRaw function
-	GetFlavorPartNames() ([]common.FlavorPart, error)
+	GetFlavorPartNames() ([]hvs.FlavorPartName, error)
 
 	// GetFlavorPartRaw extracts the details of the flavor part requested by the
 	// caller from the host report used during the creation of the PlatformFlavor instance
-	GetFlavorPartRaw(common.FlavorPart) ([]cm.Flavor, error)
+	GetFlavorPartRaw(name hvs.FlavorPartName) ([]hvs.Flavor, error)
 }

@@ -12,8 +12,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	flavormodel "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
@@ -594,8 +592,8 @@ func (store *MockFlavorStore) Search(criteria *models.FlavorVerificationFC) ([]h
 		for _, fId := range fIds {
 			f, _ := store.Retrieve(fId)
 			if f != nil {
-				var flvrPart cf.FlavorPart
-				err := (&flvrPart).Parse(f.Flavor.Meta.Description[flavormodel.FlavorPart].(string))
+				var flvrPart hvs.FlavorPartName
+				err := (&flvrPart).Parse(f.Flavor.Meta.Description[hvs.FlavorPartDescription].(string))
 				if err != nil {
 					defaultLog.WithError(err).Errorf("Error parsing Flavor part")
 				}
@@ -668,12 +666,12 @@ func NewFakeFlavorStoreWithAllFlavors(flavorFilePath string) *MockFlavorStore {
 	return store
 }
 
-func getFlavorPartsWithLatestMap(flavorParts []cf.FlavorPart, flavorPartsWithLatestMap map[cf.FlavorPart]bool) map[cf.FlavorPart]bool {
+func getFlavorPartsWithLatestMap(flavorParts []hvs.FlavorPartName, flavorPartsWithLatestMap map[hvs.FlavorPartName]bool) map[hvs.FlavorPartName]bool {
 	if len(flavorParts) <= 0 {
 		return flavorPartsWithLatestMap
 	}
 	if len(flavorPartsWithLatestMap) <= 0 {
-		flavorPartsWithLatestMap = make(map[cf.FlavorPart]bool)
+		flavorPartsWithLatestMap = make(map[hvs.FlavorPartName]bool)
 	}
 	for _, flavorPart := range flavorParts {
 		if _, ok := flavorPartsWithLatestMap[flavorPart]; !ok {

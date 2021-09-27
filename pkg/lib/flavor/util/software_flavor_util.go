@@ -5,7 +5,7 @@
 package util
 
 import (
-	cm "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"strings"
 )
@@ -20,7 +20,7 @@ type SoftwareFlavorUtil struct {
 }
 
 // GetSoftware returns the Software struct per the integrity Measurements sourced from HostManifest
-func (sfu SoftwareFlavorUtil) GetSoftware(measurements taModel.Measurement) cm.Software {
+func (sfu SoftwareFlavorUtil) GetSoftware(measurements taModel.Measurement) hvs.Software {
 	log.Trace("flavor/util/software_flavor_util:GetSoftware() Entering")
 	defer log.Trace("flavor/util/software_flavor_util:GetSoftware() Leaving")
 
@@ -45,7 +45,7 @@ func (sfu SoftwareFlavorUtil) GetSoftware(measurements taModel.Measurement) cm.S
 		measurementMap[sfu.cleanupPaths(mT.Path)] = flavorMeasurement
 	}
 
-	var s cm.Software
+	var s hvs.Software
 	s.Measurements = measurementMap
 	s.CumulativeHash = measurements.CumulativeHash
 	return s

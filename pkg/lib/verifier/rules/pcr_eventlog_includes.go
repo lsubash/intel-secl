@@ -8,15 +8,13 @@ import (
 	"fmt"
 
 	constants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
 //NewPcrEventLogIncludes creates the rule that will check
 //if all the actual event log measurements included in expected
-func NewPcrEventLogIncludes(expectedPcrEventLogEntry *types.TpmEventLog, marker common.FlavorPart) (Rule, error) {
+func NewPcrEventLogIncludes(expectedPcrEventLogEntry *hvs.TpmEventLog, marker hvs.FlavorPartName) (Rule, error) {
 	var rule pcrEventLogIncludes
 
 	if expectedPcrEventLogEntry == nil {
@@ -34,8 +32,8 @@ func NewPcrEventLogIncludes(expectedPcrEventLogEntry *types.TpmEventLog, marker 
 }
 
 type pcrEventLogIncludes struct {
-	expectedPcrEventLogEntry *types.TpmEventLog
-	marker                   common.FlavorPart
+	expectedPcrEventLogEntry *hvs.TpmEventLog
+	marker                   hvs.FlavorPartName
 }
 
 // - If the PcrManifest is not present in the host manifest, raise PcrManifestMissing fault.
@@ -43,7 +41,7 @@ type pcrEventLogIncludes struct {
 //   at the bank/index 'expected', raise "PcrEventLogMissing".
 // - if the log at bank/index does not have the same events as 'expected', raise
 //   "PcrEventLogMissingExpectedEntries".
-func (rule *pcrEventLogIncludes) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *pcrEventLogIncludes) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = constants.RulePcrEventLogIncludes
@@ -61,9 +59,9 @@ func (rule *pcrEventLogIncludes) Apply(hostManifest *types.HostManifest) (*hvs.R
 		}
 
 		if actualEventLogCriteria == nil {
-			result.Faults = append(result.Faults, newPcrEventLogMissingFault(types.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index), types.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)))
+			result.Faults = append(result.Faults, newPcrEventLogMissingFault(hvs.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index), hvs.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)))
 		} else {
-			actualEventLog := &types.TpmEventLog{}
+			actualEventLog := &hvs.TpmEventLog{}
 			actualEventLog.TpmEvent = actualEventLogCriteria
 			actualEventLog.Pcr.Index = pIndex
 			actualEventLog.Pcr.Bank = bank
@@ -82,8 +80,8 @@ func (rule *pcrEventLogIncludes) Apply(hostManifest *types.HostManifest) (*hvs.R
 
 			if len(missingAttr.TpmEvent) > 0 {
 				log.Debug("Missing eventlog fields in pcrevent includes equals rule :", missingAttr.TpmEvent)
-				index := types.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index)
-				bank := types.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)
+				index := hvs.PcrIndex(rule.expectedPcrEventLogEntry.Pcr.Index)
+				bank := hvs.SHAAlgorithm(rule.expectedPcrEventLogEntry.Pcr.Bank)
 
 				mismatchInfo := hvs.MismatchField{
 					Name:           constants.PcrEventLogMissingFields,

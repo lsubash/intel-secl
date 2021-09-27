@@ -365,3 +365,37 @@ func (c *Client) GetCredentials(createCredentailsReq types.CreateCredentialsReq)
 	}
 	return creds, nil
 }
+
+func (c *Client) GetCustomClaimsToken(customClaimsTokenReq types.CustomClaims) ([]byte, error) {
+	credentialsUrl := clients.ResolvePath(c.BaseURL, "custom-claims-token")
+	payload, err := json.Marshal(&customClaimsTokenReq)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, credentialsUrl, bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+	c.prepReqHeader(req)
+	req.Header.Set("Accept", "text/plain")
+
+	if c.HTTPClient == nil {
+		return nil, errors.New("aas/client:GetCustomClaimsToken() HTTPClient should not be null")
+	}
+
+	rsp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if rsp.StatusCode != http.StatusOK {
+		return nil, errors.Errorf("aas/client:GetCustomClaimsToken() Request made to %s returned status %d", credentialsUrl, rsp.StatusCode)
+	}
+
+	creds, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "aas/client:GetCustomClaimsToken() Error reading response")
+	}
+	return creds, nil
+}

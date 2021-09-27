@@ -11,8 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	fc "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	flavormodel "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -30,7 +28,7 @@ func NewFlavorStore(store *DataStore) *FlavorStore {
 func (f *FlavorStore) Create(signedFlavor *hvs.SignedFlavor) (*hvs.SignedFlavor, error) {
 	defaultLog.Trace("postgres/flavor_store:Create() Entering")
 	defer defaultLog.Trace("postgres/flavor_store:Create() Leaving")
-	if signedFlavor == nil || signedFlavor.Signature == "" || signedFlavor.Flavor.Meta.Description[flavormodel.Label].(string) == "" {
+	if signedFlavor == nil || signedFlavor.Signature == "" || signedFlavor.Flavor.Meta.Description[hvs.Label].(string) == "" {
 		return nil, errors.New("postgres/flavor_store:Create()- invalid input : must have content, signature and the label for the flavor")
 	}
 
@@ -46,8 +44,8 @@ func (f *FlavorStore) Create(signedFlavor *hvs.SignedFlavor) (*hvs.SignedFlavor,
 		ID:         signedFlavor.Flavor.Meta.ID,
 		Content:    PGFlavorContent(signedFlavor.Flavor),
 		CreatedAt:  time.Now(),
-		Label:      signedFlavor.Flavor.Meta.Description[flavormodel.Label].(string),
-		FlavorPart: signedFlavor.Flavor.Meta.Description[flavormodel.FlavorPart].(string),
+		Label:      signedFlavor.Flavor.Meta.Description[hvs.Label].(string),
+		FlavorPart: signedFlavor.Flavor.Meta.Description[hvs.FlavorPartDescription].(string),
 		Signature:  signedFlavor.Signature,
 	}
 
@@ -114,7 +112,7 @@ func (f *FlavorStore) Search(flavorFilter *models.FlavorVerificationFC) ([]hvs.S
 	return signedFlavors, nil
 }
 
-func (f *FlavorStore) buildMultipleFlavorPartQueryString(tx *gorm.DB, fgId uuid.UUID, flavorMetaInfo map[fc.FlavorPart][]models.FlavorMetaKv, flavorPartsWithLatest map[fc.FlavorPart]bool) *gorm.DB {
+func (f *FlavorStore) buildMultipleFlavorPartQueryString(tx *gorm.DB, fgId uuid.UUID, flavorMetaInfo map[hvs.FlavorPartName][]models.FlavorMetaKv, flavorPartsWithLatest map[hvs.FlavorPartName]bool) *gorm.DB {
 	defaultLog.Trace("postgres/flavor_store:buildMultipleFlavorPartQueryString() Entering")
 	defer defaultLog.Trace("postgres/flavor_store:buildMultipleFlavorPartQueryString() Leaving")
 
@@ -127,71 +125,71 @@ func (f *FlavorStore) buildMultipleFlavorPartQueryString(tx *gorm.DB, fgId uuid.
 	if flavorPartsWithLatest != nil && len(flavorPartsWithLatest) >= 1 {
 		for flavorPart := range flavorPartsWithLatest {
 			switch flavorPart {
-			case fc.FlavorPartPlatform:
+			case hvs.FlavorPartPlatform:
 				biosQuery = f.Store.Db
-				biosQuery = buildFlavorPartQueryStringWithFlavorParts(fc.FlavorPartPlatform.String(), fgId.String(), biosQuery)
+				biosQuery = buildFlavorPartQueryStringWithFlavorParts(hvs.FlavorPartPlatform.String(), fgId.String(), biosQuery)
 				// build biosQuery with all the platform flavor query attributes from host manifest
-				pfQueryAttributes := flavorMetaInfo[fc.FlavorPartPlatform]
+				pfQueryAttributes := flavorMetaInfo[hvs.FlavorPartPlatform]
 				for _, pfQueryAttribute := range pfQueryAttributes {
 					biosQuery = biosQuery.Where(convertToPgJsonqueryString("f.content", pfQueryAttribute.Key)+" = ?", pfQueryAttribute.Value)
 				}
 				// apply limit if latest
-				if flavorPartsWithLatest[fc.FlavorPartPlatform] {
+				if flavorPartsWithLatest[hvs.FlavorPartPlatform] {
 					biosQuery = biosQuery.Order("f.created_at desc").Limit(1)
 				}
 
-			case fc.FlavorPartOs:
+			case hvs.FlavorPartOs:
 				osQuery = f.Store.Db
-				osQuery = buildFlavorPartQueryStringWithFlavorParts(fc.FlavorPartOs.String(), fgId.String(), osQuery)
+				osQuery = buildFlavorPartQueryStringWithFlavorParts(hvs.FlavorPartOs.String(), fgId.String(), osQuery)
 				// build osQuery with all the OS flavor query attributes from host manifest
-				osfQueryAttributes := flavorMetaInfo[fc.FlavorPartOs]
+				osfQueryAttributes := flavorMetaInfo[hvs.FlavorPartOs]
 				for _, osfQueryAttribute := range osfQueryAttributes {
 					osQuery = osQuery.Where(convertToPgJsonqueryString("f.content", osfQueryAttribute.Key)+" = ?", osfQueryAttribute.Value)
 				}
 				// apply limit if latest
-				if flavorPartsWithLatest[fc.FlavorPartOs] {
+				if flavorPartsWithLatest[hvs.FlavorPartOs] {
 					osQuery = osQuery.Order("f.created_at desc").Limit(1)
 				}
 
-			case fc.FlavorPartHostUnique:
+			case hvs.FlavorPartHostUnique:
 				hostUniqueQuery = f.Store.Db
 				hostUniqueQuery = hostUniqueQuery.Table("flavor f")
 				hostUniqueQuery = hostUniqueQuery.Select("f.id")
-				hostUniqueQuery = hostUniqueQuery.Where(convertToPgJsonqueryString("f.content", "meta.description.flavor_part")+" = ?", fc.FlavorPartHostUnique.String())
+				hostUniqueQuery = hostUniqueQuery.Where(convertToPgJsonqueryString("f.content", "meta.description.flavor_part")+" = ?", hvs.FlavorPartHostUnique.String())
 				// build host unique Query with all the host unique flavor query attributes from host manifest
-				hufQueryAttributes := flavorMetaInfo[fc.FlavorPartHostUnique]
+				hufQueryAttributes := flavorMetaInfo[hvs.FlavorPartHostUnique]
 				for _, hufQueryAttribute := range hufQueryAttributes {
 					hostUniqueQuery = hostUniqueQuery.Where(convertToPgJsonqueryString("f.content", hufQueryAttribute.Key)+" = ?", hufQueryAttribute.Value)
 				}
 				// apply limit if latest
-				if flavorPartsWithLatest[fc.FlavorPartHostUnique] {
+				if flavorPartsWithLatest[hvs.FlavorPartHostUnique] {
 					hostUniqueQuery = hostUniqueQuery.Order("f.created_at desc").Limit(1)
 				}
 
-			case fc.FlavorPartSoftware:
+			case hvs.FlavorPartSoftware:
 				softwareQuery = f.Store.Db
-				softwareQuery = buildFlavorPartQueryStringWithFlavorParts(fc.FlavorPartSoftware.String(), fgId.String(), softwareQuery)
-				sfQueryAttributes := flavorMetaInfo[fc.FlavorPartSoftware]
+				softwareQuery = buildFlavorPartQueryStringWithFlavorParts(hvs.FlavorPartSoftware.String(), fgId.String(), softwareQuery)
+				sfQueryAttributes := flavorMetaInfo[hvs.FlavorPartSoftware]
 				// build software Query with all the software flavor query attributes from host manifest
 				for _, sfQueryAttribute := range sfQueryAttributes {
 					softwareQuery = softwareQuery.Where("f.label IN (?)", sfQueryAttribute.Value.([]string))
 				}
 				// apply limit if latest
-				if flavorPartsWithLatest[fc.FlavorPartSoftware] {
+				if flavorPartsWithLatest[hvs.FlavorPartSoftware] {
 					softwareQuery = softwareQuery.Order("f.created_at desc").Limit(1)
 				}
 
-			case fc.FlavorPartAssetTag:
+			case hvs.FlavorPartAssetTag:
 				aTagQuery = f.Store.Db
 				aTagQuery = aTagQuery.Table("flavor f").Select("f.id")
-				aTagQuery = aTagQuery.Where(convertToPgJsonqueryString("f.content", "meta.description.flavor_part")+" = ?", fc.FlavorPartAssetTag)
+				aTagQuery = aTagQuery.Where(convertToPgJsonqueryString("f.content", "meta.description.flavor_part")+" = ?", hvs.FlavorPartAssetTag)
 				// build assetTag Query with all the assetTag flavor query attributes from host manifest
-				atfQueryAttributes := flavorMetaInfo[fc.FlavorPartAssetTag]
+				atfQueryAttributes := flavorMetaInfo[hvs.FlavorPartAssetTag]
 				for _, atfQueryAttribute := range atfQueryAttributes {
 					aTagQuery = aTagQuery.Where(convertToPgJsonqueryString("f.content", atfQueryAttribute.Key)+" = ?", atfQueryAttribute.Value)
 				}
 				// apply limit if latest
-				if flavorPartsWithLatest[fc.FlavorPartAssetTag] {
+				if flavorPartsWithLatest[hvs.FlavorPartAssetTag] {
 					aTagQuery = aTagQuery.Order("f.created_at desc").Limit(1)
 				}
 
@@ -298,12 +296,12 @@ func buildFlavorPartQueryStringWithFlavorgroup(flavorgroupId string, tx *gorm.DB
 }
 
 // helper function used to add the list of flavor parts in the map[flavorPart]bool, indicating if latest flavor is required
-func getFlavorPartsWithLatestMap(flavorParts []fc.FlavorPart, flavorPartsWithLatestMap map[fc.FlavorPart]bool) map[fc.FlavorPart]bool {
+func getFlavorPartsWithLatestMap(flavorParts []hvs.FlavorPartName, flavorPartsWithLatestMap map[hvs.FlavorPartName]bool) map[hvs.FlavorPartName]bool {
 	if len(flavorParts) <= 0 {
 		return flavorPartsWithLatestMap
 	}
 	if len(flavorPartsWithLatestMap) <= 0 {
-		flavorPartsWithLatestMap = make(map[fc.FlavorPart]bool)
+		flavorPartsWithLatestMap = make(map[hvs.FlavorPartName]bool)
 	}
 	for _, flavorPart := range flavorParts {
 		if _, ok := flavorPartsWithLatestMap[flavorPart]; !ok {

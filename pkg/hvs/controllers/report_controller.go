@@ -16,7 +16,6 @@ import (
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"net/http"
@@ -65,11 +64,22 @@ func (controller ReportController) Create(w http.ResponseWriter, r *http.Request
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Bad input given in input request"}
 	}
 
-	hvsReport, err := controller.createReport(reqReportCreateRequest)
+	requestType := r.URL.Query().Get("process")
+	async := false
+	if requestType != "" && requestType == "async" {
+		async = true
+	}
+	hvsReport, err := controller.createReport(reqReportCreateRequest, async)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/report_controller:Create() Error while creating report")
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
 	}
+
+	if async {
+		defaultLog.Debug("controllers/report_controller:Create() Asynchronous request to create a trust report was successfully created")
+		return nil, http.StatusCreated, nil
+	}
+
 	if hvsReport == nil {
 		defaultLog.WithError(err).Error("controllers/report_controller:Create() The report was not created")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error while creating report"}
@@ -80,7 +90,7 @@ func (controller ReportController) Create(w http.ResponseWriter, r *http.Request
 	return report, http.StatusCreated, nil
 }
 
-func (controller ReportController) createReport(rsCriteria hvs.ReportCreateRequest) (*models.HVSReport, error) {
+func (controller ReportController) createReport(rsCriteria hvs.ReportCreateRequest, async bool) (*models.HVSReport, error) {
 	defaultLog.Trace("controllers/report_controller:createReport() Entering")
 	defer defaultLog.Trace("controllers/report_controller:createReport() Leaving")
 	hsCriteria := getHostFilterCriteria(rsCriteria)
@@ -92,8 +102,20 @@ func (controller ReportController) createReport(rsCriteria hvs.ReportCreateReque
 	if hosts == nil || len(hosts) == 0 {
 		return nil, errors.New("Host for given criteria does not exist")
 	}
+
 	//Always only one record is returned for the particular criteria
 	hostId := hosts[0].Id
+	// if async is true, process the request to create the report asynchronously by adding the host to queue
+	if async {
+		defaultLog.Debugf("controllers/report_controller:createReport() Adding host %s to queue to process request to create sync report", hostId.String())
+		verr := controller.HTManager.VerifyHostsAsync([]uuid.UUID{hostId}, true, true)
+		if verr != nil {
+			defaultLog.WithError(verr).Error("controllers/report_controller:createReport() Failed to add host to FV queue")
+			return nil, errors.New("Failed to create async reports")
+		}
+		return nil, nil
+	}
+
 	hvsReport, err := controller.HTManager.VerifyHost(hostId, true, true)
 	if err != nil {
 		defaultLog.WithError(err).Errorf("controllers/report_controller:createReport() Failed to create a trust report, flavor verification failed")
@@ -145,7 +167,7 @@ func (controller ReportController) CreateSaml(w http.ResponseWriter, r *http.Req
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Bad input given in input request"}
 	}
 
-	hvsReport, err := controller.createReport(reqReportCreateRequest)
+	hvsReport, err := controller.createReport(reqReportCreateRequest, false)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/report_controller:CreateSaml() Error while creating SAML report")
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
@@ -398,8 +420,8 @@ func ConvertToReport(hvsReport *models.HVSReport) *hvs.Report {
 
 func buildTrustInformation(trustReport hvs.TrustReport) *hvs.TrustInformation {
 
-	flavorParts := common.GetFlavorTypes()
-	flavorsTrustStatus := make(map[common.FlavorPart]hvs.FlavorTrustStatus)
+	flavorParts := hvs.GetFlavorTypes()
+	flavorsTrustStatus := make(map[hvs.FlavorPartName]hvs.FlavorTrustStatus)
 	tr := hvs.NewTrustReport(trustReport)
 	for _, flavorPart := range flavorParts {
 		if len(tr.GetResultsForMarker(flavorPart.String())) > 0 {

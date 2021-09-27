@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	fc "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -386,14 +385,14 @@ func (f *FlavorGroupStore) searchFlavorGroups(flavorId *uuid.UUID) ([]uuid.UUID,
 
 // Returns different flavor types of flavors that are part of the flavor group. It is returned as a map
 // It relies on the a cache entry - only if the cache entry does not exist, a database lookup is performed
-func (f *FlavorGroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[fc.FlavorPart]bool, error) {
+func (f *FlavorGroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[hvs.FlavorPartName]bool, error) {
 	defaultLog.Trace("postgres/flavorgroup_store:GetFlavorTypesInFlavorGroup() Entering")
 	defer defaultLog.Trace("postgres/flavorgroup_store:GetFlavorTypesInFlavorGroup() Leaving")
 
 	// obtain a read lock before we check if an entry exists in the cache. Release the lock after reading in either
 	// path. Cannot use defer RUnlock since we will have to modify the cache if an entry is not found.
 	if flavorParts, exists := f.flavorPartsCache.Load(fgId); exists {
-		return flavorParts.(map[fc.FlavorPart]bool), nil
+		return flavorParts.(map[hvs.FlavorPartName]bool), nil
 	} else {
 		// create the map first.. the map itself might be empty if there are flavors in the flavorgroup
 		var flavorParts []string
@@ -401,9 +400,9 @@ func (f *FlavorGroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[fc.F
 		if err != nil {
 			return nil, errors.Wrap(err, "postgres/flavorgroup_store:GetFlavorTypesInFlavorGroup() failed to retrieve records from db")
 		}
-		fpMap := make(map[fc.FlavorPart]bool)
+		fpMap := make(map[hvs.FlavorPartName]bool)
 		for _, fp := range flavorParts {
-			fpMap[fc.FlavorPart(fp)] = true
+			fpMap[hvs.FlavorPartName(fp)] = true
 		}
 
 		f.flavorPartsCache.Store(fgId, fpMap)

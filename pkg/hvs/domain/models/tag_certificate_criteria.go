@@ -6,7 +6,7 @@ package models
 
 import (
 	"github.com/google/uuid"
-	asset_tag "github.com/intel-secl/intel-secl/v5/pkg/lib/asset-tag"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"time"
 )
 
@@ -31,7 +31,7 @@ type TagCertificateCreateCriteria struct {
 	// swagger:strfmt uuid
 	HardwareUUID uuid.UUID `json:"hardware_uuid"`
 	// SelectionContent is an array of one or more key-value pairs with the tag selection attributes.
-	SelectionContent []asset_tag.TagKvAttribute `json:"selection_content,omitempty"`
+	SelectionContent []hvs.TagKvAttribute `json:"selection_content,omitempty"`
 }
 
 // TagCertificateDeployCriteria holds the data used to deploy a TagCertificate onto a host

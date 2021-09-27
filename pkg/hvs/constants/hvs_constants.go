@@ -195,3 +195,6 @@ const (
 	HrrsRefreshPeriod                  = "hrrs-refresh-period"
 	VcssRefreshPeriod                  = "vcss-refresh-period"
 )
+
+// EnableEKCertRevokeCheck
+const EnableEKCertRevokeCheck = "enable-ekcert-revoke-check"

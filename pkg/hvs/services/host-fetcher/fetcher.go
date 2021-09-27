@@ -25,7 +25,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/chnlworkq"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	hc "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
@@ -263,7 +262,7 @@ func (svc *Service) doWork() {
 	}
 }
 
-func (svc *Service) Retrieve(host hvs.Host) (*types.HostManifest, error) {
+func (svc *Service) Retrieve(host hvs.Host) (*hvs.HostManifest, error) {
 	defaultLog.Trace("hostfetcher/Service:Retrieve() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:Retrieve() Leaving")
 
@@ -413,7 +412,7 @@ func (svc *Service) getTrustPcrListFromCache(hId uuid.UUID) []int {
 	return trustPcrList
 }
 
-func (svc *Service) GetHostData(connUrl string, pcrList []int) (*types.HostManifest, error) {
+func (svc *Service) GetHostData(connUrl string, pcrList []int) (*hvs.HostManifest, error) {
 	defaultLog.Trace("hostfetcher/Service:GetHostData() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:GetHostData() Leaving")
 
@@ -437,7 +436,7 @@ func (svc *Service) GetHostData(connUrl string, pcrList []int) (*types.HostManif
 	return &data, err
 }
 
-func (svc *Service) updateMissingHostDetails(hostId uuid.UUID, manifest *types.HostManifest) {
+func (svc *Service) updateMissingHostDetails(hostId uuid.UUID, manifest *hvs.HostManifest) {
 	defaultLog.Trace("hostfetcher/Service:updateMissingHostDetails() Entering")
 	defer defaultLog.Trace("hostfetcher/Service:updateMissingHostDetails() Leaving")
 

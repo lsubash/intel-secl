@@ -10,8 +10,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust/rules"
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	flavorVerifier "github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
@@ -22,14 +20,14 @@ type flvGrpHostTrustReqs struct {
 	HostId                          uuid.UUID
 	FlavorGroupId                   uuid.UUID
 	FlavorMatchPolicies             hvs.FlavorMatchPolicies
-	MatchTypeFlavorParts            map[hvs.MatchType][]cf.FlavorPart
+	MatchTypeFlavorParts            map[hvs.MatchType][]hvs.FlavorPartName
 	AllOfFlavors                    []hvs.SignedFlavor
-	DefinedAndRequiredFlavorTypes   map[cf.FlavorPart]bool
-	FlavorPartMatchPolicy           map[cf.FlavorPart]hvs.MatchPolicy
+	DefinedAndRequiredFlavorTypes   map[hvs.FlavorPartName]bool
+	FlavorPartMatchPolicy           map[hvs.FlavorPartName]hvs.MatchPolicy
 	SkipFlavorSignatureVerification bool
 }
 
-func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[cf.FlavorPart]bool, fg hvs.FlavorGroup, fs domain.FlavorStore, fgs domain.FlavorGroupStore, hostData *types.HostManifest, SkipFlavorSignatureVerification bool) (*flvGrpHostTrustReqs, error) {
+func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[hvs.FlavorPartName]bool, fg hvs.FlavorGroup, fs domain.FlavorStore, fgs domain.FlavorGroupStore, hostData *hvs.HostManifest, SkipFlavorSignatureVerification bool) (*flvGrpHostTrustReqs, error) {
 	defaultLog.Trace("hosttrust/trust_requirements:NewFlvGrpHostTrustReqs() Entering")
 	defer defaultLog.Trace("hosttrust/trust_requirements:NewFlvGrpHostTrustReqs() Leaving")
 
@@ -38,11 +36,11 @@ func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[cf.Fl
 		FlavorGroupId:       fg.ID,
 		FlavorMatchPolicies: fg.MatchPolicies,
 		//Initialize empty map.
-		DefinedAndRequiredFlavorTypes:   make(map[cf.FlavorPart]bool),
+		DefinedAndRequiredFlavorTypes:   make(map[hvs.FlavorPartName]bool),
 		SkipFlavorSignatureVerification: SkipFlavorSignatureVerification,
 	}
 
-	var fgRequirePolicyMap map[hvs.FlavorRequiredPolicy][]cf.FlavorPart
+	var fgRequirePolicyMap map[hvs.FlavorRequiredPolicy][]hvs.FlavorPartName
 
 	reqs.FlavorPartMatchPolicy, reqs.MatchTypeFlavorParts, fgRequirePolicyMap = fg.GetMatchPolicyMaps()
 
@@ -57,7 +55,7 @@ func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[cf.Fl
 		}
 		reqs.AllOfFlavors, err = fs.Search(&models.FlavorVerificationFC{
 			FlavorFC: models.FlavorFilterCriteria{
-				// Flavor Parts of the Search Criteria takes a []cf.FlavorPart - but we have a map.
+				// Flavor Parts of the Search Criteria takes a []hvs.FlavorPart - but we have a map.
 				// So dump keys of the map into a slice.
 				FlavorgroupID: fg.ID,
 				FlavorParts:   reqs.MatchTypeFlavorParts[hvs.MatchTypeAllOf],
@@ -103,11 +101,11 @@ func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[cf.Fl
 	return &reqs, nil
 }
 
-func (r *flvGrpHostTrustReqs) GetLatestFlavorTypeMap() map[cf.FlavorPart]bool {
+func (r *flvGrpHostTrustReqs) GetLatestFlavorTypeMap() map[hvs.FlavorPartName]bool {
 	defaultLog.Trace("hosttrust/trust_requirements:NewFlvGrpHostTrustReqs() Entering")
 	defer defaultLog.Trace("hosttrust/trust_requirements:NewFlvGrpHostTrustReqs() Leaving")
 
-	result := make(map[cf.FlavorPart]bool)
+	result := make(map[hvs.FlavorPartName]bool)
 	for part := range r.DefinedAndRequiredFlavorTypes {
 		if r.FlavorPartMatchPolicy[part].MatchType == hvs.MatchTypeLatest {
 			result[part] = true
@@ -148,10 +146,10 @@ func (r *flvGrpHostTrustReqs) MeetsFlavorGroupReqs(trustCache hostTrustCache, ve
 // According to verification-service: RuleAllOfFlavors.java
 // the protected 'marker' variable inherited from lib-verifier: BaseRule.java
 // does not at all effect the behavior of methods implemented in RuleAllOfFlavors
-func (r *flvGrpHostTrustReqs) getAllOfMarkers() []cf.FlavorPart {
+func (r *flvGrpHostTrustReqs) getAllOfMarkers() []hvs.FlavorPartName {
 	defaultLog.Trace("hosttrust/trust_requirements:getAllOfMarkers() Entering")
 	defer defaultLog.Trace("hosttrust/trust_requirements:getAllOfMarkers() Leaving")
-	markers := make([]cf.FlavorPart, 0, len(r.MatchTypeFlavorParts[hvs.MatchTypeAllOf]))
+	markers := make([]hvs.FlavorPartName, 0, len(r.MatchTypeFlavorParts[hvs.MatchTypeAllOf]))
 	for _, flavorPart := range r.MatchTypeFlavorParts[hvs.MatchTypeAllOf] {
 		markers = append(markers, flavorPart)
 	}

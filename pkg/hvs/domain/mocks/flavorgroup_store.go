@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 	"strings"
@@ -177,8 +176,8 @@ func (store *MockFlavorgroupStore) SearchHostsByFlavorGroup(fgID uuid.UUID) ([]u
 	return hIds, nil
 }
 
-func (store *MockFlavorgroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[cf.FlavorPart]bool, error) {
-	return make(map[cf.FlavorPart]bool), nil
+func (store *MockFlavorgroupStore) GetFlavorTypesInFlavorGroup(fgId uuid.UUID) (map[hvs.FlavorPartName]bool, error) {
+	return make(map[hvs.FlavorPartName]bool), nil
 }
 
 func (store *MockFlavorgroupStore) AddFlavorTemplates(fgId uuid.UUID, ftIds []uuid.UUID) error {
@@ -197,21 +196,21 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 		Name: "hvs_flavorgroup_test1",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
-				FlavorPart: cf.FlavorPartOs,
+				FlavorPart: hvs.FlavorPartOs,
 				MatchPolicy: hvs.MatchPolicy{
 					MatchType: hvs.MatchTypeAnyOf,
 					Required:  hvs.FlavorRequired,
 				},
 			},
 			{
-				FlavorPart: cf.FlavorPartPlatform,
+				FlavorPart: hvs.FlavorPartPlatform,
 				MatchPolicy: hvs.MatchPolicy{
 					MatchType: hvs.MatchTypeAnyOf,
 					Required:  hvs.FlavorRequired,
 				},
 			},
 			{
-				FlavorPart: cf.FlavorPartSoftware,
+				FlavorPart: hvs.FlavorPartSoftware,
 				MatchPolicy: hvs.MatchPolicy{
 					MatchType: hvs.MatchTypeAllOf,
 					Required:  hvs.FlavorRequiredIfDefined,
@@ -227,7 +226,7 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 		Name: "hvs_flavorgroup_test2",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
-				FlavorPart: cf.FlavorPartHostUnique,
+				FlavorPart: hvs.FlavorPartHostUnique,
 				MatchPolicy: hvs.MatchPolicy{
 					MatchType: hvs.MatchTypeAllOf,
 					Required:  hvs.FlavorRequired,

@@ -14,11 +14,8 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/constants"
-	cm "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/util"
 	hcConstants "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
-	hcTypes "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
@@ -31,9 +28,9 @@ import (
 
 // LinuxPlatformFlavor is used to generate various Flavors for a Intel-based Linux host
 type HostPlatformFlavor struct {
-	HostManifest    *hcTypes.HostManifest        `json:"host_manifest"`
-	HostInfo        *taModel.HostInfo            `json:"host_info"`
-	TagCertificate  *cm.X509AttributeCertificate `json:"tag_certificate"`
+	HostManifest    *hvs.HostManifest             `json:"host_manifest"`
+	HostInfo        *taModel.HostInfo             `json:"host_info"`
+	TagCertificate  *hvs.X509AttributeCertificate `json:"tag_certificate"`
 	FlavorTemplates []hvs.FlavorTemplate
 }
 
@@ -41,7 +38,7 @@ var pfutil util.PlatformFlavorUtil
 var sfutil util.SoftwareFlavorUtil
 
 // NewHostPlatformFlavor returns an instance of LinuxPlatformFlavor
-func NewHostPlatformFlavor(hostReport *hcTypes.HostManifest, tagCertificate *cm.X509AttributeCertificate, flavorTemplates []hvs.FlavorTemplate) PlatformFlavor {
+func NewHostPlatformFlavor(hostReport *hvs.HostManifest, tagCertificate *hvs.X509AttributeCertificate, flavorTemplates []hvs.FlavorTemplate) PlatformFlavor {
 	log.Trace("flavor/types/host_platform_flavor:NewHostPlatformFlavor() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:NewHostPlatformFlavor() Leaving")
 
@@ -55,20 +52,20 @@ func NewHostPlatformFlavor(hostReport *hcTypes.HostManifest, tagCertificate *cm.
 
 // GetFlavorPartRaw extracts the details of the flavor part requested by the
 // caller from the host report used during the creation of the PlatformFlavor instance
-func (pf HostPlatformFlavor) GetFlavorPartRaw(name cf.FlavorPart) ([]cm.Flavor, error) {
+func (pf HostPlatformFlavor) GetFlavorPartRaw(name hvs.FlavorPartName) ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/host_platform_flavor:GetFlavorPartRaw() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:GetFlavorPartRaw() Leaving")
 
 	switch name {
-	case cf.FlavorPartPlatform:
+	case hvs.FlavorPartPlatform:
 		return pf.getPlatformFlavor()
-	case cf.FlavorPartOs:
+	case hvs.FlavorPartOs:
 		return pf.getOsFlavor()
-	case cf.FlavorPartAssetTag:
+	case hvs.FlavorPartAssetTag:
 		return pf.getAssetTagFlavor()
-	case cf.FlavorPartHostUnique:
+	case hvs.FlavorPartHostUnique:
 		return pf.getHostUniqueFlavor()
-	case cf.FlavorPartSoftware:
+	case hvs.FlavorPartSoftware:
 		if pf.HostManifest.HostInfo.OSType == taModel.OsTypeLinux {
 			return pf.getDefaultSoftwareFlavor()
 		} else {
@@ -79,19 +76,19 @@ func (pf HostPlatformFlavor) GetFlavorPartRaw(name cf.FlavorPart) ([]cm.Flavor, 
 }
 
 // GetFlavorPartNames retrieves the list of flavor parts that can be obtained using the GetFlavorPartRaw function
-func (pf HostPlatformFlavor) GetFlavorPartNames() ([]cf.FlavorPart, error) {
+func (pf HostPlatformFlavor) GetFlavorPartNames() ([]hvs.FlavorPartName, error) {
 	log.Trace("flavor/types/host_platform_flavor:GetFlavorPartNames() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:GetFlavorPartNames() Leaving")
 
 	if strings.ToUpper(pf.HostManifest.HostInfo.OSName) == constants.OsLinux {
-		return []cf.FlavorPart{
-			cf.FlavorPartPlatform, cf.FlavorPartOs,
-			cf.FlavorPartHostUnique, cf.FlavorPartSoftware,
-			cf.FlavorPartAssetTag}, nil
+		return []hvs.FlavorPartName{
+			hvs.FlavorPartPlatform, hvs.FlavorPartOs,
+			hvs.FlavorPartHostUnique, hvs.FlavorPartSoftware,
+			hvs.FlavorPartAssetTag}, nil
 	} else {
-		return []cf.FlavorPart{
-			cf.FlavorPartPlatform, cf.FlavorPartOs,
-			cf.FlavorPartHostUnique, cf.FlavorPartAssetTag}, nil
+		return []hvs.FlavorPartName{
+			hvs.FlavorPartPlatform, hvs.FlavorPartOs,
+			hvs.FlavorPartHostUnique, hvs.FlavorPartAssetTag}, nil
 	}
 }
 
@@ -107,25 +104,25 @@ func isCbntMeasureProfile(cbnt *taModel.CBNT) bool {
 
 // getPlatformFlavor returns a json document having all the good known PCR values and
 // corresponding event logs that can be used for evaluating the PLATFORM trust of a host
-func (pf HostPlatformFlavor) getPlatformFlavor() ([]cm.Flavor, error) {
+func (pf HostPlatformFlavor) getPlatformFlavor() ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/host_platform_flavor:getPlatformFlavor() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:getPlatformFlavor() Leaving")
 
 	var errorMessage = "Error during creation of PLATFORM flavor"
-	platformPcrs, err := pfutil.GetPcrRulesMap(cf.FlavorPartPlatform, pf.FlavorTemplates)
+	platformPcrs, err := pfutil.GetPcrRulesMap(hvs.FlavorPartPlatform, pf.FlavorTemplates)
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getPlatformFlavor() %s Failure in getting pcrlist", errorMessage)
 	}
 
 	var allPcrDetails = pfutil.GetPcrDetails(pf.HostManifest.PcrManifest, platformPcrs)
 
-	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", cf.FlavorPartPlatform, pf.getVendorName())
+	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", hvs.FlavorPartPlatform, pf.getVendorName())
 	if err != nil {
 		return nil, errors.Wrapf(err, errorMessage, "%s - failure in Meta section details")
 	}
 	log.Debugf("flavor/types/host_platform_flavor:getPlatformFlavor() New Meta Section: %v", *newMeta)
 
-	newMeta = UpdateMetaSectionDetails(cf.FlavorPartPlatform, newMeta, pf.FlavorTemplates)
+	newMeta = UpdateMetaSectionDetails(hvs.FlavorPartPlatform, newMeta, pf.FlavorTemplates)
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getPlatformFlavor() %s failure in Updating Meta section details", errorMessage)
 	}
@@ -144,34 +141,34 @@ func (pf HostPlatformFlavor) getPlatformFlavor() ([]cm.Flavor, error) {
 	log.Debugf("flavor/types/host_platform_flavor:getPlatformFlavor() New Hardware Section: %v", *newHW)
 
 	// Assemble the Platform Flavor
-	platformFlavor := cm.NewFlavor(newMeta, newBios, newHW, allPcrDetails, nil, nil)
+	platformFlavor := hvs.NewFlavor(newMeta, newBios, newHW, allPcrDetails, nil, nil)
 
 	log.Debugf("flavor/types/host_platform_flavor:getPlatformFlavor()  New PlatformFlavor: %v", platformFlavor)
 
-	return []cm.Flavor{*platformFlavor}, nil
+	return []hvs.Flavor{*platformFlavor}, nil
 }
 
 // getOsFlavor Returns a json document having all the good known PCR values and
 // corresponding event logs that can be used for evaluating the OS Trust of a host
-func (pf HostPlatformFlavor) getOsFlavor() ([]cm.Flavor, error) {
+func (pf HostPlatformFlavor) getOsFlavor() ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/host_platform_flavor:getOsFlavor() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:getOsFlavor() Leaving")
 
 	var errorMessage = "Error during creation of OS flavor"
-	osPcrs, err := pfutil.GetPcrRulesMap(cf.FlavorPartOs, pf.FlavorTemplates)
+	osPcrs, err := pfutil.GetPcrRulesMap(hvs.FlavorPartOs, pf.FlavorTemplates)
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getOsFlavor() %s Failure in getting pcrlist", errorMessage)
 	}
 
 	var allPcrDetails = pfutil.GetPcrDetails(pf.HostManifest.PcrManifest, osPcrs)
 
-	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", cf.FlavorPartOs, pf.getVendorName())
+	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", hvs.FlavorPartOs, pf.getVendorName())
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getOsFlavor() %s Failure in Meta section details", errorMessage)
 	}
 	log.Debugf("flavor/types/host_platform_flavor:getOsFlavor() New Meta Section: %v", *newMeta)
 
-	newMeta = UpdateMetaSectionDetails(cf.FlavorPartOs, newMeta, pf.FlavorTemplates)
+	newMeta = UpdateMetaSectionDetails(hvs.FlavorPartOs, newMeta, pf.FlavorTemplates)
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getOsFlavor() %s failure in Updating Meta section details", errorMessage)
 	}
@@ -183,36 +180,36 @@ func (pf HostPlatformFlavor) getOsFlavor() ([]cm.Flavor, error) {
 	log.Debugf("flavor/types/host_platform_flavor:getOsFlavor() New Bios Section: %v", *newBios)
 
 	// Assemble the OS Flavor
-	osFlavor := cm.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil)
+	osFlavor := hvs.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil)
 
 	log.Debugf("flavor/types/host_platform_flavor:getOSFlavor()  New OS Flavor: %v", osFlavor)
 
-	return []cm.Flavor{*osFlavor}, nil
+	return []hvs.Flavor{*osFlavor}, nil
 }
 
 // getHostUniqueFlavor Returns a json document having all the good known PCR values and corresponding event logs that
 // can be used for evaluating the unique part of the PCR configurations of a host. These include PCRs/modules getting
 // extended to PCRs that would vary from host to host.
-func (pf HostPlatformFlavor) getHostUniqueFlavor() ([]cm.Flavor, error) {
+func (pf HostPlatformFlavor) getHostUniqueFlavor() ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/host_platform_flavor:getHostUniqueFlavor() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:getHostUniqueFlavor() Leaving")
 
 	var errorMessage = "Error during creation of HOST_UNIQUE flavor"
 	var err error
-	hostUniquePcrs, err := pfutil.GetPcrRulesMap(cf.FlavorPartHostUnique, pf.FlavorTemplates)
+	hostUniquePcrs, err := pfutil.GetPcrRulesMap(hvs.FlavorPartHostUnique, pf.FlavorTemplates)
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getHostUniqueFlavor() %s Failure in getting pcrlist", errorMessage)
 	}
 
 	var allPcrDetails = pfutil.GetPcrDetails(pf.HostManifest.PcrManifest, hostUniquePcrs)
 
-	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", cf.FlavorPartHostUnique, pf.getVendorName())
+	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", hvs.FlavorPartHostUnique, pf.getVendorName())
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getHostUniqueFlavor() %s Failure in Meta section details", errorMessage)
 	}
 	log.Debugf("flavor/types/host_platform_flavor:getHostUniqueFlavor() New Meta Section: %v", *newMeta)
 
-	newMeta = UpdateMetaSectionDetails(cf.FlavorPartHostUnique, newMeta, pf.FlavorTemplates)
+	newMeta = UpdateMetaSectionDetails(hvs.FlavorPartHostUnique, newMeta, pf.FlavorTemplates)
 	if err != nil {
 		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getHostUniqueFlavor() %s failure in Updating Meta section details", errorMessage)
 	}
@@ -225,16 +222,16 @@ func (pf HostPlatformFlavor) getHostUniqueFlavor() ([]cm.Flavor, error) {
 	log.Debugf("flavor/types/host_platform_flavor:getHostUniqueFlavor() New Bios Section: %v", *newBios)
 
 	// Assemble the Host Unique Flavor
-	hostUniqueFlavor := cm.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil)
+	hostUniqueFlavor := hvs.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil)
 
 	log.Debugf("flavor/types/host_platform_flavor:getHostUniqueFlavor() New Host unique flavor: %v", hostUniqueFlavor)
 
-	return []cm.Flavor{*hostUniqueFlavor}, nil
+	return []hvs.Flavor{*hostUniqueFlavor}, nil
 }
 
 // getAssetTagFlavor Retrieves the asset tag part of the flavor including the certificate and all the key-value pairs
 // that are part of the certificate.
-func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
+func (pf HostPlatformFlavor) getAssetTagFlavor() ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/host_platform_flavor:getAssetTagFlavor() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:getAssetTagFlavor() Leaving")
 
@@ -242,7 +239,7 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 	var err error
 	var tagCertificateHash []byte
 	var expectedPcrValue string
-	var pcrDetails []types.FlavorPcrs
+	var pcrDetails []hvs.FlavorPcrs
 	if pf.TagCertificate == nil {
 		return nil, errors.Errorf("%s - %s", errorMessage, cf.FLAVOR_PART_CANNOT_BE_SUPPORTED().Message)
 	}
@@ -255,12 +252,12 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 		}
 
 		//Vmware supports only SHA1 value to be pushed and measure, hence use SHA1 bank here
-		expectedEventLogEntry := hcTypes.TpmEventLog{
-			Pcr: hcTypes.Pcr{
+		expectedEventLogEntry := hvs.TpmEventLog{
+			Pcr: hvs.Pcr{
 				Index: constants.PCR22,
 				Bank:  constants.SHA1,
 			},
-			TpmEvent: []hcTypes.EventLog{
+			TpmEvent: []hvs.EventLog{
 				{
 					Measurement: hex.EncodeToString(tagCertificateHash),
 				},
@@ -272,9 +269,9 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 			return nil, errors.Wrapf(err, errorMessage, "%s Failure in evaluating PCR22 value")
 		}
 
-		pcrDetails = []hcTypes.FlavorPcrs{
+		pcrDetails = []hvs.FlavorPcrs{
 			{
-				Pcr: hcTypes.Pcr{
+				Pcr: hvs.Pcr{
 					Index: constants.PCR22,
 					Bank:  constants.SHA1,
 				},
@@ -285,7 +282,7 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 	}
 
 	// create meta section details
-	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", cf.FlavorPartAssetTag, pf.getVendorName())
+	newMeta, err := pfutil.GetMetaSectionDetails(pf.HostInfo, pf.TagCertificate, "", hvs.FlavorPartAssetTag, pf.getVendorName())
 	if err != nil {
 		return nil, errors.Wrapf(err, errorMessage, "%s Failure in Meta section details")
 	}
@@ -306,25 +303,25 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]cm.Flavor, error) {
 	log.Debugf("flavor/types/host_platform_flavor:getAssetTagFlavor() New External Section: %v", *newExt)
 
 	// Assemble the Asset Tag Flavor
-	var assetTagFlavor *cm.Flavor
+	var assetTagFlavor *hvs.Flavor
 	if strings.ToUpper(pf.HostManifest.HostInfo.OSName) == constants.OsLinux {
-		assetTagFlavor = cm.NewFlavor(newMeta, newBios, nil, nil, newExt, nil)
+		assetTagFlavor = hvs.NewFlavor(newMeta, newBios, nil, nil, newExt, nil)
 	} else {
-		assetTagFlavor = cm.NewFlavor(newMeta, newBios, nil, pcrDetails, newExt, nil)
+		assetTagFlavor = hvs.NewFlavor(newMeta, newBios, nil, pcrDetails, newExt, nil)
 	}
 
 	log.Debugf("flavor/types/host_platform_flavor:getAssetTagFlavor() New Asset Tag Flavor: %v", assetTagFlavor)
 
-	return []cm.Flavor{*assetTagFlavor}, nil
+	return []hvs.Flavor{*assetTagFlavor}, nil
 }
 
 // getDefaultSoftwareFlavor Method to create a software flavor. This method would create a software flavor that would
 // include all the measurements provided from host.
-func (pf HostPlatformFlavor) getDefaultSoftwareFlavor() ([]cm.Flavor, error) {
+func (pf HostPlatformFlavor) getDefaultSoftwareFlavor() ([]hvs.Flavor, error) {
 	log.Trace("flavor/types/host_platform_flavor:getDefaultSoftwareFlavor() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:getDefaultSoftwareFlavor() Leaving")
 
-	var softwareFlavors []cm.Flavor
+	var softwareFlavors []hvs.Flavor
 	var errorMessage = cf.SOFTWARE_FLAVOR_CANNOT_BE_CREATED().Message
 
 	if pf.HostManifest != nil && pf.HostManifest.MeasurementXmls != nil {
@@ -370,7 +367,7 @@ func (pf HostPlatformFlavor) getDefaultMeasurement() ([]string, error) {
 }
 
 // UpdateMetaSectionDetails This method is used to update the meta section in flavor part
-func UpdateMetaSectionDetails(flavorPart cf.FlavorPart, newMeta *cm.Meta, flavorTemplates []hvs.FlavorTemplate) *cm.Meta {
+func UpdateMetaSectionDetails(flavorPart hvs.FlavorPartName, newMeta *hvs.Meta, flavorTemplates []hvs.FlavorTemplate) *hvs.Meta {
 	log.Trace("flavor/types/host_platform_flavor:UpdateMetaSectionDetails() Entering")
 	defer log.Trace("flavor/types/host_platform_flavor:UpdateMetaSectionDetails() Leaving")
 
@@ -379,11 +376,11 @@ func UpdateMetaSectionDetails(flavorPart cf.FlavorPart, newMeta *cm.Meta, flavor
 		flavorTemplateIDList = append(flavorTemplateIDList, flavorTemplate.ID)
 		var flavor *hvs.FlavorPart
 		switch flavorPart {
-		case cf.FlavorPartPlatform:
+		case hvs.FlavorPartPlatform:
 			flavor = flavorTemplate.FlavorParts.Platform
-		case cf.FlavorPartOs:
+		case hvs.FlavorPartOs:
 			flavor = flavorTemplate.FlavorParts.OS
-		case cf.FlavorPartHostUnique:
+		case hvs.FlavorPartHostUnique:
 			flavor = flavorTemplate.FlavorParts.HostUnique
 		}
 

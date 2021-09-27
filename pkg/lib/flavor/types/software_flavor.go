@@ -6,9 +6,8 @@ package types
 
 import (
 	"encoding/xml"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	cm "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
 	hcConstants "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
@@ -31,7 +30,7 @@ func NewSoftwareFlavor(measurement string) SoftwareFlavor {
 }
 
 // GetSoftwareFlavor creates a SoftwareFlavor that would include all the measurements provided in input.
-func (sf *SoftwareFlavor) GetSoftwareFlavor() (*cm.Flavor, error) {
+func (sf *SoftwareFlavor) GetSoftwareFlavor() (*hvs.Flavor, error) {
 	log.Trace("flavor/types/software_flavor:GetSoftwareFlavor() Entering")
 	defer log.Trace("flavor/types/software_flavor:GetSoftwareFlavor() Leaving")
 
@@ -44,12 +43,12 @@ func (sf *SoftwareFlavor) GetSoftwareFlavor() (*cm.Flavor, error) {
 	}
 	var software = sfutil.GetSoftware(measurements)
 	// create meta section details
-	newMeta, err := pfutil.GetMetaSectionDetails(nil, nil, sf.Measurement, cf.FlavorPartSoftware,
+	newMeta, err := pfutil.GetMetaSectionDetails(nil, nil, sf.Measurement, hvs.FlavorPartSoftware,
 		hcConstants.VendorIntel)
 	if err != nil {
 		return nil, errors.Wrap(err, errorMessage+" Failure in Meta section details")
 	}
 	log.Debugf("flavor/types/software_flavor:GetSoftwareFlavor() New Meta Section: %v", *newMeta)
 
-	return cm.NewFlavor(newMeta, nil, nil, nil, nil, &software), nil
+	return hvs.NewFlavor(newMeta, nil, nil, nil, nil, &software), nil
 }

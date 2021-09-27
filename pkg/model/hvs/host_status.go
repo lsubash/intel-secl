@@ -5,9 +5,9 @@
 package hvs
 
 import (
-	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // HostStatusInformation holds the current connection state between the Host's Trust Agent and VS and the timestamp of the
@@ -26,7 +26,7 @@ type HostStatus struct {
 	HostID                uuid.UUID             `json:"host_id"`
 	Created               time.Time             `json:"created"`
 	HostStatusInformation HostStatusInformation `json:"status"`
-	HostManifest          types.HostManifest    `json:"host_manifest"`
+	HostManifest          HostManifest          `json:"host_manifest"`
 }
 
 // HostStatusCollection holds a collection of HostStatus in response to an API query

@@ -168,18 +168,30 @@ main() {
 
   if [ -z "$BACKUP_ONLY" ]; then
     if [ "$UPGRADE_VERSION" = "$COMPONENT_VERSION" ]; then
-      echo "Installed component is already up to date, upgrade not required"
-      echo "Exiting upgrade"
-      exit 125
-    fi
+      INSTALLED_BUILD_DATE=`printf "$INSTALLED_COMPONENT_VERSION" | grep 'Build Date' | awk -F"Build Date: " '{print $2}'`
 
-    UPGRADE_MANIFEST="./manifest/supported_versions"
-    IFS=$'\r\n' GLOBIGNORE='*' command eval 'SUPPORTED_VERSION=($(cat ${UPGRADE_MANIFEST}))'
-    if $(echo ${SUPPORTED_VERSION[@]} | grep -q "$COMPONENT_VERSION"); then
-      echo "Upgrade path from $COMPONENT_VERSION to $UPGRADE_VERSION is supported, proceeding with the upgrade"
+      NEW_BUILD_VERSION=`./$NEW_EXEC_NAME --version`
+      NEW_BUILD_DATE=`printf "$NEW_BUILD_VERSION" | grep 'Build Date' | awk -F"Build Date: " '{print $2}'`
+
+      FORMATTED_BUILD_DATE=$(date -d $INSTALLED_BUILD_DATE "+%Y%m%d%H%M%S")
+      FORMATTED_NEW_BUILD_DATE=$(date -d $NEW_BUILD_DATE "+%Y%m%d%H%M%S")
+
+      if [ $FORMATTED_BUILD_DATE -lt $FORMATTED_NEW_BUILD_DATE ]; then
+        echo "Proceeding with upgrade for the latest version of the component within release"
+      else
+        echo "Installed component is already up to date, no need of upgrade"
+        echo "Exiting upgrade"
+        exit 125
+      fi
     else
-      echo "Upgrade path is not supported"
-      exit 1
+      UPGRADE_MANIFEST="./manifest/supported_versions"
+      IFS=$'\r\n' GLOBIGNORE='*' command eval 'SUPPORTED_VERSION=($(cat ${UPGRADE_MANIFEST}))'
+      if $(echo ${SUPPORTED_VERSION[@]} | grep -q "$COMPONENT_VERSION"); then
+        echo "Upgrade path from $COMPONENT_VERSION to $UPGRADE_VERSION is supported, proceeding with the upgrade"
+      else
+        echo "Upgrade path is not supported"
+        exit 1
+      fi
     fi
   fi
 

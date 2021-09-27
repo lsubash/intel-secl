@@ -14,11 +14,10 @@ import (
 
 	"github.com/google/uuid"
 	faultsConst "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
-func newPcrValueMissingFault(bank types.SHAAlgorithm, pcrIndex types.PcrIndex) hvs.Fault {
+func newPcrValueMissingFault(bank hvs.SHAAlgorithm, pcrIndex hvs.PcrIndex) hvs.Fault {
 	return hvs.Fault{
 		Name:        faultsConst.FaultPcrValueMissing,
 		Description: fmt.Sprintf("Host report does not include required PCR %d, bank %s", pcrIndex, bank),
@@ -26,7 +25,7 @@ func newPcrValueMissingFault(bank types.SHAAlgorithm, pcrIndex types.PcrIndex) h
 	}
 }
 
-func newPcrValueMismatchFault(pcrIndex types.PcrIndex, PcrBank types.SHAAlgorithm, expectedPcr types.FlavorPcrs, actualPcr types.HostManifestPcrs) hvs.Fault {
+func newPcrValueMismatchFault(pcrIndex hvs.PcrIndex, PcrBank hvs.SHAAlgorithm, expectedPcr hvs.FlavorPcrs, actualPcr hvs.HostManifestPcrs) hvs.Fault {
 	return hvs.Fault{
 		Name:             faultsConst.FaultPcrValueMismatch + string(actualPcr.PcrBank),
 		Description:      fmt.Sprintf("Host PCR %d of %s with value '%s' does not match expected value '%s'", pcrIndex, PcrBank, actualPcr.Value, expectedPcr.Measurement),
@@ -37,9 +36,9 @@ func newPcrValueMismatchFault(pcrIndex types.PcrIndex, PcrBank types.SHAAlgorith
 	}
 }
 
-func newPcrEventLogMissingExpectedEntries(pcrEventLogEntry *types.TpmEventLog) hvs.Fault {
-	pIndex := types.PcrIndex(pcrEventLogEntry.Pcr.Index)
-	pBank := types.SHAAlgorithm(pcrEventLogEntry.Pcr.Bank)
+func newPcrEventLogMissingExpectedEntries(pcrEventLogEntry *hvs.TpmEventLog) hvs.Fault {
+	pIndex := hvs.PcrIndex(pcrEventLogEntry.Pcr.Index)
+	pBank := hvs.SHAAlgorithm(pcrEventLogEntry.Pcr.Bank)
 	return hvs.Fault{
 		Name:           faultsConst.FaultPcrEventLogMissingExpectedEntries,
 		Description:    fmt.Sprintf("Module manifest for PCR %d of %s value missing %d expected entries", pcrEventLogEntry.Pcr.Index, pcrEventLogEntry.Pcr.Bank, len(pcrEventLogEntry.TpmEvent)),
@@ -49,7 +48,7 @@ func newPcrEventLogMissingExpectedEntries(pcrEventLogEntry *types.TpmEventLog) h
 	}
 }
 
-func newPcrEventLogMissingFault(pcrIndex types.PcrIndex, PcrBank types.SHAAlgorithm) hvs.Fault {
+func newPcrEventLogMissingFault(pcrIndex hvs.PcrIndex, PcrBank hvs.SHAAlgorithm) hvs.Fault {
 	return hvs.Fault{
 		Name:        faultsConst.FaultPcrEventLogMissing,
 		Description: fmt.Sprintf("Host report does not include a PCR Event Log for PCR %d of %s value", pcrIndex, PcrBank),
@@ -58,9 +57,9 @@ func newPcrEventLogMissingFault(pcrIndex types.PcrIndex, PcrBank types.SHAAlgori
 	}
 }
 
-func newPcrEventLogContainsUnexpectedEntries(pcrEventLogEntry *types.TpmEventLog) hvs.Fault {
-	pIndex := types.PcrIndex(pcrEventLogEntry.Pcr.Index)
-	pBank := types.SHAAlgorithm(pcrEventLogEntry.Pcr.Bank)
+func newPcrEventLogContainsUnexpectedEntries(pcrEventLogEntry *hvs.TpmEventLog) hvs.Fault {
+	pIndex := hvs.PcrIndex(pcrEventLogEntry.Pcr.Index)
+	pBank := hvs.SHAAlgorithm(pcrEventLogEntry.Pcr.Bank)
 	return hvs.Fault{
 		Name:              faultsConst.FaultPcrEventLogContainsUnexpectedEntries,
 		Description:       fmt.Sprintf("Module manifest for PCR %d of %s value contains %d unexpected entries", pcrEventLogEntry.Pcr.Index, pcrEventLogEntry.Pcr.Bank, len(pcrEventLogEntry.TpmEvent)),

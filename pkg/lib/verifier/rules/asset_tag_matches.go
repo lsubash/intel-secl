@@ -14,14 +14,11 @@ import (
 	"encoding/base64"
 
 	constants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	asset_tag "github.com/intel-secl/intel-secl/v5/pkg/lib/asset-tag"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
-func NewAssetTagMatches(expectedAssetTagDigest []byte, tags []asset_tag.TagKvAttribute) (Rule, error) {
+func NewAssetTagMatches(expectedAssetTagDigest []byte, tags []hvs.TagKvAttribute) (Rule, error) {
 
 	assetTagMatches := assetTagMatches{
 		expectedAssetTagDigest: expectedAssetTagDigest,
@@ -33,16 +30,16 @@ func NewAssetTagMatches(expectedAssetTagDigest []byte, tags []asset_tag.TagKvAtt
 
 type assetTagMatches struct {
 	expectedAssetTagDigest []byte
-	tags                   []asset_tag.TagKvAttribute
+	tags                   []hvs.TagKvAttribute
 }
 
-func (rule *assetTagMatches) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *assetTagMatches) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 	var fault *hvs.Fault
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = constants.RuleAssetTagMatches
 	result.Rule.ExpectedTag = rule.expectedAssetTagDigest
-	result.Rule.Markers = append(result.Rule.Markers, common.FlavorPartAssetTag)
+	result.Rule.Markers = append(result.Rule.Markers, hvs.FlavorPartAssetTag)
 	tags := map[string]string{}
 	for _, kvAttr := range rule.tags {
 		tags[kvAttr.Key] = kvAttr.Value

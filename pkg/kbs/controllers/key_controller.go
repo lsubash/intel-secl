@@ -59,7 +59,7 @@ var allowedAlgorithms = map[string]bool{"AES": true, "RSA": true, "EC": true, "a
 var allowedCurveTypes = map[string]bool{"secp256r1": true, "secp384r1": true, "secp521r1": true, "prime256v1": true}
 var allowedKeyLengths = map[int]bool{128: true, 192: true, 256: true, 2048: true, 3072: true, 4096: true, 7680: true}
 
-//Create : Function to create key
+// Create : Function to create key
 func (kc KeyController) Create(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Create() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Create() Leaving")
@@ -144,11 +144,10 @@ func (kc KeyController) Create(responseWriter http.ResponseWriter, request *http
 
 		secLog.WithField("Id", createdKey.KeyInformation.ID).Infof("controllers/key_controller:Create() %s: Key registered by: %s", commLogMsg.PrivilegeModified, request.RemoteAddr)
 	}
-
 	return createdKey, http.StatusCreated, nil
 }
 
-//Retrieve : Function to retrieve key
+// Retrieve : Function to retrieve key
 func (kc KeyController) Retrieve(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Retrieve() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Retrieve() Leaving")
@@ -169,7 +168,7 @@ func (kc KeyController) Retrieve(responseWriter http.ResponseWriter, request *ht
 	return key, http.StatusOK, nil
 }
 
-//Delete : Function to delete key
+// Delete : Function to delete key
 func (kc KeyController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Delete() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Delete() Leaving")
@@ -190,7 +189,7 @@ func (kc KeyController) Delete(responseWriter http.ResponseWriter, request *http
 	return nil, http.StatusNoContent, nil
 }
 
-//Search : Function to search keys
+// Search : Function to search keys
 func (kc KeyController) Search(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Search() Leaving")
@@ -218,7 +217,7 @@ func (kc KeyController) Search(responseWriter http.ResponseWriter, request *http
 	return keys, http.StatusOK, nil
 }
 
-//Transfer : Function to perform key transfer with public key
+// Transfer : Function to perform key transfer with public key
 func (kc KeyController) Transfer(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:Transfer() Entering")
 	defer defaultLog.Trace("controllers/key_controller:Transfer() Leaving")
@@ -263,7 +262,7 @@ func (kc KeyController) Transfer(responseWriter http.ResponseWriter, request *ht
 	return transferKeyResponse, http.StatusOK, nil
 }
 
-//TransferWithSaml : Function to perform key transfer with saml report
+// TransferWithSaml : Function to perform key transfer with saml report
 func (kc KeyController) TransferWithSaml(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_controller:TransferWithSaml() Entering")
 	defer defaultLog.Trace("controllers/key_controller:TransferWithSaml() Leaving")
@@ -336,7 +335,7 @@ func (kc KeyController) wrapSecretKey(id uuid.UUID, publicKey *rsa.PublicKey, ha
 	return wrappedKey, http.StatusOK, nil
 }
 
-//validateKeyCreateRequest checks for various attributes in the Key Create request and returns a boolean value
+// validateKeyCreateRequest checks for various attributes in the Key Create request and returns a boolean value
 func validateKeyCreateRequest(requestKey kbs.KeyRequest) error {
 	defaultLog.Trace("controllers/key_controller:validateKeyCreateRequest() Entering")
 	defer defaultLog.Trace("controllers/key_controller:validateKeyCreateRequest() Leaving")
@@ -385,11 +384,10 @@ func validateKeyCreateRequest(requestKey kbs.KeyRequest) error {
 			return errors.New("valid contents for usage must be specified")
 		}
 	}
-
 	return nil
 }
 
-//getKeyFilterCriteria checks for set filter params in the Search request and returns a valid KeyFilterCriteria
+// getKeyFilterCriteria checks for set filter params in the Search request and returns a valid KeyFilterCriteria
 func getKeyFilterCriteria(params url.Values) (*models.KeyFilterCriteria, error) {
 	defaultLog.Trace("controllers/key_controller:getKeyFilterCriteria() Entering")
 	defer defaultLog.Trace("controllers/key_controller:getKeyFilterCriteria() Leaving")
@@ -432,7 +430,6 @@ func getKeyFilterCriteria(params url.Values) (*models.KeyFilterCriteria, error) 
 		}
 		criteria.TransferPolicyId = id
 	}
-
 	return &criteria, nil
 }
 
@@ -440,8 +437,7 @@ func checkValidKeyPermission(privileges []ct.PermissionInfo, requiredPermission 
 	defaultLog.Trace("controllers/key_controller:checkValidKeyPermission() Entering")
 	defer defaultLog.Trace("controllers/key_controller:checkValidKeyPermission() Leaving")
 	reqPermissions := ct.PermissionInfo{Service: consts.ServiceName, Rules: requiredPermission}
-	_, foundMatchingPermission := auth.ValidatePermissionAndGetPermissionsContext(privileges, reqPermissions,
-		true)
+	_, foundMatchingPermission := auth.ValidatePermissionAndGetPermissionsContext(privileges, reqPermissions, true)
 	if !foundMatchingPermission {
 		secLog.Errorf("controllers/key_controller:checkValidKeyPermission() %s Insufficient privileges to access /v1/keys", commLogMsg.UnauthorizedAccess)
 		return false

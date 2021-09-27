@@ -6,9 +6,8 @@
 package verifier
 
 import (
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier/rules"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
 type vendorTrustPolicyReader interface {
@@ -18,7 +17,7 @@ type vendorTrustPolicyReader interface {
 type hostTrustPolicyManager struct {
 }
 
-func NewHostTrustPolicyManager(model.Flavor, *types.HostManifest) *hostTrustPolicyManager {
+func NewHostTrustPolicyManager(hvs.Flavor, *hvs.HostManifest) *hostTrustPolicyManager {
 	return &hostTrustPolicyManager{}
 }
 

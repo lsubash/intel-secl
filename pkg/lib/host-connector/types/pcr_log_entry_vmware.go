@@ -5,9 +5,11 @@
 
 package types
 
+import "github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+
 type EventDetails struct {
 	DataHash           []int
-	DataHashMethod     SHAAlgorithm
+	DataHashMethod     hvs.SHAAlgorithm
 	ComponentName      *string
 	VibName            *string
 	VibVersion         *string

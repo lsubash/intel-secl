@@ -5,10 +5,11 @@
 package mocks
 
 import (
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"reflect"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain/models"

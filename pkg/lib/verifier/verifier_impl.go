@@ -9,7 +9,6 @@ package verifier
 //
 
 import (
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier/rules"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
@@ -20,7 +19,7 @@ type verifierImpl struct {
 }
 
 //Verify method implements the flavor verification
-func (v *verifierImpl) Verify(hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor, skipSignedFlavorVerification bool) (*hvs.TrustReport, error) {
+func (v *verifierImpl) Verify(hostManifest *hvs.HostManifest, signedFlavor *hvs.SignedFlavor, skipSignedFlavorVerification bool) (*hvs.TrustReport, error) {
 
 	var err error
 
@@ -53,7 +52,7 @@ func (v *verifierImpl) Verify(hostManifest *types.HostManifest, signedFlavor *hv
 	return &trustReport, nil
 }
 
-func (v *verifierImpl) applyRules(rulesToApply []rules.Rule, hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor) ([]hvs.RuleResult, bool, error) {
+func (v *verifierImpl) applyRules(rulesToApply []rules.Rule, hostManifest *hvs.HostManifest, signedFlavor *hvs.SignedFlavor) ([]hvs.RuleResult, bool, error) {
 
 	var results []hvs.RuleResult
 

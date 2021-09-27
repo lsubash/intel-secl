@@ -59,7 +59,8 @@ docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 	skopeo copy docker-daemon:isecl/$*:$(VERSION) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
 
 aas-manager:
-	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
+	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && \
+	env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
 	cp tools/aas-manager/populate-users deployments/installer/populate-users.sh
 	cp build/linux/authservice/install_pgdb.sh deployments/installer/install_pgdb.sh
 	cp build/linux/authservice/create_db.sh deployments/installer/create_db.sh

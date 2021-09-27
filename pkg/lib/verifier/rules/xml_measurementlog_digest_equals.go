@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 )
@@ -33,12 +31,12 @@ type xmlMeasurementLogDigestEquals struct {
 // - If the xml event log is missing, create a XmlMeasurementLogMissing fault.
 // - Otherwise, loop over all of the software measurements and make sure they
 //   have 'expectedDigestAlgorithm', creating faults if they don't match.
-func (rule *xmlMeasurementLogDigestEquals) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *xmlMeasurementLogDigestEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = constants.RuleXmlMeasurementsDigestEquals
-	result.Rule.Markers = append(result.Rule.Markers, common.FlavorPartSoftware)
+	result.Rule.Markers = append(result.Rule.Markers, hvs.FlavorPartSoftware)
 
 	if hostManifest.MeasurementXmls == nil || len(hostManifest.MeasurementXmls) == 0 {
 		result.Faults = append(result.Faults, newXmlEventLogMissingFault(rule.flavorID))

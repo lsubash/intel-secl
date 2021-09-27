@@ -10,20 +10,18 @@ package verifier
 
 import (
 	hvsconstants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier/rules"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
 type ruleBuilderVMWare20 struct {
 	verifierCertificates VerifierCertificates
-	hostManifest         *types.HostManifest
+	hostManifest         *hvs.HostManifest
 	signedFlavor         *hvs.SignedFlavor
 	rules                []rules.Rule
 }
 
-func newRuleBuilderVMWare20(verifierCertificates VerifierCertificates, hostManifest *types.HostManifest, signedFlavor *hvs.SignedFlavor) (ruleBuilder, error) {
+func newRuleBuilderVMWare20(verifierCertificates VerifierCertificates, hostManifest *hvs.HostManifest, signedFlavor *hvs.SignedFlavor) (ruleBuilder, error) {
 	builder := ruleBuilderVMWare20{
 		verifierCertificates: verifierCertificates,
 		hostManifest:         hostManifest,
@@ -69,7 +67,7 @@ func (builder *ruleBuilderVMWare20) GetAssetTagRules() ([]rules.Rule, error) {
 
 // From 'design' repo at isecl/libraries/verifier/verifier.md...
 //(none)
-func (builder *ruleBuilderVMWare20) GetAikCertificateTrustedRule(fp common.FlavorPart) ([]rules.Rule, error) {
+func (builder *ruleBuilderVMWare20) GetAikCertificateTrustedRule(fp hvs.FlavorPartName) ([]rules.Rule, error) {
 	return nil, nil
 }
 

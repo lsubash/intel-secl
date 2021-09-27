@@ -10,9 +10,6 @@ import (
 
 	"github.com/google/uuid"
 	constants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	flavormodel "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	ta "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
@@ -21,11 +18,11 @@ import (
 func NewXmlMeasurementLogEquals(softwareFlavor *hvs.Flavor) (Rule, error) {
 
 	meta := softwareFlavor.Meta
-	if reflect.DeepEqual(meta, flavormodel.Meta{}) {
+	if reflect.DeepEqual(meta, hvs.Meta{}) {
 		return nil, errors.New("'Meta' was not provided in the software flavor")
 	}
 
-	if len(meta.Description[flavormodel.Label].(string)) == 0 {
+	if len(meta.Description[hvs.Label].(string)) == 0 {
 		return nil, errors.New("The software flavor label was not provided")
 	}
 
@@ -35,7 +32,7 @@ func NewXmlMeasurementLogEquals(softwareFlavor *hvs.Flavor) (Rule, error) {
 
 	rule := xmlMeasurementLogEquals{
 		flavorID:    meta.ID,
-		flavorLabel: meta.Description[flavormodel.Label].(string),
+		flavorLabel: meta.Description[hvs.Label].(string),
 	}
 
 	for _, measurement := range softwareFlavor.Software.Measurements {
@@ -67,13 +64,13 @@ type xmlMeasurementLogEquals struct {
 //   XmlMeasurementLogMissing fault.
 // - If the host manifest's xml event log is empty, create a XmlMeasurementLogMissing fault.
 // - Otherwise, compare the expected/actual and generate faults in createEventLogFaults()
-func (rule *xmlMeasurementLogEquals) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *xmlMeasurementLogEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = constants.RuleXmlMeasurementLogEquals
 	result.Rule.FlavorName = &rule.flavorLabel
-	result.Rule.Markers = append(result.Rule.Markers, common.FlavorPartSoftware)
+	result.Rule.Markers = append(result.Rule.Markers, hvs.FlavorPartSoftware)
 	result.Rule.FlavorID = &rule.flavorID
 
 	result.Rule.ExpectedMeasurements = append(result.Rule.ExpectedMeasurements, rule.expectedFileMeasurements...)

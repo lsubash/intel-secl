@@ -10,14 +10,11 @@ import (
 	"time"
 
 	faultsConst "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
 
-func NewTagCertificateTrusted(assetTagCACertificates *x509.CertPool, attributeCertificate *model.X509AttributeCertificate) (Rule, error) {
+func NewTagCertificateTrusted(assetTagCACertificates *x509.CertPool, attributeCertificate *hvs.X509AttributeCertificate) (Rule, error) {
 	if assetTagCACertificates == nil {
 		return nil, errors.New("The tag certificates cannot be nil")
 	}
@@ -32,7 +29,7 @@ func NewTagCertificateTrusted(assetTagCACertificates *x509.CertPool, attributeCe
 
 type tagCertificateTrusted struct {
 	assetTagCACertificates *x509.CertPool
-	attributeCertificate   *model.X509AttributeCertificate
+	attributeCertificate   *hvs.X509AttributeCertificate
 }
 
 // - If the X509AttributeCertificate is null, raise TagCertificateMissing fault.
@@ -41,13 +38,13 @@ type tagCertificateTrusted struct {
 //   raise a TagCertificateNotYetValid fault.
 // - If the attributeCertificate is valid but has a 'NotAfter' value after 'today,
 //   raise a TagCertificateNotYetExpired fault.
-func (rule *tagCertificateTrusted) Apply(hostManifest *types.HostManifest) (*hvs.RuleResult, error) {
+func (rule *tagCertificateTrusted) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 
 	var fault *hvs.Fault
 	result := hvs.RuleResult{}
 	result.Trusted = true
 	result.Rule.Name = faultsConst.RuleTagCertificateTrusted
-	result.Rule.Markers = append(result.Rule.Markers, common.FlavorPartAssetTag)
+	result.Rule.Markers = append(result.Rule.Markers, hvs.FlavorPartAssetTag)
 
 	if rule.attributeCertificate == nil {
 		fault = &hvs.Fault{

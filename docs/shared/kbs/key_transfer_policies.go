@@ -34,17 +34,14 @@ type KeyTransferPolicyCollection struct {
 //
 //    | Attribute                                    | Description |
 //    |----------------------------------------------|-------------|
-//    | sgx_enclave_issuer_anyof                     | Array of allowed common names of SGX enclave’s code signing certificate. This is mandatory. The same issuer must be added as a trusted certificate in key server configuration settings. |
-//    | sgx_enclave_issuer_product_id_anyof          | Array of (16-bit value) (ISVPRODID). This is mandatory. This is like a qualifier for the issuer so same issuer (code signing) key can sign separate products. |
-//    | sgx_enclave_issuer_extended_product_id_anyof | Array of (16-byte value) (ISVPRODID). This is like a qualifier for the issuer so same issuer key can sign separate products, it's like product id but simply bigger (starts in Coffee Lake). |
+//    | sgx_enclave_issuer_anyof                     | Array of hash of enclave signing key. This is mandatory field. |
+//    | sgx_enclave_issuer_product_id                | Enclave Product ID. The ISV should configure a unique ProdID for each product which may want to share sealed data between enclaves signed with a specific MRSIGNER. This is mandatory field. |
 //    | sgx_enclave_measurement_anyof                | Array of enclave measurements that are allowed to retrieve the key (MRENCLAVE). Expect client to have one of these measurements in the SGX quote (this supports use case of providing key only to an SGX enclave that will enforce the key usage policy locally). |
-//    | sgx_config_id_svn                            | Integer. |
 //    | sgx_enclave_svn_minimum                      | Minimum version number required. |
-//    | sgx_config_id_anyof                          | Array of config id measurements that are allowed to retrieve the key. Required value for the enclave to have when it launched. for loading e.g. Java applets into enclavized JVM, so that enclave measurement is JVM measurement, and when it launches it's configured with this id, so when it loads applet it can measure it and compare to config id in register, and refuse to load applet if wrong (starts in Coffee Lake). |
 //    | tls_client_certificate_issuer_cn_anyof       | Array of Common Name to expect on client certificate's issuer field. Expect client certificate to have any one of these issuers. |
 //    | tls_client_certificate_san_anyof             | Array of Subject Alternative Name to expect in client certificate's extensions. Expect client certificate to have any of these names. |
 //    | tls_client_certificate_san_allof             | Array of Subject Alternative Name to expect in client certificate's extensions. Expect client certificate to have all of these names. |
-//    | attestation_type_anyof                       | Array of Attestation Type identifiers that client must support to get the key expect client to advertise these with the key request e.g. "SGX", "KPT2" (note that if key server needs to restrict technologies, then it should list only the ones that can receive the key). |
+//    | attestation_type_anyof                       | Array of Attestation Type identifiers that client must support to get the key expect client to advertise these with the key request e.g. "SGX" (note that if key server needs to restrict technologies, then it should list only the ones that can receive the key). |
 //    | sgx_enforce_tcb_up_to_date                   | Boolean. |
 //
 // x-permissions: keys-transfer-policies:create
@@ -92,29 +89,25 @@ type KeyTransferPolicyCollection struct {
 // x-sample-call-input: |
 //    {
 //        "sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
-//        "sgx_enclave_issuer_product_id_anyof": [0],
-//        "sgx_enclave_issuer_extended_product_id_anyof": ["00000000000000000000000000000000"],
+//        "sgx_enclave_issuer_product_id": 0,
 //        "sgx_enclave_measurement_anyof":["01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"],
-//        "sgx_config_id_svn":0,
 //        "sgx_enclave_svn_minimum":1,
-//        "sgx_config_id_anyof":["00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
 //        "tls_client_certificate_issuer_cn_anyof":["CMSCA", "CMS TLS Client CA"],
 //        "tls_client_certificate_san_allof":["nginx","USA"],
 //        "attestation_type_anyof":["SGX"]
+//        "sgx_enforce_tcb_up_to_date":false,
 //    }
 // x-sample-call-output: |
 //    {
 //        "id": "75d34bf4-80fb-4ca5-8602-a8d82e56b30d",
 //        "sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
-//        "sgx_enclave_issuer_product_id_anyof": [0],
-//        "sgx_enclave_issuer_extended_product_id_anyof": ["00000000000000000000000000000000"],
+//        "sgx_enclave_issuer_product_id": 0,
 //        "sgx_enclave_measurement_anyof":["01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"],
-//        "sgx_config_id_svn":0,
 //        "sgx_enclave_svn_minimum":1,
-//        "sgx_config_id_anyof":["00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
 //        "tls_client_certificate_issuer_cn_anyof":["CMSCA", "CMS TLS Client CA"],
 //        "tls_client_certificate_san_allof":["nginx","USA"],
 //        "attestation_type_anyof":["SGX"],
+//        "sgx_enforce_tcb_up_to_date":false,
 //        "created_at": "2020-06-09T01:05:47-0700"
 //    }
 
@@ -164,15 +157,13 @@ type KeyTransferPolicyCollection struct {
 //    {
 //        "id": "75d34bf4-80fb-4ca5-8602-a8d82e56b30d",
 //        "sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
-//        "sgx_enclave_issuer_product_id_anyof": [0],
-//        "sgx_enclave_issuer_extended_product_id_anyof": ["00000000000000000000000000000000"],
+//        "sgx_enclave_issuer_product_id":0,
 //        "sgx_enclave_measurement_anyof":["01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"],
-//        "sgx_config_id_svn":0,
 //        "sgx_enclave_svn_minimum":1,
-//        "sgx_config_id_anyof":["00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
 //        "tls_client_certificate_issuer_cn_anyof":["CMSCA", "CMS TLS Client CA"],
 //        "tls_client_certificate_san_allof":["nginx","USA"],
 //        "attestation_type_anyof":["SGX"],
+//        "sgx_enforce_tcb_up_to_date":false,
 //        "created_at": "2020-06-09T01:05:47-0700"
 //    }
 
@@ -243,15 +234,13 @@ type KeyTransferPolicyCollection struct {
 //        {
 //            "id": "75d34bf4-80fb-4ca5-8602-a8d82e56b30d",
 //            "sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
-//            "sgx_enclave_issuer_product_id_anyof": [0],
-//            "sgx_enclave_issuer_extended_product_id_anyof": ["00000000000000000000000000000000"],
+//            "sgx_enclave_issuer_product_id": 0,
 //            "sgx_enclave_measurement_anyof":["01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"],
-//            "sgx_config_id_svn":0,
 //            "sgx_enclave_svn_minimum":1,
-//            "sgx_config_id_anyof":["00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
 //            "tls_client_certificate_issuer_cn_anyof":["CMSCA", "CMS TLS Client CA"],
 //            "tls_client_certificate_san_allof":["nginx","USA"],
 //            "attestation_type_anyof":["SGX"],
+//            "sgx_enforce_tcb_up_to_date":false,
 //            "created_at": "2020-06-09T01:05:47-0700"
 //        }
 //    ]

@@ -7,7 +7,7 @@ package mocks
 
 import (
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/vmware"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -23,9 +23,9 @@ func (vhc *MockVmwareConnector) GetHostDetails() (taModel.HostInfo, error) {
 	return args.Get(0).(taModel.HostInfo), args.Error(1)
 }
 
-func (vhc *MockVmwareConnector) GetHostManifest([]int) (types.HostManifest, error) {
+func (vhc *MockVmwareConnector) GetHostManifest([]int) (hvs.HostManifest, error) {
 	args := vhc.Called()
-	return args.Get(0).(types.HostManifest), args.Error(1)
+	return args.Get(0).(hvs.HostManifest), args.Error(1)
 }
 
 func (vhc *MockVmwareConnector) DeployAssetTag(hardwareUUID, tag string) error {

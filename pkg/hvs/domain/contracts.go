@@ -10,8 +10,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
@@ -28,7 +26,7 @@ type (
 		RetrieveFlavor(uuid.UUID, uuid.UUID) (*hvs.FlavorgroupFlavorLink, error)
 		SearchHostsByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error)
 		SearchFlavorTemplatesByFlavorGroup(fgID uuid.UUID) ([]uuid.UUID, error)
-		GetFlavorTypesInFlavorGroup(flvGrpId uuid.UUID) (map[cf.FlavorPart]bool, error)
+		GetFlavorTypesInFlavorGroup(flvGrpId uuid.UUID) (map[hvs.FlavorPartName]bool, error)
 		AddFlavorTemplates(uuid.UUID, []uuid.UUID) error
 	}
 
@@ -157,12 +155,12 @@ type (
 	}
 
 	HostDataReceiver interface {
-		ProcessHostData(ctx context.Context, host hvs.Host, data *types.HostManifest, preferHashMatch bool, err error) error
+		ProcessHostData(ctx context.Context, host hvs.Host, data *hvs.HostManifest, preferHashMatch bool, err error) error
 	}
 
 	HostDataFetcher interface {
 		// Synchronous method that blocks till the data is retrieved from the host.
-		Retrieve(host hvs.Host) (*types.HostManifest, error)
+		Retrieve(host hvs.Host) (*hvs.HostManifest, error)
 
 		// Asynchronous method to be used to fetch data from hosts. As soon as the request is registered,
 		// the method returns. The result is returned individually as they are processed.
@@ -175,7 +173,7 @@ type (
 	}
 
 	HostTrustVerifier interface {
-		Verify(hostId uuid.UUID, hostData *types.HostManifest, newData bool, preferHashMatch bool) (*models.HVSReport, error)
+		Verify(hostId uuid.UUID, hostData *hvs.HostManifest, newData bool, preferHashMatch bool) (*models.HVSReport, error)
 	}
 
 	AuditLogWriter interface {

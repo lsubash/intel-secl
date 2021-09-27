@@ -6,7 +6,6 @@ package utils
 
 import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 )
 
@@ -27,11 +26,11 @@ func GetAutomaticFlavorMatchPolicy() []hvs.FlavorMatchPolicy {
 	defer defaultLog.Trace("utils/flavor_group:GetAutomaticFlavorMatchPolicy() Leaving")
 
 	var policies []hvs.FlavorMatchPolicy
-	policies = append(policies, hvs.NewFlavorMatchPolicy(cf.FlavorPartPlatform, hvs.NewMatchPolicy(hvs.MatchTypeAnyOf, hvs.FlavorRequired)))
-	policies = append(policies, hvs.NewFlavorMatchPolicy(cf.FlavorPartOs, hvs.NewMatchPolicy(hvs.MatchTypeAnyOf, hvs.FlavorRequired)))
-	policies = append(policies, hvs.NewFlavorMatchPolicy(cf.FlavorPartSoftware, hvs.NewMatchPolicy(hvs.MatchTypeAllOf, hvs.FlavorRequiredIfDefined)))
-	policies = append(policies, hvs.NewFlavorMatchPolicy(cf.FlavorPartAssetTag, hvs.NewMatchPolicy(hvs.MatchTypeLatest, hvs.FlavorRequiredIfDefined)))
-	policies = append(policies, hvs.NewFlavorMatchPolicy(cf.FlavorPartHostUnique, hvs.NewMatchPolicy(hvs.MatchTypeLatest, hvs.FlavorRequiredIfDefined)))
+	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartPlatform, hvs.NewMatchPolicy(hvs.MatchTypeAnyOf, hvs.FlavorRequired)))
+	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartOs, hvs.NewMatchPolicy(hvs.MatchTypeAnyOf, hvs.FlavorRequired)))
+	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartSoftware, hvs.NewMatchPolicy(hvs.MatchTypeAllOf, hvs.FlavorRequiredIfDefined)))
+	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartAssetTag, hvs.NewMatchPolicy(hvs.MatchTypeLatest, hvs.FlavorRequiredIfDefined)))
+	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartHostUnique, hvs.NewMatchPolicy(hvs.MatchTypeLatest, hvs.FlavorRequiredIfDefined)))
 
 	return policies
 }

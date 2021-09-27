@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/kmipclient"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
+
 	"github.com/stretchr/testify/mock"
 )
 

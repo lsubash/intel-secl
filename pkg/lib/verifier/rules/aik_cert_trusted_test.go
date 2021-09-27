@@ -13,7 +13,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"
@@ -120,7 +120,7 @@ func TestAikCertificateTrustedNoFault(t *testing.T) {
 	aikBytes, err := getCertificateBytes(aikCertificate, caPrivateKey)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 
@@ -139,7 +139,7 @@ func TestAikCertificateTrustedMissingFault(t *testing.T) {
 	trustedAuthorityCerts := x509.CertPool{}
 
 	// do not provide the aik certificate
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AIKCertificate: "",
 	}
 
@@ -170,7 +170,7 @@ func TestAikCertificateTrustedExpiredFault(t *testing.T) {
 	aikBytes, err := getCertificateBytes(aikCertificate, nil)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 
@@ -201,7 +201,7 @@ func TestAikCertificateTrustedNotBeforeFault(t *testing.T) {
 	aikBytes, err := getCertificateBytes(aikCertificate, nil)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 
@@ -227,7 +227,7 @@ func TestAikCertificateTrustedNotTrustedFault(t *testing.T) {
 	aikBytes, err := getCertificateBytes(aikCertificate, nil)
 	assert.NoError(t, err)
 
-	hostManifest := types.HostManifest{
+	hostManifest := hvs.HostManifest{
 		AIKCertificate: base64.StdEncoding.EncodeToString(aikBytes),
 	}
 

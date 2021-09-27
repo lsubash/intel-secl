@@ -7,15 +7,15 @@ package hvsclient
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
-	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/google/uuid"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+	"github.com/pkg/errors"
 )
 
 //-------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ import (
 type HostsClient interface {
 
 	//  Searches for the hosts with the specified criteria.
-	SearchHosts(*models.HostFilterCriteria) (*hvs.HostCollection, error)
+	SearchHosts(*hvs.HostFilterCriteria) (*hvs.HostCollection, error)
 
 	// Registers the specified host with the Verfication Service.
 	CreateHost(*hvs.HostCreateRequest) (*hvs.Host, error)
@@ -43,7 +43,7 @@ type hostsClientImpl struct {
 	cfg        *hvsClientConfig
 }
 
-func (client *hostsClientImpl) SearchHosts(hostFilterCriteria *models.HostFilterCriteria) (*hvs.HostCollection, error) {
+func (client *hostsClientImpl) SearchHosts(hostFilterCriteria *hvs.HostFilterCriteria) (*hvs.HostCollection, error) {
 	log.Trace("hvsclient/hosts_client:SearchHosts() Entering")
 	defer log.Trace("hvsclient/hosts_client:SearchHosts() Leaving")
 

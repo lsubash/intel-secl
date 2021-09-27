@@ -7,7 +7,6 @@ package models
 import (
 	"encoding/json"
 	"github.com/google/uuid"
-	cf "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
@@ -20,7 +19,7 @@ type FlavorCreateRequest struct {
 	FlavorCollection       hvs.FlavorCollection       `json:"flavor_collection,omitempty"`
 	SignedFlavorCollection hvs.SignedFlavorCollection `json:"signed_flavor_collection,omitempty"`
 	FlavorgroupNames       []string                   `json:"flavorgroup_names,omitempty"`
-	FlavorParts            []cf.FlavorPart            `json:"partial_flavor_types,omitempty"`
+	FlavorParts            []hvs.FlavorPartName       `json:"partial_flavor_types,omitempty"`
 }
 
 type FlavorFilterCriteria struct {
@@ -28,13 +27,13 @@ type FlavorFilterCriteria struct {
 	Key           string
 	Value         string
 	FlavorgroupID uuid.UUID
-	FlavorParts   []cf.FlavorPart
+	FlavorParts   []hvs.FlavorPartName
 }
 
 type FlavorVerificationFC struct {
 	FlavorFC              FlavorFilterCriteria
-	FlavorMeta            map[cf.FlavorPart][]FlavorMetaKv
-	FlavorPartsWithLatest map[cf.FlavorPart]bool
+	FlavorMeta            map[hvs.FlavorPartName][]FlavorMetaKv
+	FlavorPartsWithLatest map[hvs.FlavorPartName]bool
 }
 
 type FlavorMetaKv struct {
@@ -48,7 +47,7 @@ func (fcr FlavorCreateRequest) MarshalJSON() ([]byte, error) {
 		FlavorCollection       hvs.FlavorCollection       `json:"flavor_collection,omitempty"`
 		SignedFlavorCollection hvs.SignedFlavorCollection `json:"signed_flavor_collection,omitempty"`
 		FlavorgroupNames       []string                   `json:"flavorgroup_names,omitempty"`
-		FlavorParts            []cf.FlavorPart            `json:"partial_flavor_types,omitempty"`
+		FlavorParts            []hvs.FlavorPartName       `json:"partial_flavor_types,omitempty"`
 	}{
 		ConnectionString:       fcr.ConnectionString,
 		FlavorCollection:       fcr.FlavorCollection,
@@ -76,7 +75,7 @@ func (fcr *FlavorCreateRequest) UnmarshalJSON(b []byte) error {
 		FlavorCollection       hvs.FlavorCollection       `json:"flavor_collection,omitempty"`
 		SignedFlavorCollection hvs.SignedFlavorCollection `json:"signed_flavor_collection,omitempty"`
 		FlavorgroupNames       []string                   `json:"flavorgroup_names,omitempty"`
-		FlavorParts            []cf.FlavorPart            `json:"partial_flavor_types,omitempty"`
+		FlavorParts            []hvs.FlavorPartName       `json:"partial_flavor_types,omitempty"`
 	})
 	err := json.Unmarshal(b, &decoded)
 	if err == nil {

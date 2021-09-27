@@ -9,9 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -25,20 +22,20 @@ func TestFlavorTrustedNoFault(t *testing.T) {
 
 	// create a valid flavor and signed flavor
 	flavor := hvs.Flavor{
-		Meta: model.Meta{
+		Meta: hvs.Meta{
 			ID: testUuid,
 		},
 	}
 
-	signedFlavor, err := model.NewSignedFlavor(&flavor, privateKey)
+	signedFlavor, err := hvs.NewSignedFlavor(&flavor, privateKey)
 	assert.NoError(t, err)
 
 	// create the rule
-	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, common.FlavorPartPlatform)
+	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, hvs.FlavorPartPlatform)
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on FlavorTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, len(result.Faults), 0)
@@ -61,15 +58,15 @@ func TestFlavorTrustedNoFaultFromJSON(t *testing.T) {
 	err = json.Unmarshal([]byte(flavorJSON), &flavor)
 	assert.NoError(t, err)
 
-	signedFlavor, err := model.NewSignedFlavor(&flavor, privateKey)
+	signedFlavor, err := hvs.NewSignedFlavor(&flavor, privateKey)
 	assert.NoError(t, err)
 
 	// create the rule
-	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, common.FlavorPartPlatform)
+	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, hvs.FlavorPartPlatform)
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on FlavorTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, len(result.Faults), 0)
@@ -83,23 +80,23 @@ func TestFlavorTrustedFlavorSignatureMissingFault(t *testing.T) {
 
 	// create a valid flavor and signed flavor
 	flavor := hvs.Flavor{
-		Meta: model.Meta{
+		Meta: hvs.Meta{
 			ID: testUuid,
 		},
 	}
 
-	signedFlavor, err := model.NewSignedFlavor(&flavor, privateKey)
+	signedFlavor, err := hvs.NewSignedFlavor(&flavor, privateKey)
 	assert.NoError(t, err)
 
 	// now remove the signature to invoke FaultFlavorSignatureMissing
 	signedFlavor.Signature = ""
 
 	// create the rule
-	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, common.FlavorPartPlatform)
+	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, hvs.FlavorPartPlatform)
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on FlavorTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, 1, len(result.Faults))
@@ -116,21 +113,21 @@ func TestFlavorTrustedMissingFlavorSigningCertificate(t *testing.T) {
 
 	// create a valid flavor and signed flavor
 	flavor := hvs.Flavor{
-		Meta: model.Meta{
+		Meta: hvs.Meta{
 			ID: testUuid,
 		},
 	}
 
-	signedFlavor, err := model.NewSignedFlavor(&flavor, privateKey)
+	signedFlavor, err := hvs.NewSignedFlavor(&flavor, privateKey)
 	assert.NoError(t, err)
 
 	// create the rule without the flavorSigningCertificate to invoke
 	// FaultFlavorSignatureVerificationFailed
-	rule, err := NewFlavorTrusted(signedFlavor, nil, flavorCaCertificates, common.FlavorPartPlatform)
+	rule, err := NewFlavorTrusted(signedFlavor, nil, flavorCaCertificates, hvs.FlavorPartPlatform)
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on FlavorTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, 1, len(result.Faults))
@@ -147,21 +144,21 @@ func TestFlavorTrustedMissingCACertificates(t *testing.T) {
 
 	// create a valid flavor and signed flavor
 	flavor := hvs.Flavor{
-		Meta: model.Meta{
+		Meta: hvs.Meta{
 			ID: testUuid,
 		},
 	}
 
-	signedFlavor, err := model.NewSignedFlavor(&flavor, privateKey)
+	signedFlavor, err := hvs.NewSignedFlavor(&flavor, privateKey)
 	assert.NoError(t, err)
 
 	// create the rule without the CA certs to invoke
 	// FaultFlavorSignatureVerificationFailed
-	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, nil, common.FlavorPartPlatform)
+	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, nil, hvs.FlavorPartPlatform)
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on FlavorTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, 1, len(result.Faults))
@@ -185,21 +182,21 @@ func TestFlavorTrustedInvalidRootCA(t *testing.T) {
 
 	// create a valid flavor and signed flavor
 	flavor := hvs.Flavor{
-		Meta: model.Meta{
+		Meta: hvs.Meta{
 			ID: testUuid,
 		},
 	}
 
-	signedFlavor, err := model.NewSignedFlavor(&flavor, privateKey)
+	signedFlavor, err := hvs.NewSignedFlavor(&flavor, privateKey)
 	assert.NoError(t, err)
 
 	// create the rule without the CA certs to invoke the
 	// FaultFlavorSignatureVerificationFailed
-	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, invalidCaCertificates, common.FlavorPartPlatform)
+	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, invalidCaCertificates, hvs.FlavorPartPlatform)
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on FlavorTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, 1, len(result.Faults))
@@ -215,23 +212,23 @@ func TestFlavorTrustedForceSignatureVerificationToFail(t *testing.T) {
 
 	// create a valid flavor and signed flavor
 	flavor := hvs.Flavor{
-		Meta: model.Meta{
+		Meta: hvs.Meta{
 			ID: testUuid,
 		},
 	}
 
-	signedFlavor, err := model.NewSignedFlavor(&flavor, privateKey)
+	signedFlavor, err := hvs.NewSignedFlavor(&flavor, privateKey)
 	assert.NoError(t, err)
 
 	// now change the signature to force verification to fail
 	signedFlavor.Signature = "invalidsignature"
 
 	// create the rule
-	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, common.FlavorPartPlatform)
+	rule, err := NewFlavorTrusted(signedFlavor, flavorSigningCertificate, flavorCaCertificates, hvs.FlavorPartPlatform)
 	assert.NoError(t, err)
 
 	// apply the rule, the hostManifest has no impact on FlavorTrusted rule
-	result, err := rule.Apply(&types.HostManifest{})
+	result, err := rule.Apply(&hvs.HostManifest{})
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, 1, len(result.Faults))
