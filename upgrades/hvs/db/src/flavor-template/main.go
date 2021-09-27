@@ -64,7 +64,7 @@ var eventIDList = map[string]string{
 
 const (
 	//Configuration file path
-	ConfigFilePath = "/etc/hvsModel/"
+	ConfigFilePath = "/etc/hvs/"
 
 	// Vendor
 	IntelVendor  = "INTEL"
