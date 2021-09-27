@@ -87,7 +87,9 @@ func (app *App) startServer() error {
 	// Dispatch web server go routine
 	go func() {
 		if err := httpServer.ListenAndServeTLS(tlsCert, tlsKey); err != nil {
-			defaultLog.WithError(err).Error("kbs/server:startServer() Failed to start HTTPS server")
+			if err != http.ErrServerClosed {
+				defaultLog.WithError(err).Fatal("Failed to start HTTPS server")
+			}
 			stop <- syscall.SIGTERM
 		}
 	}()
