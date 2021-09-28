@@ -1,9 +1,10 @@
 #!/bin/bash
 
-source /etc/secret-volume/secrets.txt
-export IHUB_SERVICE_USERNAME
-export IHUB_SERVICE_PASSWORD
-export BEARER_TOKEN
+SECRETS=/etc/secrets
+IFS=$'\r\n' GLOBIGNORE='*' command eval 'secretFiles=($(ls  $SECRETS))'
+for i in "${secretFiles[@]}"; do
+    export $i=$(cat $SECRETS/$i)
+done
 
 USER_ID=$(id -u)
 SERVICE=ihub
@@ -42,5 +43,9 @@ if [ ! -z $SETUP_TASK ]; then
   done
   rm -rf /tmp/config.yml
 fi
+
+for i in "${secretFiles[@]}"; do
+    unset $i
+done
 
 ihub run

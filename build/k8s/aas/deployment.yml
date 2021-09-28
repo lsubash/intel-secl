@@ -41,9 +41,9 @@ spec:
               mountPath: /var/log/authservice/
             - name: aas-db-certs
               mountPath: /etc/postgresql/
-            - mountPath: /etc/secret-volume/
-              name: aas-credentials
-              readOnly: true              
+            - mountPath: /etc/secrets/
+              name: aas-secrets
+              readOnly: true
       volumes:
         - name: aas-config-volume
           persistentVolumeClaim:
@@ -55,7 +55,10 @@ spec:
           secret:
             secretName: aas-db-certs
             defaultMode: 0640
-        - name: aas-credentials
-          secret:
-              secretName: aas-secret            
-            
+        - name: aas-secrets
+          projected:
+            sources:
+              - secret:
+                  name: aas-credentials
+              - secret:
+                  name: aas-bootstrap-token

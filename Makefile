@@ -11,7 +11,7 @@ else
 endif
 
 TARGETS = cms kbs ihub hvs authservice wpm
-K8S_TARGETS = cms kbs ihub hvs authservice
+K8S_TARGETS = cms kbs ihub hvs authservice aas-manager
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
@@ -58,9 +58,10 @@ docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 %-oci-archive: %-docker
 	skopeo copy docker-daemon:isecl/$*:$(VERSION) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
 
-aas-manager:
-	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && \
-	env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
+populate-users:
+	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
+
+aas-manager: populate-users
 	cp tools/aas-manager/populate-users deployments/installer/populate-users.sh
 	cp build/linux/authservice/install_pgdb.sh deployments/installer/install_pgdb.sh
 	cp build/linux/authservice/create_db.sh deployments/installer/create_db.sh
@@ -89,7 +90,9 @@ authservice-k8s: authservice-oci-archive aas-manager
 k8s: $(patsubst %, %-k8s, $(K8S_TARGETS))
 
 %-k8s:  %-oci-archive
-	cp -r build/k8s/$* deployments/k8s/
+	if [ -d "build/k8s/$*" ]; then \
+		cp -r build/k8s/$* deployments/k8s/ ;\
+	fi
 	cp tools/download-tls-certs.sh deployments/k8s/
 
 all: clean installer test k8s

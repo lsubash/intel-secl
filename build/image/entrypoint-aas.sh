@@ -1,11 +1,10 @@
 #!/bin/bash
 
-source /etc/secret-volume/secrets.txt
-export AAS_ADMIN_USERNAME
-export AAS_ADMIN_PASSWORD 
-export BEARER_TOKEN
-export AAS_DB_USERNAME
-export AAS_DB_PASSWORD
+SECRETS=/etc/secrets
+IFS=$'\r\n' GLOBIGNORE='*' command eval 'secretFiles=($(ls  $SECRETS))'
+for i in "${secretFiles[@]}"; do
+    export $i=$(cat $SECRETS/$i)
+done
 
 USER_ID=$(id -u)
 COMPONENT_NAME=authservice
@@ -46,5 +45,9 @@ if [ ! -z $SETUP_TASK ]; then
   done
   rm -rf /tmp/config.yml
 fi
+
+for i in "${secretFiles[@]}"; do
+    unset $i
+done
 
 authservice run

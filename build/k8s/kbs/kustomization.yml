@@ -18,5 +18,6 @@ resources:
 - logs-pvc.yml
 - opt-pv.yml
 - opt-pvc.yml
+- secrets.yml
 - deployment.yml
 - service.yml
