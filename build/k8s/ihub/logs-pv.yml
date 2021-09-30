@@ -14,6 +14,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs
+  claimRef:
+    namespace: isecl
+    name: ihub-logs-pvc
   nfs:
     path: /mnt/nfs_share/isecl/ihub/logs
     server:
