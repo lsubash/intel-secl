@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"net/http"
-
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain"
@@ -31,7 +30,7 @@ func NewKeyTransferPolicyController(ps domain.KeyTransferPolicyStore, ks domain.
 	}
 }
 
-//Create : Function to create a key transfer policy
+// Create : Function to create a key transfer policy
 func (ktpc KeyTransferPolicyController) Create(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Create() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Create() Leaving")
@@ -56,9 +55,9 @@ func (ktpc KeyTransferPolicyController) Create(responseWriter http.ResponseWrite
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
 	}
 
-	if requestPolicy.SGXEnclaveIssuerAnyof == nil || requestPolicy.SGXEnclaveIssuerProductIDAnyof == nil {
-		secLog.Errorf("controllers/key_transfer_policy_controller:Create() %s : sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id_anyof must be specified", commLogMsg.InvalidInputBadParam)
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id_anyof must be specified"}
+	if requestPolicy.SGXEnclaveIssuerAnyof == nil || requestPolicy.SGXEnclaveIssuerProductID == nil {
+		secLog.Errorf("controllers/key_transfer_policy_controller:Create() %s : sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id must be specified", commLogMsg.InvalidInputBadParam)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "sgx_enclave_issuer_anyof and sgx_enclave_issuer_product_id must be specified"}
 	}
 
 	for _, enclaveIssuer := range requestPolicy.SGXEnclaveIssuerAnyof {
@@ -78,7 +77,7 @@ func (ktpc KeyTransferPolicyController) Create(responseWriter http.ResponseWrite
 	return createdPolicy, http.StatusCreated, nil
 }
 
-//Retrieve : Function to retrieve a key transfer policy
+// Retrieve : Function to retrieve a key transfer policy
 func (ktpc KeyTransferPolicyController) Retrieve(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Retrieve() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Retrieve() Leaving")
@@ -99,7 +98,7 @@ func (ktpc KeyTransferPolicyController) Retrieve(responseWriter http.ResponseWri
 	return transferPolicy, http.StatusOK, nil
 }
 
-//Delete : Function to delete a key transfer policy
+// Delete : Function to delete a key transfer policy
 func (ktpc KeyTransferPolicyController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Delete() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Delete() Leaving")
@@ -135,7 +134,7 @@ func (ktpc KeyTransferPolicyController) Delete(responseWriter http.ResponseWrite
 	return nil, http.StatusNoContent, nil
 }
 
-//Search : Function to retrieve all the key transfer policies
+// Search : Function to retrieve all the key transfer policies
 func (ktpc KeyTransferPolicyController) Search(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Search() Leaving")

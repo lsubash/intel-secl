@@ -7,15 +7,18 @@ INSTANCE_NAME=${INSTANCE_NAME:-$COMPONENT_NAME}
 BACKUP_PATH=${BACKUP_PATH:-"/tmp/"}
 BACKUP_DIR=${BACKUP_PATH}${SERVICE_USERNAME}_backup
 LOG_PATH=/var/log/$COMPONENT_NAME
+CONFIG_FILE=/etc/ihub/config.yml
 
 echo "Starting $COMPONENT_NAME config upgrade to v3.6.0"
 # Update config file
-echo "Using HVS Base Url $HVS_BASE_URL"
-echo "Using SHVS Base Url $SHVS_BASE_URL"
-./$COMPONENT_NAME setup attestation-service-connection
-if [ $? -ne 0 ]; then
-  echo "Failed to update config to v3.6.0"
-  exit 1
+ATT_TYPE=`grep 'attestation-type' $CONFIG_FILE | cut -d ":" -f2`
+
+if [[ $ATT_TYPE == " HVS" ]]; then
+   sed -i 's/attestation-url:/hvs-base-url:/' $CONFIG_FILE
+   sed -i 's/attestation-type:.*/shvs-base-url:/' $CONFIG_FILE
+elif [[ $ATT_TYPE == " SHVS" ]]; then
+   sed -i 's/attestation-url:/shvs-base-url:/' $CONFIG_FILE
+   sed -i 's/attestation-type:.*/hvs-base-url:/' $CONFIG_FILE
 fi
 
 # Install systemd script

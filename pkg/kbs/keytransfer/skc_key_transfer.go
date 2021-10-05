@@ -19,6 +19,8 @@ import (
 	"strconv"
 	"strings"
 
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v4/pkg/clients"
 	aasClient "github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
@@ -29,7 +31,6 @@ import (
 	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
 	"github.com/pkg/errors"
-	"time"
 )
 
 const (
@@ -201,7 +202,6 @@ func (keyInfo *KeyDetails) SetUserContext(userCommonName string, cfg *config.Con
 			break
 		}
 	}
-
 	return nil
 }
 
@@ -317,8 +317,8 @@ func (keyInfo KeyDetails) doesCertcontextListMatchKeyTransferPolicy() bool {
 					}
 				}
 			}
-			if value == true {
-				return true
+			if value {
+				return value
 			} else {
 				defaultLog.Error("keytransfer/skc_key_transfer:doesCertcontextListMatchKeyTransferPolicy() clientCertContextAllOf is not in context list")
 				return false
@@ -368,10 +368,7 @@ func (keyInfo *KeyDetails) IsValidSession(stmLabel string) (validSession, validS
 
 				if keyInfo.validateSgxEnclaveIssuer(attributes.EnclaveIssuer) &&
 					keyInfo.validateSgxEnclaveIssuerProdId(attributes.EnclaveIssuerProductID) &&
-					keyInfo.validateSgxEnclaveIssuerExtProdId(attributes.EnclaveIssuerExtendedProductID) &&
-					keyInfo.validateSgxConfigId(attributes.ConfigID) &&
-					keyInfo.validateSgxIsvSvn(attributes.IsvSvn) &&
-					keyInfo.validateSgxConfigIdSvn(attributes.ConfigSvn) {
+					keyInfo.validateSgxIsvSvn(attributes.IsvSvn) {
 					keyInfo.ActiveSessionID = sessionID
 					defaultLog.Debug("keytransfer/skc_key_transfer:IsValidSession() All sgx attributes in stm attestation report match key transfer policy")
 					return true, true, true
@@ -463,37 +460,15 @@ func (keyInfo KeyDetails) validateSgxEnclaveIssuerProdId(stmSgxEnclaveIssuerProd
 		defaultLog.Error("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerProdId() sgx_enclave_issuer_product_id missing from sgx attestation report")
 		return false
 	}
-	stmSgxEnclaveIssuerProdIDIn, err := strconv.Atoi(stmSgxEnclaveIssuerProdID)
+	sgxEnclaveIssuerProdID, err := strconv.ParseUint(stmSgxEnclaveIssuerProdID, 10, 6)
 	if err != nil {
 		defaultLog.Error("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerProdId() Error in converting encalve issue id")
 		return false
 
 	}
-	a1 := int16(stmSgxEnclaveIssuerProdIDIn)
-	for _, enclaveIssuerProdID := range keyInfo.TransferPolicyAttributes.SGXEnclaveIssuerProductIDAnyof {
-		if a1 == enclaveIssuerProdID {
-			defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerProdId() StmSgxEnclaveIssuerProdID matches with the key transfer policy")
-			return true
-		}
-	}
-	return false
-}
-
-// validateSgxEnclaveIssuerExtProdId - Function to Validate SgxEnclaveIssuerExtProdId
-func (keyInfo KeyDetails) validateSgxEnclaveIssuerExtProdId(stmSgxEnclaveIssuerExtProdID string) bool {
-	defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerExtProdId() Entering")
-	defer defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerExtProdId() Leaving")
-
-	if stmSgxEnclaveIssuerExtProdID == "" && len(keyInfo.TransferPolicyAttributes.SGXEnclaveIssuerExtendedProductIDAnyof) == 0 {
-		defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerExtProdId() StmSgxEnclaveIssuerExtProdID matches with the key transfer policy")
+	if uint16(sgxEnclaveIssuerProdID) == *keyInfo.TransferPolicyAttributes.SGXEnclaveIssuerProductID {
+		defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerProdId() StmSgxEnclaveIssuerProdID matches with the key transfer policy")
 		return true
-	}
-
-	for _, enclaveIssuerExtProdID := range keyInfo.TransferPolicyAttributes.SGXEnclaveIssuerExtendedProductIDAnyof {
-		if stmSgxEnclaveIssuerExtProdID == enclaveIssuerExtProdID {
-			defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxEnclaveIssuerExtProdId() StmSgxEnclaveIssuerExtProdID matches with the key transfer policy")
-			return true
-		}
 	}
 	return false
 }
@@ -518,58 +493,19 @@ func (keyInfo KeyDetails) validateSgxEnclaveMeasurement(stmSgxEnclaveMeasurement
 	return false
 }
 
-// validateSgxConfigId - Function to Validate SgxConfigId
-func (keyInfo KeyDetails) validateSgxConfigId(stmSgxConfigID string) bool {
-	defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxConfigId() Entering")
-	defer defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxConfigId() Leaving")
-
-	if stmSgxConfigID == "" && len(keyInfo.TransferPolicyAttributes.SGXConfigIDAnyof) == 0 {
-		defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxConfigId() StmSgxConfigID matches with the key transfer policy")
-		return true
-	}
-
-	for _, sgxConfigID := range keyInfo.TransferPolicyAttributes.SGXConfigIDAnyof {
-		if stmSgxConfigID == sgxConfigID {
-			defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxConfigId() StmSgxConfigID matches with the key transfer policy")
-			return true
-		}
-	}
-	return false
-}
-
 // validateSgxIsvSvn- Function to Validate isvSvn
 func (keyInfo KeyDetails) validateSgxIsvSvn(stmSgxIsvSvn string) bool {
 	defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxIsvSvn() Entering")
 	defer defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxIsvSvn() Leaving")
 
-	stmSgxsvn, err := strconv.Atoi(stmSgxIsvSvn)
+	sgxSvn, err := strconv.ParseUint(stmSgxIsvSvn, 10, 6)
 	if err != nil {
 		defaultLog.Error("keytransfer/skc_key_transfer:validateSgxIsvSvn() Error in converting isvSvn to integer")
 		return false
 
 	}
-	a1 := int16(stmSgxsvn)
-	if a1 == keyInfo.TransferPolicyAttributes.SGXEnclaveSVNMinimum {
+	if uint16(sgxSvn) == keyInfo.TransferPolicyAttributes.SGXEnclaveSVNMinimum {
 		defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxIsvSvn() stmSgxIsvSvn matches with the key transfer policy")
-		return true
-	}
-	return false
-}
-
-// validateSgxConfigIdSvn- Function to Validate configIdSvn
-func (keyInfo KeyDetails) validateSgxConfigIdSvn(stmSgxConfigSvn string) bool {
-	defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxConfigIdSvn() Entering")
-	defer defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxConfigIdSvn() Leaving")
-
-	stmSgxConfigIdSvn, err := strconv.Atoi(stmSgxConfigSvn)
-	if err != nil {
-		defaultLog.Error("keytransfer/skc_key_transfer:validateSgxConfigIdSvn() Error in converting stmSgxConfigIdSvn to integer")
-		return false
-
-	}
-	a1 := int16(stmSgxConfigIdSvn)
-	if a1 == keyInfo.TransferPolicyAttributes.SGXConfigIDSVN {
-		defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxConfigIdSvn() stmSgxConfigIdSvn matches with the key transfer policy")
 		return true
 	}
 	return false
