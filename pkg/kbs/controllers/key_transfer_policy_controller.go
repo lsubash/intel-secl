@@ -10,15 +10,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	consts "github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain/models"
-	"github.com/intel-secl/intel-secl/v5/pkg/kbs/utils"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/slice"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
 	"github.com/pkg/errors"
 )
@@ -161,11 +160,11 @@ func ValidateKeyTransferPolicy(requestPolicy kbs.KeyTransferPolicy) error {
 		return errors.New("controllers/key_transfer_policy_controller:ValidateKeyTransferPolicy() Only one attestation type is supported in key transfer policy")
 	}
 
-	if !utils.ValidateInputString(consts.AttestationTypeKey, requestPolicy.AttestationType[0]) {
+	if !requestPolicy.AttestationType[0].Valid() {
 		return errors.New("controllers/key_transfer_policy_controller:ValidateKeyTransferPolicy() Invalid attestation type")
 	}
 
-	if slice.Contains(requestPolicy.AttestationType, consts.AttestationTypeSGX) && requestPolicy.SGX.Attributes != nil {
+	if slice.Contains(requestPolicy.AttestationType, aps.SGX) && requestPolicy.SGX.Attributes != nil {
 		if requestPolicy.SGX.Attributes.MrSigner == nil || requestPolicy.SGX.Attributes.IsvProductId == nil {
 			return errors.New("controllers/key_transfer_policy_controller:ValidateKeyTransferPolicy() MrSigner and IsvProductId must be specified for SGX policy")
 		}
@@ -174,7 +173,7 @@ func ValidateKeyTransferPolicy(requestPolicy kbs.KeyTransferPolicy) error {
 		}
 	}
 
-	if slice.Contains(requestPolicy.AttestationType, consts.AttestationTypeTDX) && requestPolicy.TDX.Attributes != nil {
+	if slice.Contains(requestPolicy.AttestationType, aps.TDX) && requestPolicy.TDX.Attributes != nil {
 		if requestPolicy.TDX.Attributes.MrSignerSeam == nil || requestPolicy.TDX.Attributes.MrSeam == nil {
 			return errors.New("controllers/key_transfer_policy_controller:ValidateKeyTransferPolicy() MrSignerSeam and MrSeam must be specified for TDX policy")
 		}

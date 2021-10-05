@@ -16,7 +16,6 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"encoding/xml"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/slice"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -37,6 +36,7 @@ import (
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	cmw "github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/slice"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
@@ -156,7 +156,7 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 				return nil, httpStatus, &commErr.ResourceError{Message: "Error retrieving nonce from APS"}
 			}
 			responseWriter.Header().Set("Nonce", nonce)
-			responseWriter.Header().Set("Attestation-Type", transferPolicy.AttestationType[0])
+			responseWriter.Header().Set("Attestation-Type", transferPolicy.AttestationType[0].String())
 			return nil, http.StatusNoContent, nil
 		} else {
 			if request.Header.Get("Content-Type") != constants.HTTPMediaTypeJson {
@@ -210,17 +210,17 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Failed to decode JSON request body"}
 		}
 
-		if request.Header.Get("Attestation-Type") != transferPolicy.AttestationType[0] {
+		if request.Header.Get("Attestation-Type") != transferPolicy.AttestationType[0].String() {
 			secLog.Error("controllers/key_transfer_controller:Transfer() attestation-type in request header does not match with attestation-type in key-transfer policy")
 			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "attestation-type in request header does not match with attestation-type in key-transfer policy"}
 		}
 
 		var policyIds []uuid.UUID
 		switch transferPolicy.AttestationType[0] {
-		case consts.AttestationTypeSGX:
+		case aps.SGX:
 			policyIds = transferPolicy.SGX.PolicyIds
 
-		case consts.AttestationTypeTDX:
+		case aps.TDX:
 			policyIds = transferPolicy.TDX.PolicyIds
 		}
 
@@ -336,7 +336,7 @@ func validateAttestationTokenClaims(tokenClaims *aps.AttestationTokenClaim, tran
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateAttestationTokenClaims() Leaving")
 
 	switch transferPolicy.AttestationType[0] {
-	case consts.AttestationTypeSGX:
+	case aps.SGX:
 		if tokenClaims.PolicyIds != nil && transferPolicy.SGX.PolicyIds != nil {
 			if isPolicyIdMatched(tokenClaims.PolicyIds, transferPolicy.SGX.PolicyIds) {
 				return nil
@@ -347,7 +347,7 @@ func validateAttestationTokenClaims(tokenClaims *aps.AttestationTokenClaim, tran
 		}
 		return validateSGXTokenClaims(tokenClaims, transferPolicy.SGX.Attributes)
 
-	case consts.AttestationTypeTDX:
+	case aps.TDX:
 		if tokenClaims.PolicyIds != nil && transferPolicy.TDX.PolicyIds != nil {
 			if isPolicyIdMatched(tokenClaims.PolicyIds, transferPolicy.TDX.PolicyIds) {
 				return nil

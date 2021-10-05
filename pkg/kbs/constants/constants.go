@@ -78,8 +78,5 @@ const (
 	KMIP_1_4 = "1.4"
 	KMIP_2_0 = "2.0"
 
-	AttestationTypeKey = "attestation_type"
-	AttestationTypeSGX = "SGX"
-	AttestationTypeTDX = "TDX"
-	TCBStatusUpToDate  = "OK"
+	TCBStatusUpToDate = "OK"
 )

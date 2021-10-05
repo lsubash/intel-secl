@@ -8,16 +8,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"regexp"
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
 	"github.com/pkg/errors"
 )
-
-var regExMap = map[string]*regexp.Regexp{
-	constants.AttestationTypeKey: regexp.MustCompile(`^(SGX|TDX)$`)}
 
 func GetDefaultKeyTransferPolicyId() (uuid.UUID, error) {
 	defaultLog.Trace("utils/key_transfer_policy:GetDefaultKeyTransferPolicyId() Entering")
@@ -40,13 +36,4 @@ func GetDefaultKeyTransferPolicyId() (uuid.UUID, error) {
 	}
 
 	return policy.ID, nil
-}
-
-func ValidateInputString(key string, inString string) bool {
-	regEx := regExMap[key]
-	if key == "" || !regEx.MatchString(inString) {
-		defaultLog.WithField(key, inString).Error("Input Validation failed")
-		return false
-	}
-	return true
 }

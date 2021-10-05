@@ -111,8 +111,6 @@ type App struct {
 	SKCLibRoleContext       string
 	ApsServiceUserName      string
 	ApsServiceUserPassword  string
-	ApcUserName             string
-	ApcUserPassword         string
 
 	Components                    map[string]bool
 	GenPassword                   bool
@@ -238,11 +236,6 @@ func (a *App) GetServiceUsers() []UserAndRolesCreate {
 			urc.Password = a.ApsServiceUserPassword
 			urc.Roles = append(urc.Roles, NewRole("QVS", "QuoteVerifier", "", []string{"sgx_quote:verify:*",
 				"tdx_quote:verify:*"}))
-		case "APC":
-			urc.Name = a.ApcUserName
-			urc.Password = a.ApcUserPassword
-			urc.Roles = append(urc.Roles, NewRole("KBS", "KeyManager", "", []string{"keys:create:*",
-				"keys:transfer:*"}))
 		case "KBS":
 			urc.Name = a.KbsServiceUsername
 			urc.Password = a.KbsServiceUserPassword
@@ -543,9 +536,6 @@ func (a *App) LoadAllVariables(envFile string) error {
 
 		{&a.ApsServiceUserName, "APS_SERVICE_USERNAME", "", "Attestation Policy Service User Name", false, false},
 		{&a.ApsServiceUserPassword, "APS_SERVICE_PASSWORD", "", "Attestation Policy Service User Password", false, true},
-
-		{&a.ApcUserName, "APC_SERVICE_USERNAME", "", "Attestation Policy Creator User Name", false, false},
-		{&a.ApcUserPassword, "APC_SERVICE_PASSWORD", "", "Attestation Policy Creator User Password", false, true},
 	}
 
 	hasError := false

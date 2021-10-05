@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/aps"
 )
 
 // KeyTransferPolicy - used in key transfer policy create request and response.
 type KeyTransferPolicy struct {
 	// swagger:strfmt uuid
-	ID              uuid.UUID  `json:"id,omitempty"`
-	CreatedAt       time.Time  `json:"created_at,omitempty"`
-	AttestationType []string   `json:"attestation_type"`
-	TDX             *TdxPolicy `json:"tdx,omitempty"`
-	SGX             *SgxPolicy `json:"sgx,omitempty"`
+	ID              uuid.UUID             `json:"id,omitempty"`
+	CreatedAt       time.Time             `json:"created_at,omitempty"`
+	AttestationType []aps.AttestationType `json:"attestation_type"`
+	TDX             *TdxPolicy            `json:"tdx,omitempty"`
+	SGX             *SgxPolicy            `json:"sgx,omitempty"`
 }
 
 type TdxPolicy struct {
