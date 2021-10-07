@@ -581,17 +581,41 @@ func (a *App) GetNewOrExistingRoleID(role aas.RoleCreate, aascl *claas.Client) (
 		return "", err
 	}
 
-	if len(roles) == 0 {
+	permissionExists := false
+	if len(roles) > 0 {
+		if len(roles) != 1 {
+			// we should not really be here.. we have multiple roles with matched name
+			return "", fmt.Errorf("Multiple records found when searching for role %v - record - %v", role, roles)
+		}
+
+		for _, rcPermission := range role.Permissions {
+			permissionExists = false
+			for _, permission := range roles[0].Permissions {
+				if permission.Rule == rcPermission {
+					permissionExists = true
+				}
+			}
+			if !permissionExists {
+				fmt.Printf("\n Missing permission %v for Role: %v", rcPermission, role.Name)
+				break
+			}
+		}
+		if !permissionExists {
+			fmt.Printf("\nDeleting Role: %v", roles[0].ID)
+			err = aascl.DeleteRole(roles[0].ID)
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+
+	if len(roles) == 0 || !permissionExists {
 		// did not find the role.. so create the role
 		newRole, err := aascl.CreateRole(role)
 		if err != nil {
 			return "", err
 		}
 		return newRole.ID, nil
-	}
-	if len(roles) != 1 {
-		// we should not really be here.. we have multiple roles with matched name
-		return "", fmt.Errorf("Multiple records found when searching for role %v - record - %v", role, roles)
 	}
 
 	// found single record that corresponds to the user.
