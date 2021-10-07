@@ -7,8 +7,9 @@ package aas
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients"
-	types "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
+	aasTypes "github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	types "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -29,6 +30,9 @@ var (
 	}
 	ErrHTTPCreateRole = &clients.HTTPClientErr{
 		ErrMessage: "Failed to create role",
+	}
+	ErrHTTPDeleteRole = &clients.HTTPClientErr{
+		ErrMessage: "Failed to delete role",
 	}
 	ErrHTTPAddRoleToUser = &clients.HTTPClientErr{
 		ErrMessage: "Failed to add role to user",
@@ -164,7 +168,7 @@ func (c *Client) CreateRole(r types.RoleCreate) (*types.RoleCreateResponse, erro
 	return &roleCreateResponse, nil
 }
 
-func (c *Client) GetRoles(service, name, context, contextContains string, allContexts bool) ([]types.RoleCreateResponse, error) {
+func (c *Client) GetRoles(service, name, context, contextContains string, allContexts bool) (aasTypes.Roles, error) {
 
 	relativeUrl := "roles"
 	u, _ := url.Parse(relativeUrl)
@@ -208,12 +212,35 @@ func (c *Client) GetRoles(service, name, context, contextContains string, allCon
 		ErrHTTPGetRoles.RetCode = rsp.StatusCode
 		return nil, ErrHTTPCreateUser
 	}
-	var roles []types.RoleCreateResponse
+	var roles aasTypes.Roles
 	err = json.NewDecoder(rsp.Body).Decode(&roles)
 	if err != nil {
 		return nil, err
 	}
 	return roles, nil
+}
+
+func (c *Client) DeleteRole(roleId string) error {
+	rolesURL := clients.ResolvePath(c.BaseURL, "roles/"+roleId)
+
+	req, err := http.NewRequest(http.MethodDelete, rolesURL, nil)
+	if err != nil {
+		return err
+	}
+	c.prepReqHeader(req)
+
+	if c.HTTPClient == nil {
+		return errors.New("aasClient.DeleteRole: HTTPClient should not be null")
+	}
+	rsp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if rsp.StatusCode != http.StatusNoContent {
+		ErrHTTPGetRoles.RetCode = rsp.StatusCode
+		return ErrHTTPDeleteRole
+	}
+	return nil
 }
 
 func (c *Client) GetPermissionsForUser(userID string) ([]types.PermissionInfo, error) {
