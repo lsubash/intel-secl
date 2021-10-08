@@ -3,6 +3,11 @@
 
 FROM centos:8
 
+LABEL org.label-schema.name="Host Verification Service" \
+      org.label-schema.vendor="Intel Corporation" \
+      org.label-schema.license="BSD-3-Clause" \
+      org.label-schema.url="https://github.com/intel-secl/intel-secl"
+
 COPY cmd/hvs/hvs /usr/bin/hvs
 
 COPY build/linux/hvs/*.pem /tmp/
