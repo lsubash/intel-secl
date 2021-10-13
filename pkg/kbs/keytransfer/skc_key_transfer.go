@@ -473,6 +473,26 @@ func (keyInfo KeyDetails) validateSgxEnclaveIssuerProdId(stmSgxEnclaveIssuerProd
 	return false
 }
 
+// validateSgxEnclaveMeasurement - Function to Validate SgxEnclaveMeasurement
+func (keyInfo KeyDetails) validateSgxEnclaveMeasurement(stmSgxEnclaveMeasurement string) bool {
+	defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxEnclaveMeasurement() Entering")
+	defer defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxEnclaveMeasurement() Leaving")
+
+	if stmSgxEnclaveMeasurement == "" && len(keyInfo.TransferPolicyAttributes.SGXEnclaveMeasurementAnyof) == 0 {
+		defaultLog.Debug("keytransfer/skc_key_transfer:validateSgxEnclaveMeasurement() StmSgxEnclaveMeasurement matches with the key transfer policy")
+		return true
+	}
+
+	for _, sgxEnclaveMeasurement := range keyInfo.TransferPolicyAttributes.SGXEnclaveMeasurementAnyof {
+		if stmSgxEnclaveMeasurement == sgxEnclaveMeasurement {
+			defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxEnclaveMeasurement() StmSgxEnclaveMeasurement matches with the key transfer policy")
+			return true
+		}
+	}
+
+	return false
+}
+
 // validateSgxIsvSvn- Function to Validate isvSvn
 func (keyInfo KeyDetails) validateSgxIsvSvn(stmSgxIsvSvn string) bool {
 	defaultLog.Trace("keytransfer/skc_key_transfer:validateSgxIsvSvn() Entering")
