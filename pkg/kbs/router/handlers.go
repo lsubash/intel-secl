@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/intel-secl/intel-secl/v4/pkg/clients"
 	aasClient "github.com/intel-secl/intel-secl/v4/pkg/clients/aas"
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/config"

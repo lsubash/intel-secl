@@ -10,7 +10,6 @@ import (
 	"encoding/asn1"
 
 	"github.com/google/uuid"
-	asset_tag "github.com/intel-secl/intel-secl/v4/pkg/lib/asset-tag"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/verifier/rules"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	"github.com/pkg/errors"
@@ -108,7 +107,7 @@ func getAssetTagMatchesRule(flavor *hvs.Flavor) (rules.Rule, error) {
 
 	tags := make([]hvs.TagKvAttribute, 0)
 	for _, extensions := range assetTagCertficate.Extensions {
-		var tagAttribute asset_tag.TagKvAttribute
+		var tagAttribute hvs.TagKvAttribute
 		_, err = asn1.Unmarshal(extensions.Value, &tagAttribute)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error parsing asset tag attribute")
