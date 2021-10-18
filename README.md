@@ -52,14 +52,14 @@ technologies. To build components necessary to try out different use cases, plea
 
 [https://github.com/intel-secl/build-manifest/](https://github.com/intel-secl/build-manifest/)
 
-It makes use of repo tool which simplifies efforts to clone and build multiple repos. To build latest **v4.0.0** version of Intel<sup>®</sup> SecL-DC with a single instruction:
+It makes use of repo tool which simplifies efforts to clone and build multiple repos. To build latest **v4.0.1** version of Intel<sup>®</sup> SecL-DC with a single instruction:
 
 ```shell
 # repo init -U <build-repo-url> -b <release-tag> -m <usecasemanifest>
 
 example:
 
-# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v4.0.0 -m manifest/fs.xml
+# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v4.0.1 -m manifest/fs.xml
 ```
 
 ### Product Guide
