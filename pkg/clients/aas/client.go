@@ -7,9 +7,9 @@ package aas
 import (
 	"bytes"
 	"encoding/json"
-	aasTypes "github.com/intel-secl/intel-secl/v4/pkg/authservice/types"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients"
-	types "github.com/intel-secl/intel-secl/v4/pkg/model/aas"
+	aasTypes "github.com/intel-secl/intel-secl/v5/pkg/authservice/types"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	types "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"io/ioutil"
 	"net/http"
 	"net/url"
