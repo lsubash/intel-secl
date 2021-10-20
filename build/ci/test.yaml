@@ -8,6 +8,15 @@
     - git config --global http."https://${GITLAB_SERVER}".proxy ""
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${GITLAB_SERVER}".insteadOf "https://${GITLAB_SERVER}"
 
+    - apt-get update -y -o Acquire::Max-FutureTime=31536000
+    - apt-get install -yq libssl-dev
+    - git clone https://github.com/openkmip/libkmip.git
+    - cd libkmip
+    - git reset --hard f7793891c994d927c11ba7206e8aa0383ed7528d
+    - make
+    - make install
+    - ldconfig
+    - cd $CI_PROJECT_DIR
   script:
     - echo "This is the CI job that runs all unit tests"
     - GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy

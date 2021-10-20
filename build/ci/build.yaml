@@ -39,4 +39,14 @@ build:wpm:
   extends: .build-normal-components
 
 build:kbs:
-  extends: .build-normal-components
+  extends: .build-common
+  script:
+    - git clone https://github.com/openkmip/libkmip.git
+    - cd libkmip
+    - git reset --hard f7793891c994d927c11ba7206e8aa0383ed7528d
+    - make
+    - make install
+    - ldconfig
+    - cd $CI_PROJECT_DIR
+    - cp /usr/local/lib/libkmip.so.0.2 build/linux/kbs/
+    - make kbs
