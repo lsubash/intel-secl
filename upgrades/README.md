@@ -4,21 +4,21 @@
 
 Following is the matrix of upgrade support for different components in Intel<sup>®</sup> SecL-DC
 
-Latest release: v4.0.0
+Latest release: v4.0.1
 
 #### Compatibility Matrix:
 | Component (v4) |  CMS                | AAS                    | WPM | KBS                    | TA     | AA | WLA | HVS                    | iHUB | WLS                    |
 |-------------|------------------------|------------------------|-----|------------------------|--------|----|-----|------------------------|------|------------------------|
 | CMS         | NA                     | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| AAS         | v3.5.0, v3.6.0, v4.0.0 | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| WPM         | v3.5.0, v3.6.0, v4.0.0 | v3.5.0, v3.6.0, v4.0.0 | NA  | v3.5.0, v3.6.0, v4.0.0 | NA     | NA | NA  | NA                     | NA   | NA                     |
-| KBS         | v3.5.0, v3.6.0, v4.0.0 | v3.5.0, v3.6.0, v4.0.0 | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| TA          | v3.5.0, v3.6.0, v4.0.0 | v4.0.0                 | NA  | NA                     | NA     | NA | NA  | v4.0.0                 | NA   | NA                     |
+| AAS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
+| WPM         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA     | NA | NA  | NA                     | NA   | NA                     |
+| KBS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
+| TA          | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v4.0.0                 | NA  | NA                     | NA     | NA | NA  | v4.0.0                 | NA   | NA                     |
 | AA          | NA                     | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| WLA         | v3.5.0, v3.6.0, v4.0.0 | v3.5.0, v3.6.0, v4.0.0 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | v3.5.0, v3.6.0, v4.0.0 |
-| HVS         | v3.5.0, v3.6.0, v4.0.0 | v4.0.0                 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | NA                     |
-| iHUB        | v3.5.0, v3.6.0, v4.0.0 | v3.5.0, v3.6.0, v4.0.0 | NA  | NA                     | NA     | NA | NA  | v3.5.0, v3.6.0, v4.0.0 | NA   | NA                     |
-| WLS         | v3.5.0, v3.6.0, v4.0.0 | v3.5.0, v3.6.0, v4.0.0 | NA  | v3.5.0, v3.6.0, v4.0.0 | NA     | NA | NA  | NA                     | NA   | NA                     |
+| WLA         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | v3.5.0, v3.6.0, v4.0.0, v4.0.1 |
+| HVS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v4.0.0                 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | NA                     |
+| iHUB        | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | NA                     | NA     | NA | NA  | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA   | NA                     |
+| WLS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA     | NA | NA  | NA                     | NA   | NA                     |
 
 #### Supported upgrade path:
 
