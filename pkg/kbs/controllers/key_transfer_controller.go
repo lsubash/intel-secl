@@ -228,6 +228,7 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 			Quote:     keyTransferRequest.Quote,
 			UserData:  keyTransferRequest.UserData,
 			PolicyIds: policyIds,
+			EventLog:  keyTransferRequest.EventLog,
 		}
 
 		token, httpStatus, err := kc.client.GetAttestationToken(request.Header.Get("Nonce"), &tokenRequest)

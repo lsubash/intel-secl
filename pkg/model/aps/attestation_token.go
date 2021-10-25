@@ -10,6 +10,7 @@ type AttestationTokenRequest struct {
 	Quote     string      `json:"quote"`
 	UserData  string      `json:"user_data"`
 	PolicyIds []uuid.UUID `json:"policy_ids,omitempty"`
+	EventLog  string      `json:"event_log,omitempty"`
 }
 
 type SignedNonce struct {
