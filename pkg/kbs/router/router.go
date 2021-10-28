@@ -78,10 +78,10 @@ func (router *Router) fnGetJwtCerts() error {
 	defer defaultLog.Trace("router/router:fnGetJwtCerts() Leaving")
 
 	cfg := router.cfg
-	if !strings.HasSuffix(cfg.AASApiUrl, "/") {
-		cfg.AASApiUrl = cfg.AASApiUrl + "/"
+	if !strings.HasSuffix(cfg.AASBaseUrl, "/") {
+		cfg.AASBaseUrl = cfg.AASBaseUrl + "/"
 	}
-	url := cfg.AASApiUrl + "jwt-certificates"
+	url := cfg.AASBaseUrl + "jwt-certificates"
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return errors.Wrap(err, "router/router:fnGetJwtCerts() Unable to create http request")

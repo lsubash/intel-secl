@@ -17,28 +17,41 @@ import (
 
 var defaultLog = log.GetDefaultLogger()
 
+// Constants for viper variable names. Will be used to set
+// default values as well as to get each value
+const (
+	ApsBaseUrl  = "aps-base-url"
+	CustomToken = "custom-token"
+
+	EndpointUrl = "endpoint-url"
+	KeyManager  = "key-manager"
+
+	KmipVersion        = "kmip.version"
+	KmipServerIP       = "kmip.server-ip"
+	KmipServerPort     = "kmip.server-port"
+	KmipHostname       = "kmip.hostname"
+	KmipUsername       = "kmip.username"
+	KmipPassword       = "kmip.password"
+	KmipClientKeyPath  = "kmip.client-key-path"
+	KmipClientCertPath = "kmip.client-cert-path"
+	KmipRootCertPath   = "kmip.root-cert-path"
+)
+
 type Configuration struct {
-	AASApiUrl        string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
+	AASBaseUrl       string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
 	CMSBaseURL       string `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	APSBaseUrl       string `yaml:"aps-base-url" mapstructure:"aps-base-url"`
 	CustomToken      string `yaml:"custom-token" mapstructure:"custom-token"`
 	CmsTlsCertDigest string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 
-	KBS KBSConfig `yaml:"kbs" mapstructure:"kbs"`
-
 	EndpointURL string `yaml:"endpoint-url" mapstructure:"endpoint-url"`
 	KeyManager  string `yaml:"key-manager" mapstructure:"key-manager"`
 
-	TLS    commConfig.TLSCertConfig `yaml:"tls" mapstructure:"tls"`
-	Log    commConfig.LogConfig     `yaml:"log" mapstructure:"log"`
-	Server commConfig.ServerConfig  `yaml:"server" mapstructure:"server"`
+	TLS    commConfig.TLSCertConfig `yaml:"tls"`
+	Log    commConfig.LogConfig     `yaml:"log"`
+	Server commConfig.ServerConfig  `yaml:"server"`
 
-	Kmip KmipConfig `yaml:"kmip" mapstructure:"kmip"`
-}
-
-type KBSConfig struct {
-	UserName string `yaml:"service-username" mapstructure:"service-username"`
-	Password string `yaml:"service-password" mapstructure:"service-password"`
+	Kmip KmipConfig `yaml:"kmip"`
 }
 
 type KmipConfig struct {

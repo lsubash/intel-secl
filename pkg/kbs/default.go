@@ -15,86 +15,51 @@ import (
 
 // This init function sets the default values for viper keys.
 func init() {
-	viper.SetDefault("endpoint-url", constants.DefaultEndpointUrl)
-	viper.SetDefault("key-manager", constants.DefaultKeyManager)
+	viper.SetDefault(config.EndpointUrl, constants.DefaultEndpointUrl)
+	viper.SetDefault(config.KeyManager, constants.DefaultKeyManager)
 
 	// Set default values for tls
-	viper.SetDefault("tls-cert-file", constants.DefaultTLSCertPath)
-	viper.SetDefault("tls-key-file", constants.DefaultTLSKeyPath)
-	viper.SetDefault("tls-common-name", constants.DefaultKbsTlsCn)
-	viper.SetDefault("tls-san-list", constants.DefaultKbsTlsSan)
+	viper.SetDefault(commConfig.TlsCertFile, constants.DefaultTLSCertPath)
+	viper.SetDefault(commConfig.TlsKeyFile, constants.DefaultTLSKeyPath)
+	viper.SetDefault(commConfig.TlsCommonName, constants.DefaultKbsTlsCn)
+	viper.SetDefault(commConfig.TlsSanList, constants.DefaultKbsTlsSan)
 
 	// Set default values for log
-	viper.SetDefault("log-max-length", constants.DefaultLogMaxlength)
-	viper.SetDefault("log-enable-stdout", true)
-	viper.SetDefault("log-level", constants.DefaultLogLevel)
+	viper.SetDefault(commConfig.LogEnableStdout, true)
+	viper.SetDefault(commConfig.LogLevel, constants.DefaultLogLevel)
+	viper.SetDefault(commConfig.LogMaxLength, constants.DefaultLogMaxlength)
 
 	// Set default value for kmip version
-	viper.SetDefault("kmip-version", constants.KMIP_2_0)
+	viper.SetDefault(config.KmipVersion, constants.KMIP_2_0)
 
 	// Set default values for server
-	viper.SetDefault("server-port", constants.DefaultKBSListenerPort)
-	viper.SetDefault("server-read-timeout", constants.DefaultReadTimeout)
-	viper.SetDefault("server-read-header-timeout", constants.DefaultReadHeaderTimeout)
-	viper.SetDefault("server-write-timeout", constants.DefaultWriteTimeout)
-	viper.SetDefault("server-idle-timeout", constants.DefaultIdleTimeout)
-	viper.SetDefault("server-max-header-bytes", constants.DefaultMaxHeaderBytes)
-
+	viper.SetDefault(commConfig.ServerPort, constants.DefaultKBSListenerPort)
+	viper.SetDefault(commConfig.ServerReadTimeout, constants.DefaultReadTimeout)
+	viper.SetDefault(commConfig.ServerReadHeaderTimeout, constants.DefaultReadHeaderTimeout)
+	viper.SetDefault(commConfig.ServerWriteTimeout, constants.DefaultWriteTimeout)
+	viper.SetDefault(commConfig.ServerIdleTimeout, constants.DefaultIdleTimeout)
+	viper.SetDefault(commConfig.ServerMaxHeaderBytes, constants.DefaultMaxHeaderBytes)
 }
 
 func defaultConfig() *config.Configuration {
 	loadAlias()
 	return &config.Configuration{
-		AASApiUrl:        viper.GetString("aas-base-url"),
-		CMSBaseURL:       viper.GetString("cms-base-url"),
-		APSBaseUrl:       viper.GetString("aps-base-url"),
-		CustomToken:      viper.GetString("custom-token"),
-		CmsTlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
+		CMSBaseURL:       viper.GetString(commConfig.CmsBaseUrl),
+		CmsTlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 
-		EndpointURL: viper.GetString("endpoint-url"),
-		KeyManager:  viper.GetString("key-manager"),
-
-		KBS: config.KBSConfig{
-			UserName: viper.GetString("kbs-service-username"),
-			Password: viper.GetString("kbs-service-password"),
-		},
 		TLS: commConfig.TLSCertConfig{
-			CertFile:   viper.GetString("tls-cert-file"),
-			KeyFile:    viper.GetString("tls-key-file"),
-			CommonName: viper.GetString("tls-common-name"),
-			SANList:    viper.GetString("tls-san-list"),
-		},
-		Log: commConfig.LogConfig{
-			MaxLength:    viper.GetInt("log-max-length"),
-			EnableStdout: viper.GetBool("log-enable-stdout"),
-			Level:        viper.GetString("log-level"),
-		},
-		Server: commConfig.ServerConfig{
-			Port:              viper.GetInt("server-port"),
-			ReadTimeout:       viper.GetDuration("server-read-timeout"),
-			ReadHeaderTimeout: viper.GetDuration("server-read-header-timeout"),
-			WriteTimeout:      viper.GetDuration("server-write-timeout"),
-			IdleTimeout:       viper.GetDuration("server-idle-timeout"),
-			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
-		},
-		Kmip: config.KmipConfig{
-			Version:                   viper.GetString("kmip-version"),
-			ServerIP:                  viper.GetString("kmip-server-ip"),
-			ServerPort:                viper.GetString("kmip-server-port"),
-			Hostname:                  viper.GetString("kmip-hostname"),
-			Username:                  viper.GetString("kmip-username"),
-			Password:                  viper.GetString("kmip-password"),
-			ClientKeyFilePath:         viper.GetString("kmip-client-key-path"),
-			ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
-			RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
+			CertFile:   viper.GetString(commConfig.TlsCertFile),
+			KeyFile:    viper.GetString(commConfig.TlsKeyFile),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
+			SANList:    viper.GetString(commConfig.TlsSanList),
 		},
 	}
 }
 
 func loadAlias() {
 	alias := map[string]string{
-		"tls-san-list": "SAN_LIST",
-		"aas-base-url": "AAS_API_URL",
+		commConfig.TlsSanList: "SAN_LIST",
+		commConfig.AasBaseUrl: "AAS_API_URL",
 	}
 	for k, v := range alias {
 		if env := os.Getenv(v); env != "" {

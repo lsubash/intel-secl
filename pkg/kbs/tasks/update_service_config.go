@@ -20,10 +20,10 @@ import (
 
 type UpdateServiceConfig struct {
 	ServerConfig  commConfig.ServerConfig
-	ServiceConfig config.KBSConfig
 	DefaultPort   int
-	AASApiUrl     string
+	AASBaseUrl    string
 	APSBaseUrl    string
+	CustomToken   string
 	AppConfig     **config.Configuration
 	ConsoleWriter io.Writer
 }
@@ -33,12 +33,10 @@ const envHelpPrompt = "Following environment variables are required for update-s
 var allowedKeyManagers = map[string]bool{"kmip": true}
 
 var envHelp = map[string]string{
-	"SERVICE_USERNAME":           "The service username as configured in AAS",
-	"SERVICE_PASSWORD":           "The service password as configured in AAS",
+	"AAS_BASE_URL":               "AAS Base URL",
 	"LOG_LEVEL":                  "Log level",
 	"LOG_MAX_LENGTH":             "Max length of log statement",
 	"LOG_ENABLE_STDOUT":          "Enable console log",
-	"AAS_BASE_URL":               "AAS Base URL",
 	"KMIP_SERVER_IP":             "IP of KMIP server",
 	"KMIP_SERVER_PORT":           "PORT of KMIP server",
 	"KMIP_HOSTNAME":              "HOSTNAME of KMIP server",
@@ -47,9 +45,6 @@ var envHelp = map[string]string{
 	"KMIP_CLIENT_CERT_PATH":      "KMIP Client certificate path",
 	"KMIP_CLIENT_KEY_PATH":       "KMIP Client key path",
 	"KMIP_ROOT_CERT_PATH":        "KMIP Root Certificate path",
-	"SKC_CHALLENGE_TYPE":         "SKC challenge type",
-	"SQVS_URL":                   "SQVS URL",
-	"SESSION_EXPIRY_TIME":        "Session Expiry Time",
 	"SERVER_PORT":                "The Port on which Server Listens to",
 	"SERVER_READ_TIMEOUT":        "Request Read Timeout Duration in Seconds",
 	"SERVER_READ_HEADER_TIMEOUT": "Request Read Header Timeout Duration in Seconds",
@@ -62,7 +57,7 @@ func (uc UpdateServiceConfig) Run() error {
 	log.Trace("tasks/update_config:Run() Entering")
 	defer log.Trace("tasks/update_config:Run() Leaving")
 
-	if uc.AASApiUrl == "" {
+	if uc.AASBaseUrl == "" {
 		return errors.New("KBS configuration not provided: AAS_BASE_URL is not set")
 	}
 
@@ -70,39 +65,39 @@ func (uc UpdateServiceConfig) Run() error {
 		uc.ServerConfig.Port > 65535 {
 		uc.ServerConfig.Port = uc.DefaultPort
 	}
-	(*uc.AppConfig).KBS = uc.ServiceConfig
 
 	(*uc.AppConfig).Server = uc.ServerConfig
-	(*uc.AppConfig).AASApiUrl = uc.AASApiUrl
+	(*uc.AppConfig).AASBaseUrl = uc.AASBaseUrl
 
 	if !strings.HasSuffix(uc.APSBaseUrl, "/") {
 		uc.APSBaseUrl = uc.APSBaseUrl + "/"
 	}
 	(*uc.AppConfig).APSBaseUrl = uc.APSBaseUrl
+	(*uc.AppConfig).CustomToken = uc.CustomToken
 
 	(*uc.AppConfig).Log = commConfig.LogConfig{
-		MaxLength:    viper.GetInt("log-max-length"),
-		EnableStdout: viper.GetBool("log-enable-stdout"),
-		Level:        viper.GetString("log-level"),
+		MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+		EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
+		Level:        viper.GetString(commConfig.LogLevel),
 	}
-	(*uc.AppConfig).EndpointURL = viper.GetString("endpoint-url")
+	(*uc.AppConfig).EndpointURL = viper.GetString(config.EndpointUrl)
 	(*uc.AppConfig).Kmip = config.KmipConfig{
-		Version:                   viper.GetString("kmip-version"),
-		ServerIP:                  viper.GetString("kmip-server-ip"),
-		ServerPort:                viper.GetString("kmip-server-port"),
-		Hostname:                  viper.GetString("kmip-hostname"),
-		Username:                  viper.GetString("kmip-username"),
-		Password:                  viper.GetString("kmip-password"),
-		ClientKeyFilePath:         viper.GetString("kmip-client-key-path"),
-		ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
-		RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
+		Version:                   viper.GetString(config.KmipVersion),
+		ServerIP:                  viper.GetString(config.KmipServerIP),
+		ServerPort:                viper.GetString(config.KmipServerPort),
+		Hostname:                  viper.GetString(config.KmipHostname),
+		Username:                  viper.GetString(config.KmipUsername),
+		Password:                  viper.GetString(config.KmipPassword),
+		ClientKeyFilePath:         viper.GetString(config.KmipClientKeyPath),
+		ClientCertificateFilePath: viper.GetString(config.KmipClientCertPath),
+		RootCertificateFilePath:   viper.GetString(config.KmipRootCertPath),
 	}
-	(*uc.AppConfig).KeyManager = viper.GetString("key-manager")
+	(*uc.AppConfig).KeyManager = viper.GetString(config.KeyManager)
 	return nil
 }
 
 func (uc UpdateServiceConfig) Validate() error {
-	if uc.AASApiUrl == "" {
+	if uc.AASBaseUrl == "" {
 		return errors.New("KBS configuration not provided: AAS_BASE_URL is not set")
 	}
 	if (*uc.AppConfig).Server.Port < 1024 ||

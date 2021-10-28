@@ -106,7 +106,7 @@ func (app *App) setup(args []string) error {
 // App helper function for setting up the task runner
 func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	loadAlias()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 	if app.configuration() == nil {
 		app.Config = defaultConfig()
@@ -119,23 +119,23 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
 		CaCertDirPath: constants.TrustedCaCertsDir,
 		ConsoleWriter: app.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		TlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 	})
 	runner.AddTask("download-cert-tls", "tls", &setup.DownloadCert{
-		KeyFile:      viper.GetString("tls-key-file"),
-		CertFile:     viper.GetString("tls-cert-file"),
+		KeyFile:      viper.GetString(commConfig.TlsKeyFile),
+		CertFile:     viper.GetString(commConfig.TlsCertFile),
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
-			CommonName: viper.GetString("tls-common-name"),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
 		},
-		SanList:       viper.GetString("tls-san-list"),
+		SanList:       viper.GetString(commConfig.TlsSanList),
 		CertType:      "tls",
 		CaCertDirPath: constants.TrustedCaCertsDir,
 		ConsoleWriter: app.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		BearerToken:   viper.GetString(commConfig.BearerToken),
 	})
 	runner.AddTask("create-default-key-transfer-policy", "", &tasks.CreateDefaultTransferPolicy{
 		DefaultTransferPolicyFile: constants.DefaultTransferPolicyFile,
@@ -143,39 +143,19 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	})
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: app.consoleWriter(),
-		ServiceConfig: config.KBSConfig{
-			UserName: viper.GetString("kbs-service-username"),
-			Password: viper.GetString("kbs-service-password"),
-		},
-		AASApiUrl:  viper.GetString("aas-base-url"),
-		APSBaseUrl: viper.GetString("aps-base-url"),
+		AASBaseUrl:    viper.GetString(commConfig.AasBaseUrl),
+		APSBaseUrl:    viper.GetString(config.ApsBaseUrl),
+		CustomToken:   viper.GetString(config.CustomToken),
 		ServerConfig: commConfig.ServerConfig{
-			Port:              viper.GetInt("server-port"),
-			ReadTimeout:       viper.GetDuration("server-read-timeout"),
-			ReadHeaderTimeout: viper.GetDuration("server-read-header-timeout"),
-			WriteTimeout:      viper.GetDuration("server-write-timeout"),
-			IdleTimeout:       viper.GetDuration("server-idle-timeout"),
-			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
+			Port:              viper.GetInt(commConfig.ServerPort),
+			ReadTimeout:       viper.GetDuration(commConfig.ServerReadTimeout),
+			ReadHeaderTimeout: viper.GetDuration(commConfig.ServerReadHeaderTimeout),
+			WriteTimeout:      viper.GetDuration(commConfig.ServerWriteTimeout),
+			IdleTimeout:       viper.GetDuration(commConfig.ServerIdleTimeout),
+			MaxHeaderBytes:    viper.GetInt(commConfig.ServerMaxHeaderBytes),
 		},
 		DefaultPort: constants.DefaultKBSListenerPort,
 		AppConfig:   &app.Config,
 	})
 	return runner, nil
-}
-
-func (app *App) downloadCertTask(certType string) setup.Task {
-	return &setup.DownloadCert{
-		KeyFile:      viper.GetString(certType + "-key-file"),
-		CertFile:     viper.GetString(certType + "-cert-file"),
-		KeyAlgorithm: constants.DefaultKeyAlgorithm,
-		KeyLength:    constants.DefaultKeyLength,
-		Subject: pkix.Name{
-			CommonName: viper.GetString(certType + "-common-name"),
-		},
-		CertType:      certType,
-		CaCertDirPath: constants.TrustedCaCertsDir,
-		ConsoleWriter: app.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
-	}
 }

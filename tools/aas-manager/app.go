@@ -296,6 +296,10 @@ func (a *App) GetGlobalAdminUser() *UserAndRolesCreate {
 			urc.Roles = append(urc.Roles, NewRole("APS", "Administrator", "", []string{"*:*:*"}))
 		case "FDS":
 			urc.Roles = append(urc.Roles, NewRole("FDS", "Administrator", "", []string{"*:*:*"}))
+		case "QVS":
+			urc.Roles = append(urc.Roles, NewRole("QVS", "Administrator", "", []string{"*:*:*"}))
+		case "TCS":
+			urc.Roles = append(urc.Roles, NewRole("TCS", "Administrator", "", []string{"*:*:*"}))
 		}
 	}
 	return &urc
