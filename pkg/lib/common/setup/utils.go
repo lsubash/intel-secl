@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -68,7 +69,7 @@ var indentStr = strings.Repeat(" ", indent)
 
 // PrintEnvHelp prints environment variable help message to
 // given io.Writer. With prompt and fixed indent.
-// The order is not guaranteed.
+// The ENV vars are sorted in alphabetical order.
 // Example:
 // <prompt>
 //     ENV_VAR_ONE      description of ENV_VAR_ONE
@@ -89,8 +90,14 @@ func PrintEnvHelp(w io.Writer, prompt, envPrefix string, keysAndHelp map[string]
 	}()
 	tabW.Init(w, tabWidth, tabWidth, 2, '\t', 0)
 
-	for k, d := range keysAndHelp {
-		fmt.Fprintln(tabW, indentStr+envPrefix+k+"\t"+d)
+	keys := make([]string, 0, len(keysAndHelp))
+	for k := range keysAndHelp {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		fmt.Fprintln(tabW, indentStr+envPrefix+k+"\t"+keysAndHelp[k])
 	}
 }
 
