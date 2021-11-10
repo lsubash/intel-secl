@@ -17,10 +17,12 @@ $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v4/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v4/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
-%-pre-installer: %
+config-upgrade-binary:
+	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
+
+%-pre-installer: % config-upgrade-binary
 	mkdir -p installer
 	cp -r build/linux/$*/* installer/
-	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
 	cp pkg/lib/common/upgrades/config-upgrade installer/
 	cp pkg/lib/common/upgrades/*.sh installer/
 	cp -a upgrades/manifest/ installer/

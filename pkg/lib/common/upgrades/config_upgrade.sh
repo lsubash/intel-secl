@@ -26,7 +26,7 @@ if [ -d "$ASSET_DIR" ]; then
   chmod +x ${ASSET_DIR}/*${EXT}
   cd $ASSET_DIR
   #Sort files
-  IFS=$'\r\n' GLOBIGNORE='*' command eval 'configUpgradeFiles=($(ls | sort))'
+  IFS=$'\r\n' GLOBIGNORE='*' command eval "configUpgradeFiles=($(ls *${EXT} | sort))"
   rm -rf temp_configs
   cd -
 

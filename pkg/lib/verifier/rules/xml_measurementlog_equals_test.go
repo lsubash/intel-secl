@@ -257,8 +257,8 @@ func TestXmlMeasurementLogEqualsMultipleComparisonFaults(t *testing.T) {
 	var multipleFaultMeasurements ta.Measurement
 	err = xml.Unmarshal([]byte(testMeasurementXml), &multipleFaultMeasurements)
 
-	multipleFaultMeasurements.File = multipleFaultMeasurements.File[1:] // missing
-	multipleFaultMeasurements.File[0].Value = "invalid"                 // mismatch
+	multipleFaultMeasurements.File = multipleFaultMeasurements.File[1:]                             // missing
+	multipleFaultMeasurements.File[0].Value = "invalid"                                             // mismatch
 	multipleFaultMeasurements.File = append(multipleFaultMeasurements.File, ta.FileMeasurementType{ // unexpected
 		Path:  "/root/malware",
 		Value: "79770fb02e5a8f6b51678bde4d017f23ac811b1a9f89182a8b7f9871990dbbc07fd9a0578275c405a02ac5223412095e",
