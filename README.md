@@ -5,8 +5,8 @@ Intel<sup>®</sup> Security Libraries for Data Center (Intel<sup>®</sup> SecL-D
 Hardware-based cloud security solutions provide a higher level of protection as compared to software-only security
 measures. There are many Intel platform security technologies, which can be used to secure customers' data. Customers
 have found adopting and deploying these technologies at a broad scale challenging, due to the lack of solution
-integration and deployment tools. Intel<sup>®</sup> Security Libraries for Data Centers (Intel<sup>®</sup> SecL - DC) was built to aid our
-customers in adopting and deploying Intel Security features, rooted in silicon, at scale.
+integration and deployment tools. Intel<sup>®</sup> Security Libraries for Data Centers (Intel<sup>®</sup> SecL - DC) 
+was built to aid our customers in adopting and deploying Intel Security features, rooted in silicon, at scale.
 
 Intel<sup>®</sup> SecL-DC is an open-source remote attestation implementation comprising a set of building blocks that utilize
 Intel Security features to discover, attest, and enable critical foundation security and confidential computing
