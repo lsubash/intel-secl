@@ -123,14 +123,14 @@ func (r *FlavorGroup) UnmarshalJSON(b []byte) error {
 // over and over again trying to look for information. Everything is gathered in one fell swoop
 func (r *FlavorGroup) GetMatchPolicyMaps() (
 
-// Map to determine what is the match policy for each individual flavor part
-// eg : map["SOFTWARE"] = MatchPolicy{MatchType: "ANY_OF", Required: "Required_if_defined"}
+	// Map to determine what is the match policy for each individual flavor part
+	// eg : map["SOFTWARE"] = MatchPolicy{MatchType: "ANY_OF", Required: "Required_if_defined"}
 	map[FlavorPartName]MatchPolicy,
-// A map for match type to all the flavor part that has the particular match type
-// eg : map["AL_OF"] = []{"SOFTWARE", "PLATFORM"}
+	// A map for match type to all the flavor part that has the particular match type
+	// eg : map["AL_OF"] = []{"SOFTWARE", "PLATFORM"}
 	map[MatchType][]FlavorPartName,
-// A map for required/ required if defined policy to all the flavor part
-// eg : map["Required_if_defined"] = {Software}
+	// A map for required/ required if defined policy to all the flavor part
+	// eg : map["Required_if_defined"] = {Software}
 	map[FlavorRequiredPolicy][]FlavorPartName) {
 
 	fpMap := make(map[FlavorPartName]MatchPolicy)

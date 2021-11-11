@@ -6,8 +6,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
-	"net/http"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v4/pkg/kbs/domain"
@@ -15,7 +13,9 @@ import (
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/constants"
 	commErr "github.com/intel-secl/intel-secl/v4/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/validation"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/kbs"
+	"net/http"
 )
 
 type KeyTransferPolicyController struct {
