@@ -6,6 +6,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
@@ -16,14 +17,14 @@ import (
 )
 
 //setKeyTransferRoutes registers routes to perform Key transfer operation
-func setKeyTransferRoutes(router *mux.Router, endpointUrl string, config domain.KeyControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient) *mux.Router {
+func setKeyTransferRoutes(router *mux.Router, endpointUrl string, config domain.KeyTransferControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient, aasClient *aas.Client) *mux.Router {
 	defaultLog.Trace("router/key_transfer:setKeyTransferRoutes() Entering")
 	defer defaultLog.Trace("router/key_transfer:setKeyTransferRoutes() Leaving")
 
 	keyStore := directory.NewKeyStore(constants.KeysDir)
 	policyStore := directory.NewKeyTransferPolicyStore(constants.KeysTransferPolicyDir)
 	remoteManager := keymanager.NewRemoteManager(keyStore, keyManager, endpointUrl)
-	keyTransferController := controllers.NewKeyTransferController(remoteManager, policyStore, config, apsClient)
+	keyTransferController := controllers.NewKeyTransferController(remoteManager, policyStore, config, apsClient, aasClient)
 	keyIdExpr := "/keys/" + validation.IdReg
 
 	router.Handle(keyIdExpr+"/transfer",

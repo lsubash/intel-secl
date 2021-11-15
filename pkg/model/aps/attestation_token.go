@@ -29,7 +29,7 @@ type AttestationTokenClaim struct {
 	RTMR1           string          `json:"rtmr1,omitempty"`
 	RTMR2           string          `json:"rtmr2,omitempty"`
 	RTMR3           string          `json:"rtmr3,omitempty"`
-	SeamSvn         uint8           `json:"seamsvn, omitempty"`
+	SeamSvn         uint8           `json:"seamsvn,omitempty"`
 	IsvSvn          uint16          `json:"isvsvn,omitempty"`
 	EnclaveHeldData string          `json:"enclave_held_data,omitempty"`
 	PolicyIds       []uuid.UUID     `json:"policy_ids"`

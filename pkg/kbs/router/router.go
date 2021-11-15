@@ -5,14 +5,11 @@
 package router
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"io/ioutil"
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
@@ -21,7 +18,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	cmw "github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
-	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/pkg/errors"
 )
 
@@ -29,11 +25,11 @@ var defaultLog = log.GetDefaultLogger()
 var secLog = log.GetSecurityLogger()
 
 type Router struct {
-	cfg *config.Configuration
+	aasClient *aas.Client
 }
 
 // InitRoutes registers all routes for the application.
-func InitRoutes(cfg *config.Configuration, keyConfig domain.KeyControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient) *mux.Router {
+func InitRoutes(cfg *config.Configuration, keyTransferConfig domain.KeyTransferControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient, aasClient *aas.Client) *mux.Router {
 	defaultLog.Trace("router/router:InitRoutes() Entering")
 	defer defaultLog.Trace("router/router:InitRoutes() Leaving")
 
@@ -44,29 +40,26 @@ func InitRoutes(cfg *config.Configuration, keyConfig domain.KeyControllerConfig,
 	router.SkipClean(true)
 
 	// Define sub routes for path /kbs/v1
-	defineSubRoutes(router, "/"+strings.ToLower(constants.ServiceName)+constants.ApiVersion, cfg, keyConfig, keyManager, apsClient)
-
-	// Define sub routes for path /v1
-	defineSubRoutes(router, constants.ApiVersion, cfg, keyConfig, keyManager, apsClient)
+	defineSubRoutes(router, "/"+strings.ToLower(constants.ServiceName)+constants.ApiVersion, cfg, keyTransferConfig, keyManager, apsClient, aasClient)
 
 	return router
 }
 
-func defineSubRoutes(router *mux.Router, serviceApi string, cfg *config.Configuration, keyConfig domain.KeyControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient) {
+func defineSubRoutes(router *mux.Router, serviceApi string, cfg *config.Configuration, keyTransferConfig domain.KeyTransferControllerConfig, keyManager keymanager.KeyManager, apsClient aps.APSClient, aasClient *aas.Client) {
 	defaultLog.Trace("router/router:defineSubRoutes() Entering")
 	defer defaultLog.Trace("router/router:defineSubRoutes() Leaving")
 
 	subRouter := router.PathPrefix(serviceApi).Subrouter()
 	subRouter = setVersionRoutes(subRouter)
-	subRouter = setKeyTransferRoutes(subRouter, cfg.EndpointURL, keyConfig, keyManager, apsClient)
+	subRouter = setKeyTransferRoutes(subRouter, cfg.EndpointURL, keyTransferConfig, keyManager, apsClient, aasClient)
 	subRouter = router.PathPrefix(serviceApi).Subrouter()
-	cfgRouter := Router{cfg: cfg}
+	cfgRouter := Router{aasClient: aasClient}
 	var cacheTime, _ = time.ParseDuration(constants.JWTCertsCacheTime)
 
 	subRouter.Use(cmw.NewTokenAuth(constants.TrustedJWTSigningCertsDir,
 		constants.TrustedCaCertsDir, cfgRouter.fnGetJwtCerts,
 		cacheTime))
-	subRouter = setKeyRoutes(subRouter, cfg.EndpointURL, keyConfig, keyManager)
+	subRouter = setKeyRoutes(subRouter, cfg.EndpointURL, keyTransferConfig.DefaultTransferPolicyId, keyManager)
 	subRouter = setKeyTransferPolicyRoutes(subRouter)
 	subRouter = setSamlCertRoutes(subRouter)
 	subRouter = setTpmIdentityCertRoutes(subRouter)
@@ -77,51 +70,12 @@ func (router *Router) fnGetJwtCerts() error {
 	defaultLog.Trace("router/router:fnGetJwtCerts() Entering")
 	defer defaultLog.Trace("router/router:fnGetJwtCerts() Leaving")
 
-	cfg := router.cfg
-	if !strings.HasSuffix(cfg.AASBaseUrl, "/") {
-		cfg.AASBaseUrl = cfg.AASBaseUrl + "/"
-	}
-	url := cfg.AASBaseUrl + "jwt-certificates"
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	jwtCert, err := router.aasClient.GetJwtSigningCertificate()
 	if err != nil {
-		return errors.Wrap(err, "router/router:fnGetJwtCerts() Unable to create http request")
-	}
-	req.Header.Add("accept", "application/x-pem-file")
-	rootCaCertPems, err := cos.GetDirFileContents(constants.TrustedCaCertsDir, "*.pem")
-	if err != nil {
-		return errors.Wrap(err, "router/router:fnGetJwtCerts() Unable to read root CA certificate")
+		return errors.Wrap(err, "router/router:fnGetJwtCerts() Error retrieving JWT signing certificate from AAS")
 	}
 
-	// Get the SystemCertPool to continue with an empty pool on error
-	rootCAs, err := x509.SystemCertPool()
-	if rootCAs == nil || err != nil {
-		rootCAs = x509.NewCertPool()
-	}
-	for _, rootCACert := range rootCaCertPems {
-		if ok := rootCAs.AppendCertsFromPEM(rootCACert); !ok {
-			return err
-		}
-	}
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS13,
-				InsecureSkipVerify: false,
-				RootCAs:            rootCAs,
-			},
-		},
-	}
-
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "router/router:fnGetJwtCerts() Could not retrieve jwt certificate")
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return errors.Wrap(err, "router/router:fnGetJwtCerts() Read body filed failed")
-	}
-	err = crypt.SavePemCertWithShortSha1FileName(body, constants.TrustedJWTSigningCertsDir)
+	err = crypt.SavePemCertWithShortSha1FileName(jwtCert, constants.TrustedJWTSigningCertsDir)
 	if err != nil {
 		return errors.Wrap(err, "router/router:fnGetJwtCerts() Could not store Certificate")
 	}

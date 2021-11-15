@@ -8,7 +8,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	stdlog "log"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,6 +17,8 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
@@ -45,8 +47,8 @@ func (app *App) startServer() error {
 		return err
 	}
 
-	// Initialize KeyControllerConfig
-	kcc, err := initKeyControllerConfig()
+	// Initialize KeyTransferControllerConfig
+	kcc, err := initKeyTransferControllerConfig()
 	if err != nil {
 		return err
 	}
@@ -71,10 +73,23 @@ func (app *App) startServer() error {
 	}
 
 	//Initialize the APS client
-	ac := aps.NewAPSClient(apsBaseUrl, caCerts, configuration.CustomToken)
+	apsClient := aps.NewAPSClient(apsBaseUrl, caCerts, configuration.CustomToken)
+
+	client, err := clients.HTTPClientWithCA(caCerts)
+	if err != nil {
+		defaultLog.WithError(err).Error("kbs/server:startServer() Error while creating http client")
+		return err
+	}
+
+	//Initialize the AAS client
+	aasClient := &aas.Client{
+		BaseURL:    configuration.AASBaseUrl,
+		JWTToken:   []byte(configuration.CustomToken),
+		HTTPClient: client,
+	}
 
 	// Initialize routes
-	routes := router.InitRoutes(configuration, kcc, km, ac)
+	routes := router.InitRoutes(configuration, kcc, km, apsClient, aasClient)
 
 	defaultLog.Info("kbs/server:startServer() Starting server")
 	tlsConfig := &tls.Config{
@@ -88,7 +103,7 @@ func (app *App) startServer() error {
 	// Setup signal handlers to gracefully handle termination
 	stop := make(chan os.Signal)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	httpLog := stdlog.New(app.httpLogWriter(), "", 0)
+	httpLog := log.New(app.httpLogWriter(), "", 0)
 	httpServer := &http.Server{
 		Addr:              fmt.Sprintf(":%d", configuration.Server.Port),
 		Handler:           handlers.RecoveryHandler(handlers.RecoveryLogger(httpLog), handlers.PrintRecoveryStack(true))(handlers.CombinedLoggingHandler(app.httpLogWriter(), routes)),
@@ -127,16 +142,17 @@ func (app *App) startServer() error {
 	return nil
 }
 
-func initKeyControllerConfig() (domain.KeyControllerConfig, error) {
-	defaultLog.Trace("server:initKeyControllerConfig() Entering")
-	defer defaultLog.Trace("server:initKeyControllerConfig() Leaving")
+func initKeyTransferControllerConfig() (domain.KeyTransferControllerConfig, error) {
+	defaultLog.Trace("kbs/server:initKeyTransferControllerConfig() Entering")
+	defer defaultLog.Trace("kbs/server:initKeyTransferControllerConfig() Leaving")
 
 	id, err := utils.GetDefaultKeyTransferPolicyId()
 	if err != nil {
-		return domain.KeyControllerConfig{}, err
+		return domain.KeyTransferControllerConfig{}, err
 	}
 
-	kcc := domain.KeyControllerConfig{
+	kcc := domain.KeyTransferControllerConfig{
+		AasJwtSigningCertsDir:   constants.TrustedJWTSigningCertsDir,
 		ApsJwtSigningCertsDir:   constants.ApsJWTSigningCertsDir,
 		SamlCertsDir:            constants.SamlCertsDir,
 		TrustedCaCertsDir:       constants.TrustedCaCertsDir,

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	aasTypes "github.com/intel-secl/intel-secl/v5/pkg/authservice/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	types "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"io/ioutil"
 	"net/http"
@@ -425,4 +426,27 @@ func (c *Client) GetCustomClaimsToken(customClaimsTokenReq types.CustomClaims) (
 		return nil, errors.Wrap(err, "aas/client:GetCustomClaimsToken() Error reading response")
 	}
 	return creds, nil
+}
+
+func (c *Client) GetJwtSigningCertificate() ([]byte, error) {
+	jwtUrl := clients.ResolvePath(c.BaseURL, "jwt-certificates")
+	req, err := http.NewRequest("GET", jwtUrl, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "aas/client:GetJwtSigningCertificate() Error initializing get jwt signing certificate request")
+	}
+
+	// Set the request header
+	req.Header.Set("Accept", constants.HTTPMediaTypePemFile)
+	res, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "aas/client:GetJwtSigningCertificate() Could not retrieve jwt certificate")
+	}
+	defer func() {
+		_ = res.Body.Close()
+	}()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "aas/client:GetJwtSigningCertificate() Failed to read response body")
+	}
+	return body, nil
 }

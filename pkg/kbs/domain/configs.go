@@ -6,7 +6,10 @@ package domain
 
 import "github.com/google/uuid"
 
-type KeyControllerConfig struct {
+type KeyTransferControllerConfig struct {
+	AasBaseUrl              string
+	CustomToken             string
+	AasJwtSigningCertsDir   string
 	ApsJwtSigningCertsDir   string
 	SamlCertsDir            string
 	TrustedCaCertsDir       string

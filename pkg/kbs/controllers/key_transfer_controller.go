@@ -25,7 +25,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	apsc "github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
+	aasClient "github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
+	apsClient "github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
@@ -38,6 +39,7 @@ import (
 	cmw "github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/slice"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
 	"github.com/pkg/errors"
@@ -46,8 +48,9 @@ import (
 type KeyTransferController struct {
 	remoteManager *keymanager.RemoteManager
 	policyStore   domain.KeyTransferPolicyStore
-	keyConfig     domain.KeyControllerConfig
-	client        apsc.APSClient
+	keyConfig     domain.KeyTransferControllerConfig
+	apsClient     apsClient.APSClient
+	aasClient     *aasClient.Client
 }
 
 var jwtVerifier jwtauth.Verifier
@@ -60,12 +63,13 @@ const (
 	wrapSize = 4
 )
 
-func NewKeyTransferController(rm *keymanager.RemoteManager, ps domain.KeyTransferPolicyStore, kc domain.KeyControllerConfig, ac apsc.APSClient) *KeyTransferController {
+func NewKeyTransferController(rm *keymanager.RemoteManager, ps domain.KeyTransferPolicyStore, kc domain.KeyTransferControllerConfig, apsc apsClient.APSClient, aasc *aasClient.Client) *KeyTransferController {
 	return &KeyTransferController{
 		remoteManager: rm,
 		policyStore:   ps,
 		keyConfig:     kc,
-		client:        ac,
+		apsClient:     apsc,
+		aasClient:     aasc,
 	}
 }
 
@@ -146,11 +150,32 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve key transfer policy"}
 	}
 
-	var keyTransferRequest kbs.KeyTransferRequest
 	var cacheTime, _ = time.ParseDuration(consts.JWTCertsCacheTime)
+	if transferPolicy.AttestationType[0] == aps.SGX {
+
+		splitAuthHeader := strings.Split(request.Header.Get("Authorization"), "Bearer ")
+		if len(splitAuthHeader) <= 1 {
+			secLog.Errorf("%s: no bearer token provided for authorization, requested from %s: ", commLogMsg.AuthenticationFailed, request.RemoteAddr)
+			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "no bearer token provided for authorization"}
+		}
+
+		claims, err := kc.authenticateToken(splitAuthHeader[1], cacheTime, false)
+		if err != nil {
+			secLog.WithError(err).Errorf("controllers/key_transfer_controller:Transfer() %s :  Failed to authenticate token", commLogMsg.AuthenticationFailed)
+			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Failed to authenticate token"}
+		}
+
+		tokenClaims := claims.(*aas.AuthClaims)
+		if tokenClaims.Permissions[0].Service != consts.ServiceName || !slice.Contains(transferPolicy.SGX.Attributes.ClientPermissions, tokenClaims.Permissions[0].Context) {
+			secLog.Errorf("controllers/key_transfer_controller:Transfer() %s :  Failed to match client permissions in token against key transfer policy", commLogMsg.AuthenticationFailed)
+			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Failed to match client permissions in token against key transfer policy"}
+		}
+	}
+
+	var keyTransferRequest kbs.KeyTransferRequest
 	if request.Header.Get("Nonce") == "" {
 		if request.ContentLength == 0 {
-			nonce, httpStatus, err := kc.client.GetNonce()
+			nonce, httpStatus, err := kc.apsClient.GetNonce()
 			if err != nil {
 				defaultLog.WithError(err).Error("controllers/key_transfer_controller:Transfer() Error retrieving nonce from APS")
 				return nil, httpStatus, &commErr.ResourceError{Message: "Error retrieving nonce from APS"}
@@ -172,11 +197,13 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 				return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Failed to decode JSON request body"}
 			}
 
-			tokenClaims, err := kc.authenticateAttestationToken(keyTransferRequest.AttestationToken, cacheTime)
+			claims, err := kc.authenticateToken(keyTransferRequest.AttestationToken, cacheTime, true)
 			if err != nil {
 				secLog.WithError(err).Errorf("controllers/key_transfer_controller:Transfer() %s :  Failed to authenticate attestation-token", commLogMsg.AuthenticationFailed)
 				return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Failed to authenticate attestation-token"}
 			}
+
+			tokenClaims := claims.(*aps.AttestationTokenClaim)
 
 			if tokenClaims.Tee != transferPolicy.AttestationType[0] {
 				secLog.Errorf("controllers/key_transfer_controller:Transfer() attestation-token is not valid for attestation-type in key-transfer policy")
@@ -231,18 +258,18 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 			EventLog:  keyTransferRequest.EventLog,
 		}
 
-		token, httpStatus, err := kc.client.GetAttestationToken(request.Header.Get("Nonce"), &tokenRequest)
+		token, httpStatus, err := kc.apsClient.GetAttestationToken(request.Header.Get("Nonce"), &tokenRequest)
 		if err != nil {
 			defaultLog.WithError(err).Error("controllers/key_transfer_controller:Transfer() Error retrieving token from APS")
 			return nil, httpStatus, &commErr.ResourceError{Message: "Error retrieving token from APS"}
 		}
 
-		tokenClaims, err := kc.authenticateAttestationToken(string(token), cacheTime)
+		claims, err := kc.authenticateToken(string(token), cacheTime, true)
 		if err != nil {
 			secLog.WithError(err).Errorf("controllers/key_transfer_controller:Transfer() %s :  Failed to authenticate attestation-token", commLogMsg.AuthenticationFailed)
 			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Failed to authenticate attestation-token"}
 		}
-
+		tokenClaims := claims.(*aps.AttestationTokenClaim)
 		transferResponse, httpStatus, err := kc.validateClaimsAndGetKey(tokenClaims, transferPolicy, key.KeyInformation.Algorithm, keyTransferRequest.UserData, keyId)
 		if err != nil {
 			return nil, httpStatus, err
@@ -252,11 +279,19 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 	}
 }
 
-func (kc *KeyTransferController) authenticateAttestationToken(attestationToken string, cacheTime time.Duration) (*aps.AttestationTokenClaim, error) {
-	defaultLog.Trace("controllers/key_transfer_controller:authenticateAttestationToken() Entering")
-	defer defaultLog.Trace("controllers/key_transfer_controller:authenticateAttestationToken() Leaving")
+func (kc *KeyTransferController) authenticateToken(token string, cacheTime time.Duration, attestationToken bool) (interface{}, error) {
+	defaultLog.Trace("controllers/key_transfer_controller:authenticateToken() Entering")
+	defer defaultLog.Trace("controllers/key_transfer_controller:authenticateToken() Leaving")
 
-	claims := aps.AttestationTokenClaim{}
+	var claims interface{}
+	var jwtSigningCertsDir string
+	if attestationToken {
+		claims = &aps.AttestationTokenClaim{}
+		jwtSigningCertsDir = kc.keyConfig.ApsJwtSigningCertsDir
+	} else {
+		claims = &aas.AuthClaims{}
+		jwtSigningCertsDir = kc.keyConfig.AasJwtSigningCertsDir
+	}
 	var err error
 	var initErr error
 
@@ -269,19 +304,19 @@ func (kc *KeyTransferController) authenticateAttestationToken(attestationToken s
 	//        a new certificate. initJwtVerifier takes care of this scenario.
 	for needInit, retryNeeded, looped := jwtVerifier == nil, false, false; retryNeeded || !looped; looped = true {
 		if needInit || retryNeeded {
-			if jwtVerifier, initErr = cmw.InitJwtVerifier(kc.keyConfig.ApsJwtSigningCertsDir, kc.keyConfig.TrustedCaCertsDir, cacheTime); initErr != nil {
-				return nil, errors.Wrap(initErr, "controllers/key_transfer_controller:authenticateAttestationToken() attempt to initialize jwt verifier failed")
+			if jwtVerifier, initErr = cmw.InitJwtVerifier(jwtSigningCertsDir, kc.keyConfig.TrustedCaCertsDir, cacheTime); initErr != nil {
+				return nil, errors.Wrap(initErr, "controllers/key_transfer_controller:authenticateToken() attempt to initialize jwt verifier failed")
 			}
 			needInit = false
 		}
 		retryNeeded = false
-		_, err = jwtVerifier.ValidateTokenAndGetClaims(strings.TrimSpace(attestationToken), &claims)
+		_, err = jwtVerifier.ValidateTokenAndGetClaims(strings.TrimSpace(token), &claims)
 		if err != nil && !looped {
 			switch err.(type) {
 			case *jwtauth.MatchingCertNotFoundError, *jwtauth.MatchingCertJustExpired:
-				err = kc.fnGetApsJwtSigningCerts()
+				err = kc.fnGetJwtSigningCerts(attestationToken, jwtSigningCertsDir)
 				if err != nil {
-					defaultLog.WithError(err).Error("controllers/key_transfer_controller:authenticateAttestationToken() failed to get APS jwt signing certificate")
+					defaultLog.WithError(err).Error("controllers/key_transfer_controller:authenticateToken() failed to get APS jwt signing certificate")
 				}
 				retryNeeded = true
 			case *jwtauth.VerifierExpiredError:
@@ -292,25 +327,31 @@ func (kc *KeyTransferController) authenticateAttestationToken(attestationToken s
 
 	if err != nil {
 		// this is an attestation-token validation failure
-		secLog.Warningf("controllers/key_transfer_controller:authenticateAttestationToken() %s: Invalid attestation token", commLogMsg.AuthenticationFailed)
-		return nil, errors.Wrap(err, "controllers/key_transfer_controller:authenticateAttestationToken() token validation failure")
+		secLog.Warningf("controllers/key_transfer_controller:authenticateToken() %s: Invalid attestation token", commLogMsg.AuthenticationFailed)
+		return nil, errors.Wrap(err, "controllers/key_transfer_controller:authenticateToken() token validation failure")
 	}
 
-	return &claims, nil
+	return claims, nil
 }
 
-// Fetch JWT Signing certificate from APS
-func (kc *KeyTransferController) fnGetApsJwtSigningCerts() error {
-	defaultLog.Trace("controllers/key_transfer_controller:fnGetApsJwtSigningCerts() Entering")
-	defer defaultLog.Trace("controllers/key_transfer_controller:fnGetApsJwtSigningCerts() Leaving")
+// Fetch JWT Signing certificate from APS/AAS
+func (kc *KeyTransferController) fnGetJwtSigningCerts(attestationToken bool, jwtSigningCertsDir string) error {
+	defaultLog.Trace("controllers/key_transfer_controller:fnGetJwtSigningCerts() Entering")
+	defer defaultLog.Trace("controllers/key_transfer_controller:fnGetJwtSigningCerts() Leaving")
 
-	apsJwtCert, err := kc.client.GetJwtSigningCertificate()
-	if err != nil {
-		return errors.Wrap(err, "controllers/key_transfer_controller:fnGetApsJwtSigningCerts() Error retrieving JWT signing certificate from APS")
+	var jwtCert []byte
+	var err error
+	if attestationToken {
+		jwtCert, err = kc.apsClient.GetJwtSigningCertificate()
+	} else {
+		jwtCert, err = kc.aasClient.GetJwtSigningCertificate()
 	}
-	err = crypt.SavePemCertWithShortSha1FileName(apsJwtCert, kc.keyConfig.ApsJwtSigningCertsDir)
 	if err != nil {
-		return errors.Wrap(err, "controllers/key_transfer_controller:fnGetApsJwtSigningCerts() Could not store JWT signing Certificate")
+		return errors.Wrap(err, "controllers/key_transfer_controller:fnGetJwtSigningCerts() Error retrieving JWT signing certificate from APS")
+	}
+	err = crypt.SavePemCertWithShortSha1FileName(jwtCert, jwtSigningCertsDir)
+	if err != nil {
+		return errors.Wrap(err, "controllers/key_transfer_controller:fnGetJwtSigningCerts() Could not store JWT signing Certificate")
 	}
 	return nil
 }
@@ -411,11 +452,6 @@ func validateMrSigner(tokenMrSigner string, policyMrSigner []string) bool {
 func validateIsvProdId(tokenIsvProdId uint16, policyIsvProdIds []uint16) bool {
 	defaultLog.Trace("controllers/key_transfer_controller:validateIsvProdId() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateIsvProdId() Leaving")
-
-	if tokenIsvProdId == 0 {
-		defaultLog.Error("controllers/key_transfer_controller:validateIsvProdId() Isv Product Id is missing from attestation token")
-		return false
-	}
 
 	if slice.Contains(policyIsvProdIds, tokenIsvProdId) {
 		defaultLog.Debug("controllers/key_transfer_controller:validateIsvProdId() Isv Product Id in attestation token matches with the key transfer policy")
@@ -562,7 +598,7 @@ func validateRTMR(tokenRTMR string, policyRTMR string) bool {
 	defaultLog.Trace("controllers/key_transfer_controller:validateRTMR() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateRTMR() Leaving")
 
-	if tokenRTMR == "" && policyRTMR == "" {
+	if policyRTMR == "" {
 		return true
 	}
 

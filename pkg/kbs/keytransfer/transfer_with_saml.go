@@ -29,7 +29,7 @@ var (
 )
 
 //IsTrustedByHvs verifies if the client can be trusted for transfer
-func IsTrustedByHvs(saml string, samlReport *samlLib.Saml, keyId uuid.UUID, config domain.KeyControllerConfig, remoteManager *keymanager.RemoteManager) (bool, *x509.Certificate) {
+func IsTrustedByHvs(saml string, samlReport *samlLib.Saml, keyId uuid.UUID, config domain.KeyTransferControllerConfig, remoteManager *keymanager.RemoteManager) (bool, *x509.Certificate) {
 	defaultLog.Trace("keytransfer/transfer_with_saml:IsTrustedByHvs() Entering")
 	defer defaultLog.Trace("keytransfer/transfer_with_saml:IsTrustedByHvs() Leaving")
 

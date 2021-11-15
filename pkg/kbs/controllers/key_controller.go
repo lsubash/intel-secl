@@ -37,16 +37,16 @@ import (
 )
 
 type KeyController struct {
-	remoteManager *keymanager.RemoteManager
-	policyStore   domain.KeyTransferPolicyStore
-	config        domain.KeyControllerConfig
+	remoteManager           *keymanager.RemoteManager
+	policyStore             domain.KeyTransferPolicyStore
+	defaultTransferPolicyId uuid.UUID
 }
 
-func NewKeyController(rm *keymanager.RemoteManager, ps domain.KeyTransferPolicyStore, kc domain.KeyControllerConfig) *KeyController {
+func NewKeyController(rm *keymanager.RemoteManager, ps domain.KeyTransferPolicyStore, dpi uuid.UUID) *KeyController {
 	return &KeyController{
-		remoteManager: rm,
-		policyStore:   ps,
-		config:        kc,
+		remoteManager:           rm,
+		policyStore:             ps,
+		defaultTransferPolicyId: dpi,
 	}
 }
 
@@ -88,7 +88,7 @@ func (kc *KeyController) Create(responseWriter http.ResponseWriter, request *htt
 
 	if requestKey.TransferPolicyID == uuid.Nil {
 		defaultLog.Debug("controllers/key_controller:Create() TransferPolicy ID is not provided : Proceeding with DefaultTransferPolicy")
-		requestKey.TransferPolicyID = kc.config.DefaultTransferPolicyId
+		requestKey.TransferPolicyID = kc.defaultTransferPolicyId
 	} else {
 		transferPolicy, err := kc.policyStore.Retrieve(requestKey.TransferPolicyID)
 		if err != nil {

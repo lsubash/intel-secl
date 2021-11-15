@@ -5,25 +5,25 @@
 package router
 
 import (
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/directory"
-	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	"net/http"
 )
 
 //setKeyRoutes registers routes to perform Key CRUD operations
-func setKeyRoutes(router *mux.Router, endpointUrl string, config domain.KeyControllerConfig, keyManager keymanager.KeyManager) *mux.Router {
+func setKeyRoutes(router *mux.Router, endpointUrl string, defaultPolicyId uuid.UUID, keyManager keymanager.KeyManager) *mux.Router {
 	defaultLog.Trace("router/keys:setKeyRoutes() Entering")
 	defer defaultLog.Trace("router/keys:setKeyRoutes() Leaving")
 
 	keyStore := directory.NewKeyStore(constants.KeysDir)
 	policyStore := directory.NewKeyTransferPolicyStore(constants.KeysTransferPolicyDir)
 	remoteManager := keymanager.NewRemoteManager(keyStore, keyManager, endpointUrl)
-	keyController := controllers.NewKeyController(remoteManager, policyStore, config)
+	keyController := controllers.NewKeyController(remoteManager, policyStore, defaultPolicyId)
 	keyIdExpr := "/keys/" + validation.IdReg
 
 	router.Handle("/keys",

@@ -88,7 +88,7 @@ cp $COMPONENT_NAME $BIN_PATH/ && chown $SERVICE_USERNAME:$SERVICE_USERNAME $BIN_
 chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
-# make log files world readable
+# make log files group readable
 chmod 740 $LOG_PATH
 
 # Install systemd script

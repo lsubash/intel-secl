@@ -18,7 +18,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
-	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/kmipclient"
@@ -48,7 +47,6 @@ var _ = Describe("KeyController", func() {
 	var policyStore *mocks.MockKeyTransferPolicyStore
 	var remoteManager *keymanager.RemoteManager
 	var keyController *controllers.KeyController
-	var keyControllerConfig domain.KeyControllerConfig
 
 	keyPair, _ := rsa.GenerateKey(rand.Reader, 2048)
 	publicKey := &keyPair.PublicKey
@@ -68,19 +66,13 @@ var _ = Describe("KeyController", func() {
 	keyManager := keymanager.NewKmipManager(mockClient)
 
 	newId, _ := uuid.NewRandom()
-	keyControllerConfig = domain.KeyControllerConfig{
-		SamlCertsDir:            samlCertsDir,
-		TrustedCaCertsDir:       trustedCaCertsDir,
-		TpmIdentityCertsDir:     tpmIdentityCertsDir,
-		DefaultTransferPolicyId: newId,
-	}
 
 	BeforeEach(func() {
 		router = mux.NewRouter()
 		keyStore = mocks.NewFakeKeyStore()
 		policyStore = mocks.NewFakeKeyTransferPolicyStore()
 		remoteManager = keymanager.NewRemoteManager(keyStore, keyManager, endpointUrl)
-		keyController = controllers.NewKeyController(remoteManager, policyStore, keyControllerConfig)
+		keyController = controllers.NewKeyController(remoteManager, policyStore, newId)
 	})
 
 	// Specs for HTTP Post to "/keys"
