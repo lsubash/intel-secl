@@ -9,8 +9,8 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
@@ -419,9 +419,9 @@ func validateSGXTokenClaims(tokenClaims *aps.AttestationTokenClaim, sgxAttribute
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateSGXTokenClaims() Leaving")
 
 	if validateMrSigner(tokenClaims.MrSigner, sgxAttributes.MrSigner) &&
-		validateIsvProdId(tokenClaims.IsvProductId, sgxAttributes.IsvProductId) &&
+		validateIsvProdId(*tokenClaims.IsvProductId, sgxAttributes.IsvProductId) &&
 		validateMrEnclave(tokenClaims.MrEnclave, sgxAttributes.MrEnclave) &&
-		validateIsvSvn(tokenClaims.IsvSvn, *sgxAttributes.IsvSvn) &&
+		validateIsvSvn(*tokenClaims.IsvSvn, *sgxAttributes.IsvSvn) &&
 		validateTcbStatus(tokenClaims.TcbStatus, *sgxAttributes.EnforceTCBUptoDate) {
 		defaultLog.Debug("controllers/key_transfer_controller:validateSGXTokenClaims() All sgx attributes in attestation token matches with attributes in key transfer policy")
 		return nil
@@ -467,7 +467,7 @@ func validateMrEnclave(tokenMrEnclave string, policyMrEnclave []string) bool {
 	defaultLog.Trace("controllers/key_transfer_controller:validateMrEnclave() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateMrEnclave() Leaving")
 
-	if tokenMrEnclave == "" && len(policyMrEnclave) == 0 {
+	if len(policyMrEnclave) == 0 {
 		return true
 	}
 
@@ -511,7 +511,7 @@ func validateTDXTokenClaims(tokenClaims *aps.AttestationTokenClaim, tdxAttribute
 
 	if validateMrSignerSeam(tokenClaims.MrSignerSeam, tdxAttributes.MrSignerSeam) &&
 		validateMrSeam(tokenClaims.MrSeam, tdxAttributes.MrSeam) &&
-		validateSeamSvn(tokenClaims.SeamSvn, *tdxAttributes.SeamSvn) &&
+		validateSeamSvn(*tokenClaims.SeamSvn, *tdxAttributes.SeamSvn) &&
 		validateMrTD(tokenClaims.MRTD, tdxAttributes.MRTD) &&
 		validateRTMR(tokenClaims.RTMR0, tdxAttributes.RTMR0) &&
 		validateRTMR(tokenClaims.RTMR1, tdxAttributes.RTMR1) &&
@@ -580,7 +580,7 @@ func validateMrTD(tokenMrTD string, policyMrTD []string) bool {
 	defaultLog.Trace("controllers/key_transfer_controller:validateMrTD() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateMrTD() Leaving")
 
-	if tokenMrTD == "" && len(policyMrTD) == 0 {
+	if len(policyMrTD) == 0 {
 		return true
 	}
 
@@ -665,7 +665,7 @@ func (kc *KeyTransferController) getWrappedKey(keyAlgorithm, userData string, id
 		wrappedKey = append(wrappedKey, bytes...)
 
 		// Wrap SWK with public key
-		wrappedSWK, status, err := wrapKey(publicKey, swk, sha512.New384(), nil)
+		wrappedSWK, status, err := wrapKey(publicKey, swk, sha1.New(), nil)
 		if err != nil {
 			return nil, status, err
 		}
@@ -677,7 +677,7 @@ func (kc *KeyTransferController) getWrappedKey(keyAlgorithm, userData string, id
 	}
 
 	// Wrap secret key with public key
-	wrappedKey, status, err := wrapKey(publicKey, secretKey.([]byte), sha512.New384(), nil)
+	wrappedKey, status, err := wrapKey(publicKey, secretKey.([]byte), sha1.New(), nil)
 	if err != nil {
 		return nil, status, err
 	}
