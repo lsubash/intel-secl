@@ -33,6 +33,7 @@ func HTTPClientTLSNoVerify() *http.Client {
 			TLSClientConfig: &tls.Config{
 				MinVersion:         tls.VersionTLS13,
 				InsecureSkipVerify: true},
+			Proxy: http.ProxyFromEnvironment,
 		},
 	}
 }
@@ -43,7 +44,7 @@ func HTTPClientWithCA(caCertificates []x509.Certificate) (*http.Client, error) {
 		InsecureSkipVerify: false,
 		RootCAs:            GetCertPool(caCertificates),
 	}
-	tr := &http.Transport{TLSClientConfig: config}
+	tr := &http.Transport{TLSClientConfig: config, Proxy: http.ProxyFromEnvironment}
 	return &http.Client{Transport: tr}, nil
 }
 
