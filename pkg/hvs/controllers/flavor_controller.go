@@ -828,7 +828,7 @@ func validateFlavorFilterCriteria(key, value, flavorgroupId string, ids, flavorP
 			return nil, errors.New("Invalid UUID format of flavorgroup identifier")
 		}
 	}
-	if len(flavorParts) > 0 {
+	if len(flavorParts) > 0 && len(flavorParts) <= len(hvs.GetFlavorTypes()) {
 		filterCriteria.FlavorParts, err = parseFlavorParts(flavorParts)
 		if err != nil {
 			return nil, errors.Wrap(err, "Valid contents of filter flavor_parts must be given")
@@ -864,7 +864,7 @@ func validateFlavorCreateRequest(criteria dm.FlavorCreateRequest) error {
 			return errors.New("Invalid flavorgroup name given as a flavor create criteria")
 		}
 	}
-	if len(criteria.FlavorParts) > 0 {
+	if len(criteria.FlavorParts) > 0 && len(criteria.FlavorParts) <= len(hvs.GetFlavorTypes()) {
 		var flavorParts []string
 		var err error
 		for _, fp := range criteria.FlavorParts {
