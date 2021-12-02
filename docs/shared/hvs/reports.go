@@ -249,7 +249,7 @@ type ReportCreateRequest struct {
 // - name: process
 //   description: Create the report asynchronously by adding the host to flavor-verification queue
 //   type: string
-//   required: false
+//   in: query
 //   enum:
 //     - async
 // responses:
@@ -426,3 +426,4 @@ type ReportCreateRequest struct {
 //       "expiration": "2018-07-23T17:39:52-0700"
 //     }
 //   }
+
