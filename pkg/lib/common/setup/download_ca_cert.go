@@ -6,9 +6,9 @@ package setup
 
 import (
 	"crypto"
-	"crypto/tls"
 	"encoding/pem"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -105,14 +105,7 @@ func downloadRootCaCertificate(cmsBaseUrl string, dirPath string, trustedTlsCert
 	}
 	req.Header.Set("Accept", "application/x-pem-file")
 	//InsecureSkipVerify is set to true as connection is validated manually
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS13,
-				InsecureSkipVerify: true,
-			},
-		},
-	}
+	client := clients.HTTPClientTLSNoVerify()
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "Failed to perform HTTP request to CMS")
