@@ -46,7 +46,7 @@ func setupMockValues(t *testing.T, portString string) (*KubernetesDetails, *type
 		SgxEnabled:   true,
 		FlcEnabled:   true,
 		EpcSize:      "2.0GB",
-		TcbUpToDate:  true,
+		TcbUpToDate:  "true",
 	}
 
 	kubernetes := KubernetesDetails{

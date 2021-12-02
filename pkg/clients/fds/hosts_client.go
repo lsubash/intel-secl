@@ -7,13 +7,13 @@ package fds
 import (
 	"crypto/x509"
 	"github.com/google/uuid"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/util"
 	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
 
-	commLog "github.com/intel-secl/intel-secl/v4/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v4/pkg/model/fds"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/util"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/fds"
 )
 
 var log = commLog.GetDefaultLogger()
@@ -72,7 +72,7 @@ func (f *fdsClient) SearchHosts(hostFilterCriteria *fds.HostFilterCriteria) ([]b
 
 	hostDetails, err := util.SendRequest(req, f.AasBaseURL.String(), f.Username, f.Password, f.CaCerts)
 	if err != nil {
-		log.Error("hvsclient/reports_client:CreateSAMLReport() Error while sending request")
+		log.Error("clients/fds:SearchHosts() Error while sending request")
 		return nil, err
 	}
 

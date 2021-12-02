@@ -6,23 +6,27 @@
 package fds
 
 import (
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/util"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 )
 
 func (f *fdsClient) GetVersion() (string, error) {
-	log.Trace("clients/fds:SearchHosts() Entering")
-	defer log.Trace("clients/fds:SearchHosts() Leaving")
+	log.Trace("clients/fds:GetVersion() Entering")
+	defer log.Trace("clients/fds:GetVersion() Leaving")
 
 	versionURL, _ := url.Parse("version")
 	reqURL := f.BaseURL.ResolveReference(versionURL)
-	response, err := http.Get(reqURL.String())
+
+	req, err := http.NewRequest("GET", reqURL.String(), nil)
 	if err != nil {
-		return "", errors.Wrap(err, "Failed to create new request")
+		return "", errors.Wrap(err, "clients/fds:GetVersion() Error forming request")
+	}
+	response, err := util.SendNoAuthRequest(req, f.CaCerts)
+	if err != nil {
+		return "", errors.Wrap(err, "clients/fds:GetVersion() Error reading response body while fetching the version")
 	}
 
-	responseBytes, err := ioutil.ReadAll(response.Body)
-	return string(responseBytes), nil
+	return string(response), nil
 }

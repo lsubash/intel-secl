@@ -195,6 +195,7 @@ func (a *App) GetServiceUsers() []UserAndRolesCreate {
 			urc.Name = a.IhubServiceUserName
 			urc.Password = a.IhubServiceUserPassword
 			urc.Roles = append(urc.Roles, NewRole("HVS", "ReportSearcher", "", []string{"reports:search:*"}))
+			urc.Roles = append(urc.Roles, NewRole("FDS", "HostSearcher", "", []string{"hosts:search:*"}))
 		case "WPM":
 			urc.Name = a.WpmServiceUserName
 			urc.Password = a.WpmServiceUserPassword

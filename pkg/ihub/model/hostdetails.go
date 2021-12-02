@@ -27,5 +27,5 @@ type HostDetails struct {
 	TdxEnabled        bool
 	FlcEnabled        bool
 	EpcSize           string
-	TcbUpToDate       bool
+	TcbUpToDate       string
 }

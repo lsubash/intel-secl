@@ -5,9 +5,9 @@
 package attestationPlugin
 
 import (
-	"github.com/intel-secl/intel-secl/v4/pkg/clients/fds"
-	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
-	fdsModel "github.com/intel-secl/intel-secl/v4/pkg/model/fds"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/fds"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
+	fdsModel "github.com/intel-secl/intel-secl/v5/pkg/model/fds"
 	"net/url"
 
 	"github.com/pkg/errors"

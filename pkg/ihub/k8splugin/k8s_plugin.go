@@ -314,7 +314,7 @@ func populateHostDetailsInCRD(k8sDetails *KubernetesDetails) ([]model.Host, erro
 			host.FlcEnabled = strconv.FormatBool(reportHostDetails.FlcEnabled)
 			host.SgxEnabled = strconv.FormatBool(reportHostDetails.SgxEnabled)
 			host.SgxSupported = strconv.FormatBool(reportHostDetails.SgxSupported)
-			host.TcbUpToDate = strconv.FormatBool(reportHostDetails.TcbUpToDate)
+			host.TcbUpToDate = reportHostDetails.TcbUpToDate
 			host.SgxTrustValidTo = new(time.Time)
 			*host.SgxTrustValidTo = reportHostDetails.ValidTo
 			signedtrustReport, err := GetSignedTrustReport(host, k8sDetails, "SGX")
@@ -453,6 +453,11 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 					continue
 				}
 
+				if len(teeData) <= 0 {
+					log.Debugf("TEE Data not found for host %s", hostDetails.HostName)
+					continue
+				}
+
 				if teeData[0].HostInfo.HardwareFeatures.SGX != nil {
 					// need to validate contents of EpcSize
 					if !osRegexEpcSize.MatchString(*teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
@@ -467,12 +472,12 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 					hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
 					hostDetails.ValidTo = teeData[0].ValidTo
 				}
-			}
 
-			if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
-				hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
-				hostDetails.TdxSupported = true
-				hostDetails.TcbUpToDate = hostDetails.TcbUpToDate && *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
+				if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
+					hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
+					hostDetails.TdxSupported = true
+					hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
+				}
 			}
 		}
 		if !hvsFail && !fdsFail {

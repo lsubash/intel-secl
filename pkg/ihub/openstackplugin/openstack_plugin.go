@@ -162,7 +162,7 @@ func filterHostReportsForOpenstack(hostDetails *openstackHostDetails, openstackD
 			if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
 				hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
 				hostDetails.TdxSupported = true
-				hostDetails.TcbUpToDate = hostDetails.TcbUpToDate && *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
+				hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
 			}
 		} else {
 			return errors.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : SGX Platform Data response has invalid length %d", len(teeData))
@@ -233,7 +233,7 @@ func getCustomTraitsFromPlatformData(hostDetails *openstackHostDetails) error {
 	log.Debug("openstackplugin/openstack_plugin:getCustomTraitsFromPlatformData() Getting traits from the SGX PlatformData")
 	traitSet = append(traitSet, getFormattedCustomTraits(constants.IseclTraitPrefix+constants.TraitDelimiter, constants.SgxTraitEnabled, strconv.FormatBool(hostDetails.SgxEnabled)))
 	traitSet = append(traitSet, getFormattedCustomTraits(constants.IseclTraitPrefix+constants.TraitDelimiter, constants.SgxTraitSupported, strconv.FormatBool(hostDetails.SgxSupported)))
-	traitSet = append(traitSet, getFormattedCustomTraits(constants.IseclTraitPrefix+constants.TraitDelimiter, constants.SgxTraitTcbUpToDate, strconv.FormatBool(hostDetails.TcbUpToDate)))
+	traitSet = append(traitSet, getFormattedCustomTraits(constants.IseclTraitPrefix+constants.TraitDelimiter, constants.SgxTraitTcbUpToDate, hostDetails.TcbUpToDate))
 	traitSet = append(traitSet, getFormattedCustomTraits(constants.IseclTraitPrefix+constants.TraitDelimiter, constants.SgxTraitFlcEnabled, strconv.FormatBool(hostDetails.FlcEnabled)))
 
 	if hostDetails.EpcSize != "" {
