@@ -426,4 +426,3 @@ type ReportCreateRequest struct {
 //       "expiration": "2018-07-23T17:39:52-0700"
 //     }
 //   }
-
