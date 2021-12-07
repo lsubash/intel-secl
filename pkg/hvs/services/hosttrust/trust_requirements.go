@@ -72,7 +72,7 @@ func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[hvs.F
 	reqPartsMap := fgRequirePolicyMap[hvs.FlavorRequired]
 	reqIfdefPartsMap := fgRequirePolicyMap[hvs.FlavorRequiredIfDefined]
 
-	// create the host defined and required falvorTypes by joining the map
+	// create the host defined and required flavorTypes by joining the map
 	for _, part := range reqPartsMap {
 		reqs.DefinedAndRequiredFlavorTypes[part] = true
 	}
@@ -80,7 +80,7 @@ func NewFlvGrpHostTrustReqs(hostId uuid.UUID, definedUniqueFlavorParts map[hvs.F
 	// now add defined if required flavor parts
 	flavorPartsInFlavorGroup, err := fgs.GetFlavorTypesInFlavorGroup(fg.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error searching flavor types in flavorgroup ")
+		return nil, errors.Wrap(err, "error searching flavor types in flavorgroup")
 	}
 	// since the above query returns all the different flavors types in the flavorgroup, filter only
 	// those flavor parts that are required if defined

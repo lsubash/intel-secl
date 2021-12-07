@@ -29,23 +29,19 @@ const (
 	FlavorPartAssetTag   FlavorPartName = "ASSET_TAG"
 )
 
+//FlavorPartsNotFilteredForLatestFlavor is a list of flavor parts that do not need to be cleaned up
+// from host-trustcache when custom flavors belonging to these groups are created
+var FlavorPartsNotFilteredForLatestFlavor = map[FlavorPartName]bool{
+	FlavorPartAssetTag:   true,
+	FlavorPartHostUnique: true,
+}
+
 // GetFlavorTypes returns a list of flavor types
 func GetFlavorTypes() []FlavorPartName {
 	log.Trace("flavor/common/flavor_part:GetFlavorTypes() Entering")
 	defer log.Trace("flavor/common/flavor_part:GetFlavorTypes() Leaving")
 
 	return []FlavorPartName{FlavorPartPlatform, FlavorPartOs, FlavorPartHostUnique, FlavorPartSoftware, FlavorPartAssetTag}
-}
-
-// GetFlavorTypesString returns a list of flavor types as strings for given flavor types
-func GetFlavorTypesString(flavorParts []FlavorPartName) []string {
-	log.Trace("flavor/common/flavor_part:GetFlavorTypesString() Entering")
-	defer log.Trace("flavor/common/flavor_part:GetFlavorTypesString() Leaving")
-	var flavorTypes []string
-	for _, flavorPart := range flavorParts {
-		flavorTypes = append(flavorTypes, flavorPart.String())
-	}
-	return flavorTypes
 }
 
 func (fp FlavorPartName) String() string {

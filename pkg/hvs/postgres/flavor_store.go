@@ -71,7 +71,7 @@ func (f *FlavorStore) Search(flavorFilter *models.FlavorVerificationFC) ([]hvs.S
 		}
 		tx = tx.Where("f.id IN (?)", flavorFilter.FlavorFC.Ids)
 	}
-	// build partial query with the given key-value pair from falvor description
+	// build partial query with the given key-value pair from flavor description
 	if flavorFilter.FlavorFC.Key != "" && flavorFilter.FlavorFC.Value != "" {
 		tx = tx.Where(convertToPgJsonqueryString("f.content", "meta.description."+flavorFilter.FlavorFC.Key)+" = ?", flavorFilter.FlavorFC.Value)
 	}
