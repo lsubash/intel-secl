@@ -632,16 +632,17 @@ func (fcon *FlavorController) purgeLatestMatchEntriesFromHTC(newFGFlvrMap map[uu
 		}
 	}
 
-	deleteFlavorList := []uuid.UUID{}
+	if len(deleteFlavorMap) > 0 {
+		deleteFlavorList := []uuid.UUID{}
+		// convert map to list
+		for id := range deleteFlavorMap {
+			deleteFlavorList = append(deleteFlavorList, id)
+		}
 
-	// convert map to list
-	for id := range deleteFlavorMap {
-		deleteFlavorList = append(deleteFlavorList, id)
-	}
-
-	err := fcon.HStore.RemoveTrustCacheFlavors(uuid.Nil, deleteFlavorList)
-	if err != nil {
-		return errors.Wrapf(err, "controllers/flavor_controller:purgeLatestMatchEntriesFromHTC(): Failed to purge flavors %v", deleteFlavorList)
+		err := fcon.HStore.RemoveTrustCacheFlavors(uuid.Nil, deleteFlavorList)
+		if err != nil {
+			return errors.Wrapf(err, "controllers/flavor_controller:purgeLatestMatchEntriesFromHTC(): Failed to purge flavors %v", deleteFlavorList)
+		}
 	}
 	return nil
 }
