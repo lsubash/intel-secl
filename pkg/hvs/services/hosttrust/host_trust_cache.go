@@ -13,8 +13,7 @@ import (
 type hostTrustCache struct {
 	hostID         uuid.UUID
 	trustedFlavors map[uuid.UUID]*hvs.Flavor
-	// TODO: consider using a map here rather than traversing through the list when we need to remove flavors
-	trustReport hvs.TrustReport
+	trustReport    hvs.TrustReport
 }
 
 // TODO:
