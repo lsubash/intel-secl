@@ -120,7 +120,7 @@ func (r *flvGrpHostTrustReqs) MeetsFlavorGroupReqs(trustCache hostTrustCache, ve
 	defaultLog.Trace("hosttrust/trust_requirements:MeetsFlavorGroupReqs() Entering")
 	defer defaultLog.Trace("hosttrust/trust_requirements:MeetsFlavorGroupReqs() Leaving")
 
-	if len(trustCache.trustedFlavors) == 0 {
+	if trustCache.isTrustCacheEmpty() {
 		defaultLog.Debugf("No results found in trust cache for host: %s", r.HostId.String())
 		return false
 	}
