@@ -2,7 +2,13 @@ on:
   schedule: 
     # runs once a week on monday
     - cron: "0 7 * * 1"
-    
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+
 jobs:
   # This workflow contains a single job called "traffic"
   traffic:
