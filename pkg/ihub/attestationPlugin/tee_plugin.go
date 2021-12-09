@@ -15,16 +15,8 @@ import (
 
 var FDSClient fds.Client
 
-// FDSHost Registered host details on FDS
-type FDSHost []struct {
-	ConnectionString string `json:"connection_string"`
-	HostID           string `json:"host_ID"`
-	HostName         string `json:"host_name"`
-	UUID             string `json:"uuid"`
-}
-
 // Retrieve platform data from FDS
-func GetHostPlatformData(hostName string, config *config.Configuration, certDirectory string) ([]byte, error) {
+func GetHostPlatformData(hostName string, config *config.Configuration, certDirectory string) ([]*fdsModel.Host, error) {
 	log.Trace("attestationPlugin/tee_plugin:GetHostPlatformData() Entering")
 	defer log.Trace("attestationPlugin/tee_plugin:GetHostPlatformData() Leaving")
 
@@ -60,7 +52,7 @@ func initializeFDSClient(con *config.Configuration, certDirectory string) (fds.C
 
 	attestationURL, err := url.Parse(con.AttestationService.FDSBaseURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "attestationPlugin/tee_plugin:initializeFDSClient() Error in parsing SGX Host Verification Service URL")
+		return nil, errors.Wrap(err, "attestationPlugin/tee_plugin:initializeFDSClient() Error in parsing FDS URL")
 	}
 
 	FDSClient = fds.NewClient(attestationURL, aasURL, CertArray, con.IHUB.Username, con.IHUB.Password)

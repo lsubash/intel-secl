@@ -173,7 +173,7 @@ func TestOpenstackPluginInit(t *testing.T) {
 		{
 			name: "Testing for failures 3",
 			configuration: &config.Configuration{
-				AASBaseUrl:          server.URL + "/aas",
+				AASBaseUrl:         server.URL + "/aas",
 				AttestationService: config.AttestationConfig{HVSBaseURL: server.URL + "/mtwilson/v2"},
 			},
 			wantErr: true,

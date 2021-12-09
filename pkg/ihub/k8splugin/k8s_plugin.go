@@ -19,7 +19,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	types "github.com/intel-secl/intel-secl/v5/pkg/ihub/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/model/fds"
 	model "github.com/intel-secl/intel-secl/v5/pkg/model/k8s"
 
 	"io/ioutil"
@@ -412,8 +411,6 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 	log.Trace("k8splugin/k8s_plugin:SendDataToEndPoint() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:SendDataToEndPoint() Leaving")
 
-	var teeData []*fds.Host
-
 	log.Debug("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching hosts from Kubernetes")
 	err := GetHosts(&kubernetes)
 	if err != nil {
@@ -447,36 +444,31 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 				fdsFail = false
 				// mark TEE agent as running on this host
 				hostDetails.AgentType = "tee"
-				err = json.Unmarshal(platformData, &teeData)
-				if err != nil {
-					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() TEE Platform data unmarshal failed")
-					continue
-				}
 
-				if len(teeData) <= 0 {
+				if len(platformData) <= 0 {
 					log.Debugf("TEE Data not found for host %s", hostDetails.HostName)
 					continue
 				}
 
-				if teeData[0].HostInfo.HardwareFeatures.SGX != nil {
+				if platformData[0].HostInfo.HardwareFeatures.SGX != nil {
 					// need to validate contents of EpcSize
-					if !osRegexEpcSize.MatchString(*teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
+					if !osRegexEpcSize.MatchString(*platformData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
 						log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
 						continue
 					}
 
-					hostDetails.EpcSize = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
-					hostDetails.FlcEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
-					hostDetails.SgxEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Enabled
+					hostDetails.EpcSize = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
+					hostDetails.FlcEnabled = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
+					hostDetails.SgxEnabled = *platformData[0].HostInfo.HardwareFeatures.SGX.Enabled
 					hostDetails.SgxSupported = true
-					hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
-					hostDetails.ValidTo = teeData[0].ValidTo
+					hostDetails.TcbUpToDate = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
+					hostDetails.ValidTo = platformData[0].ValidTo
 				}
 
-				if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
-					hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
+				if platformData[0].HostInfo.HardwareFeatures.TDX != nil {
+					hostDetails.TdxEnabled = *platformData[0].HostInfo.HardwareFeatures.TDX.Enabled
 					hostDetails.TdxSupported = true
-					hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
+					hostDetails.TcbUpToDate = *platformData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
 				}
 			}
 		}

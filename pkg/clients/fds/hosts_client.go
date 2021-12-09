@@ -6,7 +6,9 @@ package fds
 
 import (
 	"crypto/x509"
+	"encoding/json"
 	"github.com/google/uuid"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
@@ -19,7 +21,7 @@ import (
 var log = commLog.GetDefaultLogger()
 
 type Client interface {
-	SearchHosts(*fds.HostFilterCriteria) ([]byte, error)
+	SearchHosts(*fds.HostFilterCriteria) ([]*fds.Host, error)
 	GetVersion() (string, error)
 }
 
@@ -41,7 +43,7 @@ type fdsClient struct {
 	Password   string
 }
 
-func (f *fdsClient) SearchHosts(hostFilterCriteria *fds.HostFilterCriteria) ([]byte, error) {
+func (f *fdsClient) SearchHosts(hostFilterCriteria *fds.HostFilterCriteria) ([]*fds.Host, error) {
 	log.Trace("clients/fds:SearchHosts() Entering")
 	defer log.Trace("clients/fds:SearchHosts() Leaving")
 
@@ -51,7 +53,7 @@ func (f *fdsClient) SearchHosts(hostFilterCriteria *fds.HostFilterCriteria) ([]b
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create new request")
 	}
-	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 	query := req.URL.Query()
 
 	if hostFilterCriteria.HostName != "" {
@@ -76,5 +78,11 @@ func (f *fdsClient) SearchHosts(hostFilterCriteria *fds.HostFilterCriteria) ([]b
 		return nil, err
 	}
 
-	return hostDetails, nil
+	var teeData []*fds.Host
+	err = json.Unmarshal(hostDetails, &teeData)
+	if err != nil {
+		return nil, errors.Wrap(err, "clients/fds:SearchHosts() TEE Platform data unmarshal failed")
+	}
+
+	return teeData, nil
 }

@@ -60,7 +60,7 @@ func (attestationService AttestationServiceConnection) Run() error {
 func (attestationService AttestationServiceConnection) Validate() error {
 
 	if attestationService.AttestationConfig.HVSBaseURL == "" && attestationService.AttestationConfig.FDSBaseURL == "" {
-		return errors.New("tasks/attestation_service_connection:Validate() Attestation service Connection: HVS and SHVS url are not set")
+		return errors.New("tasks/attestation_service_connection:Validate() Attestation service Connection: HVS and FDS url are not set")
 	}
 
 	//validating the service url

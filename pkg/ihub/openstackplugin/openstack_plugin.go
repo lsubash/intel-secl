@@ -21,7 +21,6 @@ import (
 	types "github.com/intel-secl/intel-secl/v5/pkg/ihub/model"
 	commonLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
-	"github.com/intel-secl/intel-secl/v5/pkg/model/fds"
 	model "github.com/intel-secl/intel-secl/v5/pkg/model/openstack"
 	"github.com/pkg/errors"
 )
@@ -137,35 +136,29 @@ func filterHostReportsForOpenstack(hostDetails *openstackHostDetails, openstackD
 			return errors.Wrap(err, "openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : Error in getting the SGX Platform Data")
 		}
 
-		var teeData []*fds.Host
-
-		err = json.Unmarshal(platformData, &teeData)
-		if err != nil {
-			return errors.Wrap(err, "openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : unmarshal SGX platform data error")
-		}
-		if len(teeData) == 1 {
-			if teeData[0].HostInfo.HardwareFeatures.SGX != nil {
+		if len(platformData) == 1 {
+			if platformData[0].HostInfo.HardwareFeatures.SGX != nil {
 				// need to validate contents of EpcSize
-				if !osRegexEpcSize.MatchString(*teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
+				if !osRegexEpcSize.MatchString(*platformData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
 					log.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() Invalid EPC Size value")
 					hostDetails.EpcSize = constants.SgxTraitEpcSizeNotAvailable
 				} else {
-					hostDetails.EpcSize = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
+					hostDetails.EpcSize = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
 				}
-				hostDetails.FlcEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
-				hostDetails.SgxEnabled = *teeData[0].HostInfo.HardwareFeatures.SGX.Enabled
+				hostDetails.FlcEnabled = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
+				hostDetails.SgxEnabled = *platformData[0].HostInfo.HardwareFeatures.SGX.Enabled
 				hostDetails.SgxSupported = true
-				hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
-				hostDetails.ValidTo = teeData[0].ValidTo
+				hostDetails.TcbUpToDate = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
+				hostDetails.ValidTo = platformData[0].ValidTo
 			}
 
-			if teeData[0].HostInfo.HardwareFeatures.TDX != nil {
-				hostDetails.TdxEnabled = *teeData[0].HostInfo.HardwareFeatures.TDX.Enabled
+			if platformData[0].HostInfo.HardwareFeatures.TDX != nil {
+				hostDetails.TdxEnabled = *platformData[0].HostInfo.HardwareFeatures.TDX.Enabled
 				hostDetails.TdxSupported = true
-				hostDetails.TcbUpToDate = *teeData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
+				hostDetails.TcbUpToDate = *platformData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
 			}
 		} else {
-			return errors.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : SGX Platform Data response has invalid length %d", len(teeData))
+			return errors.Errorf("openstackplugin/openstack_plugin:filterHostReportsForOpenstack() : SGX Platform Data response has invalid length %d", len(platformData))
 		}
 
 		err = getCustomTraitsFromPlatformData(hostDetails)
