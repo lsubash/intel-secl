@@ -35,7 +35,7 @@ func setKeyRoutes(router *mux.Router, endpointUrl string, defaultPolicyId uuid.U
 			[]string{constants.KeyRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(keyIdExpr,
-		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.Delete),
+		ErrorHandler(permissionsHandler(ResponseHandler(keyController.Delete),
 			[]string{constants.KeyDelete}))).Methods(http.MethodDelete)
 
 	router.Handle("/keys",

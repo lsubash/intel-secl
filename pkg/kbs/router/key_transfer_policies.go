@@ -32,7 +32,7 @@ func setKeyTransferPolicyRoutes(router *mux.Router) *mux.Router {
 			[]string{constants.KeyTransferPolicyRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(keyTransferPolicyIdExpr,
-		ErrorHandler(permissionsHandler(JsonResponseHandler(transferPolicyController.Delete),
+		ErrorHandler(permissionsHandler(ResponseHandler(transferPolicyController.Delete),
 			[]string{constants.KeyTransferPolicyDelete}))).Methods(http.MethodDelete)
 
 	router.Handle("/key-transfer-policies",

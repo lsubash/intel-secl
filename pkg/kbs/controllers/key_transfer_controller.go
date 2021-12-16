@@ -161,8 +161,8 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 
 		claims, err := kc.authenticateToken(splitAuthHeader[1], cacheTime, false)
 		if err != nil {
-			secLog.WithError(err).Errorf("controllers/key_transfer_controller:Transfer() %s :  Failed to authenticate token", commLogMsg.AuthenticationFailed)
-			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Failed to authenticate token"}
+			secLog.WithError(err).Errorf("controllers/key_transfer_controller:Transfer() %s :  Failed to authenticate authorization-token", commLogMsg.AuthenticationFailed)
+			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Failed to authenticate authorization-token"}
 		}
 
 		tokenClaims := claims.(*aas.AuthClaims)
@@ -316,7 +316,7 @@ func (kc *KeyTransferController) authenticateToken(token string, cacheTime time.
 			case *jwtauth.MatchingCertNotFoundError, *jwtauth.MatchingCertJustExpired:
 				err = kc.fnGetJwtSigningCerts(attestationToken, jwtSigningCertsDir)
 				if err != nil {
-					defaultLog.WithError(err).Error("controllers/key_transfer_controller:authenticateToken() failed to get APS jwt signing certificate")
+					defaultLog.WithError(err).Error("controllers/key_transfer_controller:authenticateToken() failed to get jwt signing certificate")
 				}
 				retryNeeded = true
 			case *jwtauth.VerifierExpiredError:
@@ -326,8 +326,8 @@ func (kc *KeyTransferController) authenticateToken(token string, cacheTime time.
 	}
 
 	if err != nil {
-		// this is an attestation-token validation failure
-		secLog.Warningf("controllers/key_transfer_controller:authenticateToken() %s: Invalid attestation token", commLogMsg.AuthenticationFailed)
+		// this is a token validation failure
+		secLog.Warningf("controllers/key_transfer_controller:authenticateToken() %s: Invalid token", commLogMsg.AuthenticationFailed)
 		return nil, errors.Wrap(err, "controllers/key_transfer_controller:authenticateToken() token validation failure")
 	}
 
@@ -347,7 +347,7 @@ func (kc *KeyTransferController) fnGetJwtSigningCerts(attestationToken bool, jwt
 		jwtCert, err = kc.aasClient.GetJwtSigningCertificate()
 	}
 	if err != nil {
-		return errors.Wrap(err, "controllers/key_transfer_controller:fnGetJwtSigningCerts() Error retrieving JWT signing certificate from APS")
+		return errors.Wrap(err, "controllers/key_transfer_controller:fnGetJwtSigningCerts() Error retrieving JWT signing certificate")
 	}
 	err = crypt.SavePemCertWithShortSha1FileName(jwtCert, jwtSigningCertsDir)
 	if err != nil {

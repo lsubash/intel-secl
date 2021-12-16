@@ -28,7 +28,7 @@ func setTpmIdentityCertRoutes(router *mux.Router) *mux.Router {
 	router.Handle(certIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(tpmIdentityCertController.Retrieve),
 		[]string{constants.TpmIdentityCertRetrieve}))).Methods(http.MethodGet)
 
-	router.Handle(certIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(tpmIdentityCertController.Delete),
+	router.Handle(certIdExpr, ErrorHandler(permissionsHandler(ResponseHandler(tpmIdentityCertController.Delete),
 		[]string{constants.TpmIdentityCertDelete}))).Methods(http.MethodDelete)
 
 	router.Handle("/tpm-identity-certificates", ErrorHandler(permissionsHandler(JsonResponseHandler(tpmIdentityCertController.Search),
