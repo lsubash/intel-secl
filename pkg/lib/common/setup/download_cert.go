@@ -9,7 +9,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v4/pkg/clients"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
