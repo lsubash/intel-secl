@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
-	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	"github.com/pkg/errors"
 )
