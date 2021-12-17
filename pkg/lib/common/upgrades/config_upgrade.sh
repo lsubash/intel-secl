@@ -23,7 +23,12 @@ CONFIG_PATH=$3
 ASSET_DIR=$4
 EXT=$5
 if [ -d "$ASSET_DIR" ]; then
-  chmod +x ${ASSET_DIR}/*${EXT}
+
+  # Change permission only in case of systemd deployment
+  if [ ! -f "/.container-env" ]; then
+    chmod +x ${ASSET_DIR}/*${EXT}
+  fi
+
   cd $ASSET_DIR
   #Sort files
   IFS=$'\r\n' GLOBIGNORE='*' command eval "configUpgradeFiles=($(ls *${EXT} | sort))"

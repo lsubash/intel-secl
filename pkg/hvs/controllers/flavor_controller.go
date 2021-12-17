@@ -565,13 +565,89 @@ func (fcon *FlavorController) addFlavorToFlavorgroup(flavorFlavorPartMap map[hvs
 			}
 		}
 	}
+
+	if err := fcon.purgeLatestMatchEntriesFromHTC(flavorgroupFlavorMap, flavorFlavorPartMap, flavorgroupsForQueue); err != nil {
+		defaultLog.WithError(err).Warn("controllers/flavor_controller: purgeLatestMatchEntriesFromHTC(): Error clearing latest flavors from host trust cache")
+	}
+
 	// get all the hosts that belong to the same flavor group and add them to flavor-verify queue
-	go fcon.addFlavorgroupHostsToFlavorVerifyQueue(flavorgroupsForQueue, fgHostIds, flavorgroupFlavorMap, fetchHostData)
+	go fcon.addFlavorgroupHostsToFlavorVerifyQueue(flavorgroupsForQueue, fgHostIds, fetchHostData)
+
 	return returnSignedFlavors, nil
 }
 
-func (fcon FlavorController) addFlavorgroupHostsToFlavorVerifyQueue(fgs []hvs.FlavorGroup, hostIds []uuid.UUID,
-	flavorgroupFlavorMap map[uuid.UUID][]uuid.UUID, forceUpdate bool) {
+//purgeLatestMatchEntriesFromHTC clears entries from HostTrust Cache ensuring that
+// reports verifications flows use the latest flavor for that flavorPart
+func (fcon *FlavorController) purgeLatestMatchEntriesFromHTC(newFGFlvrMap map[uuid.UUID][]uuid.UUID,
+	newFlavorpartFlavorMap map[hvs.FlavorPartName][]hvs.SignedFlavor,
+	fgs []hvs.FlavorGroup) error {
+	defaultLog.Trace("controllers/flavor_controller:purgeLatestMatchEntriesFromHTC() Entering")
+	defer defaultLog.Trace("controllers/flavor_controller:purgeLatestMatchEntriesFromHTC() Leaving")
+
+	filteredFlavorPartsMap := map[uuid.UUID][]hvs.FlavorPartName{}
+	// loop through flavorgroups in the map to get the flavor parts
+	// for which we need to query flavors
+	for fgID := range newFGFlvrMap {
+		var fg *hvs.FlavorGroup
+		for _, flavorGroupFromFg := range fgs {
+			if fgID == flavorGroupFromFg.ID {
+				fg = &flavorGroupFromFg
+			}
+		}
+		if fg == nil {
+			return errors.Errorf("controllers/flavor_controller:purgeLatestMatchEntriesFromHTC(): Failed to retrieve FlavorGroup %v", fgID)
+		}
+		filteredFlavorPartsMap[fgID] = []hvs.FlavorPartName{}
+		// get the list of flavorparts which fit the latest matchPolicy
+		// and flavorpart requirements (should NOT be host-unique or asset-tag)
+		_, matchTypeFlavorPartMap, _ := fg.GetMatchPolicyMaps()
+		// select only the flavorparts corresponding to the "LATEST" match policy
+		for _, fpart := range matchTypeFlavorPartMap[hvs.MatchTypeLatest] {
+			// select only non-hostunique and non-assettag flavorparts
+			if _, ok := hvs.FlavorPartsNotFilteredForLatestFlavor[fpart]; !ok {
+				// check if the flavorpart is in the list of newly created flavors
+				if _, ok := newFlavorpartFlavorMap[fpart]; ok {
+					filteredFlavorPartsMap[fgID] = append(filteredFlavorPartsMap[fgID], fpart)
+				}
+			}
+		}
+	}
+
+	deleteFlavorMap := map[uuid.UUID]bool{}
+	for fgID, filterFlavorParts := range filteredFlavorPartsMap {
+		// get all flavors in the flavorgroup matching the filter criteria
+		filteredFlavors, err := fcon.FStore.Search(&dm.FlavorVerificationFC{
+			FlavorFC: dm.FlavorFilterCriteria{
+				FlavorgroupID: fgID,
+				FlavorParts:   filterFlavorParts,
+			},
+		})
+		if err != nil {
+			defaultLog.Warnf("controllers/flavor_controller:purgeLatestMatchEntriesFromHTC(): Failed to retrieve Flavors for FlavorGroup %v", fgID)
+			continue
+		}
+		// loop through new flavors in each flavorgroup
+		for _, sflvr := range filteredFlavors {
+			deleteFlavorMap[sflvr.Flavor.Meta.ID] = true
+		}
+	}
+
+	if len(deleteFlavorMap) > 0 {
+		deleteFlavorList := []uuid.UUID{}
+		// convert map to list
+		for id := range deleteFlavorMap {
+			deleteFlavorList = append(deleteFlavorList, id)
+		}
+
+		err := fcon.HStore.RemoveTrustCacheFlavors(uuid.Nil, deleteFlavorList)
+		if err != nil {
+			return errors.Wrapf(err, "controllers/flavor_controller:purgeLatestMatchEntriesFromHTC(): Failed to purge flavors %v", deleteFlavorList)
+		}
+	}
+	return nil
+}
+
+func (fcon FlavorController) addFlavorgroupHostsToFlavorVerifyQueue(fgs []hvs.FlavorGroup, hostIds []uuid.UUID, forceUpdate bool) {
 	defaultLog.Trace("controllers/flavor_controller:addFlavorgroupHostsToFlavorVerifyQueue() Entering")
 	defer defaultLog.Trace("controllers/flavor_controller:addFlavorgroupHostsToFlavorVerifyQueue() Leaving")
 	fgHosts := make(map[uuid.UUID]bool)

@@ -246,6 +246,12 @@ type ReportCreateRequest struct {
 //   required: true
 //   enum:
 //     - application/json
+// - name: process
+//   description: Create the report asynchronously by adding the host to flavor-verification queue
+//   type: string
+//   in: query
+//   enum:
+//     - async
 // responses:
 //   '201':
 //     description: Successfully created the report.

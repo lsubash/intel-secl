@@ -12,9 +12,8 @@ import (
 
 type hostTrustCache struct {
 	hostID         uuid.UUID
-	trustedFlavors []hvs.Flavor
-	// TODO: consider using a map here rather than traversing through the list when we need to remove flavors
-	trustReport hvs.TrustReport
+	trustedFlavors map[uuid.UUID]*hvs.Flavor
+	trustReport    hvs.TrustReport
 }
 
 // TODO:
@@ -22,24 +21,21 @@ type hostTrustCache struct {
 // "github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 // for the structure hvs.FlavorCollection
 func (htc *hostTrustCache) addTrustedFlavors(f *hvs.Flavor) {
-	htc.trustedFlavors = append(htc.trustedFlavors, *f)
+	if htc.trustedFlavors == nil {
+		htc.trustedFlavors = map[uuid.UUID]*hvs.Flavor{}
+	}
+	if f != nil && f.Meta.ID != uuid.Nil {
+		htc.trustedFlavors[f.Meta.ID] = f
+	}
 }
 
 func (htc *hostTrustCache) removeTrustedFlavors(fIn *hvs.Flavor) {
 	if fIn == nil {
 		return
 	}
-	targetID := fIn.Meta.ID
-	for i, f := range htc.trustedFlavors {
-		if f.Meta.ID == targetID {
-			htc.trustedFlavors = append(htc.trustedFlavors[:i], htc.trustedFlavors[i+1:]...)
-		}
-	}
+	delete(htc.trustedFlavors, fIn.Meta.ID)
 }
 
 func (htc *hostTrustCache) isTrustCacheEmpty() bool {
-	if len(htc.trustedFlavors) == 0 {
-		return true
-	}
-	return false
+	return len(htc.trustedFlavors) == 0
 }

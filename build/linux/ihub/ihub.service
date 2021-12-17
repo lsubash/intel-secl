@@ -9,6 +9,7 @@ WorkingDirectory=/opt/ihub/bin/
 ExecStart=/usr/bin/ihub run -i %i
 ExecReload=/bin/kill -s HUP $MAINPID
 TimeoutStartSec=0
+StartLimitBurst=10
 Restart=on-failure
 PermissionsStartOnly=true
 RuntimeDirectory=ihub

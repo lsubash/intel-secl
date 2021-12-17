@@ -22,6 +22,9 @@ type CreateCredentialsReq struct {
 // description: |
 //   Creates a new credential on AAS and sends it out over response to be accessed and used by the client
 //   to authenticate and authorize itself to a service.
+//   The credential creation request has a parameter called "type" which is basically the type of the component
+//   for which the credential needs to be generated. The only supported values for that are "HVS" or "TA" which
+//   stands for Host Verification Service and Trust Agent. Any other value provided will result in bad request.
 //
 // x-permissions: credential:create
 // security:

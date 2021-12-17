@@ -228,7 +228,7 @@ func (v *Verifier) validateCachedFlavors(hostId uuid.UUID,
 			return hostTrustCache{}, errors.Wrap(err, "hosttrust/verifier:validateCachedFlavors() Error from flavor verifier")
 		}
 		if report.Trusted {
-			htc.trustedFlavors = append(htc.trustedFlavors, cachedFlavor.Flavor)
+			htc.addTrustedFlavors(&cachedFlavor.Flavor)
 			collectiveReport.Results = append(collectiveReport.Results, report.Results...)
 		} else {
 			trustCachesToDelete = append(trustCachesToDelete, cachedFlavor.Flavor.Meta.ID)

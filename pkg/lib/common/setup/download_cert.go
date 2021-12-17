@@ -6,11 +6,10 @@ package setup
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v4/pkg/clients"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -174,29 +173,14 @@ func getCertificateFromCMS(certType string, keyAlg string, keyLen int, cmsBaseUr
 	req.Header.Set("Content-Type", "application/x-pem-file")
 	req.Header.Set("Authorization", "Bearer "+bearerToken)
 
-	rootCaCertPems, err := cos.GetDirFileContents(CaCertDirPath, "*.pem")
+	caCerts, err := crypt.GetCertsFromDir(CaCertDirPath)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "cos.GetDirFileContents failed")
+		return nil, nil, errors.Wrap(err, "Failed to read CA Certs")
 	}
 
-	rootCAs, _ := x509.SystemCertPool()
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
-	}
-	for _, rootCACert := range rootCaCertPems {
-		if ok := rootCAs.AppendCertsFromPEM(rootCACert); !ok {
-			return nil, nil, errors.New("AppendCertsFromPEM failed on cert pool")
-		}
-	}
-
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS13,
-				InsecureSkipVerify: false,
-				RootCAs:            rootCAs,
-			},
-		},
+	client, err := clients.HTTPClientWithCA(caCerts)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Failed create http client")
 	}
 	resp, err := client.Do(req)
 	if err != nil {
