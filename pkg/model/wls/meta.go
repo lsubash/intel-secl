@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2021 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
 package wls
+
+import "github.com/google/uuid"
 
 // Description contains information about the host hardware identifiers
 type Description struct {
@@ -35,7 +36,7 @@ type Author struct {
 // Meta defines meta data of the flavor
 type Meta struct {
 	Schema      *Schema      `json:"schema,omitempty"`
-	ID          string       `json:"id"`
+	ID          uuid.UUID    `json:"id"`
 	Author      *Author      `json:"author,omitempty"`
 	Realm       string       `json:"realm,omitempty"`
 	Description *Description `json:"description"`

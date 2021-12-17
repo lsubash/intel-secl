@@ -1,0 +1,35 @@
+aas-base-url: {{.aas_api_url}}
+cms-base-url: {{.cms_base_url}}
+cms-tls-cert-sha384: {{.cmstlscertdigest}}
+hvs-base-url: {{.hvs_api_url}}
+wls:
+  service-username: {{.wls.user}}
+  service-password: {{.wls.password}}
+tls:
+  cert-file: {{.tlscertfile}}
+  key-file: {{.tlskeyfile}}
+  common-name: {{.subject.tlscertcommonname}}
+  san-list: {{.certsanlist}}
+key-cache-seconds: {{.key_cache_seconds}}
+server:
+  port: {{.port}}
+  read-timeout: {{.readtimeout}}
+  read-header-timeout: {{.readheadertimeout}}
+  write-timeout: {{.writetimeout}}
+  idle-timeout: {{.idletimeout}}
+  max-header-bytes: {{.maxheaderbytes}}
+log:
+  max-length: {{.logentrymaxlength}}
+  enable-stdout: {{.logenablestdout}}
+  level: {{.loglevel}}
+db:
+  vendor: postgres
+  host: {{.postgres.hostname}}
+  port: {{.postgres.port}}
+  name: {{.postgres.dbname}}
+  username: {{.postgres.username}}
+  password: {{.postgres.password}}
+  ssl-mode: {{.postgres.sslmode}}
+  ssl-cert: {{.postgres.sslcert}}
+  conn-retry-attempts: 4
+  conn-retry-time: 1

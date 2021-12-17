@@ -128,20 +128,6 @@ type Hardware struct {
 	Feature        *Feature `json:"feature,omitempty"`
 }
 
-// Image struct defines the metadata of the image and
-// encryption details such as key URL, digest etc.
-type Image struct {
-	Meta               Meta        `json:"meta"`
-	EncryptionRequired bool        `json:"encryption_required"`
-	Encryption         *Encryption `json:"encryption,omitempty"`
-	IntegrityEnforced  bool        `json:"integrity_enforced"`
-	Integrity          *Integrity  `json:"integrity,omitempty"`
-}
-
-type Integrity struct {
-	NotaryURL string `json:"notary_url,omitempty"`
-}
-
 // Meta holds metadata information related to the Flavor
 type Meta struct {
 	Schema *Schema `json:"schema,omitempty"`

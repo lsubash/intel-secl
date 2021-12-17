@@ -1,0 +1,16 @@
+{
+    "flavor": {
+        "meta": {
+            "id": "e7bf141d-df2f-4512-a29e-dc9f5be4fafc",
+            "description": {
+                "flavor_part": "IMAGE",
+                "label": "Cirros-enc"
+            }
+        },
+        "encryption": {
+            "encryption_required": true,
+            "key_url": "http://kbs.server.com:20080/v1/keys/73755fda-c910-46be-821f-e8ddeab189e9/transfer",
+            "digest": "261209df1789073192285e4e408addadb35068421ef4890a5d4d434"
+        }
+    }
+}

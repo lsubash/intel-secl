@@ -10,7 +10,7 @@ else
 	undefine DOCKER_PROXY_FLAGS
 endif
 
-TARGETS = cms kbs ihub hvs authservice wpm
+TARGETS = cms kbs ihub hvs authservice wpm wls
 K8S_TARGETS = cms kbs ihub hvs authservice aas-manager
 
 $(TARGETS):

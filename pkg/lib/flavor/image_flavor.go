@@ -13,7 +13,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/wls"
 	"github.com/pkg/errors"
 	"io/ioutil"
 
@@ -28,7 +28,7 @@ import (
 // ImageFlavor is a flavor for an image with the encryption requirement information
 // and key details of an encrypted image.
 type ImageFlavor struct {
-	Image hvs.Image `json:"flavor"`
+	Image wls.Image `json:"flavor"`
 }
 
 // GetImageFlavor is used to create a new image flavor with the specified label, encryption policy,
@@ -36,15 +36,15 @@ type ImageFlavor struct {
 func GetImageFlavor(label string, encryptionRequired bool, keyURL string, digest string) (*ImageFlavor, error) {
 	log.Trace("flavor/image_flavor:GetImageFlavor() Entering")
 	defer log.Trace("flavor/image_flavor:GetImageFlavor() Leaving")
-	var encryption *hvs.Encryption
+	var encryption *wls.Encryption
 
-	description := map[string]interface{}{
-		hvs.Label:                 label,
-		hvs.FlavorPartDescription: "IMAGE",
+	description := wls.Description{
+		Label:      label,
+		FlavorPart: "IMAGE",
 	}
 
-	meta := hvs.Meta{
-		Description: description,
+	meta := wls.Meta{
+		Description: &description,
 	}
 	newUuid, err := uuid.NewRandom()
 	if err != nil {
@@ -53,13 +53,13 @@ func GetImageFlavor(label string, encryptionRequired bool, keyURL string, digest
 	meta.ID = newUuid
 
 	if encryptionRequired {
-		encryption = &hvs.Encryption{
+		encryption = &wls.Encryption{
 			KeyURL: keyURL,
 			Digest: digest,
 		}
 	}
 
-	imageflavor := hvs.Image{
+	imageflavor := wls.Image{
 		Meta:               meta,
 		EncryptionRequired: encryptionRequired,
 		Encryption:         encryption,
@@ -76,20 +76,20 @@ func GetImageFlavor(label string, encryptionRequired bool, keyURL string, digest
 func GetContainerImageFlavor(label string, encryptionRequired bool, keyURL string, integrityEnforced bool, notaryURL string) (*ImageFlavor, error) {
 	log.Trace("flavor/image_flavor:GetContainerImageFlavor() Entering")
 	defer log.Trace("flavor/image_flavor:GetContainerImageFlavor() Leaving")
-	var encryption *hvs.Encryption
-	var integrity *hvs.Integrity
+	var encryption *wls.Encryption
+	var integrity *wls.Integrity
 
 	if label == "" {
 		return nil, errors.Errorf("label cannot be empty")
 	}
 
-	description := map[string]interface{}{
-		hvs.Label:                 label,
-		hvs.FlavorPartDescription: "CONTAINER_IMAGE",
+	description := wls.Description{
+		Label:      label,
+		FlavorPart: "CONTAINER_IMAGE",
 	}
 
-	meta := hvs.Meta{
-		Description: description,
+	meta := wls.Meta{
+		Description: &description,
 	}
 	newUuid, err := uuid.NewRandom()
 	if err != nil {
@@ -97,15 +97,15 @@ func GetContainerImageFlavor(label string, encryptionRequired bool, keyURL strin
 	}
 	meta.ID = newUuid
 
-	encryption = &hvs.Encryption{
+	encryption = &wls.Encryption{
 		KeyURL: keyURL,
 	}
 
-	integrity = &hvs.Integrity{
+	integrity = &wls.Integrity{
 		NotaryURL: notaryURL,
 	}
 
-	containerImageFlavor := hvs.Image{
+	containerImageFlavor := wls.Image{
 		Meta:               meta,
 		EncryptionRequired: encryptionRequired,
 		Encryption:         encryption,
@@ -150,12 +150,14 @@ func GetSignedImageFlavor(flavorString string, rsaPrivateKeyLocation string) (st
 	}
 	hashEntity := sha512.New384()
 	hashEntity.Write([]byte(flavorString))
-	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA384, hashEntity.Sum(nil))
+
+	digest := hashEntity.Sum(nil)
+	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA384, digest)
 	signatureString := base64.StdEncoding.EncodeToString(signature)
 
 	json.Unmarshal([]byte(flavorString), &flavorInterface)
 
-	signedFlavor := SignedImageFlavor{
+	signedFlavor := &SignedImageFlavor{
 		ImageFlavor: flavorInterface.Image,
 		Signature:   signatureString,
 	}

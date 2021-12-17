@@ -1,0 +1,29 @@
+{
+    "instance_manifest": {
+        "instance_info": {
+            "instance_id": "7B280921-83F7-4F44-9F8D-2DCF36E7AF33",
+            "host_hardware_uuid": "59EED8F0-28C5-4070-91FC-F5E2E5443F6B",
+            "image_id": "670F263E-B34E-4E07-A520-40AC9A89F62D"
+        },
+        "image_encrypted": true
+    },
+    "policy_name": "Intel VM Policy",
+    "results": [
+        {
+            "Rule": {
+                "rule_name": "EncryptionMatches",
+                "markers": [
+                    "IMAGE"
+                ],
+                "expected": {
+                    "name": "encryption_required",
+                    "value": true
+                }
+            },
+            "flavor_id": "e7bf141d-df2f-4512-a29e-dc9f5be4fafc",
+            "faults": null,
+            "trusted": true
+        }
+    ],
+    "trusted": true
+}

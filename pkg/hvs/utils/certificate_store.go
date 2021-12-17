@@ -42,7 +42,7 @@ func loadCertificatesFromFile(certLocation *models.CertLocation) *models.Certifi
 
 	certs, err := crypt.GetSubjectCertsMapFromPemFile(certLocation.CertPath)
 	if err != nil {
-		defaultLog.WithError(err).Errorf("utils/certificate_store:loadCertificatesFromFile() Error while reading certs from file - " + certLocation.CertPath)
+		defaultLog.WithError(err).Warnf("utils/certificate_store:loadCertificatesFromFile() Error while reading certs from file - " + certLocation.CertPath)
 	}
 
 	key := loadKey(certLocation.KeyFile)

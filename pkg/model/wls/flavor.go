@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2021 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -33,8 +33,6 @@ type SignedImageFlavor struct {
 	Signature   string `json:"signature"`
 }
 
-// ImageFlavor is a flavor for an image with the encryption requirement information
-// and key details of an encrypted image.
-type ImageFlavor struct {
+type FlavorImage struct {
 	Image Image `json:"flavor"`
 }

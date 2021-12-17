@@ -238,11 +238,7 @@ main() {
   ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config $CONFIG_PATH "./config" ".sh"
   exit_on_error false "Failed to upgrade the configuration to the latest."
 
-  echo "Migrating Database if required"
-  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config $CONFIG_PATH "./database" ""
-  exit_on_error false "Failed to upgrade the database to the latest."
-
-  if [ "$NEW_EXEC_NAME" != "$OLD_EXEC_NAME" ]; then
+  if [ "${NEW_EXEC_NAME}" != "${OLD_EXEC_NAME}" ]; then
     echo "Updating component directories and symlinks"
     echo "Updating log location from ${LOG_PATH}${OLD_EXEC_NAME} to ${LOG_PATH}${NEW_EXEC_NAME}"
     mv ${LOG_PATH}${OLD_EXEC_NAME} ${LOG_PATH}${NEW_EXEC_NAME}
@@ -251,11 +247,36 @@ main() {
     mv ${CONFIG_PATH} ${CONFIG_DIR_PATH}/${NEW_EXEC_NAME}
     OLD_INSTALL_PATH=$(dirname "${INSTALLED_DIR_PATH}")
     BASE_INSTALL_PATH=$(dirname "${OLD_INSTALL_PATH}")
+    if [[ -f "${OLD_INSTALL_PATH}/${OLD_EXEC_NAME}.service" ]]; then
+      echo "systemctl disable ${OLD_INSTALL_PATH}/${OLD_EXEC_NAME}.service"
+      systemctl disable ${OLD_INSTALL_PATH}/${OLD_EXEC_NAME}.service > /dev/null 2>&1
+      systemctl daemon-reload
+      echo "Updating service file name from ${OLD_INSTALL_PATH}/${OLD_EXEC_NAME}.service to ${OLD_INSTALL_PATH}/${NEW_EXEC_NAME}.service"
+      touch ${OLD_INSTALL_PATH}/${NEW_EXEC_NAME}.service
+      mv ${OLD_INSTALL_PATH}/${OLD_EXEC_NAME}.service ${OLD_INSTALL_PATH}/${NEW_EXEC_NAME}.service
+      echo "Updating binary location from ${OLD_INSTALL_PATH}/bin/${OLD_EXEC_NAME} to ${OLD_INSTALL_PATH}/bin/${NEW_EXEC_NAME}"
+      touch ${OLD_INSTALL_PATH}/bin/${NEW_EXEC_NAME}
+      mv ${OLD_INSTALL_PATH}/bin/${OLD_EXEC_NAME} ${OLD_INSTALL_PATH}/bin/${NEW_EXEC_NAME}
+      sed -i "s/${OLD_EXEC_NAME}/${NEW_EXEC_NAME}/g" ${OLD_INSTALL_PATH}/${NEW_EXEC_NAME}.service
+    fi
     echo "Updating install location from ${OLD_INSTALL_PATH} to ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}"
     mv ${OLD_INSTALL_PATH} ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}
+    if [[ -f "${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/${NEW_EXEC_NAME}.service" ]]; then
+      echo "systemctl disable ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/${NEW_EXEC_NAME}.service"
+      systemctl disable ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/${NEW_EXEC_NAME}.service > /dev/null 2>&1
+      echo "systemctl enable ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/${NEW_EXEC_NAME}.service"
+      systemctl enable ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/${NEW_EXEC_NAME}.service
+      systemctl daemon-reload
+      SERVICE_NAME=${NEW_EXEC_NAME}
+    fi
+    echo "Creating symbolic link from ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/bin/${NEW_EXEC_NAME} to /usr/bin/${NEW_EXEC_NAME}"
     ln -sfT ${BASE_INSTALL_PATH}/${NEW_EXEC_NAME}/bin/${NEW_EXEC_NAME} /usr/bin/${NEW_EXEC_NAME}
     hash ${NEW_EXEC_NAME}
   fi
+
+  echo "Migrating Database if required"
+  ./config_upgrade.sh $COMPONENT_VERSION ${BACKUP_DIR}/config $CONFIG_PATH "./database" ""
+  exit_on_error false "Failed to upgrade the database to the latest."
 
   start_service
   echo "Upgrade to the latest version '$UPGRADE_VERSION' completed successfully"
