@@ -101,7 +101,7 @@ func FetchKey(keyID string, assetTag string) ([]byte, string, error) {
 	log.Info("pkg/wpm/util/fetch_key.go:FetchKey() Successfully retrieved key")
 	log.Debugf("pkg/util/fetch_key.go:FetchKey() %s", keyUrlString)
 
-	wrappedKey, err := base64.StdEncoding.DecodeString(keyValue.KeyData)
+	wrappedKey, err := base64.StdEncoding.DecodeString(keyValue.WrappedKey)
 	if err != nil {
 		return nil, "", errors.Wrap(err, "pkg/util/fetch_key.go:FetchKey() Error decoding the image encryption key")
 	}

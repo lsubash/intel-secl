@@ -40,22 +40,3 @@ type KeyResponse struct {
 	Label            string    `json:"label,omitempty"`
 	Usage            string    `json:"usage,omitempty"`
 }
-
-// KeyTransferAttributes - Contains all possible key transfer attributes.
-type KeyTransferAttributes struct {
-	// swagger:strfmt uuid
-	KeyId uuid.UUID `json:"id,omitempty"`
-	// swagger:strfmt base64
-	KeyData      string     `json:"payload,omitempty"`
-	KeyAlgorithm string     `json:"algorithm,omitempty"`
-	KeyLength    int        `json:"key_length,omitempty"`
-	CreatedAt    *time.Time `json:"created_at,omitempty"`
-	Policy       struct {
-		Link struct {
-			KeyTransfer struct {
-				Href   string `json:"href,omitempty"`
-				Method string `json:"method,omitempty"`
-			} `json:"key-transfer,omitempty"`
-		} `json:"link,omitempty"`
-	} `json:"policy,omitempty"`
-}

@@ -282,7 +282,7 @@ func (icon *ImageController) RetrieveFlavorAndKey(w http.ResponseWriter, r *http
 	// Check if flavor keyUrl is not empty
 	if flavor.ImageFlavor.EncryptionRequired {
 		if len(flavor.ImageFlavor.Encryption.KeyURL) > 0 {
-			key, err := transfer_key(true, hwid, keyUrl, id.String(), icon.conf, icon.CertStore)
+			key, err := transferKey(true, hwid, keyUrl, id.String(), icon.conf, icon.CertStore)
 			if err != nil {
 				defaultLog.WithField("imageUUID", id).WithField("hardwareUUID", hwid).WithError(err).Error("controllers/images_controller:RetrieveFlavorAndKey() Error while retrieving key")
 				return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: " Error while retrieving key"}

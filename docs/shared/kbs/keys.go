@@ -30,10 +30,10 @@ type KeyCollection struct {
 }
 
 // KeyTransfer response payload
-// swagger:parameters KeyTransferAttributes
-type KeyTransferAttributes struct {
+// swagger:parameters KeyTransferResponse
+type KeyTransferResponse struct {
 	// in:body
-	Body kbs.KeyTransferAttributes
+	Body kbs.KeyTransferResponse
 }
 
 // ---
@@ -185,7 +185,7 @@ type KeyTransferAttributes struct {
 //
 // description: |
 //   Transfers a key.
-//   Returns - The serialized KeyTransferAttributes Go struct object that was retrieved.
+//   Returns - The serialized KeyTransferResponse Go struct object that was retrieved.
 // x-permissions: keys:transfer
 // security:
 //  - bearerAuth: []
@@ -220,7 +220,7 @@ type KeyTransferAttributes struct {
 //     content:
 //       application/json
 //     schema:
-//       $ref: "#/definitions/KeyTransferAttributes"
+//       $ref: "#/definitions/KeyTransferResponse"
 //   '404':
 //     description: Key record not found
 //   '415':

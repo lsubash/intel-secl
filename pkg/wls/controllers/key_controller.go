@@ -5,6 +5,7 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"github.com/google/uuid"
@@ -67,7 +68,7 @@ func (kcon *KeyController) RetrieveKey(w http.ResponseWriter, r *http.Request) (
 	keyUrl := formBody.KeyUrl
 	// Check if flavor keyUrl is not empty
 	if len(keyUrl) > 0 {
-		key, err := transfer_key(false, hwid, keyUrl, "", kcon.config, kcon.CertStore)
+		key, err := transferKey(false, hwid, keyUrl, "", kcon.config, kcon.CertStore)
 		if err != nil {
 			cLog.WithError(err).Error("controller/key_controller:RetrieveKey() Error while retrieving key")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
@@ -90,8 +91,7 @@ func (kcon *KeyController) RetrieveKey(w http.ResponseWriter, r *http.Request) (
 // Verifies host and retrieves key from KBS
 // getFlavor is true for the images API and false for the keys API
 // id is only required when using the images API
-//transfer_key(false, hwid, keyUrl, "", kcon.config,kcon.CertStore)
-func transfer_key(getFlavor bool, hwid string, kUrl string, id string, cfg *config.Configuration, certStore *crypt.CertificatesStore) ([]byte, error) {
+func transferKey(getFlavor bool, hwid string, kUrl string, id string, cfg *config.Configuration, certStore *crypt.CertificatesStore) ([]byte, error) {
 	var endpoint, funcName, retrievalErr string
 	if getFlavor {
 		endpoint = "resource/images"
@@ -166,52 +166,57 @@ func transfer_key(getFlavor bool, hwid string, kUrl string, id string, cfg *conf
 		return nil, errors.New(retrievalErr + " - SAML signature or certificate chain verification failed")
 	}
 
-	var key []byte
 	for i := 0; i < len(samlStruct.Attribute); i++ {
 		if samlStruct.Attribute[i].Name == "TRUST_OVERALL" {
 			if samlStruct.Attribute[i].AttributeValue == "false" {
 				return nil, errors.New(retrievalErr + " - Host is untrusted")
-			}
-			// check if the key is cached and retrieve it
-			// try to obtain the key from the cache. If the key is not found in the cache,
-			// then it will return and error.
-
-			var cachedKeyID string
-			cachedKey, err := getKeyFromCache(hwid)
-			if err == nil {
-				cachedKeyID = cachedKey.ID
-				cLog.Infof("%s:%s %s : Retrieved Key from in-memory cache. key ID: %s", endpoint, funcName, message.EncKeyUsed, cachedKey.ID)
-			}
-			// check if the key cached is same as the one in the flavor
-			if cachedKeyID != "" && cachedKeyID == keyID {
-				key = cachedKey.Bytes
 			} else {
-				//Load trusted CA certificates
-				caCerts, err := crypt.GetCertsFromDir(rootCAs)
-				if err != nil {
-					cLog.WithError(err).Errorf("%s:%s %s : Failed to load CA certificates", endpoint, funcName, message.AppRuntimeErr)
-					return nil, errors.Wrap(err, retrievalErr+" - Unable to load CA certificates")
-				}
-
-				baseUrl := strings.TrimSuffix(re.Split(kUrl, 2)[0], "keys/")
-				kbsUrl, _ := url.Parse(baseUrl)
-				//Initialize the KBS client
-				kc := kbs.NewKBSClient(nil, kbsUrl, "", "", caCerts)
-
-				// post to KBS client with saml
-				cLog.Infof("%s:%s baseURL: %s, keyID: %s : start to retrieve key from KMS", endpoint, funcName, baseUrl, keyID)
-				key, err = kc.TransferKeyWithSaml(keyID, string(saml))
-				if err != nil {
-					cLog.WithError(err).Errorf("%s:%s %s : Failed to retrieve key from KMS", endpoint, funcName, message.AppRuntimeErr)
-					return nil, errors.Wrap(err, "Failed to retrieve key ")
-				}
-				cLog.Infof("%s:%s Successfully got key from KBS", endpoint, funcName)
-				err = cacheKeyInMemory(hwid, keyID, key)
-				if err != nil {
-					cLog.WithError(err).Errorf("Failed to cache key")
-				}
+				break
 			}
 		}
+	}
+
+	// check if the key is cached and retrieve it
+	// try to obtain the key from the cache. If the key is not found in the cache,
+	// then it will return and error.
+	cachedKey, err := getKeyFromCache(hwid)
+	if err == nil {
+		cLog.Infof("%s:%s %s : Retrieved Key from in-memory cache. key ID: %s", endpoint, funcName, message.EncKeyUsed, cachedKey.ID)
+		// check if the key cached is same as the one in the flavor
+		if cachedKey.ID != "" && cachedKey.ID == keyID {
+			return cachedKey.Bytes, nil
+		}
+	}
+
+	//Load trusted CA certificates
+	caCerts, err := crypt.GetCertsFromDir(rootCAs)
+	if err != nil {
+		cLog.WithError(err).Errorf("%s:%s %s : Failed to load CA certificates", endpoint, funcName, message.AppRuntimeErr)
+		return nil, errors.Wrap(err, retrievalErr+" - Unable to load CA certificates")
+	}
+
+	baseUrl := strings.TrimSuffix(re.Split(kUrl, 2)[0], "keys/")
+	kbsUrl, _ := url.Parse(baseUrl)
+	//Initialize the KBS client
+	kc := kbs.NewKBSClient(nil, kbsUrl, "", "", "", caCerts)
+
+	// post to KBS client with saml
+	cLog.Infof("%s:%s baseURL: %s, keyID: %s : start to retrieve key from KMS", endpoint, funcName, baseUrl, keyID)
+	keyResp, err := kc.TransferKeyWithSaml(keyID, string(saml))
+	if err != nil {
+		cLog.WithError(err).Errorf("%s:%s %s : Failed to retrieve key from KMS", endpoint, funcName, message.AppRuntimeErr)
+		return nil, errors.Wrap(err, "Failed to retrieve key ")
+	}
+	cLog.Infof("%s:%s Successfully got key from KBS", endpoint, funcName)
+
+	key, err := base64.StdEncoding.DecodeString(keyResp.WrappedKey)
+	if err != nil {
+		cLog.WithError(err).Errorf("Failed to decode key")
+		return nil, errors.Wrap(err, "Failed to decode key")
+	}
+	err = cacheKeyInMemory(hwid, keyID, key)
+	if err != nil {
+		cLog.WithError(err).Errorf("Failed to cache key")
 	}
 	return key, nil
 }

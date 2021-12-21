@@ -53,7 +53,7 @@ func (k *kbsClient) CreateKey(keyRequest *kbs.KeyRequest) (*kbs.KeyResponse, err
 }
 
 // GetKey performs a POST to /keys/{id} to retrieve the actual key data from the KBS
-func (k *kbsClient) GetKey(keyId, pubKey string) (*kbs.KeyTransferAttributes, error) {
+func (k *kbsClient) GetKey(keyId, pubKey string) (*kbs.KeyTransferResponse, error) {
 	log.Trace("kbs/client:TransferKey() Entering")
 	defer log.Trace("kbs/client:TransferKey() Leaving")
 
@@ -73,7 +73,7 @@ func (k *kbsClient) GetKey(keyId, pubKey string) (*kbs.KeyTransferAttributes, er
 	}
 
 	// Parse response
-	var key kbs.KeyTransferAttributes
+	var key kbs.KeyTransferResponse
 	err = json.Unmarshal(rsp, &key)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error unmarshalling key retrieval response")
@@ -110,6 +110,35 @@ func (k *kbsClient) TransferKey(keyId string) (string, string, error) {
 
 	// Parse response headers
 	return rsp.Header.Get("Nonce"), rsp.Header.Get("Attestation-Type"), nil
+}
+
+// TransferKeyWithSaml performs a POST to /keys/{id}/transfer to retrieve the actual key data from the KBS
+func (k *kbsClient) TransferKeyWithSaml(keyId string, saml string) (*kbs.KeyTransferResponse, error) {
+	log.Trace("kbs/client:TransferKeyWithSaml() Entering")
+	defer log.Trace("kbs/client:TransferKeyWithSaml() Leaving")
+
+	keyURL, _ := url.Parse("keys/" + keyId + "/transfer")
+	reqURL := k.BaseURL.ResolveReference(keyURL)
+	req, err := http.NewRequest("POST", reqURL.String(), strings.NewReader(saml))
+	if err != nil {
+		return nil, errors.Wrap(err, "Error initializing key transfer request")
+	}
+
+	// Set the request headers
+	req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+	req.Header.Set("Content-Type", constants.HTTPMediaTypeSaml)
+	rsp, err := util.SendNoAuthRequest(req, k.CaCerts)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error response from key transfer request")
+	}
+
+	var response kbs.KeyTransferResponse
+	err = json.Unmarshal(rsp, &response)
+	if err != nil {
+		return nil, errors.New("Error unmarshalling key transfer response")
+	}
+
+	return &response, nil
 }
 
 // TransferKeyWithEvidence performs a POST to /keys/{key_id}/transfer to retrieve the actual key data from the KBS

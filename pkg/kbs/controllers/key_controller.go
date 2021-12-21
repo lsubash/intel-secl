@@ -255,9 +255,8 @@ func (kc *KeyController) Transfer(responseWriter http.ResponseWriter, request *h
 		return nil, status, err
 	}
 
-	transferKeyResponse := kbs.KeyTransferAttributes{
-		KeyId:   id,
-		KeyData: base64.StdEncoding.EncodeToString(wrappedKey.([]byte)),
+	transferKeyResponse := kbs.KeyTransferResponse{
+		WrappedKey: base64.StdEncoding.EncodeToString(wrappedKey.([]byte)),
 	}
 
 	secLog.WithField("Id", id).Infof("controllers/key_controller:Transfer() %s: Key transferred using Envelope key by: %s", commLogMsg.PrivilegeModified, request.RemoteAddr)
