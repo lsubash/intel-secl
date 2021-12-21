@@ -18,7 +18,7 @@ type KBSClient interface {
 	CreateKey(*kbs.KeyRequest) (*kbs.KeyResponse, error)
 	GetKey(string, string) (*kbs.KeyTransferResponse, error)
 	TransferKey(string) (string, string, error)
-	TransferKeyWithSaml(string, string) (*kbs.KeyTransferResponse, error)
+	TransferKeyWithSaml(string, string) ([]byte, error)
 	TransferKeyWithEvidence(string, string, string, *kbs.KeyTransferRequest) (*kbs.KeyTransferResponse, error)
 }
 

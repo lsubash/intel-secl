@@ -73,6 +73,58 @@ func NewKeyTransferController(rm *keymanager.RemoteManager, ps domain.KeyTransfe
 	}
 }
 
+// TransferWithSaml : Function to perform key transfer with saml report
+func (kc *KeyTransferController) TransferWithSaml(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+	defaultLog.Trace("controllers/key_transfer_controller:TransferWithSaml() Entering")
+	defer defaultLog.Trace("controllers/key_transfer_controller:TransferWithSaml() Leaving")
+
+	if request.Header.Get("Content-Type") != constants.HTTPMediaTypeSaml {
+		return nil, http.StatusUnsupportedMediaType, &commErr.ResourceError{Message: "Invalid Content-Type"}
+	}
+
+	if request.ContentLength == 0 {
+		secLog.Error("controllers/key_transfer_controller:TransferWithSaml() The request body was not provided")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
+	}
+
+	bytes, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		secLog.WithError(err).Errorf("controllers/key_transfer_controller:TransferWithSaml() %s : Unable to read request body", commLogMsg.InvalidInputBadEncoding)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to read request body"}
+	}
+
+	// Unmarshal saml report in request
+	var samlReport *saml.Saml
+	err = xml.Unmarshal(bytes, &samlReport)
+	if err != nil {
+		secLog.WithError(err).Errorf("controllers/key_transfer_controller:TransferWithSaml() %s : SAML report unmarshal failed", commLogMsg.InvalidInputBadParam)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Failed to unmarshal SAML report"}
+	}
+
+	// Validate saml report in request
+	keyId := uuid.MustParse(mux.Vars(request)["id"])
+	trusted, bindingCert := keytransfer.IsTrustedByHvs(string(bytes), samlReport, keyId, kc.keyConfig, kc.remoteManager)
+	if !trusted {
+		secLog.Error("controllers/key_transfer_controller:TransferWithSaml() Client not trusted by HVS")
+		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Client not trusted by HVS"}
+	}
+	envelopeKey := bindingCert.PublicKey.(*rsa.PublicKey)
+
+	secretKey, status, err := getSecretKey(kc.remoteManager, keyId)
+	if err != nil {
+		return nil, status, err
+	}
+
+	// Wrap secret key with binding key
+	wrappedKey, status, err := wrapKey(envelopeKey, secretKey.([]byte), sha256.New(), []byte("TPM2\000"))
+	if err != nil {
+		return nil, status, err
+	}
+
+	secLog.WithField("Id", keyId).Infof("controllers/key_transfer_controller:TransferWithSaml() %s: Key transferred using SAML report by: %s", commLogMsg.AuthorizedAccess, request.RemoteAddr)
+	return wrappedKey, http.StatusOK, nil
+}
+
 //Transfer : Function to perform key transfer
 func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_controller:Transfer() Entering")
@@ -88,60 +140,6 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 			defaultLog.WithError(err).Error("controllers/key_transfer_controller:Transfer() Key retrieval failed")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve key"}
 		}
-	}
-
-	if key.TransferPolicyID == kc.keyConfig.DefaultTransferPolicyId {
-		defaultLog.Info("controllers/key_transfer_controller:Transfer() Key transfer request for SAML-based key transfer")
-
-		if request.Header.Get("Content-Type") != constants.HTTPMediaTypeSaml {
-			defaultLog.Error("controllers/key_transfer_controller:Transfer() Invalid Content-Type")
-			return nil, http.StatusUnsupportedMediaType, &commErr.ResourceError{Message: "Invalid Content-Type"}
-		}
-
-		if request.ContentLength == 0 {
-			secLog.Error("controllers/key_transfer_controller:Transfer() The request body was not provided")
-			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
-		}
-
-		bytes, err := ioutil.ReadAll(request.Body)
-		if err != nil {
-			secLog.WithError(err).Errorf("controllers/key_transfer_controller:Transfer() %s : Unable to read request body", commLogMsg.InvalidInputBadEncoding)
-			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to read request body"}
-		}
-
-		// Unmarshal saml report in request
-		var samlReport *saml.Saml
-		err = xml.Unmarshal(bytes, &samlReport)
-		if err != nil {
-			secLog.WithError(err).Errorf("controllers/key_transfer_controller:Transfer() %s : SAML report unmarshal failed", commLogMsg.InvalidInputBadParam)
-			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Failed to unmarshal SAML report"}
-		}
-
-		// Validate saml report in request
-		trusted, bindingCert := keytransfer.IsTrustedByHvs(string(bytes), samlReport, keyId, kc.keyConfig, kc.remoteManager)
-		if !trusted {
-			secLog.Error("controllers/key_transfer_controller:Transfer() Client not trusted by HVS")
-			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Client not trusted by HVS"}
-		}
-		envelopeKey := bindingCert.PublicKey.(*rsa.PublicKey)
-
-		secretKey, status, err := getSecretKey(kc.remoteManager, keyId)
-		if err != nil {
-			return nil, status, err
-		}
-
-		// Wrap secret key with binding key
-		wrappedKey, status, err := wrapKey(envelopeKey, secretKey.([]byte), sha256.New(), []byte("TPM2\000"))
-		if err != nil {
-			return nil, status, err
-		}
-
-		transferResponse := kbs.KeyTransferResponse{
-			WrappedKey: base64.StdEncoding.EncodeToString(wrappedKey.([]byte)),
-		}
-
-		secLog.WithField("Id", keyId).Infof("controllers/key_transfer_controller:Transfer() %s: Key transferred using SAML report by: %s", commLogMsg.AuthorizedAccess, request.RemoteAddr)
-		return transferResponse, http.StatusOK, nil
 	}
 
 	transferPolicy, err := kc.policyStore.Retrieve(key.TransferPolicyID)

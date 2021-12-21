@@ -13,6 +13,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/directory"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
+	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 )
 
@@ -29,6 +30,9 @@ func setKeyTransferRoutes(router *mux.Router, endpointUrl string, config domain.
 
 	router.Handle(keyIdExpr+"/transfer",
 		ErrorHandler(JsonResponseHandler(keyTransferController.Transfer))).Methods("POST")
+
+	router.Handle(keyIdExpr+"/transfer",
+		ErrorHandler(ResponseHandler(keyTransferController.TransferWithSaml))).Methods("POST").Headers("Accept", consts.HTTPMediaTypeOctetStream)
 
 	return router
 }

@@ -113,7 +113,7 @@ func (k *kbsClient) TransferKey(keyId string) (string, string, error) {
 }
 
 // TransferKeyWithSaml performs a POST to /keys/{id}/transfer to retrieve the actual key data from the KBS
-func (k *kbsClient) TransferKeyWithSaml(keyId string, saml string) (*kbs.KeyTransferResponse, error) {
+func (k *kbsClient) TransferKeyWithSaml(keyId, saml string) ([]byte, error) {
 	log.Trace("kbs/client:TransferKeyWithSaml() Entering")
 	defer log.Trace("kbs/client:TransferKeyWithSaml() Leaving")
 
@@ -125,20 +125,14 @@ func (k *kbsClient) TransferKeyWithSaml(keyId string, saml string) (*kbs.KeyTran
 	}
 
 	// Set the request headers
-	req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+	req.Header.Set("Accept", constants.HTTPMediaTypeOctetStream)
 	req.Header.Set("Content-Type", constants.HTTPMediaTypeSaml)
 	rsp, err := util.SendNoAuthRequest(req, k.CaCerts)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error response from key transfer request")
 	}
 
-	var response kbs.KeyTransferResponse
-	err = json.Unmarshal(rsp, &response)
-	if err != nil {
-		return nil, errors.New("Error unmarshalling key transfer response")
-	}
-
-	return &response, nil
+	return rsp, nil
 }
 
 // TransferKeyWithEvidence performs a POST to /keys/{key_id}/transfer to retrieve the actual key data from the KBS

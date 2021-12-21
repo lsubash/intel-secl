@@ -10,6 +10,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
+	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/kmipclient"
@@ -47,6 +49,7 @@ var _ = Describe("KeyController", func() {
 	var policyStore *mocks.MockKeyTransferPolicyStore
 	var remoteManager *keymanager.RemoteManager
 	var keyController *controllers.KeyController
+	var keyTransferController *controllers.KeyTransferController
 
 	keyPair, _ := rsa.GenerateKey(rand.Reader, 2048)
 	publicKey := &keyPair.PublicKey
@@ -55,9 +58,11 @@ var _ = Describe("KeyController", func() {
 		Type:  "PUBLIC KEY",
 		Bytes: pubKeyBytes,
 	}
-	validEnvelopeKey := pem.EncodeToMemory(publicKeyInPem)
 
+	validEnvelopeKey := pem.EncodeToMemory(publicKeyInPem)
 	invalidEnvelopeKey := strings.Replace(strings.Replace(string(validEnvelopeKey), "-----BEGIN PUBLIC KEY-----\n", "", 1), "-----END PUBLIC KEY-----", "", 1)
+	validSamlReport, _ := ioutil.ReadFile(validSamlReportPath)
+	invalidSamlReport, _ := ioutil.ReadFile(invalidSamlReportPath)
 
 	mockClient := kmipclient.NewMockKmipClient()
 	mockClient.On("CreateSymmetricKey", mock.Anything, mock.Anything).Return("1", nil)
@@ -66,6 +71,11 @@ var _ = Describe("KeyController", func() {
 	keyManager := keymanager.NewKmipManager(mockClient)
 
 	newId, _ := uuid.NewRandom()
+	kcc := domain.KeyTransferControllerConfig{
+		SamlCertsDir:        samlCertsDir,
+		TrustedCaCertsDir:   trustedCaCertsDir,
+		TpmIdentityCertsDir: tpmIdentityCertsDir,
+	}
 
 	BeforeEach(func() {
 		router = mux.NewRouter()
@@ -73,6 +83,7 @@ var _ = Describe("KeyController", func() {
 		policyStore = mocks.NewFakeKeyTransferPolicyStore()
 		remoteManager = keymanager.NewRemoteManager(keyStore, keyManager, endpointUrl)
 		keyController = controllers.NewKeyController(remoteManager, policyStore, newId)
+		keyTransferController = controllers.NewKeyTransferController(remoteManager, policyStore, kcc, nil, nil)
 	})
 
 	// Specs for HTTP Post to "/keys"
@@ -123,9 +134,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -145,9 +156,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -168,9 +179,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -190,9 +201,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -213,9 +224,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -235,9 +246,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -258,9 +269,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -316,9 +327,9 @@ var _ = Describe("KeyController", func() {
 					"/keys",
 					strings.NewReader(keyJson),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -338,9 +349,9 @@ var _ = Describe("KeyController", func() {
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(envelopeKey),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypePlain)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
@@ -356,9 +367,9 @@ var _ = Describe("KeyController", func() {
 					"/keys/87d59b82-33b7-47e7-8fcb-6f7f12c82719/transfer",
 					strings.NewReader(envelopeKey),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypePlain)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
@@ -374,9 +385,9 @@ var _ = Describe("KeyController", func() {
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(envelopeKey),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypePlain)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -393,9 +404,9 @@ var _ = Describe("KeyController", func() {
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(envelopeKey),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypePlain)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
@@ -411,12 +422,87 @@ var _ = Describe("KeyController", func() {
 					"/keys/73755fda-c910-46be-821f-e8ddeab189e9/transfer",
 					strings.NewReader(envelopeKey),
 				)
+				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypePlain)
-				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusNotFound))
+			})
+		})
+	})
+
+	Describe("Transfer using saml report", func() {
+		Context("Provide a valid saml report", func() {
+			It("Should transfer an existing Key", func() {
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.TransferWithSaml))).Methods(http.MethodPost)
+				samlReport := string(validSamlReport)
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
+					strings.NewReader(samlReport),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+		Context("Provide a saml report with overall trust false", func() {
+			It("Should fail to transfer Key", func() {
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.TransferWithSaml))).Methods(http.MethodPost)
+				samlReport := strings.ReplaceAll(string(validSamlReport), "true", "false")
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
+					strings.NewReader(samlReport),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnauthorized))
+			})
+		})
+		Context("Provide a saml report with unknown signer", func() {
+			It("Should fail to transfer Key", func() {
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.TransferWithSaml))).Methods(http.MethodPost)
+				samlReport := string(invalidSamlReport)
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
+					strings.NewReader(samlReport),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnauthorized))
+			})
+		})
+		Context("Provide an invalid saml report", func() {
+			It("Should fail to transfer Key", func() {
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.TransferWithSaml))).Methods(http.MethodPost)
+				samlReport := `saml`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
+					strings.NewReader(samlReport),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeOctetStream)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeSaml)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -484,7 +570,7 @@ var _ = Describe("KeyController", func() {
 				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var keyResponses []kbs.KeyResponse
-				json.Unmarshal(w.Body.Bytes(), &keyResponses)
+				_ = json.Unmarshal(w.Body.Bytes(), &keyResponses)
 				// Verifying mocked data of 3 keys
 				Expect(len(keyResponses)).To(Equal(3))
 			})
@@ -511,7 +597,7 @@ var _ = Describe("KeyController", func() {
 				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var keyResponses []kbs.KeyResponse
-				json.Unmarshal(w.Body.Bytes(), &keyResponses)
+				_ = json.Unmarshal(w.Body.Bytes(), &keyResponses)
 				// Verifying mocked data of 1 key
 				Expect(len(keyResponses)).To(Equal(1))
 			})
@@ -538,7 +624,7 @@ var _ = Describe("KeyController", func() {
 				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var keyResponses []kbs.KeyResponse
-				json.Unmarshal(w.Body.Bytes(), &keyResponses)
+				_ = json.Unmarshal(w.Body.Bytes(), &keyResponses)
 				// Verifying mocked data of 1 key
 				Expect(len(keyResponses)).To(Equal(1))
 			})
@@ -565,7 +651,7 @@ var _ = Describe("KeyController", func() {
 				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var keyResponses []kbs.KeyResponse
-				json.Unmarshal(w.Body.Bytes(), &keyResponses)
+				_ = json.Unmarshal(w.Body.Bytes(), &keyResponses)
 				// Verifying mocked data of 1 key
 				Expect(len(keyResponses)).To(Equal(1))
 			})
@@ -592,7 +678,7 @@ var _ = Describe("KeyController", func() {
 				Expect(w.Code).To(Equal(http.StatusOK))
 
 				var keyResponses []kbs.KeyResponse
-				json.Unmarshal(w.Body.Bytes(), &keyResponses)
+				_ = json.Unmarshal(w.Body.Bytes(), &keyResponses)
 				// Verifying mocked data of 3 keys
 				Expect(len(keyResponses)).To(Equal(3))
 			})

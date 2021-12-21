@@ -5,7 +5,6 @@
 package controllers
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"github.com/google/uuid"
@@ -202,18 +201,12 @@ func transferKey(getFlavor bool, hwid string, kUrl string, id string, cfg *confi
 
 	// post to KBS client with saml
 	cLog.Infof("%s:%s baseURL: %s, keyID: %s : start to retrieve key from KMS", endpoint, funcName, baseUrl, keyID)
-	keyResp, err := kc.TransferKeyWithSaml(keyID, string(saml))
+	key, err := kc.TransferKeyWithSaml(keyID, string(saml))
 	if err != nil {
 		cLog.WithError(err).Errorf("%s:%s %s : Failed to retrieve key from KMS", endpoint, funcName, message.AppRuntimeErr)
 		return nil, errors.Wrap(err, "Failed to retrieve key ")
 	}
 	cLog.Infof("%s:%s Successfully got key from KBS", endpoint, funcName)
-
-	key, err := base64.StdEncoding.DecodeString(keyResp.WrappedKey)
-	if err != nil {
-		cLog.WithError(err).Errorf("Failed to decode key")
-		return nil, errors.Wrap(err, "Failed to decode key")
-	}
 	err = cacheKeyInMemory(hwid, keyID, key)
 	if err != nil {
 		cLog.WithError(err).Errorf("Failed to cache key")
