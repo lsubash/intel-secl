@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/intel-secl/intel-secl/v5/pkg/clients/fds"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	testutility "github.com/intel-secl/intel-secl/v5/pkg/ihub/test"
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
@@ -68,7 +67,7 @@ func TestGetHostReportsSGX(t *testing.T) {
 	}
 }
 
-func Test_initializeSKCClient(t *testing.T) {
+func Test_initializeFDSClient(t *testing.T) {
 	server := testutility.MockServer(t)
 	defer server.Close()
 
@@ -101,7 +100,6 @@ func Test_initializeSKCClient(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		FDSClient = &fds.Client{}
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := initializeFDSClient(tt.args.con, tt.args.certDirectory)
 			if (err != nil) != tt.wantErr {

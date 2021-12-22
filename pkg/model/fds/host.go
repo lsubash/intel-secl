@@ -14,7 +14,7 @@ type Host struct {
 	HostName string    `json:"host_name"`
 	HostInfo *HostInfo `json:"host_info"`
 	Status   string    `json:"status"`
-	ValidTo  time.Time `json:"validTo"`
+	ValidTo  time.Time `json:"valid_to"`
 }
 
 type HostInfo struct {

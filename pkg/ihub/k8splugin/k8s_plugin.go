@@ -9,6 +9,7 @@ import (
 	"crypto"
 	"crypto/sha1"
 	"encoding/json"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/util"
 	"regexp"
 	"strconv"
 	"strings"
@@ -462,7 +463,8 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 					hostDetails.SgxEnabled = *platformData[0].HostInfo.HardwareFeatures.SGX.Enabled
 					hostDetails.SgxSupported = true
 					hostDetails.TcbUpToDate = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
-					hostDetails.ValidTo = platformData[0].ValidTo
+					validTo := util.EvaluateValidTo(platformData[0].ValidTo, kubernetes.Config.PollIntervalMinutes)
+					hostDetails.ValidTo = validTo
 				}
 
 				if platformData[0].HostInfo.HardwareFeatures.TDX != nil {
