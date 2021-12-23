@@ -11,7 +11,7 @@ else
 endif
 
 TARGETS = cms kbs ihub hvs authservice wpm wls
-K8S_TARGETS = cms kbs ihub hvs authservice aas-manager
+K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
