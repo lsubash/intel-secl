@@ -10,7 +10,7 @@ LABEL org.label-schema.name="Certificate Management Service" \
 
 COPY cmd/cms/cms /usr/bin/cms
 
-COPY build/image/entrypoint-cms.sh /entrypoint.sh
+COPY build/image/cms/entrypoint.sh /entrypoint.sh
 
 RUN touch /.container-env && chmod +x /entrypoint.sh
 

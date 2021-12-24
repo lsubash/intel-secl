@@ -12,7 +12,7 @@ LABEL org.label-schema.name="Workload Service" \
 
 COPY cmd/wls/wls  /usr/bin/wls
 
-COPY build/image/entrypoint-wls.sh /entrypoint.sh
+COPY build/image/wls/entrypoint.sh /entrypoint.sh
 
 RUN touch /.container-env && chmod +x /entrypoint.sh
 

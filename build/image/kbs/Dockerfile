@@ -10,7 +10,7 @@ LABEL org.label-schema.name="Key Broker Service" \
 
 COPY cmd/kbs/kbs /usr/bin/kbs
 
-COPY build/image/entrypoint-kbs.sh /entrypoint.sh
+COPY build/image/kbs/entrypoint.sh /entrypoint.sh
 
 # Copy upgrade scripts
 RUN mkdir -p /config

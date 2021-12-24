@@ -3,14 +3,14 @@
 
 FROM centos:8
 
-LABEL org.label-schema.name="Integration Hub" \
+LABEL org.label-schema.name="Authservice" \
       org.label-schema.vendor="Intel Corporation" \
       org.label-schema.license="BSD-3-Clause" \
       org.label-schema.url="https://github.com/intel-secl/intel-secl"
 
-COPY cmd/ihub/ihub /usr/bin/ihub
+COPY cmd/authservice/authservice /usr/bin/authservice
 
-COPY build/image/entrypoint-ihub.sh /entrypoint.sh
+COPY build/image/authservice/entrypoint.sh /entrypoint.sh
 
 RUN touch /.container-env && chmod +x /entrypoint.sh
 

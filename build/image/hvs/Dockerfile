@@ -16,7 +16,7 @@ COPY build/linux/hvs/schema /tmp/schema
 
 COPY build/linux/hvs/templates /tmp/templates
 
-COPY build/image/entrypoint-hvs.sh /entrypoint.sh
+COPY build/image/hvs/entrypoint.sh /entrypoint.sh
 
 RUN mkdir -p /opt/hvs/privacyca-aik-requests && chmod +0766 /opt/hvs/privacyca-aik-requests
 
