@@ -105,8 +105,6 @@ func New(cfg *Config) (*DataStore, error) {
 		return nil, errors.Wrapf(dbErr, "Failed to connect to db after %d attempts", numAttempts)
 	}
 	db.SingularTable(true)
-	db.LogMode(true)
-	db.SetLogger(defaultLog)
 
 	store.Db = db
 	return &store, nil
