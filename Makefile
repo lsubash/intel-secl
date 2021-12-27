@@ -41,11 +41,11 @@ config-upgrade-binary:
 	rm -rf installer
 
 %-docker: %
-	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/$*/Dockerfile -t isecl/$*:$(VERSION) .
+	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/$*/Dockerfile -t $(DOCKER_REGISTRY)isecl/$*:$(VERSION)-$(GITCOMMIT) .
 
 hvs-docker: hvs
 	cd ./upgrades/hvs/db && make all && cd -
-	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/hvs/Dockerfile -t isecl/hvs:$(VERSION) .
+	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/hvs/Dockerfile -t $(DOCKER_REGISTRY)isecl/hvs:$(VERSION)-$(GITCOMMIT) .
 
 %-swagger:
 	env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
