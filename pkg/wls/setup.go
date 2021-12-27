@@ -164,6 +164,7 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 			Password: viper.GetString("wls-service-password"),
 		},
 		AASApiUrl: viper.GetString("aas-base-url"),
+		HVSApiUrl: viper.GetString("hvs-base-url"),
 		ServerConfig: commConfig.ServerConfig{
 			Port:              viper.GetInt("server-port"),
 			ReadTimeout:       viper.GetDuration("server-read-timeout"),
@@ -183,7 +184,5 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		TrustedCaCertsDir: constants.TrustedCaCertsDir,
 		BearerToken:       viper.GetString("bearer-token"),
 	})
-	runner.AddTask("hvs-connection", "", &tasks.UpdateServiceConfig{HVSApiUrl: viper.GetString("hvs-base-url")})
-
 	return runner, nil
 }
