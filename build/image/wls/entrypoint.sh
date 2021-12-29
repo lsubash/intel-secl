@@ -47,4 +47,4 @@ for i in "${secretFiles[@]}"; do
     unset $i
 done
 
-wls startServer
+wls run
