@@ -11,7 +11,7 @@ import (
 )
 
 const helpStr = `Usage:
-    workload-service <command> [arguments]
+    wls <command> [arguments]
 
 Available Commands:
     -h|--help            Show this help message

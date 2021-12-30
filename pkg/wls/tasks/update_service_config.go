@@ -35,6 +35,7 @@ var envHelp = map[string]string{
 	"LOG_MAX_LENGTH":             "Max length of log statement",
 	"LOG_ENABLE_STDOUT":          "Enable console log",
 	"AAS_BASE_URL":               "AAS Base URL",
+	"HVS_BASE_URL":               "HVS Base URL",
 	"ATTESTATION_TYPE":           "Type of Attestation Service",
 	"ATTESTATION_SERVICE_URL":    "Base URL for the Attestation Service",
 	"SERVER_PORT":                "The Port on which Server Listens to",
