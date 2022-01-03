@@ -79,13 +79,11 @@ auto_install() {
   local cprefix=${2}
   local packages=$(eval "echo \$${cprefix}_PACKAGES")
   # detect available package management tools. start with the less likely ones to differentiate.
-if [ "$OS" == "rhel" ]
-then
-  yum -y install $packages
-elif [ "$OS" == "ubuntu" ]
-then
-  apt -y install $packages
-fi
+  if [ "$OS" == "rhel" ]; then
+    yum -y install $packages
+  elif [ "$OS" == "ubuntu" ]; then
+    apt -y install $packages
+  fi
 }
 
 # SCRIPT EXECUTION
@@ -111,7 +109,7 @@ logRotate_install() {
     if [ -z "$logrotate" ]; then
       echo "logrotate is not installed"
     else
-      echo  "logrotate installed in $logrotate"
+      echo "logrotate installed in $logrotate"
     fi
 }
 
