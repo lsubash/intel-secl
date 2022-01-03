@@ -5,15 +5,15 @@ COMPONENT_NAME=wls
 SERVICE_USERNAME=wls
 
 # Upgrade if component is already installed
-if command -v COMPONENT_OLD_NAME &>/dev/null; then
+if command -v $COMPONENT_NAME &>/dev/null || command -v $COMPONENT_OLD_NAME &>/dev/null ; then
   n=0
   until [ "$n" -ge 3 ]
   do
-  echo "$COMPONENT_OLD_NAME is already installed, Do you want to proceed with the upgrade? [y/n]"
+  echo "$COMPONENT_NAME is already installed, Do you want to proceed with the upgrade? [y/n]"
   read UPGRADE_NEEDED
   if [ $UPGRADE_NEEDED == "y" ] || [ $UPGRADE_NEEDED == "Y" ] ; then
     echo "Proceeding with the upgrade.."
-    ./${COMPONENT_OLD_NAME}_upgrade.sh
+    ./${COMPONENT_NAME}_upgrade.sh
     exit $?
   elif [ $UPGRADE_NEEDED == "n" ] || [ $UPGRADE_NEEDED == "N" ] ; then
     echo "Exiting the installation.."
@@ -45,7 +45,7 @@ CERTDIR_TRUSTEDJWTCERTS=$CERTS_PATH/trustedjwt
 CERTDIR_TRUSTEDCAS=$CERTS_PATH/trustedca/
 
 
-for directory in $BIN_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDJWTCERTS $CERTDIR_TRUSTEDCAS $CREDENTIAL_PATH; do
+for directory in $BIN_PATH $LOG_PATH $CONFIG_PATH $CERTS_PATH $CERTDIR_TRUSTEDJWTCERTS $CERTDIR_TRUSTEDCAS; do
   # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
   mkdir -p $directory
   if [ $? -ne 0 ]; then
