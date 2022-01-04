@@ -165,7 +165,7 @@ if [ "${WLS_NOSETUP,,}" == "true" ]; then
 else 
     $COMPONENT_NAME setup all --force -f $env_file
     SETUPRESULT=$?
-    chown -R wls:wls /etc/wls/
+    chown -R $SERVICE_USERNAME:$SERVICE_USERNAME $CONFIG_PATH
     if [ ${SETUPRESULT} == 0 ]; then
         systemctl start $COMPONENT_NAME
         echo "Waiting for daemon to settle down before checking status"
