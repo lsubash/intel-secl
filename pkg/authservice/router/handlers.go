@@ -28,10 +28,10 @@ func permissionsHandler(eh endpointHandler, permissionNames []string) endpointHa
 
 	return func(w http.ResponseWriter, r *http.Request) error {
 		privileges, err := comctx.GetUserPermissions(r)
+		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			_, writeErr := w.Write([]byte("Could not get user permissions from http context"))
-			w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 			if writeErr != nil {
 				defaultLog.WithError(writeErr).Error("Failed to write response")
 			}
