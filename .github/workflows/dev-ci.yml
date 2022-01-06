@@ -23,6 +23,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Add Running Label
+      if: github.event_name == 'pull_request'
       uses: actions/github-script@v2
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
@@ -53,6 +54,7 @@ jobs:
         echo $value
 
     - name: Add Coverage Label
+      if: github.event_name == 'pull_request'
       uses: actions/github-script@v2
       with:
        github-token: ${{secrets.GITHUB_TOKEN}}
