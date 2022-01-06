@@ -56,7 +56,12 @@ func (uc UpdateServiceConfig) Run() error {
 	if uc.AASApiUrl == "" {
 		return errors.New("WLS configuration not provided: AAS_BASE_URL is not set")
 	}
+	if uc.HVSApiUrl == "" {
+		return errors.New("WLS configuration not provided: HVS_BASE_URL is not set")
+	}
+
 	(*uc.AppConfig).AASApiUrl = uc.AASApiUrl
+	(*uc.AppConfig).HVSApiUrl = uc.HVSApiUrl
 	(*uc.AppConfig).Log = commConfig.LogConfig{
 		MaxLength:    viper.GetInt("log-max-length"),
 		EnableStdout: viper.GetBool("log-enable-stdout"),
@@ -69,12 +74,6 @@ func (uc UpdateServiceConfig) Run() error {
 	}
 	(*uc.AppConfig).Server = uc.ServerConfig
 	(*uc.AppConfig).WLS = uc.ServiceConfig
-
-	fmt.Println("Setting up HVS configuration ...")
-	if uc.HVSApiUrl == "" {
-		return errors.New("setup/hvs:Run() Missing HVS Endpoint URL in environment")
-	}
-	log.Info("setup/hvs:Run() Updated HVS endpoint in configuration")
 
 	return nil
 }
@@ -89,12 +88,12 @@ func (uc UpdateServiceConfig) Validate() error {
 	if (*uc.AppConfig).AASApiUrl == "" {
 		return errors.New("AAS API url is not set in the configuration")
 	}
+	if (*uc.AppConfig).HVSApiUrl == "" {
+		return errors.New("HVS API url is not set in the configuration")
+	}
 	if (*uc.AppConfig).Server.Port < 1024 ||
 		(*uc.AppConfig).Server.Port > 65535 {
 		return errors.New("Configured port is not valid")
-	}
-	if uc.HVSApiUrl == "" {
-		return errors.New("HVS URL is not set")
 	}
 	return nil
 }

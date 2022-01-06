@@ -141,7 +141,7 @@ func transfer_key(getFlavor bool, hwid string, kUrl string, id string, cfg *conf
 	}
 	saml, err := reportsClient.CreateSAMLReport(reportCreateRequest)
 	if err != nil {
-		cLog.WithError(err).Errorf("%s:%s %s : Failed to read HVS response body", endpoint, funcName, message.BadConnection)
+		cLog.WithError(err).Errorf("%s:%s %s : Failed to read HVS response body", endpoint, funcName, message.AppRuntimeErr)
 		log.Tracef("%+v", err)
 		return nil, errors.Wrap(err, retrievalErr+" - Failed to read HVS response")
 	}

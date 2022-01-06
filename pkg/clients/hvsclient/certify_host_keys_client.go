@@ -74,15 +74,15 @@ func (client certifyHostKeysClientImpl) SendCertifyHostKeyRequest(key *wlaModel.
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/certify_host_keys_client.go:SendCertifyHostKeyRequest() Error from response")
 	}
-	if rsp == nil {
-		return nil, errors.Wrap(err, "hvsclient/certify_host_keys_client.go:SendCertifyHostKeyRequest() Failed to register host signing/binding key with HVS")
-	}
 	defer func() {
 		derr := rsp.Body.Close()
 		if derr != nil {
 			log.WithError(derr).Error("Error closing response body")
 		}
 	}()
+	if rsp.StatusCode != http.StatusCreated {
+		return nil, errors.Errorf("hvsclient/certify_host_keys_client.go:SendCertifyHostKeyRequest() request made to %s returned status %d", certifyKeyUrl.String(), rsp.StatusCode)
+	}
 	body, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/certify_host_keys_client.go:SendCertifyHostKeyRequest() Error from response")

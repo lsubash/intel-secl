@@ -182,7 +182,7 @@ func (tc *taClient) GetBindingKeyCertificate() ([]byte, error) {
 		return []byte{}, errors.Wrap(err, "client/trust_agent_client:GetBindingKeyCertificate() Error while "+
 			"getting response  from Get Binding key certificate API")
 	}
-	log.Info("clients/trust_agent_client:GetAIK() Successfully received Binding key certificate from TA")
+	log.Info("clients/trust_agent_client:GetBindingKeyCertificate() Successfully received Binding key certificate from TA")
 	return httpResponse, nil
 }
 
