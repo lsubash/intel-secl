@@ -624,13 +624,18 @@ func (kc *KeyTransferController) getWrappedKey(keyAlgorithm, userData string, id
 		return nil, status, err
 	}
 
-	if keyAlgorithm == consts.CRYPTOALG_RSA {
-		swk, err := CreateSwk()
-		if err != nil {
-			secLog.Error("controllers/key_transfer_controller:getWrappedKey() Error in creating SWK key")
-			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error in creating SWK key"}
-		}
+	swk, err := CreateSwk()
+	if err != nil {
+		secLog.Error("controllers/key_transfer_controller:getWrappedKey() Error in creating SWK key")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error in creating SWK key"}
+	}
 
+	var bytes, keyByte, nonceByte []byte
+	switch keyAlgorithm {
+	case consts.CRYPTOALG_AES:
+		keyByte = secretKey.([]byte)
+
+	case consts.CRYPTOALG_RSA:
 		privatePem := pem.EncodeToMemory(
 			&pem.Block{
 				Type:  "RSA PRIVATE KEY",
@@ -643,45 +648,52 @@ func (kc *KeyTransferController) getWrappedKey(keyAlgorithm, userData string, id
 			defaultLog.Error("controllers/key_transfer_controller:getWrappedKey() Failed to decode secret key")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to decode secret key"}
 		}
-		// Wrap secret key with swk
-		bytes, nonceByte, err := AesEncrypt(decodedBlock.Bytes, swk)
-		if err != nil {
-			defaultLog.Error("controllers/key_transfer_controller:getWrappedKey() Failed to encrypt secret key with swk")
-			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to encrypt secret key with swk"}
-		}
+		keyByte = decodedBlock.Bytes
 
-		keyMetaDataSize := ivSize + tagSize + wrapSize
-		ivLength := len(nonceByte)
-		keyMetaData := make([]byte, keyMetaDataSize)
-		binary.LittleEndian.PutUint32(keyMetaData[0:], uint32(ivLength))
-		binary.LittleEndian.PutUint32(keyMetaData[4:], uint32(16))
-		binary.LittleEndian.PutUint32(keyMetaData[8:], uint32(len(bytes)))
+	case consts.CRYPTOALG_EC:
+		privatePem := pem.EncodeToMemory(
+			&pem.Block{
+				Type:  "EC PRIVATE KEY",
+				Bytes: secretKey.([]byte),
+			},
+		)
 
-		wrappedKey := []byte{}
-		wrappedKey = append(wrappedKey, keyMetaData...)
-		wrappedKey = append(wrappedKey, nonceByte...)
-		wrappedKey = append(wrappedKey, bytes...)
-
-		// Wrap SWK with public key
-		wrappedSWK, status, err := wrapKey(publicKey, swk, sha1.New(), nil)
-		if err != nil {
-			return nil, status, err
+		decodedBlock, _ := pem.Decode(privatePem)
+		if decodedBlock == nil {
+			defaultLog.Error("controllers/key_transfer_controller:getWrappedKey() Failed to decode secret key")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to decode secret key"}
 		}
-		transferResponse := kbs.KeyTransferResponse{
-			WrappedKey: base64.StdEncoding.EncodeToString(wrappedKey),
-			WrappedSWK: base64.StdEncoding.EncodeToString(wrappedSWK.([]byte)),
-		}
-		return transferResponse, http.StatusOK, nil
+		keyByte = decodedBlock.Bytes
 	}
 
-	// Wrap secret key with public key
-	wrappedKey, status, err := wrapKey(publicKey, secretKey.([]byte), sha1.New(), nil)
+	// Wrap secret key with swk
+	bytes, nonceByte, err = AesEncrypt(keyByte, swk)
+	if err != nil {
+		defaultLog.Error("controllers/key_transfer_controller:getWrappedKey() Failed to encrypt secret key with swk")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to encrypt secret key with swk"}
+	}
+
+	keyMetaDataSize := ivSize + tagSize + wrapSize
+	ivLength := len(nonceByte)
+	keyMetaData := make([]byte, keyMetaDataSize)
+	binary.LittleEndian.PutUint32(keyMetaData[0:], uint32(ivLength))
+	binary.LittleEndian.PutUint32(keyMetaData[4:], uint32(16))
+	binary.LittleEndian.PutUint32(keyMetaData[8:], uint32(len(bytes)))
+
+	wrappedKey := []byte{}
+	wrappedKey = append(wrappedKey, keyMetaData...)
+	wrappedKey = append(wrappedKey, nonceByte...)
+	wrappedKey = append(wrappedKey, bytes...)
+
+	// Wrap SWK with public key
+	wrappedSWK, status, err := wrapKey(publicKey, swk, sha1.New(), nil)
 	if err != nil {
 		return nil, status, err
 	}
 
 	transferResponse := kbs.KeyTransferResponse{
-		WrappedKey: base64.StdEncoding.EncodeToString(wrappedKey.([]byte)),
+		WrappedKey: base64.StdEncoding.EncodeToString(wrappedKey),
+		WrappedSWK: base64.StdEncoding.EncodeToString(wrappedSWK.([]byte)),
 	}
 	return transferResponse, http.StatusOK, nil
 }
