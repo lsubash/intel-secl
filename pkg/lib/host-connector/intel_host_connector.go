@@ -66,11 +66,15 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 
 	//check if AIK Certificate is present on host before getting host manifest
 	aikInDER, err := ic.client.GetAIK()
-	if err != nil || len(aikInDER) == 0 {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Invalid AIK"+
-			"certificate returned by TA")
+	if err != nil {
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() "+
+			"Error getting AIK certificate from TA")
 	}
-	secLog.Debug("intel_host_connector:GetHostManifestAcceptNonce() Successfully received AIK certificate in DER format")
+
+	if aikInDER == nil || len(aikInDER) == 0 {
+		return hvs.HostManifest{}, errors.New("intel_host_connector:GetHostManifestAcceptNonce() " +
+			"Empty AIK received")
+	}
 
 	hostManifest.HostInfo, err = ic.client.GetHostInfo()
 	if err != nil {

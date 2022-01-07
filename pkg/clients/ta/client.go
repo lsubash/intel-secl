@@ -138,20 +138,20 @@ func (tc *taClient) GetAIK() ([]byte, error) {
 
 	requestURL, err := url.Parse(tc.BaseURL.String() + "/aik")
 	if err != nil {
-		return []byte{}, errors.New("client/trust_agent_client:GetAIK() Error forming GET AIK certificate URL")
+		return nil, errors.Wrap(err, "client/trust_agent_client:GetAIK() Error forming GET AIK certificate URL")
 	}
 	log.Debug("clients/trust_agent_client:GetAIK() Request URL created for AIK certificate")
 
 	httpRequest, err := http.NewRequest("GET", requestURL.String(), nil)
 	if err != nil {
-		return []byte{}, err
+		return nil, err
 	}
 
 	log.Debugf("clients/trust_agent_client:GetAIK() TA AIK certificate retrieval GET request URL: %s", requestURL.String())
 
 	httpResponse, err := util.SendRequest(httpRequest, tc.AasURL, tc.ServiceUsername, tc.ServicePassword, tc.TrustedCaCerts)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, "client/trust_agent_client:GetAIK() Error while getting response"+
+		return nil, errors.Wrap(err, "client/trust_agent_client:GetAIK() Error while getting response"+
 			" from Get AIK API")
 	}
 	log.Info("clients/trust_agent_client:GetAIK() Successfully received AIK certificate from TA")
@@ -164,13 +164,13 @@ func (tc *taClient) GetBindingKeyCertificate() ([]byte, error) {
 
 	requestURL, err := url.Parse(tc.BaseURL.String() + "/binding-key-certificate")
 	if err != nil {
-		return []byte{}, errors.New("client/trust_agent_client:GetBindingKeyCertificate() Error forming GET binding key " +
+		return nil, errors.New("client/trust_agent_client:GetBindingKeyCertificate() Error forming GET binding key " +
 			"certificate URL")
 	}
 	log.Debug("clients/trust_agent_client:GetBindingKeyCertificate() Request URL created for Binding Key certificate")
 	httpRequest, err := http.NewRequest("GET", requestURL.String(), nil)
 	if err != nil {
-		return []byte{}, err
+		return nil, err
 	}
 	httpRequest.Header.Set("Accept", "application/x-pem-file")
 
@@ -179,7 +179,7 @@ func (tc *taClient) GetBindingKeyCertificate() ([]byte, error) {
 
 	httpResponse, err := util.SendRequest(httpRequest, tc.AasURL, tc.ServiceUsername, tc.ServicePassword, tc.TrustedCaCerts)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, "client/trust_agent_client:GetBindingKeyCertificate() Error while "+
+		return nil, errors.Wrap(err, "client/trust_agent_client:GetBindingKeyCertificate() Error while "+
 			"getting response  from Get Binding key certificate API")
 	}
 	log.Info("clients/trust_agent_client:GetBindingKeyCertificate() Successfully received Binding key certificate from TA")
@@ -289,6 +289,6 @@ func (tc *taClient) GetMeasurementFromManifest(manifest taModel.Manifest) (taMod
 	return measurement, nil
 }
 
-func (ta *taClient) GetBaseURL() *url.URL {
-	return ta.BaseURL
+func (tc *taClient) GetBaseURL() *url.URL {
+	return tc.BaseURL
 }
