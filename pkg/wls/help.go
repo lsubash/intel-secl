@@ -30,7 +30,6 @@ Available tasks for setup:
    download-cert-tls                Generates Key pair and CSR, gets it signed from CMS
    database                         Setup workload-service database
    server                           Setup http server on given port
-   hvs-connection                   Setup task for setting up the connection to the Host Verification Service(HVS)
    download-saml-ca-cert            Setup to download SAML CA certificates from HVS
    update-service-config            Sets or Updates the Service configuration 
 `
