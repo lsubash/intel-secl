@@ -109,7 +109,7 @@ func (attestationService AttestationServiceConnection) validateService() error {
 func (attestationService AttestationServiceConnection) PrintHelp(w io.Writer) {
 	var envHelp = map[string]string{
 		"HVS_BASE_URL":  "Base URL for the Host Verification Service",
-		"SHVS_BASE_URL": "Base URL for the SGX Host Verification Service",
+		"FDS_BASE_URL":  "Base URL for the Feature Discovery Service",
 	}
 	setup.PrintEnvHelp(w, "Following environment variables are required for attestation-service-connection setup:", "", envHelp)
 	fmt.Fprintln(w, "")
