@@ -1,6 +1,6 @@
 GITCOMMIT := $(shell git describe --always)
 GITCOMMITDATE := $(shell git log -1 --date=short --pretty=format:%cd)
-VERSION := "v5.0.0"
+VERSION := v5.0.0
 BUILDDATE := $(shell TZ=UTC date +%Y-%m-%dT%H:%M:%S%z)
 PROXY_EXISTS := $(shell if [[ "${https_proxy}" || "${http_proxy}" ]]; then echo 1; else echo 0; fi)
 DOCKER_PROXY_FLAGS := ""
@@ -58,7 +58,7 @@ installer: clean $(patsubst %, %-installer, $(TARGETS)) aas-manager
 docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 
 %-oci-archive: %-docker
-	skopeo copy docker-daemon:isecl/$*:$(VERSION) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
+	skopeo copy docker-daemon:isecl/$*:$(VERSION)-$(GITCOMMIT) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
 
 populate-users:
 	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
