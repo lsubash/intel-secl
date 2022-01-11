@@ -11,10 +11,15 @@ else
 endif
 
 TARGETS = cms kbs ihub hvs authservice wpm wls
-K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls
+K8S_EXTENSIONS_TARGETS = admission-controller isecl-k8s-controller isecl-k8s-scheduler
+K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls $(K8S_EXTENSIONS_TARGETS)
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
+		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
+
+$(K8S_EXTENSIONS_TARGETS):
+	cd cmd/isecl-k8s-extensions/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 config-upgrade-binary:
@@ -46,6 +51,23 @@ config-upgrade-binary:
 hvs-docker: hvs
 	cd ./upgrades/hvs/db && make all && cd -
 	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/hvs/Dockerfile -t $(DOCKER_REGISTRY)isecl/hvs:$(VERSION)-$(GITCOMMIT) .
+
+isecl-k8s-extensions-pre-installer: clean $(patsubst %, %-oci-archive, $(K8S_EXTENSIONS_TARGETS))
+
+isecl-k8s-extensions-installer: isecl-k8s-extensions-pre-installer
+	mkdir -p installer/isecl-k8s-extensions/yamls
+	cp -r pkg/isecl-k8s-extensions/certificate-generation-scripts/* installer/isecl-k8s-extensions/
+	cp deployments/container-archive/oci/isecl-k8s-scheduler*.tar installer/isecl-k8s-extensions/
+	cp deployments/container-archive/oci/isecl-k8s-controller*.tar installer/isecl-k8s-extensions/
+	cp deployments/container-archive/oci/admission-controller*.tar installer/isecl-k8s-extensions/
+	sed -i 's/image: isecl\/k8s-controller.*/image: isecl\/k8s-controller:'${VERSION}'/g' build/k8s/isecl-k8s-extensions/isecl-k8s-controller/isecl-controller.yaml
+	sed -i 's/image: isecl\/k8s-scheduler.*/image: isecl\/k8s-scheduler:'${VERSION}'/g' build/k8s/isecl-k8s-extensions/isecl-k8s-scheduler/isecl-scheduler.yaml
+	sed -i 's/image: isecl\/k8s-admission-controller.*/image: isecl\/k8s-admission-controller:'${VERSION}'/g' build/k8s/isecl-k8s-extensions/admission-controller/admission-controller.yaml
+	cp -r build/k8s/isecl-k8s-extensions/isecl-k8s-controller/* installer/isecl-k8s-extensions/yamls
+	cp -r build/k8s/isecl-k8s-extensions/isecl-k8s-scheduler/* installer/isecl-k8s-extensions/yamls
+	cp -r build/k8s/isecl-k8s-extensions/admission-controller/* installer/isecl-k8s-extensions/yamls
+	cp -r build/linux/isecl-k8s-extensions/config-files/* installer/isecl-k8s-extensions/
+	cd installer/ && tar -zcvf isecl-k8s-extensions-$(VERSION).tar.gz isecl-k8s-extensions
 
 %-swagger:
 	env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
@@ -97,7 +119,7 @@ k8s: $(patsubst %, %-k8s, $(K8S_TARGETS))
 	fi
 	cp tools/download-tls-certs.sh deployments/k8s/
 
-all: clean installer test k8s
+all: clean installer test k8s k8s-extensions-installer
 
 clean:
 	rm -f cover.*

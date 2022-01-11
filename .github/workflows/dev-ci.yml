@@ -87,6 +87,15 @@ jobs:
     - name: Build-kbs
       run: make kbs
 
+    - name: Build-admission-controller
+      run: make admission-controller
+
+    - name: Build-k8s-controller
+      run: make isecl-k8s-controller
+
+    - name: Build-k8s-scheduler
+      run: make isecl-k8s-scheduler
+
   docker-push:
     if: github.event_name == 'push'
     needs: [ sanity-test-build ]
@@ -134,3 +143,18 @@ jobs:
       run: |
         make kbs-docker
         docker push `docker images | grep kbs | awk '{print $1":"$2}' | awk 'NR==1'`
+
+    - name: Build-admission-controller-docker
+      run: |
+        make admission-controller-docker
+        docker push `docker images | grep admission-controller | awk '{print $1":"$2}' | awk 'NR==1'`
+
+    - name: Build-k8s-controller-docker
+      run: |
+        make isecl-k8s-controller-docker
+        docker push `docker images | grep isecl-k8s-controller | awk '{print $1":"$2}' | awk 'NR==1'`
+
+    - name: Build-k8s-scheduler-docker
+      run: |
+        make isecl-k8s-scheduler-docker
+        docker push `docker images | grep isecl-k8s-scheduler | awk '{print $1":"$2}' | awk 'NR==1'`

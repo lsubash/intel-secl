@@ -35,8 +35,8 @@ The below diagram depicts the high level architecture of the Intel<sup>®</sup>S
 | Workload Agent                           | WLA         | [https://github.com/intel-secl/workload-agent](https://github.com/intel-secl/workload-agent) |
 | Host Verification Service                | HVS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/hvs](https://github.com/intel-secl/intel-secl/tree/master/pkg/hvs) |
 | Integration Hub                          | iHUB        | [https://github.com/intel-secl/intel-secl/tree/master/pkg/ihub](https://github.com/intel-secl/intel-secl/tree/master/pkg/ihub) |
-| Workload Service                         | WLS         | [https://github.com/intel-secl/workload-service](https://github.com/intel-secl/workload-service) |
-| ISecl K8s Extensions                     | --          | [https://github.com/intel-secl/k8s-extensions](https://github.com/intel-secl/k8s-extensions) |
+| Workload Service                         | WLS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/wls](https://github.com/intel-secl/intel-secl/tree/master/pkg/wls) |
+| ISecl K8s Extensions                     | --          | [https://github.com/intel-secl/tree/master/pkg/isecl-k8s-extensions](https://github.com/intel-secl/tree/master/pkg/isecl-k8s-extensions) |
 | SGX Caching Service                      | SCS         | [https://github.com/intel-secl/sgx-caching-service](https://github.com/intel-secl/sgx-caching-service) |
 | SGX Quote Verification Service           | SQVS        | [https://github.com/intel-secl/sgx-verification-service](https://github.com/intel-secl/sgx-verification-service) |
 | SGX Host Verification Service            | SHVS        | [https://github.com/intel-secl/sgx-hvs](https://github.com/intel-secl/sgx-hvs) |
