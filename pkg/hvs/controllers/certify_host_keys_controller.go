@@ -26,10 +26,10 @@ import (
 )
 
 type CertifyHostKeysController struct {
-	CertStore *models.CertificatesStore
+	CertStore *crypt.CertificatesStore
 }
 
-func NewCertifyHostKeysController(certStore *models.CertificatesStore) *CertifyHostKeysController {
+func NewCertifyHostKeysController(certStore *crypt.CertificatesStore) *CertifyHostKeysController {
 	// CertStore should have an entry for Privacyca key
 	pcaKey, pcaCerts, err := certStore.GetKeyAndCertificates(models.CaCertTypesPrivacyCa.String())
 	if err != nil || pcaKey == nil || pcaCerts == nil {

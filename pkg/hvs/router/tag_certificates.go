@@ -6,6 +6,7 @@ package router
 
 import (
 	"fmt"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
@@ -25,7 +26,7 @@ const (
 )
 
 // SetTagCertificateRoutes registers routes for tag-certificates API
-func SetTagCertificateRoutes(router *mux.Router, cfg *config.Configuration, flavorGroupStore *postgres.FlavorGroupStore, certStore *models.CertificatesStore, hostTrustManager domain.HostTrustManager, store *postgres.DataStore) *mux.Router {
+func SetTagCertificateRoutes(router *mux.Router, cfg *config.Configuration, flavorGroupStore *postgres.FlavorGroupStore, certStore *crypt.CertificatesStore, hostTrustManager domain.HostTrustManager, store *postgres.DataStore) *mux.Router {
 	defaultLog.Trace("router/tag_certificates:SetTagCertificateRoutes() Entering")
 	defer defaultLog.Trace("router/tag_certificates:SetTagCertificateRoutes() Leaving")
 

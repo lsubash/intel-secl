@@ -11,6 +11,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	flavorVerifier "github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
@@ -28,7 +29,7 @@ type Verifier struct {
 	HostStore                       domain.HostStore
 	ReportStore                     domain.ReportStore
 	FlavorVerifier                  flavorVerifier.Verifier
-	CertsStore                      models.CertificatesStore
+	CertsStore                      crypt.CertificatesStore
 	SamlIssuer                      saml.IssuerConfiguration
 	SkipFlavorSignatureVerification bool
 	hostQuoteReportCache            map[uuid.UUID]*models.QuoteReportCache

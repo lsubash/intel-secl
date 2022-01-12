@@ -13,7 +13,6 @@ import (
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
@@ -27,7 +26,7 @@ import (
 var _ = Describe("CaCertificatesController", func() {
 	var router *mux.Router
 	var w *httptest.ResponseRecorder
-	certStore := utils.LoadCertificates(mocks2.NewFakeCertificatesPathStore())
+	certStore := crypt.LoadCertificates(mocks2.NewFakeCertificatesPathStore(), models.GetUniqueCertTypes())
 	var caCertificatesController *controllers.CaCertificatesController
 	BeforeEach(func() {
 		router = mux.NewRouter()

@@ -33,14 +33,14 @@ import (
 )
 
 type CertifyHostAiksController struct {
-	CertStore          *models.CertificatesStore
+	CertStore          *crypt.CertificatesStore
 	ECStore            domain.TpmEndorsementStore
 	AikCertValidity    int
 	AikRequestsDirPath string
 	CheckEkCertRevoke  bool
 }
 
-func NewCertifyHostAiksController(certStore *models.CertificatesStore, ecstore domain.TpmEndorsementStore, aikCertValidity int, aikReqsDir string, isCheckEkCertRevoke bool) *CertifyHostAiksController {
+func NewCertifyHostAiksController(certStore *crypt.CertificatesStore, ecstore domain.TpmEndorsementStore, aikCertValidity int, aikReqsDir string, isCheckEkCertRevoke bool) *CertifyHostAiksController {
 	defaultLog.Trace("controllers/certify_host_aiks_controller:NewCertifyHostAiksController() Entering")
 	defer defaultLog.Trace("controllers/certify_host_aiks_controller:NewCertifyHostAiksController() Leaving")
 	// CertStore should have an entry for Privacyca key

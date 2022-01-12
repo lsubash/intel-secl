@@ -7,7 +7,7 @@ package router
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
@@ -16,7 +16,7 @@ import (
 )
 
 // SetImageRoutes registers routes for image
-func SetImageRoutes(router *mux.Router, store *postgres.DataStore, conf *config.Configuration, certStore *models.CertificatesStore) *mux.Router {
+func SetImageRoutes(router *mux.Router, store *postgres.DataStore, conf *config.Configuration, certStore *crypt.CertificatesStore) *mux.Router {
 	defaultLog.Trace("router/flavors:SetFlavorRoutes() Entering")
 	defer defaultLog.Trace("router/flavors:SetFlavorRoutes() Leaving")
 

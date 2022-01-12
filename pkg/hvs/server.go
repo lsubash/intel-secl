@@ -37,8 +37,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
-
 	stdlog "log"
 
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
@@ -72,7 +70,7 @@ func (a *App) startServer() error {
 	alw, _ := auditlog.NewAuditLogDBWriter(als, c.AuditLog.BufferSize)
 
 	// Load Certificates
-	certStore := utils.LoadCertificates(a.loadCertPathStore())
+	certStore := crypt.LoadCertificates(a.loadCertPathStore(), models.GetUniqueCertTypes())
 
 	// Initialize Host trust manager
 	fgs := postgres.NewFlavorGroupStore(dataStore)
@@ -168,7 +166,7 @@ func (a *App) startServer() error {
 	return nil
 }
 
-func initHostControllerConfig(cfg *config.Configuration, certStore *models.CertificatesStore) domain.HostControllerConfig {
+func initHostControllerConfig(cfg *config.Configuration, certStore *crypt.CertificatesStore) domain.HostControllerConfig {
 	defaultLog.Trace("server:initHostControllerConfig() Entering")
 	defer defaultLog.Trace("server:initHostControllerConfig() Leaving")
 
@@ -196,7 +194,7 @@ func getDecodedDek(cfg *config.Configuration) []byte {
 	return dek
 }
 
-func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataStore, fgs *postgres.FlavorGroupStore, certStore *models.CertificatesStore, alw domain.AuditLogWriter) domain.HostTrustManager {
+func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataStore, fgs *postgres.FlavorGroupStore, certStore *crypt.CertificatesStore, alw domain.AuditLogWriter) domain.HostTrustManager {
 	defaultLog.Trace("server:InitHostTrustManager() Entering")
 	defer defaultLog.Trace("server:InitHostTrustManager() Leaving")
 
@@ -287,37 +285,37 @@ func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataSto
 	return htm
 }
 
-func (a *App) loadCertPathStore() *models.CertificatesPathStore {
+func (a *App) loadCertPathStore() *crypt.CertificatesPathStore {
 	// constants are used somewhere else in the repo
 	// change it into the configured paths after fixing all of them
 	// currently used constants:
 	//     TrustedRootCACertsDir, PrivacyCAKeyFile, PrivacyCACertFile
-	return &models.CertificatesPathStore{
-		models.CaCertTypesRootCa.String(): models.CertLocation{
+	return &crypt.CertificatesPathStore{
+		models.CaCertTypesRootCa.String(): crypt.CertLocation{
 			KeyFile:  "",
 			CertPath: constants.TrustedRootCACertsDir,
 		},
-		models.CaCertTypesEndorsementCa.String(): models.CertLocation{
+		models.CaCertTypesEndorsementCa.String(): crypt.CertLocation{
 			KeyFile:  constants.EndorsementCAKeyFile,
 			CertPath: constants.EndorsementCACertDir,
 		},
-		models.CaCertTypesPrivacyCa.String(): models.CertLocation{
+		models.CaCertTypesPrivacyCa.String(): crypt.CertLocation{
 			KeyFile:  constants.PrivacyCAKeyFile,
 			CertPath: constants.PrivacyCACertFile,
 		},
-		models.CaCertTypesTagCa.String(): models.CertLocation{
+		models.CaCertTypesTagCa.String(): crypt.CertLocation{
 			KeyFile:  constants.TagCAKeyFile,
 			CertPath: constants.TagCACertFile,
 		},
-		models.CertTypesSaml.String(): models.CertLocation{
+		models.CertTypesSaml.String(): crypt.CertLocation{
 			KeyFile:  constants.SAMLKeyFile,
 			CertPath: constants.SAMLCertFile,
 		},
-		models.CertTypesTls.String(): models.CertLocation{
+		models.CertTypesTls.String(): crypt.CertLocation{
 			KeyFile:  constants.DefaultTLSKeyFile,
 			CertPath: constants.DefaultTLSCertFile,
 		},
-		models.CertTypesFlavorSigning.String(): models.CertLocation{
+		models.CertTypesFlavorSigning.String(): crypt.CertLocation{
 			KeyFile:  constants.FlavorSigningKeyFile,
 			CertPath: constants.FlavorSigningCertFile,
 		},

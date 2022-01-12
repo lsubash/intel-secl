@@ -10,8 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/hvsclient"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/kbs"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	dm "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
@@ -33,11 +31,11 @@ import (
 )
 
 type KeyController struct {
-	CertStore *dm.CertificatesStore
+	CertStore *crypt.CertificatesStore
 	config    *config.Configuration
 }
 
-func NewKeyController(cfg *config.Configuration, certStore *dm.CertificatesStore) *KeyController {
+func NewKeyController(cfg *config.Configuration, certStore *crypt.CertificatesStore) *KeyController {
 	return &KeyController{config: cfg,
 		CertStore: certStore,
 	}
@@ -93,7 +91,7 @@ func (kcon *KeyController) RetrieveKey(w http.ResponseWriter, r *http.Request) (
 // getFlavor is true for the images API and false for the keys API
 // id is only required when using the images API
 //transfer_key(false, hwid, keyUrl, "", kcon.config,kcon.CertStore)
-func transfer_key(getFlavor bool, hwid string, kUrl string, id string, cfg *config.Configuration, certStore *dm.CertificatesStore) ([]byte, error) {
+func transfer_key(getFlavor bool, hwid string, kUrl string, id string, cfg *config.Configuration, certStore *crypt.CertificatesStore) ([]byte, error) {
 	var endpoint, funcName, retrievalErr string
 	if getFlavor {
 		endpoint = "resource/images"
@@ -121,8 +119,8 @@ func transfer_key(getFlavor bool, hwid string, kUrl string, id string, cfg *conf
 	re := regexp.MustCompile("(?i)([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})")
 	keyID := re.FindString(keyUrl.Path)
 
-	rootCAs := (*certStore)[models.CaCertTypesRootCa.String()].CertPath
-	samlCAFile := (*certStore)[models.CertTypesSaml.String()].CertPath
+	rootCAs := (*certStore)[model.CaCertTypesRootCa.String()].CertPath
+	samlCAFile := (*certStore)[model.CertTypesSaml.String()].CertPath
 	// retrieve host SAML report from HVS]
 	vsClientFactory, err := hvsclient.NewVSClientFactoryWithUserCredentials(cfg.HVSApiUrl, cfg.AASApiUrl, cfg.WLS.Username, cfg.WLS.Password, rootCAs)
 	if err != nil {

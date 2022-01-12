@@ -7,7 +7,6 @@ package router
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -32,7 +31,7 @@ type Router struct {
 }
 
 // InitRoutes registers all routes for the application.
-func InitRoutes(cfg *config.Configuration, dataStore *postgres.DataStore, certStore *models.CertificatesStore) (*mux.Router, error) {
+func InitRoutes(cfg *config.Configuration, dataStore *postgres.DataStore, certStore *crypt.CertificatesStore) (*mux.Router, error) {
 	defaultLog.Trace("router/router:InitRoutes() Entering")
 	defer defaultLog.Trace("router/router:InitRoutes() Leaving")
 
@@ -51,7 +50,7 @@ func InitRoutes(cfg *config.Configuration, dataStore *postgres.DataStore, certSt
 	return router, nil
 }
 
-func defineSubRoutes(router *mux.Router, service string, cfg *config.Configuration, dataStore *postgres.DataStore, certStore *models.CertificatesStore) error {
+func defineSubRoutes(router *mux.Router, service string, cfg *config.Configuration, dataStore *postgres.DataStore, certStore *crypt.CertificatesStore) error {
 	defaultLog.Trace("router/router:defineSubRoutes() Entering")
 	defer defaultLog.Trace("router/router:defineSubRoutes() Leaving")
 
@@ -74,7 +73,7 @@ func defineSubRoutes(router *mux.Router, service string, cfg *config.Configurati
 	return nil
 }
 
-func defineSubRoutesV1(router *mux.Router, service string, cfg *config.Configuration, dataStore *postgres.DataStore, certStore *models.CertificatesStore) error {
+func defineSubRoutesV1(router *mux.Router, service string, cfg *config.Configuration, dataStore *postgres.DataStore, certStore *crypt.CertificatesStore) error {
 	defaultLog.Trace("router/router:defineSubRoutes() Entering")
 	defer defaultLog.Trace("router/router:defineSubRoutes() Leaving")
 

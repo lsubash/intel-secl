@@ -6,18 +6,18 @@ package router
 
 import (
 	"fmt"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 )
 
 // SetFlavorRoutes registers routes for flavors
-func SetFlavorRoutes(router *mux.Router, store *postgres.DataStore, flavorGroupStore *postgres.FlavorGroupStore, certStore *models.CertificatesStore, hostTrustManager domain.HostTrustManager, flavorControllerConfig domain.HostControllerConfig) *mux.Router {
+func SetFlavorRoutes(router *mux.Router, store *postgres.DataStore, flavorGroupStore *postgres.FlavorGroupStore, certStore *crypt.CertificatesStore, hostTrustManager domain.HostTrustManager, flavorControllerConfig domain.HostControllerConfig) *mux.Router {
 	defaultLog.Trace("router/flavors:SetFlavorRoutes() Entering")
 	defer defaultLog.Trace("router/flavors:SetFlavorRoutes() Leaving")
 

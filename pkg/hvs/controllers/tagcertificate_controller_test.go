@@ -39,7 +39,7 @@ const (
 	flavorSigningKeyPath  = "../domain/mocks/resources/flavor-skey.pem"
 )
 
-func setupCertsStore() *models.CertificatesStore {
+func setupCertsStore() *crypt.CertificatesStore {
 	var tagKey, fsKey crypto.PrivateKey
 
 	//Generate TagCA Keypair
@@ -64,7 +64,7 @@ func setupCertsStore() *models.CertificatesStore {
 		log.WithError(err).Errorf("Failed get certificate")
 	}
 
-	var tagCAStore = models.CertificateStore{
+	var tagCAStore = crypt.CertificateStore{
 		Key:          tagKey,
 		CertPath:     tagCASigningCertPath,
 		Certificates: certMap,
@@ -94,7 +94,7 @@ func setupCertsStore() *models.CertificatesStore {
 		log.WithError(err).Errorf("Failed get certificate")
 	}
 
-	var flavorCAStore = models.CertificateStore{
+	var flavorCAStore = crypt.CertificateStore{
 		Key:          fsKey,
 		CertPath:     flavorSigningCertPath,
 		Certificates: certMap,
@@ -109,7 +109,7 @@ func setupCertsStore() *models.CertificatesStore {
 var _ = Describe("TagCertificateController", func() {
 	var router *mux.Router
 	var w *httptest.ResponseRecorder
-	var caCertsStore *models.CertificatesStore
+	var caCertsStore *crypt.CertificatesStore
 	var tagCertStore *mocks2.MockTagCertificateStore
 	var hostStore *mocks2.MockHostStore
 	var flavorStore *mocks2.MockFlavorStore
@@ -799,7 +799,7 @@ func TestNewTagCertificateController(t *testing.T) {
 	certStoreMissingFSCA := setupCertsStore()
 	delete(*certStoreMissingFSCA, models.CaCertTypesTagCa.String())
 	type args struct {
-		certStore *models.CertificatesStore
+		certStore *crypt.CertificatesStore
 		tcs       domain.TagCertificateStore
 		hs        domain.HostStore
 		fs        domain.FlavorStore

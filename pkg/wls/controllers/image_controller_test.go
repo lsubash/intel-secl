@@ -8,13 +8,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	dm "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/controllers"
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/wls/domain/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/domain/model"
+	wlsModel "github.com/intel-secl/intel-secl/v5/pkg/wls/domain/model"
 	wlsRoutes "github.com/intel-secl/intel-secl/v5/pkg/wls/router"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -31,8 +31,8 @@ var _ = Describe("ImageController", func() {
 	var imageStore *mocks2.MockImageStore
 	var flavorStore *mocks2.MockFlavorStore
 	var imageController *controllers.ImageController
-	var certStore *dm.CertificatesStore
-	certStore = utils.LoadCertificates(mocks2.NewFakeCertificatesPathStore())
+	var certStore *crypt.CertificatesStore
+	certStore = crypt.LoadCertificates(mocks2.NewFakeCertificatesPathStore(), wlsModel.GetUniqueCertTypes())
 
 	BeforeEach(func() {
 		router = mux.NewRouter()

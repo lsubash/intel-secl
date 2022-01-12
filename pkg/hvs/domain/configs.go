@@ -7,7 +7,7 @@ package domain
 
 import (
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
@@ -19,7 +19,7 @@ type HostTrustVerifierConfig struct {
 	HostStore                       HostStore
 	ReportStore                     ReportStore
 	FlavorVerifier                  verifier.Verifier
-	CertsStore                      models.CertificatesStore
+	CertsStore                      crypt.CertificatesStore
 	SamlIssuerConfig                saml.IssuerConfiguration
 	SkipFlavorSignatureVerification bool
 	HostTrustCache                  *lru.Cache

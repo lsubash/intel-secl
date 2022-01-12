@@ -10,6 +10,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/json"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -43,7 +44,7 @@ type FlavorController struct {
 	HStore    domain.HostStore
 	TCStore   domain.TagCertificateStore
 	HTManager domain.HostTrustManager
-	CertStore *dm.CertificatesStore
+	CertStore *crypt.CertificatesStore
 	HostCon   HostController
 	FTStore   domain.FlavorTemplateStore
 	IsExsi    bool
@@ -51,7 +52,7 @@ type FlavorController struct {
 
 var flavorSearchParams = map[string]bool{"id": true, "key": true, "value": true, "flavorgroupId": true, "flavorParts": true}
 
-func NewFlavorController(fs domain.FlavorStore, fgs domain.FlavorGroupStore, hs domain.HostStore, tcs domain.TagCertificateStore, htm domain.HostTrustManager, certStore *dm.CertificatesStore, hcConfig domain.HostControllerConfig, fts domain.FlavorTemplateStore) *FlavorController {
+func NewFlavorController(fs domain.FlavorStore, fgs domain.FlavorGroupStore, hs domain.HostStore, tcs domain.TagCertificateStore, htm domain.HostTrustManager, certStore *crypt.CertificatesStore, hcConfig domain.HostControllerConfig, fts domain.FlavorTemplateStore) *FlavorController {
 	// certStore should have an entry for Flavor Signing CA
 	if _, found := (*certStore)[dm.CertTypesFlavorSigning.String()]; !found {
 		defaultLog.Errorf("controllers/flavor_controller:NewFlavorController() %s : Flavor Signing KeyPair not found in CertStore", commLogMsg.AppRuntimeErr)

@@ -9,11 +9,11 @@ import (
 	"github.com/gorilla/mux"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 )
 
-func SetCertifyHostKeysRoutes(router *mux.Router, certStore *models.CertificatesStore) *mux.Router {
+func SetCertifyHostKeysRoutes(router *mux.Router, certStore *crypt.CertificatesStore) *mux.Router {
 	defaultLog.Trace("router/certify_host_keys:SetCertifyHostKeys() Entering")
 	defer defaultLog.Trace("router/certify_host_keys:SetCertifyHostKeys() Leaving")
 
@@ -26,7 +26,7 @@ func SetCertifyHostKeysRoutes(router *mux.Router, certStore *models.Certificates
 	return router
 }
 
-func SetCertifyAiksRoutes(router *mux.Router, store *postgres.DataStore, certStore *models.CertificatesStore, aikCertValidity int, enableEkCertRevokeChecks bool) *mux.Router {
+func SetCertifyAiksRoutes(router *mux.Router, store *postgres.DataStore, certStore *crypt.CertificatesStore, aikCertValidity int, enableEkCertRevokeChecks bool) *mux.Router {
 	defaultLog.Trace("router/certify_host_aiks:SetCertifyAiksRoutes() Entering")
 	defer defaultLog.Trace("router/certify_host_aiks:SetCertifyAiksRoutes() Leaving")
 

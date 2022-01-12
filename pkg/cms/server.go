@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/router"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"net/http"
 	"os"
@@ -93,13 +94,13 @@ func (a *App) startServer() error {
 	return nil
 }
 
-func (a *App) loadCertPathStore() *models.CertificatesPathStore {
-	return &models.CertificatesPathStore{
-		models.CaCertTypesRootCa.String(): models.CertLocation{
+func (a *App) loadCertPathStore() *crypt.CertificatesPathStore {
+	return &crypt.CertificatesPathStore{
+		models.CaCertTypesRootCa.String(): crypt.CertLocation{
 			KeyFile:  "",
 			CertPath: constants.RootCADirPath,
 		},
-		models.CertTypesTls.String(): models.CertLocation{
+		models.CertTypesTls.String(): crypt.CertLocation{
 			KeyFile:  constants.TLSKeyPath,
 			CertPath: constants.TLSCertPath,
 		},

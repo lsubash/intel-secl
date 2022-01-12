@@ -9,11 +9,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/gorilla/handlers"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
+	wlsModel "github.com/intel-secl/intel-secl/v5/pkg/wls/domain/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/router"
 	"github.com/pkg/errors"
@@ -47,7 +47,7 @@ func (a *App) startServer() error {
 		return errors.Wrap(err, "An error occurred while initializing Database")
 	}
 
-	certStore := utils.LoadCertificates(a.loadCertPathStore())
+	certStore := crypt.LoadCertificates(a.loadCertPathStore(), wlsModel.GetUniqueCertTypes())
 	// Initialize routes
 	routes, err := router.InitRoutes(c, dataStore, certStore)
 	if err != nil {
@@ -104,12 +104,12 @@ func (a *App) startServer() error {
 	return nil
 }
 
-func (a *App) loadCertPathStore() *models.CertificatesPathStore {
-	return &models.CertificatesPathStore{
-		models.CaCertTypesRootCa.String(): models.CertLocation{
+func (a *App) loadCertPathStore() *crypt.CertificatesPathStore {
+	return &crypt.CertificatesPathStore{
+		wlsModel.CaCertTypesRootCa.String(): crypt.CertLocation{
 			CertPath: constants.TrustedCaCertsDir,
 		},
-		models.CertTypesSaml.String(): models.CertLocation{
+		wlsModel.CertTypesSaml.String(): crypt.CertLocation{
 			CertPath: constants.SamlCaCertFilePath,
 		},
 	}

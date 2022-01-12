@@ -16,7 +16,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	wlaModel "github.com/intel-secl/intel-secl/v5/pkg/model/wlagent"
@@ -28,11 +27,11 @@ import (
 	"os"
 )
 
-var certStore *models.CertificatesStore
+var certStore *crypt.CertificatesStore
 
 var _ = BeforeSuite(func() {
 	//Generate Privacyca cert
-	certStore = utils.LoadCertificates(mocks.NewFakeCertificatesPathStore())
+	certStore = crypt.LoadCertificates(mocks.NewFakeCertificatesPathStore(), models.GetUniqueCertTypes())
 	caCertDer, caKeyDer, _ := crypt.CreateKeyPairAndCertificate(consts.DefaultPrivacyCaIdentityIssuer, "", consts.DefaultKeyAlgorithm, consts.DefaultKeyLength)
 	caCert, _ := x509.ParseCertificate(caCertDer)
 	var caCerts []x509.Certificate

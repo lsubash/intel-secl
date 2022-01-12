@@ -6,13 +6,14 @@ package mocks
 
 import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 )
 
 var defaultLog = log.GetDefaultLogger()
 var secLog = log.GetSecurityLogger()
 
-func NewFakeCertificatesPathStore() *models.CertificatesPathStore {
+func NewFakeCertificatesPathStore() *crypt.CertificatesPathStore {
 	// For ECA, to read list of certificates from directory
 	ecCaPath := "../domain/mocks/resources/"
 	// Mock path to create new certificate
@@ -20,61 +21,61 @@ func NewFakeCertificatesPathStore() *models.CertificatesPathStore {
 	//Path for any certificate containing file, so instead of creating new use existing one
 	caCertPath := "../domain/mocks/resources/EndorsementCA-external.pem"
 
-	return &models.CertificatesPathStore{
-		models.CaCertTypesRootCa.String(): models.CertLocation{
+	return &crypt.CertificatesPathStore{
+		models.CaCertTypesRootCa.String(): crypt.CertLocation{
 			CertPath: rootCaPath,
 		},
-		models.CaCertTypesEndorsementCa.String(): models.CertLocation{
+		models.CaCertTypesEndorsementCa.String(): crypt.CertLocation{
 			CertPath: ecCaPath,
 		},
-		models.CaCertTypesPrivacyCa.String(): models.CertLocation{
+		models.CaCertTypesPrivacyCa.String(): crypt.CertLocation{
 			CertPath: caCertPath,
 		},
-		models.CaCertTypesTagCa.String(): models.CertLocation{
+		models.CaCertTypesTagCa.String(): crypt.CertLocation{
 			CertPath: caCertPath,
 		},
-		models.CertTypesSaml.String(): models.CertLocation{
+		models.CertTypesSaml.String(): crypt.CertLocation{
 			CertPath: caCertPath,
 		},
-		models.CertTypesTls.String(): models.CertLocation{
+		models.CertTypesTls.String(): crypt.CertLocation{
 			CertPath: caCertPath,
 		},
 	}
 }
 
-func NewFakeCertificatesStore() *models.CertificatesStore {
+func NewFakeCertificatesStore() *crypt.CertificatesStore {
 
 	// Mock path to create new certificate
 	rootCaPath := "../domain/mocks/resources/"
 	//Path for any certificate containing file, so instead of creating new use existing one
 	caCertPath := "../domain/mocks/resources/EndorsementCA-external.pem"
 
-	return &models.CertificatesStore{
-		models.CaCertTypesRootCa.String(): &models.CertificateStore{
+	return &crypt.CertificatesStore{
+		models.CaCertTypesRootCa.String(): &crypt.CertificateStore{
 			CertPath:     rootCaPath,
 			Certificates: nil,
 		},
-		models.CaCertTypesEndorsementCa.String(): &models.CertificateStore{
+		models.CaCertTypesEndorsementCa.String(): &crypt.CertificateStore{
 			CertPath:     rootCaPath,
 			Certificates: nil,
 		},
-		models.CaCertTypesPrivacyCa.String(): &models.CertificateStore{
+		models.CaCertTypesPrivacyCa.String(): &crypt.CertificateStore{
 			CertPath:     caCertPath,
 			Certificates: nil,
 		},
-		models.CaCertTypesTagCa.String(): &models.CertificateStore{
+		models.CaCertTypesTagCa.String(): &crypt.CertificateStore{
 			CertPath:     caCertPath,
 			Certificates: nil,
 		},
-		models.CertTypesSaml.String(): &models.CertificateStore{
+		models.CertTypesSaml.String(): &crypt.CertificateStore{
 			CertPath:     caCertPath,
 			Certificates: nil,
 		},
-		models.CertTypesTls.String(): &models.CertificateStore{
+		models.CertTypesTls.String(): &crypt.CertificateStore{
 			CertPath:     caCertPath,
 			Certificates: nil,
 		},
-		models.CertTypesFlavorSigning.String(): &models.CertificateStore{
+		models.CertTypesFlavorSigning.String(): &crypt.CertificateStore{
 			Key:          nil,
 			CertPath:     caCertPath,
 			Certificates: nil,

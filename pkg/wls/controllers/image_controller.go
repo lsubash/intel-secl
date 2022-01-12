@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	dm "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
@@ -28,10 +28,10 @@ type ImageController struct {
 	IStore    domain.ImageStore
 	FStore    domain.FlavorStore
 	conf      *config.Configuration
-	CertStore *dm.CertificatesStore
+	CertStore *crypt.CertificatesStore
 }
 
-func NewImageController(imgs domain.ImageStore, fs domain.FlavorStore, conf *config.Configuration, certStore *dm.CertificatesStore) *ImageController {
+func NewImageController(imgs domain.ImageStore, fs domain.FlavorStore, conf *config.Configuration, certStore *crypt.CertificatesStore) *ImageController {
 	return &ImageController{
 		IStore:    imgs,
 		FStore:    fs,

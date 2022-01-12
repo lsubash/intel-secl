@@ -12,6 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
@@ -21,7 +22,7 @@ import (
 )
 
 type CaCertificatesController struct {
-	CertStore *models.CertificatesStore
+	CertStore *crypt.CertificatesStore
 }
 
 var caCertificatesSearchParams = map[string]bool{"domain": true}
@@ -170,7 +171,7 @@ func validateCaCertificates(caCertificate hvs.CaCertificate) (*x509.Certificate,
 }
 
 // Read CaCertificates/certificate from the given certificate path
-func ReadCertificates(certType string, certStore *models.CertificatesStore) (*hvs.CaCertificateCollection, error) {
+func ReadCertificates(certType string, certStore *crypt.CertificatesStore) (*hvs.CaCertificateCollection, error) {
 	defaultLog.Trace("controllers/ca_certificates_controller:ReadCertificates() Entering")
 	defer defaultLog.Trace("controllers/ca_certificates_controller:ReadCertificates() Leaving")
 
@@ -193,7 +194,7 @@ func ReadCertificates(certType string, certStore *models.CertificatesStore) (*hv
 }
 
 // Read CaCertificate/certificate from the given certificate path
-func ReadCertificate(certType string, certStore *models.CertificatesStore) (*hvs.CaCertificate, error) {
+func ReadCertificate(certType string, certStore *crypt.CertificatesStore) (*hvs.CaCertificate, error) {
 	defaultLog.Trace("controllers/ca_certificates_controller:ReadCertificate() Entering")
 	defer defaultLog.Trace("controllers/ca_certificates_controller:ReadCertificate() Leaving")
 

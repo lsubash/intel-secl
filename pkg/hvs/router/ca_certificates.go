@@ -8,11 +8,11 @@ package router
 import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 )
 
-func SetCaCertificatesRoutes(router *mux.Router, certStore *models.CertificatesStore) *mux.Router {
+func SetCaCertificatesRoutes(router *mux.Router, certStore *crypt.CertificatesStore) *mux.Router {
 	defaultLog.Trace("router/ca_certificates:SetCaCertificatesRoutes() Entering")
 	defer defaultLog.Trace("router/ca_certificates:SetCaCertificatesRoutes() Leaving")
 

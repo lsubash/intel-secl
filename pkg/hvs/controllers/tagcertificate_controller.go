@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -38,7 +39,7 @@ type TagCertificateController struct {
 	// Config contains the required values sourced from the VS configuration
 	Config domain.TagCertControllerConfig
 	// TagCertStore is required to source the Signing Keys and Certificates
-	CertStore models.CertificatesStore
+	CertStore crypt.CertificatesStore
 	// Store is used to hold a reference to the backend store for the TagCertificates
 	Store domain.TagCertificateStore
 	// HostStore is used to hold a reference to the backend store for the Host records
@@ -50,7 +51,7 @@ type TagCertificateController struct {
 	HostConnectorProvider hostConnector.HostConnectorProvider
 }
 
-func NewTagCertificateController(tc domain.TagCertControllerConfig, certStore models.CertificatesStore, tcs domain.TagCertificateStore,
+func NewTagCertificateController(tc domain.TagCertControllerConfig, certStore crypt.CertificatesStore, tcs domain.TagCertificateStore,
 	htm domain.HostTrustManager, hs domain.HostStore, fs domain.FlavorStore, fgs domain.FlavorGroupStore, hcp hostConnector.HostConnectorProvider) *TagCertificateController {
 
 	// CertStore should have an entry for Tag CA Cert
