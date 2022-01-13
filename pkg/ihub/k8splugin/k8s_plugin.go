@@ -50,7 +50,6 @@ type KubernetesDetails struct {
 var (
 	log            = commonLog.GetDefaultLogger()
 	osRegexEpcSize = regexp.MustCompile(constants.RegexEpcSize)
-	rgx            = regexp.MustCompile(constants.RegexNonStandardChar)
 )
 
 // GetHosts Getting Hosts From Kubernetes

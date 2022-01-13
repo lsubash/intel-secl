@@ -1,0 +1,28 @@
+[
+  {
+    "host_id": "11e51be7-a56e-40f5-adc7-ab69a4a80c47",
+    "host_name": "ArcherCity1",
+    "host_info": {
+      "hardware_uuid": "88888888-8887-0162-0100-3202a5a5a5a5",
+      "hardware_features": {
+        "SGX": {
+          "enabled": true,
+          "meta": {
+            "integrity_enabled": true,
+            "flc_enabled": true,
+            "epc_size": "242.5 MB",
+            "tcb_upto_date": "false"
+          }
+        },
+        "TDX": {
+          "enabled": true,
+          "meta": {
+            "tcb_upto_date": "false"
+          }
+        }
+      }
+    },
+    "status": "active",
+    "valid_to": "2022-01-08T19:29:23.228165-08:00"
+  }
+]

@@ -7,7 +7,6 @@ package ihub
 import (
 	"encoding/pem"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/k8s"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients/openstack"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"io/ioutil"
@@ -19,7 +18,6 @@ import (
 
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/k8splugin"
-	"github.com/intel-secl/intel-secl/v5/pkg/ihub/openstackplugin"
 	"github.com/pkg/errors"
 
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
@@ -46,7 +44,6 @@ func (app *App) startDaemon() error {
 	}
 
 	var k k8splugin.KubernetesDetails
-	var o openstackplugin.OpenstackDetails
 
 	attestationHVSURL := configuration.AttestationService.HVSBaseURL
 	attestationFDSURL := configuration.AttestationService.FDSBaseURL
@@ -55,44 +52,7 @@ func (app *App) startDaemon() error {
 		return errors.New("startService:startDaemon() Neither HVS nor FDS URL are defined")
 	}
 
-	if configuration.Endpoint.Type == constants.OpenStackTenant {
-
-		o.Config = configuration
-		authURL := o.Config.Endpoint.AuthURL
-		apiURL := o.Config.Endpoint.URL
-		userName := o.Config.Endpoint.UserName
-		password := o.Config.Endpoint.Password
-		certPath := o.Config.Endpoint.CertFile
-
-		authUrl, err := url.Parse(authURL)
-		if err != nil {
-			return errors.Wrap(err, "startService:startDaemon() unable to parse OpenStack auth url")
-		}
-
-		apiUrl, err := url.Parse(apiURL)
-		if err != nil {
-			return errors.Wrap(err, "startService:startDaemon() unable to parse OpenStack api url")
-		}
-
-		openstackClient, err := openstack.NewOpenstackClient(authUrl, apiUrl, userName, password, certPath)
-		if err != nil {
-			return errors.Wrap(err, "startService:startDaemon() Error in initializing the OpenStack client")
-		}
-		o.OpenstackClient = openstackClient
-
-		o.TrustedCAsStoreDir = app.configDir() + constants.TrustedCAsStoreDir
-		if _, err := os.Stat(o.TrustedCAsStoreDir); err != nil {
-			return errors.Wrap(err, "startService:startDaemon(): TrustedCA Certificate Missing, Error in initializing the OpenStack client")
-		}
-
-		if attestationHVSURL != "" {
-			o.SamlCertFilePath = app.configDir() + constants.SamlCertFilePath
-			if _, err := os.Stat(o.SamlCertFilePath); err != nil {
-				return errors.Wrap(err, "startService:startDaemon(): Saml Certificate Missing, Error in initializing the OpenStack client")
-			}
-		}
-
-	} else if configuration.Endpoint.Type == constants.K8sTenant {
+	if configuration.Endpoint.Type == constants.K8sTenant {
 
 		privateKey, err := crypt.GetPrivateKeyFromPKCS8File(app.configDir() + constants.PrivatekeyLocation)
 		if err != nil {
@@ -138,7 +98,6 @@ func (app *App) startDaemon() error {
 				return errors.Wrap(err, "startService:startDaemon(): Saml Certificate Missing, Error in initializing the Kubernetes client")
 			}
 		}
-
 	} else {
 		return errors.Errorf("startService:startDaemon() Endpoint type '%s' is not supported", configuration.Endpoint.Type)
 	}
@@ -148,7 +107,7 @@ func (app *App) startDaemon() error {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
 	// invoke for the first time before scheduling regular runs
-	app.kickOffPlugins(k, o)
+	app.kickOffPlugins(k)
 
 	tick := time.NewTicker(time.Minute * time.Duration(configuration.PollIntervalMinutes))
 	go func() {
@@ -156,7 +115,7 @@ func (app *App) startDaemon() error {
 			time.Minute*time.Duration(configuration.PollIntervalMinutes)))
 		for t := range tick.C {
 			secLog.Debugf("startService:startDaemon() Scheduler started at : %v", t)
-			app.kickOffPlugins(k, o)
+			app.kickOffPlugins(k)
 		}
 	}()
 
@@ -169,16 +128,11 @@ func (app *App) startDaemon() error {
 	return nil
 }
 
-func (app *App) kickOffPlugins(k k8splugin.KubernetesDetails, o openstackplugin.OpenstackDetails) {
+func (app *App) kickOffPlugins(k k8splugin.KubernetesDetails) {
 
 	log.Debugf("startService:kickOffPlugins() The Endpoint is : %s", app.Config.Endpoint.Type)
 
-	if app.Config.Endpoint.Type == constants.OpenStackTenant {
-		err := openstackplugin.SendDataToEndPoint(o)
-		if err != nil {
-			log.WithError(err).Error("startService:kickOffPlugins() Error in pushing OpenStack traits")
-		}
-	} else {
+	if app.Config.Endpoint.Type == constants.K8sTenant {
 		err := k8splugin.SendDataToEndPoint(k)
 		if err != nil {
 			log.WithError(err).Error("startService:kickOffPlugins() : Error in pushing Kubernetes CRDs")

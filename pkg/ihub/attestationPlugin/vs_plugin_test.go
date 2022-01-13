@@ -7,6 +7,7 @@ package attestationPlugin
 
 import (
 	"encoding/xml"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	"io/ioutil"
 	"reflect"
 	"testing"
@@ -19,10 +20,8 @@ import (
 )
 
 var sampleSamlCertPath = testutility.SampleSamlCertPath
-var sampleSamlReportPath = testutility.SampleSamlReportPath
 var sampleRootCertDirPath = "../test/resources/trustedCACert"
-var hostID = testutility.OpenstackHostID
-var invalidHostID = testutility.InvalidOpenstackHostID
+var sampleSamlReportPath = "../test/resources/saml_report.xml"
 
 func TestGetHostReports(t *testing.T) {
 
@@ -50,7 +49,6 @@ func TestGetHostReports(t *testing.T) {
 		{
 			name: "TestGetHostReports Test 1",
 			args: args{
-				h: hostID,
 				c: c,
 			},
 			want: samlReport,
@@ -58,63 +56,12 @@ func TestGetHostReports(t *testing.T) {
 		{
 			name: "TestGetHostReports Test 2",
 			args: args{
-				h: invalidHostID,
-				c: &config.Configuration{
-					AASBaseUrl: server.URL + "/aas",
-					AttestationService: config.AttestationConfig{
-						HVSBaseURL: server.URL + "/mtwilson/v2/invalid",
-					},
-					Endpoint: config.Endpoint{
-						Type:     "OPENSTACK",
-						URL:      server.URL + "/openstack/api/",
-						AuthURL:  server.URL + "/v3/auth/tokens",
-						UserName: testutility.OpenstackUserName,
-						Password: testutility.OpenstackPassword,
-					},
-					IHUB: commConfig.ServiceConfig{
-						Username: testutility.IhubServiceUserName,
-						Password: testutility.IhubServicePassword,
-					},
-				},
-			},
-			want: nil,
-		},
-		{
-			name: "TestGetHostReports Test 3",
-			args: args{
-				h: hostID,
-				c: &config.Configuration{
-					AASBaseUrl: server.URL + "/aas",
-					AttestationService: config.AttestationConfig{
-						HVSBaseURL: server.URL + "/mtwilson/v2/",
-					},
-					Endpoint: config.Endpoint{
-						Type:     "OPENSTACK",
-						URL:      server.URL + "/openstack/api/",
-						AuthURL:  server.URL + "/v3/auth/tokens",
-						UserName: testutility.OpenstackUserName,
-						Password: testutility.OpenstackPassword,
-					},
-					IHUB: commConfig.ServiceConfig{
-						Username: testutility.IhubServiceUserName,
-						Password: testutility.IhubServicePassword,
-					},
-				},
-			},
-
-			want: samlReport,
-		},
-
-		{
-			name: "TestGetHostReports Test 4",
-			args: args{
-				h: hostID,
 				c: &config.Configuration{
 					AASBaseUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
 						HVSBaseURL: "mtwilson/v2"},
 					Endpoint: config.Endpoint{
-						Type: "OPENSTACK",
+						Type: constants.K8sTenant,
 					},
 				},
 			},
@@ -161,7 +108,7 @@ func TestGetCaCerts(t *testing.T) {
 			args: args{
 				domain: "SAML",
 				configuration: &config.Configuration{
-					AASBaseUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
@@ -179,7 +126,7 @@ func TestGetCaCerts(t *testing.T) {
 			args: args{
 				domain: "SAML",
 				configuration: &config.Configuration{
-					AASBaseUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
@@ -260,7 +207,7 @@ func Test_initializeClient(t *testing.T) {
 			args: args{
 				certDirectory: "",
 				con: &config.Configuration{
-					AASBaseUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",

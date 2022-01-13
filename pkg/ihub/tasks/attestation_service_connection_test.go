@@ -51,7 +51,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"SHVS_BASE_URL": server.URL + "/sgx-hvs/v2/",
+				"FDS_BASE_URL": server.URL + "/fds/v1/",
 			},
 
 			wantErr: false,

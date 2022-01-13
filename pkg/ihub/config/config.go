@@ -39,9 +39,6 @@ type Endpoint struct {
 	URL      string `yaml:"url" mapstructure:"url"`
 	CRDName  string `yaml:"crd-name" mapstructure:"crd-name"`
 	Token    string `yaml:"token" mapstructure:"token"`
-	UserName string `yaml:"username" mapstructure:"username"`
-	Password string `yaml:"password" mapstructure:"password"`
-	AuthURL  string `yaml:"auth-url" mapstructure:"auth-url"`
 	CertFile string `yaml:"cert-file" mapstructure:"cert-file"`
 }
 

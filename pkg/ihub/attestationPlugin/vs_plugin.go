@@ -92,10 +92,10 @@ func GetHostReports(h string, conf *config.Configuration, certDirectory, samlCer
 	reportUrl := conf.AttestationService.HVSBaseURL + "reports?latestPerHost=true&"
 
 	var filterType string
-	if conf.Endpoint.Type == constants.OpenStackTenant {
-		filterType = "hostName"
-	} else {
+	if conf.Endpoint.Type == constants.K8sTenant {
 		filterType = "hostHardwareId"
+	} else {
+		return nil, errors.New("Invalid endpoint type provided")
 	}
 	reportUrl = reportUrl + filterType + "=%s"
 	reportUrl = fmt.Sprintf(reportUrl, h)

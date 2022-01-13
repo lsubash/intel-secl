@@ -25,7 +25,6 @@ func TestTenantConnectionRun(t *testing.T) {
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
 
-	openstackConfig := testutility.SetupMockOpenStackConfiguration(t, server.URL)
 	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)
 	k8sConfig.Endpoint.CertFile = constants.DefaultK8SCertFile
 
@@ -123,170 +122,6 @@ func TestTenantConnectionRun(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		{
-			name: "tenant-connection-openstack valid test",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      server.URL,
-					"OPENSTACK_PLACEMENT_URL": server.URL,
-					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
-					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "tenant-connection-openstack negative test 1",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":             openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL": server.URL,
-					"OPENSTACK_USERNAME": openstackConfig.Endpoint.UserName,
-					"OPENSTACK_PASSWORD": openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 2",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_PLACEMENT_URL": server.URL,
-					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
-					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 3",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":             openstackConfig.Endpoint.Type,
-					"OPENSTACK_USERNAME": openstackConfig.Endpoint.UserName,
-					"OPENSTACK_PASSWORD": openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 4",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      server.URL,
-					"OPENSTACK_PLACEMENT_URL": server.URL,
-					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 5",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      server.URL,
-					"OPENSTACK_PLACEMENT_URL": server.URL,
-					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 6",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      server.URL,
-					"OPENSTACK_PLACEMENT_URL": server.URL,
-					"OPENSTACK_USERNAME":      "",
-					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 7",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      server.URL,
-					"OPENSTACK_PLACEMENT_URL": server.URL,
-					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
-					"OPENSTACK_PASSWORD":      "",
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 8",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      "_________________________________abc:localhost1234:",
-					"OPENSTACK_PLACEMENT_URL": server.URL,
-					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
-					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-openstack negative test 9",
-			tenantConnection: TenantConnection{
-				TenantConfig:  &config.Endpoint{},
-				ConsoleWriter: os.Stdout,
-			},
-			args: args{
-				EnvValues: map[string]string{
-					"TENANT":                  openstackConfig.Endpoint.Type,
-					"OPENSTACK_AUTH_URL":      server.URL,
-					"OPENSTACK_PLACEMENT_URL": "_________________________________abc:localhost1234:",
-					"OPENSTACK_USERNAME":      openstackConfig.Endpoint.UserName,
-					"OPENSTACK_PASSWORD":      openstackConfig.Endpoint.Password,
-				},
-			},
-			wantErr: true,
-		},
 	}
 
 	for _, tt := range tests {
@@ -329,77 +164,6 @@ func TestTenantConnectionValidate(t *testing.T) {
 
 	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)
 
-	tests := []struct {
-		name             string
-		tenantConnection TenantConnection
-		wantErr          bool
-	}{
-		{
-			name: "tenant-connection-validate valid test",
-			tenantConnection: TenantConnection{
-				TenantConfig: &config.Endpoint{
-					Type:     constants.OpenStackTenant,
-					AuthURL:  server.URL + "/v3/auth/tokens",
-					URL:      server.URL + "/",
-					UserName: "admin",
-					Password: "password",
-				},
-				ConsoleWriter: os.Stdout,
-			},
-			wantErr: false,
-		},
-		{
-			name: "tenant-connection-validate openstack negative test",
-			tenantConnection: TenantConnection{
-				TenantConfig: &config.Endpoint{
-					Type:     constants.OpenStackTenant,
-					AuthURL:  "",
-					URL:      "",
-					UserName: "admin",
-					Password: "password",
-				},
-				ConsoleWriter: os.Stdout,
-			},
-			wantErr: true,
-		},
-		{
-			name: "tenant-connection-validate k8s negative test",
-			tenantConnection: TenantConnection{
-				TenantConfig: &config.Endpoint{
-					Type:     k8sConfig.Endpoint.Type,
-					URL:      "",
-					CRDName:  "",
-					Token:    "",
-					CertFile: "",
-				},
-				ConsoleWriter: os.Stdout,
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			if err := tt.tenantConnection.Validate(); (err != nil) != tt.wantErr {
-				t.Errorf("tasks/tenant_connection_test:TestTenantConnectionValidate(): error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestTenantConnection_validateService(t *testing.T) {
-
-	server := testutility.MockServer(t)
-	defer server.Close()
-
-	openstackConfig := testutility.SetupMockOpenStackConfiguration(t, server.URL)
-	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)
-
-	t1 := TenantConnection{
-		TenantConfig:  &openstackConfig.Endpoint,
-		ConsoleWriter: os.Stdout,
-	}
-
 	t2 := TenantConnection{
 		TenantConfig:  &k8sConfig.Endpoint,
 		ConsoleWriter: os.Stdout,
@@ -410,10 +174,6 @@ func TestTenantConnection_validateService(t *testing.T) {
 		tenantConnection TenantConnection
 		wantErr          bool
 	}{
-		{name: "tenant-connection-validate-service openstack valid test 1",
-			tenantConnection: t1,
-			wantErr:          false,
-		},
 		{
 			name:             "tenant-connection-validate-service k8s valid test 2",
 			tenantConnection: t2,
@@ -422,7 +182,7 @@ func TestTenantConnection_validateService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.tenantConnection.validateService(); (err != nil) != tt.wantErr {
+			if err := tt.tenantConnection.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("TenantConnection.validateService() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

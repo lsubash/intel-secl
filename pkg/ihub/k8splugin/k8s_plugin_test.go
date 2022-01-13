@@ -33,7 +33,7 @@ func setupMockValues(t *testing.T, portString string) (*KubernetesDetails, *type
 	hID := uuid.MustParse("42193CDA-7620-2540-C526-9B2F6936AECA")
 	hostDetails := types.HostDetails{
 		HostID:   hID,
-		HostName: "worker-node1",
+		HostName: "ArcherCity1",
 		HostIP:   "localhost",
 		Trusted:  true,
 		AssetTags: map[string]string{

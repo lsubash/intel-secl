@@ -6,7 +6,6 @@ package attestationPlugin
 
 import (
 	"io/ioutil"
-	"reflect"
 	"testing"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
@@ -14,13 +13,13 @@ import (
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 )
 
-func TestGetHostReportsSGX(t *testing.T) {
+func TestGetHostReportsTee(t *testing.T) {
 	server := testutility.MockServer(t)
 	defer server.Close()
 
-	output, err := ioutil.ReadFile("../../ihub/test/resources/sgx_platform_data.json")
+	output, err := ioutil.ReadFile("../../ihub/test/resources/tee_platform_data.json")
 	if err != nil {
-		t.Log("attestationPlugin/sgx_plugin_test:TestGetHostReportsSGX(): Unable to read file", err)
+		t.Log("attestationPlugin/tee_plugin_test:TestGetHostReportsTee(): Unable to read file", err)
 	}
 
 	sgxHostName := "localhost"
@@ -35,17 +34,17 @@ func TestGetHostReportsSGX(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Valid Test: get-sgx-host-platform-data",
+			name: "Valid Test: get-tee-host-platform-data",
 			args: args{
 				hostIP: sgxHostName,
 				config: &config.Configuration{
-					AASBaseUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						FDSBaseURL: server.URL + "/sgx-hvs/v2/",
+						FDSBaseURL: server.URL + "/fds/v1/",
 					},
 				},
 			},
@@ -57,11 +56,11 @@ func TestGetHostReportsSGX(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetHostPlatformData(tt.args.hostIP, tt.args.config, sampleRootCertDirPath)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetHostReportsSGX() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("TestGetHostReportsTee() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetHostReportsSGX() = %v, want %v", got, tt.want)
+			if len(got) != 1 {
+				t.Errorf("TestGetHostReportsTee(): Could not retrieve host platform data")
 			}
 		})
 	}
@@ -82,17 +81,17 @@ func Test_initializeFDSClient(t *testing.T) {
 	}{
 
 		{
-			name: "Valid Test: initialize-skc-client",
+			name: "Valid Test: initialize-fds-client",
 			args: args{
 				certDirectory: "",
 				con: &config.Configuration{
-					AASBaseUrl: server.URL + "/aas",
+					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
 					},
 					AttestationService: config.AttestationConfig{
-						FDSBaseURL: server.URL + "/sgx-hvs/v2",
+						FDSBaseURL: server.URL + "/fds/v1",
 					},
 				},
 			},
