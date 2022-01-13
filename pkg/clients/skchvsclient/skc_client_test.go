@@ -16,7 +16,7 @@ import (
 func TestClientGetSGXPlatformData(t *testing.T) {
 	server := testutility.MockServer(t)
 	defer server.Close()
-	aasUrl, _ := url.Parse(server.URL + "/aas")
+	aasUrl, _ := url.Parse(server.URL + "/aas/v1")
 	baseURL, _ := url.Parse(server.URL + "/sgx-hvs/v2")
 
 	client1 := Client{
@@ -62,7 +62,7 @@ func TestClientGetSHVSVersion(t *testing.T) {
 	server := testutility.MockServer(t)
 	defer server.Close()
 
-	aasUrl, _ := url.Parse(server.URL + "/aas")
+	aasUrl, _ := url.Parse(server.URL + "/aas/v1")
 	baseURL, _ := url.Parse(server.URL + "/sgx-hvs/v2")
 
 	client1 := Client{

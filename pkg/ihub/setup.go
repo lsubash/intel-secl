@@ -152,8 +152,8 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	})
 
 	runner.AddTask("create-signing-key", "", &tasks.CreateSigningKey{
-		PrivateKeyLocation: app.configDir() + constants.PrivatekeyLocation,
-		PublicKeyLocation:  app.configDir() + constants.PublickeyLocation,
+		PrivateKeyLocation: app.configDir() + constants.PrivateKeyLocation,
+		PublicKeyLocation:  app.configDir() + constants.PublicKeyLocation,
 		KeyAlgorithmLength: constants.DefaultKeyLength,
 	})
 
