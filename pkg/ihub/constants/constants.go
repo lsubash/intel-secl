@@ -20,8 +20,8 @@ const (
 	ConfigFile                  = "config"
 	DefaultTLSCertFile          = "tls-cert.pem"
 	DefaultTLSKeyFile           = "tls-key.pem"
-	PublickeyLocation           = "ihub_public_key.pem"
-	PrivatekeyLocation          = "ihub_private_key.pem"
+	PublicKeyLocation           = "ihub_public_key.pem"
+	PrivateKeyLocation          = "ihub_private_key.pem"
 	TrustedCAsStoreDir          = "certs/trustedca/"
 	SamlCertFilePath            = "certs/saml/saml-cert.pem"
 	ServiceRemoveCmd            = "systemctl disable "
@@ -29,10 +29,8 @@ const (
 	DefaultKeyLength            = 3072
 	DefaultTLSSan               = "127.0.0.1,localhost"
 	DefaultIHUBTlsCn            = "Integration Hub TLS Certificate"
-	K8sTenant                   = "KUBERNETES"
-	OpenStackTenant             = "OPENSTACK"
 	HTTP                        = "http"
-	OpenStackAuthenticationAPI  = "v3/auth/tokens"
+	K8sTenant                   = "KUBERNETES"
 	KubernetesNodesAPI          = "api/v1/nodes"
 	KubernetesCRDAPI            = "apis/crd.isecl.intel.com/v1beta1/namespaces/default/hostattributes/"
 	KubernetesCRDAPIVersion     = "crd.isecl.intel.com/v1beta1"
@@ -42,23 +40,9 @@ const (
 	DefaultK8SCertFile          = "apiserver.crt"
 	RegexNonStandardChar        = "[^a-zA-Z0-9]"
 	DefaultLogEntryMaxlength    = 1500
-	IseclTraitPrefix            = "CUSTOM_ISECL"
-	TraitAssetTagPrefix         = "_AT_"
-	TraitHardwareFeaturesPrefix = "_HAS_"
-	TraitDelimiter              = "_"
-	TrustedTrait                = IseclTraitPrefix + TraitDelimiter + "TRUSTED"
-	OpenStackAPIVersion         = "placement 1.23"
 	MaxArguments                = 5
 )
 
 const (
-	/*Open Stack Specific Constants */
-	SgxTraitPrefix              = "SGX_"
-	SgxTraitEnabled             = SgxTraitPrefix + "ENABLED"
-	SgxTraitSupported           = SgxTraitPrefix + "SUPPORTED"
-	SgxTraitTcbUpToDate         = SgxTraitPrefix + "TCBUPTODATE"
-	SgxTraitEpcSize             = SgxTraitPrefix + "EPC_SIZE"
-	SgxTraitEpcSizeNotAvailable = "UNAVAILABLE"
-	SgxTraitFlcEnabled          = SgxTraitPrefix + "FLC_ENABLED"
-	RegexEpcSize                = `[[:digit:]]+(\.[[:digit:]]+)? [KMGT]?B`
+	RegexEpcSize = `[[:digit:]]+(\.[[:digit:]]+)? [KMGT]?B`
 )

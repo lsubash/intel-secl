@@ -40,7 +40,7 @@ func TestGetHostReportsSGX(t *testing.T) {
 			args: args{
 				hostIP: sgxHostName,
 				config: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASApiUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",
@@ -87,7 +87,7 @@ func Test_initializeSKCClient(t *testing.T) {
 			args: args{
 				certDirectory: "",
 				con: &config.Configuration{
-					AASApiUrl: server.URL + "/aas",
+					AASApiUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
 						Username: "admin@hub",
 						Password: "hubAdminPass",

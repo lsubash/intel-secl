@@ -6,17 +6,14 @@ package tasks
 
 import (
 	"fmt"
-	"io"
-	"net/url"
-	"os"
-	"strings"
-
 	"github.com/intel-secl/intel-secl/v4/pkg/clients/k8s"
-	openstackClient "github.com/intel-secl/intel-secl/v4/pkg/clients/openstack"
 	"github.com/intel-secl/intel-secl/v4/pkg/ihub/config"
 	"github.com/intel-secl/intel-secl/v4/pkg/ihub/constants"
 	cos "github.com/intel-secl/intel-secl/v4/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v4/pkg/lib/common/setup"
+	"io"
+	"net/url"
+	"os"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -39,55 +36,8 @@ func (tenantConnection TenantConnection) Run() error {
 	}
 
 	tenantConf := tenantConnection.TenantConfig
-	tenantConf.Type = endPointType
 
-	if endPointType == constants.OpenStackTenant {
-
-		openstackPlacementUrl := viper.GetString("openstack-placement-url")
-		openstackAuthUrl := viper.GetString("openstack-auth-url")
-		openstackUserName := viper.GetString("openstack-username")
-		openstackPassword := viper.GetString("openstack-password")
-
-		if openstackPlacementUrl == "" {
-			return errors.New("tasks/tenant_connection:Run() OPENSTACK_PLACEMENT_URL is not defined in environment")
-		}
-
-		if openstackAuthUrl == "" {
-			return errors.New("tasks/tenant_connection:Run() OPENSTACK_AUTH_URL is not defined in environment")
-		}
-
-		if openstackUserName == "" {
-			return errors.New("tasks/tenant_connection:Run() OPENSTACK_USERNAME is not defined in environment")
-		}
-
-		if openstackPassword == "" {
-			return errors.New("tasks/tenant_connection:Run() OPENSTACK_PASSWORD is not defined in environment")
-		}
-
-		if _, err := url.Parse(openstackPlacementUrl); err != nil {
-			return errors.Wrap(err, "tasks/tenant_connection:Run() OPENSTACK_PLACEMENT_URL is invalid")
-		}
-
-		if _, err := url.Parse(openstackAuthUrl); err != nil {
-			return errors.Wrap(err, "tasks/tenant_connection:Run() OPENSTACK_AUTH_URL is invalid")
-		}
-
-		if !strings.HasSuffix(openstackPlacementUrl, "/") {
-			openstackPlacementUrl += "/"
-		}
-
-		if !strings.HasSuffix(openstackAuthUrl, "/") {
-			openstackAuthUrl += "/"
-		}
-		openstackAuthUrl += constants.OpenStackAuthenticationAPI
-
-		tenantConf.URL = openstackPlacementUrl
-		tenantConf.AuthURL = openstackAuthUrl
-		tenantConf.UserName = openstackUserName
-		tenantConf.Password = openstackPassword
-
-	} else if endPointType == constants.K8sTenant {
-
+	if endPointType == constants.K8sTenant {
 		k8sURL := viper.GetString("kubernetes-url")
 		k8sCRDName := viper.GetString("kubernetes-crd")
 		k8sToken := viper.GetString("kubernetes-token")
@@ -129,7 +79,6 @@ func (tenantConnection TenantConnection) Run() error {
 		tenantConf.CRDName = k8sCRDName
 		tenantConf.Token = k8sToken
 		tenantConf.CertFile = k8sCertFile
-
 	} else {
 		return errors.Errorf("tasks/tenant_connection:Run() Endpoint type '%s' is not supported", endPointType)
 	}
@@ -140,10 +89,8 @@ func (tenantConnection TenantConnection) Run() error {
 // Validate checks whether or not the tenant Connection setup task was completed successfully
 func (tenantConnection TenantConnection) Validate() error {
 	conf := tenantConnection.TenantConfig
-	if conf.URL == "" || (conf.Type != constants.OpenStackTenant && conf.Type != constants.K8sTenant) {
+	if conf.URL == "" || conf.Type != constants.K8sTenant {
 		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: URL & Type is not set")
-	} else if conf.Type == constants.OpenStackTenant && conf.AuthURL == "" && conf.UserName == "" && conf.Password == "" {
-		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: OpenStack credentials are not set ")
 	} else if conf.Type == constants.K8sTenant && conf.CRDName == "" && conf.Token == "" && conf.CertFile == "" {
 		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: K8s credentials are not set ")
 	}
@@ -156,26 +103,8 @@ func (tenantConnection TenantConnection) Validate() error {
 func (tenantConnection TenantConnection) validateService() error {
 
 	conf := tenantConnection.TenantConfig
-	if conf.Type == constants.OpenStackTenant {
 
-		authURL, err := url.Parse(conf.AuthURL)
-		if err != nil {
-			return errors.Wrap(err, "tasks/tenant_connection:validateService() : Unable to parse the auth URL")
-		}
-
-		apiURL, err := url.Parse(conf.URL)
-		if err != nil {
-			return errors.Wrap(err, "tasks/tenant_connection:validateService() : Unable to parse the api URL")
-		}
-
-		_, err = openstackClient.NewOpenstackClient(authURL, apiURL, conf.UserName, conf.Password, "")
-		if err != nil {
-			return errors.Wrap(err, "tasks/tenant_connection:validateService() : Error Initializing the OpenStack client")
-		}
-		fmt.Fprintln(tenantConnection.ConsoleWriter, "OpenStack Connection is successful")
-
-	} else {
-
+	if conf.Type == constants.K8sTenant {
 		parsedUrl, err := url.Parse(conf.URL)
 		if err != nil {
 			return errors.Wrap(err, "tasks/tenant_connection:validateService() : Unable to parse the url")
@@ -221,16 +150,8 @@ func (tenantConnection TenantConnection) PrintHelp(w io.Writer) {
 		"KUBERNETES_CERT_FILE": "Certificate path for Kubernetes deployment",
 	}
 
-	var opsEnv = map[string]string{
-		"OPENSTACK_AUTH_URL":      "Keystone API endpoint for OpenStack deployment",
-		"OPENSTACK_PLACEMENT_URL": "Placement API endpoint for OpenStack deployment",
-		"OPENSTACK_USERNAME":      "UserName for OpenStack deployment",
-		"OPENSTACK_PASSWORD":      "Password for OpenStack deployment",
-	}
-
 	setup.PrintEnvHelp(w, "Following environment variables are required for tenant-service-connection setup:", "", envHelp)
 	setup.PrintEnvHelp(w, "Following environment variables are required for Kubernetes tenant: ", "", k8sEnv)
-	setup.PrintEnvHelp(w, "Following environment variables are required for OpenStack tenant:", "", opsEnv)
 	fmt.Fprintln(w, "")
 }
 
