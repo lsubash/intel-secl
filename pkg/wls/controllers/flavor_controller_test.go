@@ -36,12 +36,12 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When a empty Flavor Create Request is passed", func() {
 			It("A HTTP Status: 400 response is received", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 				// Create Request body
 				createfReq := ``
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(createfReq),
 				)
@@ -56,7 +56,7 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When a VALID Flavor Create Request is passed which already exist in database", func() {
 			It("A new Flavor record is created and HTTP Status: 409 response is received", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 
 				createfReq := `{
 "flavor": {
@@ -77,7 +77,7 @@ var _ = Describe("FlavorController", func() {
 "signature": "N6J8yVIW5XT2KCudY2ShL7MlR2vffOg/olf/QFJKEiu5qAQri254G9LSkQ53CX3KrHQdNXpZdEcYfhunEnzIS3IOuihACCIBeN1Wz0ly0aWEraV21/e1kVeTOFuG8CJQqli00a1XkMFpn2Ik6NNbnwHQ/wUohxqjQ8MRunMP/Aj2rtWmZqDowL9ZjLpvS6Lk/AmfkPq/ai8zdv4uhoaIZZBs9SGQUPWiejhMeHNdjoP+t/D5SCuRJ7bsMBmw9F5ctUwgwS9gy9ThDUUhevQmoBpdFybkc+CU2xO0U/J+alqPO54nytPOLy7aU99SSD68N30jYkYdm+0ORXSMRk3raKcf9zAO8M3hWqctaKsfnMAJTaLvOzo7zNrIf1zoEfIAjJYWgjWUSgtzh5t0sPQOUh9Szrwl6daom0re6vHK/FWGr3fO7PvpJIQkzOXoDXKdM4H/ueEXl5y53bHQ0d/1P2DJfLOV7Lx1g+MrcaTolzgbQ7QQXlA4NL4je/zUY+qZ"
 }`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(createfReq),
 				)
@@ -92,12 +92,12 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When an invalid Content-Type is set", func() {
 			It("Should return 415: StatusUnsupportedMediaType response is received", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 
 				createfReq := ``
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(createfReq),
 				)
@@ -112,7 +112,7 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When an invalid flavor content is set", func() {
 			It("Should return 400 response is received", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 
 				createfReq := `"flavor": {
     "meta": {
@@ -129,7 +129,7 @@ var _ = Describe("FlavorController", func() {
 }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(createfReq),
 				)
@@ -147,8 +147,8 @@ var _ = Describe("FlavorController", func() {
 	Describe("Search Flavor", func() {
 		Context("When no arguments are passed", func() {
 			It("At least one parameter is required and a 400 response code", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors", nil)
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -159,8 +159,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When filtered by Flavor id", func() {
 			It("Should get a single Flavor entry and a 200 response code", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors?id=dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?id=dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -176,8 +176,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When filtered by Invalid Flavor uuid", func() {
 			It("Should not get the Flavor entry and a 400 response code", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors?id=za22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?id=za22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -188,8 +188,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When filtered by Flavor id which doesn't exist", func() {
 			It("Should get an empty list of Flavor entry and a 200 response code", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors?id=b47a13b1-0af2-47d6-91d0-717094bfda2d", nil)
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?id=b47a13b1-0af2-47d6-91d0-717094bfda2d", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -205,8 +205,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When filtered by label", func() {
 			It("Should get a Flavor entry and a 200 response code", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors?label=vm1-label-name", nil)
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?label=vm1-label-name", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -222,8 +222,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("When an non existing label string is provided", func() {
 			It("Should return 200", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors?label=12155", nil)
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?label=12155", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -237,8 +237,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Delete Flavor by ID from data store", func() {
 			It("Should delete Flavor and return a 204 response code", func() {
-				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(flavorController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/flavors/dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
+				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(flavorController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavors/dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -248,8 +248,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Delete Flavor by incorrect ID from data store", func() {
 			It("Should fail to delete Flavor and return a 404 response code", func() {
-				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(flavorController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/flavors/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
+				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(flavorController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavors/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -259,8 +259,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Internal Server error request", func() {
 			It("Should fail to delete Flavor and return a 500 response code", func() {
-				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(flavorController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
+				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(flavorController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -273,8 +273,8 @@ var _ = Describe("FlavorController", func() {
 	Describe("Retrieve Flavor by ID", func() {
 		Context("Retrieve Flavor by ID from data store", func() {
 			It("Should Retrieve Flavor and return a 200 response code", func() {
-				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors/dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
+				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors/dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -285,8 +285,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Retrieve Flavor by incorrect ID from data store", func() {
 			It("Should fail to Retrieve Flavor and return a 404 response code", func() {
-				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
+				router.Handle("/flavors/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()

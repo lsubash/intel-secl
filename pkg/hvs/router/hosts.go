@@ -6,6 +6,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
@@ -36,24 +37,24 @@ func SetHostRoutes(router *mux.Router, store *postgres.DataStore, hostTrustManag
 	flavorgroupIdExpr := fmt.Sprintf("%s/{fgId:%s}", flavorgroupExpr, validation.UUIDReg)
 
 	router.Handle(hostExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Create),
-		[]string{constants.HostCreate}))).Methods("POST")
+		[]string{constants.HostCreate}))).Methods(http.MethodPost)
 	router.Handle(hostIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Retrieve),
-		[]string{constants.HostRetrieve}))).Methods("GET")
+		[]string{constants.HostRetrieve}))).Methods(http.MethodGet)
 	router.Handle(hostIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Update),
-		[]string{constants.HostUpdate}))).Methods("PUT")
+		[]string{constants.HostUpdate}))).Methods(http.MethodPut)
 	router.Handle(hostIdExpr, ErrorHandler(permissionsHandler(ResponseHandler(hostController.Delete),
-		[]string{constants.HostDelete}))).Methods("DELETE")
+		[]string{constants.HostDelete}))).Methods(http.MethodDelete)
 	router.Handle(hostExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Search),
-		[]string{constants.HostSearch}))).Methods("GET")
+		[]string{constants.HostSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorgroupExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.AddFlavorgroup),
-		[]string{constants.HostCreate}))).Methods("POST")
+		[]string{constants.HostCreate}))).Methods(http.MethodPost)
 	router.Handle(flavorgroupIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.RetrieveFlavorgroup),
-		[]string{constants.HostRetrieve}))).Methods("GET")
+		[]string{constants.HostRetrieve}))).Methods(http.MethodGet)
 	router.Handle(flavorgroupIdExpr, ErrorHandler(permissionsHandler(ResponseHandler(hostController.RemoveFlavorgroup),
-		[]string{constants.HostDelete}))).Methods("DELETE")
+		[]string{constants.HostDelete}))).Methods(http.MethodDelete)
 	router.Handle(flavorgroupExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.SearchFlavorgroups),
-		[]string{constants.HostSearch}))).Methods("GET")
+		[]string{constants.HostSearch}))).Methods(http.MethodGet)
 
 	return router
 }

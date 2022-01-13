@@ -75,7 +75,7 @@ var _ = Describe("SKCKeyTransferController", func() {
 		Context("Provide a valid Transfer request", func() {
 			BeforeEach(func() {
 				sessionController := controllers.NewSessionController(kbsConfig, trustedCaCertsDir)
-				router.Handle("/session", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(sessionController.Create))).Methods("POST")
+				router.Handle("/session", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(sessionController.Create))).Methods(http.MethodPost)
 				sessionJson := `{
 							"challenge_type": "SGX",
 							"challenge": "MTRjZmNlZDEtMDNlZS00YTY4LThiNTAtNmQ0NTY0MjNiMDc4",
@@ -83,7 +83,7 @@ var _ = Describe("SKCKeyTransferController", func() {
 							"userData": "ATE0Y2ZjZWQxMDNlZTRhNjg4YjUwNmQ0NTY0MjNiMDc4"
 						}`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/session",
 					strings.NewReader(sessionJson),
 				)
@@ -95,8 +95,8 @@ var _ = Describe("SKCKeyTransferController", func() {
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 			It("Should fail to transfer an existing Key", func() {
-				router.Handle("/keys/{id}/dhsm2-transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(skcController.TransferApplicationKey))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/dhsm2-transfer", nil)
+				router.Handle("/keys/{id}/dhsm2-transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(skcController.TransferApplicationKey))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/dhsm2-transfer", nil)
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Accept-Challenge", "SGX")
 				req.Header.Set("Session-Id", "SGX:14cfced1-03ee-4a68-8b50-6d456423b078")
@@ -109,8 +109,8 @@ var _ = Describe("SKCKeyTransferController", func() {
 		})
 		Context("Provide a Transfer request without Accept-Challenge Header", func() {
 			It("Should fail to transfer an existing Key", func() {
-				router.Handle("/keys/{id}/dhsm2-transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(skcController.TransferApplicationKey))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/dhsm2-transfer", nil)
+				router.Handle("/keys/{id}/dhsm2-transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(skcController.TransferApplicationKey))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/dhsm2-transfer", nil)
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Session-Id", "SGX:14cfced1-03ee-4a68-8b50-6d456423b078")
 				req.TLS = &cs
@@ -122,8 +122,8 @@ var _ = Describe("SKCKeyTransferController", func() {
 		})
 		Context("Provide a Transfer request without Session-Id Header", func() {
 			It("Should fail to transfer an existing Key", func() {
-				router.Handle("/keys/{id}/dhsm2-transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(skcController.TransferApplicationKey))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/dhsm2-transfer", nil)
+				router.Handle("/keys/{id}/dhsm2-transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(skcController.TransferApplicationKey))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/dhsm2-transfer", nil)
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Accept-Challenge", "SGX")
 				req.TLS = &cs

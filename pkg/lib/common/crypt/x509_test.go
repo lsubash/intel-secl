@@ -307,7 +307,7 @@ func TestRevokedX509(t *testing.T) {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	// Create intermediate Certs for signing the leaf
 	intermediateCert1Template := x509.Certificate{

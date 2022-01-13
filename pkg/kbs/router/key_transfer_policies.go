@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/directory"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
+	"net/http"
 )
 
 //setKeyTransferPolicyRoutes registers routes to perform KeyTransferPolicy CRUD operations
@@ -24,19 +25,19 @@ func setKeyTransferPolicyRoutes(router *mux.Router) *mux.Router {
 
 	router.Handle("/key-transfer-policies",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(transferPolicyController.Create),
-			[]string{constants.KeyTransferPolicyCreate}))).Methods("POST")
+			[]string{constants.KeyTransferPolicyCreate}))).Methods(http.MethodPost)
 
 	router.Handle(keyTransferPolicyIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(transferPolicyController.Retrieve),
-			[]string{constants.KeyTransferPolicyRetrieve}))).Methods("GET")
+			[]string{constants.KeyTransferPolicyRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(keyTransferPolicyIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(transferPolicyController.Delete),
-			[]string{constants.KeyTransferPolicyDelete}))).Methods("DELETE")
+			[]string{constants.KeyTransferPolicyDelete}))).Methods(http.MethodDelete)
 
 	router.Handle("/key-transfer-policies",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(transferPolicyController.Search),
-			[]string{constants.KeyTransferPolicySearch}))).Methods("GET")
+			[]string{constants.KeyTransferPolicySearch}))).Methods(http.MethodGet)
 
 	return router
 }

@@ -44,7 +44,7 @@ func (client flavorsClientImpl) GetImageFlavorKey(imageUUID, hardwareUUID string
 	parameters.Add("hardware_uuid", hardwareUUID)
 	requestURL.RawQuery = parameters.Encode()
 
-	httpRequest, err := http.NewRequest("GET", requestURL.String(), nil)
+	httpRequest, err := http.NewRequest(http.MethodGet, requestURL.String(), nil)
 	if err != nil {
 		return flavorKeyInfo, err
 	}
@@ -86,7 +86,7 @@ func (client flavorsClientImpl) GetImageFlavor(imageID, flavorPart string) (wlsM
 	parameters.Add("flavor_part", flavorPart)
 	requestURL.RawQuery = parameters.Encode()
 
-	httpRequest, err := http.NewRequest("GET", requestURL.String(), nil)
+	httpRequest, err := http.NewRequest(http.MethodGet, requestURL.String(), nil)
 	if err != nil {
 		return flavor, err
 	}

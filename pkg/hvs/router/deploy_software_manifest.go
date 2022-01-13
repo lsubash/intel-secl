@@ -11,6 +11,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
+	"net/http"
 )
 
 //SetDeploySoftwareManifestRoute registers routes for APIs that deploy software manifest to host
@@ -31,7 +32,7 @@ func SetDeploySoftwareManifestRoute(router *mux.Router, store *postgres.DataStor
 
 	router.Handle("/rpc/deploy-software-manifest",
 		ErrorHandler(permissionsHandler(ResponseHandler(dsmController.DeployManifest),
-			[]string{constants.SoftwareFlavorDeploy}))).Methods("POST")
+			[]string{constants.SoftwareFlavorDeploy}))).Methods(http.MethodPost)
 
 	return router
 }

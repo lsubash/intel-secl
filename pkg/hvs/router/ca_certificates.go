@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	"net/http"
 )
 
 func SetCaCertificatesRoutes(router *mux.Router, certStore *crypt.CertificatesStore) *mux.Router {
@@ -18,8 +19,8 @@ func SetCaCertificatesRoutes(router *mux.Router, certStore *crypt.CertificatesSt
 
 	caCertController := controllers.CaCertificatesController{CertStore: certStore}
 
-	router.Handle("/ca-certificates/{certType}", ErrorHandler(JsonResponseHandler(caCertController.Retrieve))).Methods("GET")
-	router.Handle("/ca-certificates", ErrorHandler(ResponseHandler(caCertController.SearchPem))).Methods("GET").Headers("Accept", constants.HTTPMediaTypePemFile)
-	router.Handle("/ca-certificates", ErrorHandler(JsonResponseHandler(caCertController.Search))).Methods("GET")
+	router.Handle("/ca-certificates/{certType}", ErrorHandler(JsonResponseHandler(caCertController.Retrieve))).Methods(http.MethodGet)
+	router.Handle("/ca-certificates", ErrorHandler(ResponseHandler(caCertController.SearchPem))).Methods(http.MethodGet).Headers("Accept", constants.HTTPMediaTypePemFile)
+	router.Handle("/ca-certificates", ErrorHandler(JsonResponseHandler(caCertController.Search))).Methods(http.MethodGet)
 	return router
 }

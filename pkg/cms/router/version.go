@@ -8,6 +8,7 @@ package router
 import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/controllers"
+	"net/http"
 )
 
 func SetVersionRoutes(router *mux.Router) *mux.Router {
@@ -15,6 +16,6 @@ func SetVersionRoutes(router *mux.Router) *mux.Router {
 	defer defaultLog.Trace("router/version:SetVersionRoutes() Leaving")
 	versionController := controllers.VersionController{}
 
-	router.Handle("/version", versionController.GetVersion()).Methods("GET")
+	router.Handle("/version", versionController.GetVersion()).Methods(http.MethodGet)
 	return router
 }

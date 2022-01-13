@@ -7,6 +7,7 @@ package router
 import (
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
@@ -32,19 +33,19 @@ func SetFlavorRoutes(router *mux.Router, store *postgres.DataStore, flavorGroupS
 	router.Handle("/flavors",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorController.Create),
 			[]string{constants.FlavorCreate, constants.SoftwareFlavorCreate, constants.HostUniqueFlavorCreate, constants.TagFlavorCreate}))).
-		Methods("POST")
+		Methods(http.MethodPost)
 
 	router.Handle("/flavors",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorController.Search),
-			[]string{constants.FlavorSearch}))).Methods("GET")
+			[]string{constants.FlavorSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(flavorController.Delete),
-			[]string{constants.FlavorDelete}))).Methods("DELETE")
+			[]string{constants.FlavorDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorController.Retrieve),
-			[]string{constants.FlavorRetrieve}))).Methods("GET")
+			[]string{constants.FlavorRetrieve}))).Methods(http.MethodGet)
 
 	return router
 }

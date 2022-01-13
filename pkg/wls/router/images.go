@@ -13,6 +13,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/postgres"
+	"net/http"
 )
 
 // SetImageRoutes registers routes for image
@@ -33,43 +34,43 @@ func SetImageRoutes(router *mux.Router, store *postgres.DataStore, conf *config.
 	router.Handle("/images",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.Create),
 			[]string{constants.ImagesCreate}))).
-		Methods("POST")
+		Methods(http.MethodPost)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(imageController.DeleteImageFlavorAssociation),
-			[]string{constants.ImageFlavorsDelete}))).Methods("DELETE")
+			[]string{constants.ImageFlavorsDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(imageIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(imageController.Delete),
-			[]string{constants.ImagesDelete}))).Methods("DELETE")
+			[]string{constants.ImagesDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(imageIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.Retrieve),
-			[]string{constants.ImagesRetrieve}))).Methods("GET")
+			[]string{constants.ImagesRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(flavorsExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart),
-			[]string{constants.ImageFlavorsRetrieve}))).Methods("GET").Queries("flavor_part", "{flavor_part}")
+			[]string{constants.ImageFlavorsRetrieve}))).Methods(http.MethodGet).Queries("flavor_part", "{flavor_part}")
 
 	router.Handle(flavorKeyExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.RetrieveFlavorAndKey),
-			[]string{constants.ImageFlavorsRetrieve}))).Methods("GET").Queries("hardware_uuid", "{hardware_uuid}")
+			[]string{constants.ImageFlavorsRetrieve}))).Methods(http.MethodGet).Queries("hardware_uuid", "{hardware_uuid}")
 
 	router.Handle("/images",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.Search),
-			[]string{constants.ImagesSearch}))).Methods("GET")
+			[]string{constants.ImagesSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(imageController.UpdateAssociatedFlavor),
-			[]string{constants.ImageFlavorsStore}))).Methods("PUT")
+			[]string{constants.ImageFlavorsStore}))).Methods(http.MethodPut)
 
 	router.Handle(flavorsExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.GetAllAssociatedFlavors),
-			[]string{constants.ImageFlavorsSearch}))).Methods("GET")
+			[]string{constants.ImageFlavorsSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.GetAssociatedFlavor),
-			[]string{constants.ImageFlavorsRetrieve}))).Methods("GET")
+			[]string{constants.ImageFlavorsRetrieve}))).Methods(http.MethodGet)
 
 	return router
 }

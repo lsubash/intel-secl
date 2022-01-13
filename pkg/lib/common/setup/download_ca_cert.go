@@ -99,7 +99,7 @@ func downloadRootCaCertificate(cmsBaseUrl string, dirPath string, trustedTlsCert
 	}
 	certificates, _ := parsedUrl.Parse("ca-certificates")
 	endpoint := parsedUrl.ResolveReference(certificates)
-	req, err := http.NewRequest("GET", endpoint.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, endpoint.String(), nil)
 	if err != nil {
 		return errors.Wrap(err, "Failed to instantiate http request to CMS")
 	}

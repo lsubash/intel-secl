@@ -39,7 +39,7 @@ func (client *caCertificatesClientImpl) GetCaCertsInPem(domain string) ([]byte, 
 	defer log.Trace("hvsclient/ca_certificates_client:GetCaCertsInPem() Leaving")
 
 	url := fmt.Sprintf("%sca-certificates?domain=%s", client.cfg.BaseURL, domain)
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/ca_certificates_client:GetCaCertsInPem() error creating request")
 	}

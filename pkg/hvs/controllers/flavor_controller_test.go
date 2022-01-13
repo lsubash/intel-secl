@@ -83,8 +83,8 @@ var _ = Describe("FlavorController", func() {
 	Describe("Search Flavors", func() {
 		Context("When no filter arguments are passed", func() {
 			It("All Flavors records are returned", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors", nil)
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -100,8 +100,8 @@ var _ = Describe("FlavorController", func() {
 		})
 		Context("When filtered by Flavor id", func() {
 			It("Should get a single flavor entry", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors?id=c36b5412-8c02-4e08-8a74-8bfa40425cf3", nil)
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?id=c36b5412-8c02-4e08-8a74-8bfa40425cf3", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -116,8 +116,8 @@ var _ = Describe("FlavorController", func() {
 		})
 		Context("When filtered by Flavor meta description key-value pair", func() {
 			It("Should get a single flavor entry", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors?key=bios_name&&value=Intel Corporation", nil)
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?key=bios_name&&value=Intel Corporation", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -137,8 +137,8 @@ var _ = Describe("FlavorController", func() {
 	Describe("Retrieve Flavor", func() {
 		Context("Retrieve Flavor by valid ID from data store", func() {
 			It("Should retrieve Flavor", func() {
-				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors/c36b5412-8c02-4e08-8a74-8bfa40425cf3", nil)
+				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors/c36b5412-8c02-4e08-8a74-8bfa40425cf3", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -149,8 +149,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Retrieve Flavor(created by template) by valid ID from data store", func() {
 			It("Should retrieve Flavor", func() {
-				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors/e6612219-bbd5-4259-8c7e-991e43729a86", nil)
+				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors/e6612219-bbd5-4259-8c7e-991e43729a86", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -161,8 +161,8 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Try to retrieve Flavor by non-existent ID from data store", func() {
 			It("Should fail to retrieve Flavor", func() {
-				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/flavors/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -181,8 +181,8 @@ var _ = Describe("FlavorController", func() {
 	Describe("Delete Flavor by ID", func() {
 		Context("Delete Flavor by ID from data store", func() {
 			It("Should delete Flavor", func() {
-				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(flavorController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/flavors/c36b5412-8c02-4e08-8a74-8bfa40425cf3", nil)
+				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(flavorController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavors/c36b5412-8c02-4e08-8a74-8bfa40425cf3", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -191,8 +191,8 @@ var _ = Describe("FlavorController", func() {
 		})
 		Context("Delete Flavor by invalid ID from data store", func() {
 			It("Should fail to delete Flavor", func() {
-				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(flavorController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/flavors/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+				router.Handle("/flavors/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(flavorController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavors/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -205,7 +205,7 @@ var _ = Describe("FlavorController", func() {
 	Describe("Create a new flavor", func() {
 		Context("Provide a invalid Create request with XSS Attack Strings", func() {
 			It("Should return 400 response code", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 				flavorJson := `{ 
                               "connection_string": "';alert(String.fromCharCode(88,83,83))//\\';alert(String.fromCharCode(88,83,83))//\";alert(String.fromCharCode(88,83,83))//\\\";alert(String.fromCharCode(88,83,83))//–>\">'>",
                               "tls_policy_id": "TRUST_FIRST_CERTIFICATE",
@@ -217,7 +217,7 @@ var _ = Describe("FlavorController", func() {
                                  "HOST_UNIQUE"
                               ]}`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(flavorJson),
 				)
@@ -241,9 +241,9 @@ var _ = Describe("FlavorController", func() {
 							"SOFTWARE"
 						]
 					}`
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(flavorJson),
 				)
@@ -257,7 +257,7 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Provide a Create request without Content-Type header", func() {
 			It("Should return 415 response code", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 				flavorJson := `{
 						"connection_string": "intel:https://another.ta.ip.com:1443",
 						"partial_flavor_types": [
@@ -268,7 +268,7 @@ var _ = Describe("FlavorController", func() {
 						]
 					}`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(flavorJson),
 				)
@@ -282,9 +282,9 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Provide a empty create request", func() {
 			It("Should return 415 response code", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(""),
 				)
@@ -299,7 +299,7 @@ var _ = Describe("FlavorController", func() {
 
 		Context("Provide a valid manually crafted Flavor request", func() {
 			It("Should return 201 Response code and a signed flavor", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 				flavorJson := `{
 					"connection_string":"",
 					"flavor_collection":{
@@ -547,7 +547,7 @@ var _ = Describe("FlavorController", func() {
 					]
 				 }`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(flavorJson),
 				)
@@ -560,7 +560,7 @@ var _ = Describe("FlavorController", func() {
 		})
 		Context("Provide a manually crafted Flavor request with an invalid field name", func() {
 			It("Should return 400 Error code", func() {
-				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Create))).Methods(http.MethodPost)
 				flavorJson := `{
 					"connection_string":"",
 					"flavor_collection":{
@@ -808,7 +808,7 @@ var _ = Describe("FlavorController", func() {
 					]
 				 }`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/flavors",
 					strings.NewReader(flavorJson),
 				)

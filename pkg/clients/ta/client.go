@@ -65,7 +65,7 @@ func (tc *taClient) GetHostInfo() (taModel.HostInfo, error) {
 		return hostInfo, errors.New("client/trust_agent_client:GetHostInfo() error forming GET host info URL")
 	}
 	log.Debug("client/trust_agent_client:GetHostInfo() Request URL created for host info")
-	httpRequest, err := http.NewRequest("GET", requestURL.String(), nil)
+	httpRequest, err := http.NewRequest(http.MethodGet, requestURL.String(), nil)
 	if err != nil {
 		return hostInfo, err
 	}
@@ -109,7 +109,7 @@ func (tc *taClient) GetTPMQuote(nonce string, pcrList []int, pcrBankList []strin
 	buffer := new(bytes.Buffer)
 	err = json.NewEncoder(buffer).Encode(quoteRequest)
 	secLog.Debugf("client/trust_agent_client:GetTPMQuote() TPM quote request: %s", buffer.String())
-	httpRequest, err := http.NewRequest("POST", requestURL.String(), buffer)
+	httpRequest, err := http.NewRequest(http.MethodPost, requestURL.String(), buffer)
 	if err != nil {
 		return quoteResponse, err
 	}
@@ -142,7 +142,7 @@ func (tc *taClient) GetAIK() ([]byte, error) {
 	}
 	log.Debug("clients/trust_agent_client:GetAIK() Request URL created for AIK certificate")
 
-	httpRequest, err := http.NewRequest("GET", requestURL.String(), nil)
+	httpRequest, err := http.NewRequest(http.MethodGet, requestURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (tc *taClient) GetBindingKeyCertificate() ([]byte, error) {
 			"certificate URL")
 	}
 	log.Debug("clients/trust_agent_client:GetBindingKeyCertificate() Request URL created for Binding Key certificate")
-	httpRequest, err := http.NewRequest("GET", requestURL.String(), nil)
+	httpRequest, err := http.NewRequest(http.MethodGet, requestURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func (tc *taClient) DeployAssetTag(hardwareUUID, tag string) error {
 	buffer := new(bytes.Buffer)
 	err = json.NewEncoder(buffer).Encode(tagWriteRequest)
 	secLog.Debugf("TAG request: %s", buffer.String())
-	httpRequest, err := http.NewRequest("POST", requestURL.String(), buffer)
+	httpRequest, err := http.NewRequest(http.MethodPost, requestURL.String(), buffer)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func (tc *taClient) DeploySoftwareManifest(manifest taModel.Manifest) error {
 	buffer := new(bytes.Buffer)
 	err = xml.NewEncoder(buffer).Encode(manifest)
 	log.Debugf("Manifest request: %s", buffer.String())
-	httpRequest, err := http.NewRequest("POST", requestURL.String(), buffer)
+	httpRequest, err := http.NewRequest(http.MethodPost, requestURL.String(), buffer)
 	if err != nil {
 		return err
 	}
@@ -265,7 +265,7 @@ func (tc *taClient) GetMeasurementFromManifest(manifest taModel.Manifest) (taMod
 	buffer := new(bytes.Buffer)
 	err = xml.NewEncoder(buffer).Encode(manifest)
 	log.Debugf("Manifest request: %s", buffer.String())
-	httpRequest, err := http.NewRequest("POST", requestURL.String(), buffer)
+	httpRequest, err := http.NewRequest(http.MethodPost, requestURL.String(), buffer)
 	if err != nil {
 		return measurement, err
 	}

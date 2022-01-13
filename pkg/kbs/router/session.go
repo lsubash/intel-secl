@@ -9,6 +9,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
+	"net/http"
 )
 
 //setSessionRoutes registers routes to perform session management operations
@@ -20,6 +21,6 @@ func setSessionRoutes(router *mux.Router, kbsConfig *config.Configuration) *mux.
 
 	router.Handle("/session",
 		ErrorHandler(permissionsHandlerUsingTLSMAuth(JsonResponseHandler(sessionController.Create),
-			kbsConfig.AASApiUrl, kbsConfig.KBS))).Methods("POST")
+			kbsConfig.AASApiUrl, kbsConfig.KBS))).Methods(http.MethodPost)
 	return router
 }

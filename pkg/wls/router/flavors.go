@@ -11,6 +11,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/postgres"
+	"net/http"
 )
 
 // SetFlavorRoutes registers routes for flavors
@@ -26,19 +27,19 @@ func SetFlavorRoutes(router *mux.Router, store *postgres.DataStore) *mux.Router 
 	router.Handle("/flavors",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorController.Create),
 			[]string{constants.FlavorsCreate}))).
-		Methods("POST")
+		Methods(http.MethodPost)
 
 	router.Handle("/flavors",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorController.Search),
-			[]string{constants.FlavorsSearch}))).Methods("GET")
+			[]string{constants.FlavorsSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(flavorController.Delete),
-			[]string{constants.FlavorsDelete}))).Methods("DELETE")
+			[]string{constants.FlavorsDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorController.Retrieve),
-			[]string{constants.FlavorsRetrieve}))).Methods("GET")
+			[]string{constants.FlavorsRetrieve}))).Methods(http.MethodGet)
 
 	return router
 }

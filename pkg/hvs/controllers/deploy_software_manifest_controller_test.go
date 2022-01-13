@@ -69,14 +69,14 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Provide a valid host ID and flavor ID", func() {
 			It("Should deploy software manifest successfully", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"flavor_id":"7f0683c1-a038-4ed4-8b29-286410f2e753",
 												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)
@@ -94,14 +94,14 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Provide invalid flavor ID in request", func() {
 			It("Should fail to deploy software manifest", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"flavor_id":"339a7ac6-b8be-000000004356-ab34-be6e3bdfa1ed",
 												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)
@@ -119,14 +119,14 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Provide invalid host ID in request", func() {
 			It("Should fail to deploy software manifest", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"flavor_id":"339a7ac6-b8be-4356-ab34-be6e3bdfa1ed",
 												"host_id":"ee37c360-7eae-000000004250-a677-6ee12adce8e2"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)
@@ -144,13 +144,13 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Do not provide host ID in request", func() {
 			It("Should fail to deploy software manifest", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"flavor_id":"339a7ac6-b8be-4356-ab34-be6e3bdfa1ed"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)
@@ -168,13 +168,13 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Do not provide flavor ID in request", func() {
 			It("Should fail to deploy software manifest", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)
@@ -192,14 +192,14 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Provide flavor ID for non software flavor", func() {
 			It("Should fail to deploy software manifest", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"flavor_id":"71e4c52e-595a-429d-9917-1965b437c353"
 												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)
@@ -216,14 +216,14 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Provide flavor ID for non existent flavor", func() {
 			It("Should fail to deploy software manifest", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"flavor_id":"71e4c52e-595a-429d-9917-1965b437c354"
 												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)
@@ -240,14 +240,14 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		Context("Provide host ID for non existent host", func() {
 			It("Should fail to deploy software manifest", func() {
 				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
-					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods("POST")
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
 				deployManifestRequestJson := `{
 												"flavor_id":"71e4c52e-595a-429d-9917-1965b437c353"
 												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e3"
 											  }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/deploy-software-manifest",
 					strings.NewReader(deployManifestRequestJson),
 				)

@@ -38,14 +38,14 @@ var _ = Describe("KeyTransferPolicyController", func() {
 	Describe("Create a new Key Transfer Policy", func() {
 		Context("Provide a valid Create request", func() {
 			It("Should create a new Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods("POST")
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
 				policyJson := `{
 							"sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
 							"sgx_enclave_issuer_product_id": 0
 						}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/key-transfer-policies",
 					strings.NewReader(policyJson),
 				)
@@ -59,13 +59,13 @@ var _ = Describe("KeyTransferPolicyController", func() {
 		})
 		Context("Provide a Create request without sgx_enclave_issuer_anyof", func() {
 			It("Should fail to create new Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods("POST")
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
 				policyJson := `{
 							"sgx_enclave_issuer_product_id": 0
 						}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/key-transfer-policies",
 					strings.NewReader(policyJson),
 				)
@@ -79,13 +79,13 @@ var _ = Describe("KeyTransferPolicyController", func() {
 		})
 		Context("Provide a Create request without sgx_enclave_issuer_product_id", func() {
 			It("Should fail to create new Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods("POST")
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
 				policyJson := `{
 							"sgx_enclave_issuer_anyof": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
 						}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/key-transfer-policies",
 					strings.NewReader(policyJson),
 				)
@@ -103,8 +103,8 @@ var _ = Describe("KeyTransferPolicyController", func() {
 	Describe("Retrieve an existing Key Transfer Policy", func() {
 		Context("Retrieve Key Transfer Policy by ID", func() {
 			It("Should retrieve a Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/key-transfer-policies/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/key-transfer-policies/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -114,8 +114,8 @@ var _ = Describe("KeyTransferPolicyController", func() {
 		})
 		Context("Retrieve Key Transfer Policy by non-existent ID", func() {
 			It("Should fail to retrieve Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/key-transfer-policies/e57e5ea0-d465-461e-882d-1600090caa0d", nil)
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/key-transfer-policies/e57e5ea0-d465-461e-882d-1600090caa0d", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -129,8 +129,8 @@ var _ = Describe("KeyTransferPolicyController", func() {
 	Describe("Delete an existing Key Transfer Policy", func() {
 		Context("Delete Key Transfer Policy by ID", func() {
 			It("Should delete a Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferPolicyController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/key-transfer-policies/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferPolicyController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/key-transfer-policies/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -139,8 +139,8 @@ var _ = Describe("KeyTransferPolicyController", func() {
 		})
 		Context("Delete Key Transfer Policy by non-existent ID", func() {
 			It("Should fail to delete Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferPolicyController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/key-transfer-policies/e57e5ea0-d465-461e-882d-1600090caa0d", nil)
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferPolicyController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/key-transfer-policies/e57e5ea0-d465-461e-882d-1600090caa0d", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -149,8 +149,8 @@ var _ = Describe("KeyTransferPolicyController", func() {
 		})
 		Context("Delete Key Transfer Policy associated with Key", func() {
 			It("Should fail to delete Key Transfer Policy", func() {
-				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferPolicyController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/key-transfer-policies/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferPolicyController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/key-transfer-policies/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -163,8 +163,8 @@ var _ = Describe("KeyTransferPolicyController", func() {
 	Describe("Search for all the Key Transfer Policies", func() {
 		Context("Get all the Key Transfer Policies", func() {
 			It("Should get list of all the Key Transfer Policies", func() {
-				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/key-transfer-policies", nil)
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/key-transfer-policies", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)

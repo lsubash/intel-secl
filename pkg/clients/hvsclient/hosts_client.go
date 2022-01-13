@@ -56,7 +56,7 @@ func (client *hostsClientImpl) SearchHosts(hostFilterCriteria *hvs.HostFilterCri
 
 	parsedUrl.Path = path.Join(parsedUrl.Path, "hosts")
 
-	request, err := http.NewRequest("GET", parsedUrl.String(), nil)
+	request, err := http.NewRequest(http.MethodGet, parsedUrl.String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/hosts_client:SearchHosts() error creating request")
 	}
@@ -139,7 +139,7 @@ func (client *hostsClientImpl) CreateHost(hostCreateRequest *hvs.HostCreateReque
 
 	parsedUrl.Path = path.Join(parsedUrl.Path, "hosts")
 
-	request, err := http.NewRequest("POST", parsedUrl.String(), bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, parsedUrl.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/hosts_client:CreateHost() error creating request")
 	}
@@ -199,7 +199,7 @@ func (client *hostsClientImpl) UpdateHost(host *hvs.Host) (*hvs.Host, error) {
 
 	parsedUrl.Path = path.Join(parsedUrl.Path, "hosts", host.Id.String())
 
-	request, err := http.NewRequest("PUT", parsedUrl.String(), bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPut, parsedUrl.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/hosts_client:UpdateHost() error creating request")
 	}

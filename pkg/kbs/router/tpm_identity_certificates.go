@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/directory"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
+	"net/http"
 )
 
 //setTpmIdentityCertRoutes registers routes to perform TpmIdentityCertificate CRUD operations
@@ -22,16 +23,16 @@ func setTpmIdentityCertRoutes(router *mux.Router) *mux.Router {
 	certIdExpr := "/tpm-identity-certificates/" + validation.IdReg
 
 	router.Handle("/tpm-identity-certificates", ErrorHandler(permissionsHandler(JsonResponseHandler(tpmIdentityCertController.Import),
-		[]string{constants.TpmIdentityCertCreate}))).Methods("POST")
+		[]string{constants.TpmIdentityCertCreate}))).Methods(http.MethodPost)
 
 	router.Handle(certIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(tpmIdentityCertController.Retrieve),
-		[]string{constants.TpmIdentityCertRetrieve}))).Methods("GET")
+		[]string{constants.TpmIdentityCertRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(certIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(tpmIdentityCertController.Delete),
-		[]string{constants.TpmIdentityCertDelete}))).Methods("DELETE")
+		[]string{constants.TpmIdentityCertDelete}))).Methods(http.MethodDelete)
 
 	router.Handle("/tpm-identity-certificates", ErrorHandler(permissionsHandler(JsonResponseHandler(tpmIdentityCertController.Search),
-		[]string{constants.TpmIdentityCertSearch}))).Methods("GET")
+		[]string{constants.TpmIdentityCertSearch}))).Methods(http.MethodGet)
 
 	return router
 }

@@ -150,7 +150,7 @@ func (openstackClient *Client) updateOpenstackToken() error {
 	defer log.Trace("openstack/client:updateOpenstackToken() Leaving")
 
 	authURL := openstackClient.AuthURL
-	method := "POST"
+	method := http.MethodPost
 	domain := "default"
 
 	authorization := Authorization{

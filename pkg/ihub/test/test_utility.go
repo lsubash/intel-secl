@@ -89,7 +89,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 
 	r.HandleFunc("/mtwilson/v2/invalid/reports", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -98,7 +98,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/mtwilson/v2/reports", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -111,7 +111,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/mtwilson/v2/ca-certificates", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -124,7 +124,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	//K8s URLs
 	r.HandleFunc("/apis/crd.isecl.intel.com/v1beta1/namespaces/default/hostattributes/custom-isecl2", func(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +138,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	//K8s URLs
 	r.HandleFunc("/apis/crd.isecl.intel.com/v1beta1/namespaces/default/hostattributes/custom-isecl-not-found", func(w http.ResponseWriter, r *http.Request) {
@@ -149,17 +149,17 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/apis/crd.isecl.intel.com/v1beta1/namespaces/default/hostattributes/custom-isecl-not-found", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 
 	r.HandleFunc("/apis/crd.isecl.intel.com/v1beta1/namespaces/default/hostattributes/custom-isecl2", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
-	}).Methods("PUT")
+	}).Methods(http.MethodPut)
 
 	r.HandleFunc("/api/v1/nodes", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -172,7 +172,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/apis", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -185,7 +185,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	//Openstack Listeners
 	r.HandleFunc("/v3/auth/tokens", func(w http.ResponseWriter, r *http.Request) {
@@ -215,7 +215,7 @@ func MockServer(t *testing.T) *httptest.Server {
 			}
 			w.WriteHeader(401)
 		}
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 
 	r.HandleFunc("/openstack/api/resource_providers", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -233,7 +233,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		} else {
 			w.WriteHeader(401)
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/openstack/api/resource_providers/2f309eb2-71fa-4d67-83a4-de5ca3fc2e05/traits", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -251,7 +251,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		} else {
 			w.WriteHeader(401)
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/openstack/api/resource_providers/2f309eb2-71fa-4d67-83a4-de5ca3fc2e05/traits", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -269,7 +269,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		} else {
 			w.WriteHeader(401)
 		}
-	}).Methods("PUT")
+	}).Methods(http.MethodPut)
 
 	r.HandleFunc("/openstack/api/traits", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -287,7 +287,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		} else {
 			w.WriteHeader(401)
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/sgx-hvs/v2/platform-data", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -301,7 +301,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/sgx-hvs/v2/platform-data?HostName=worker-node1", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -315,12 +315,12 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	r.HandleFunc("/sgx-hvs/v2/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	return httptest.NewServer(r)
 }

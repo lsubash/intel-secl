@@ -42,13 +42,13 @@ var _ = Describe("TpmIdentityCertController", func() {
 	Describe("Import TpmIdentityCertificates", func() {
 		Context("Provide a valid TpmIdentityCertificate in request", func() {
 			It("Should import a new TpmIdentityCertificate", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Import))).Methods("POST")
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Import))).Methods(http.MethodPost)
 
 				// Import Request body
 				importCertReq := string(validTpmCert)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/tpm-identity-certificates",
 					strings.NewReader(importCertReq),
 				)
@@ -63,13 +63,13 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("Provide a TpmIdentityCertificate without CERTIFICATE headers in request", func() {
 			It("Should fail to import TpmIdentityCertificate", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Import))).Methods("POST")
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Import))).Methods(http.MethodPost)
 
 				// Import Request body
 				importCertReq := invalidTpmCert
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/tpm-identity-certificates",
 					strings.NewReader(importCertReq),
 				)
@@ -84,14 +84,14 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("Provide a TpmIdentityCertificate without DER data in request", func() {
 			It("Should fail to import TpmIdentityCertificate", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Import))).Methods("POST")
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Import))).Methods(http.MethodPost)
 
 				// Import Request body
 				importCertReq := `-----BEGIN CERTIFICATE-----
 -----END CERTIFICATE-----`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/tpm-identity-certificates",
 					strings.NewReader(importCertReq),
 				)
@@ -109,8 +109,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 	Describe("Retrieve an existing TpmIdentityCertificate", func() {
 		Context("Retrieve TpmIdentityCertificate by ID", func() {
 			It("Should retrieve a TpmIdentityCertificate", func() {
-				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -121,8 +121,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("Retrieve TpmIdentityCertificate by non-existent ID", func() {
 			It("Should fail to retrieve TpmIdentityCertificate", func() {
-				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates/c00135a8-f5e9-4860-ae6c-4acce525d340", nil)
+				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates/c00135a8-f5e9-4860-ae6c-4acce525d340", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -136,8 +136,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 	Describe("Delete an existing TpmIdentityCertificate", func() {
 		Context("Delete TpmIdentityCertificate by ID", func() {
 			It("Should delete a TpmIdentityCertificate", func() {
-				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/tpm-identity-certificates/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/tpm-identity-certificates/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -147,8 +147,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("Delete TpmIdentityCertificate by non-existent ID", func() {
 			It("Should fail to delete TpmIdentityCertificate", func() {
-				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/tpm-identity-certificates"+"/c00135a8-f5e9-4860-ae6c-4acce525d340", nil)
+				router.Handle("/tpm-identity-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(tpmIdentityCertController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/tpm-identity-certificates"+"/c00135a8-f5e9-4860-ae6c-4acce525d340", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -161,8 +161,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 	Describe("Search TpmIdentityCertificates", func() {
 		Context("When no query parameters are passed", func() {
 			It("Should get list of all the TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -178,8 +178,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When unknown query parameters are passed", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?badparam=value", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?badparam=value", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -190,8 +190,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by a valid SubjectEqualTo", func() {
 			It("Should get a list of TpmIdentityCertificates whose Subject is SubjectEqualTo value", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?subjectEqualTo=HVS Privacy Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?subjectEqualTo=HVS Privacy Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -207,8 +207,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by an invalid SubjectEqualTo", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?subjectEqualTo=HVS<>Privacy<>Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?subjectEqualTo=HVS<>Privacy<>Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -219,8 +219,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by a valid SubjectContains", func() {
 			It("Should get a list of TpmIdentityCertificates whose Subject contains the SubjectContains value", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?subjectContains=Privacy Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?subjectContains=Privacy Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -236,8 +236,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by an invalid SubjectContains", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?subjectContains=Privacy<>Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?subjectContains=Privacy<>Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -248,8 +248,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by a valid IssuerEqualTo", func() {
 			It("Should get a list of TpmIdentityCertificates filtered whose Issuer is IssuerEqualTo value", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?issuerEqualTo=HVS Privacy Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?issuerEqualTo=HVS Privacy Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -265,8 +265,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by an invalid IssuerEqualTo", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?issuerEqualTo=HVS<>Privacy<>Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?issuerEqualTo=HVS<>Privacy<>Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -277,8 +277,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by a valid IssuerContains", func() {
 			It("Should get a list of TpmIdentityCertificates whose Issuer contains the IssuerContains value", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?issuerContains=Privacy Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?issuerContains=Privacy Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -294,8 +294,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by an invalid IssuerContains", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?issuerContains=Privacy<>Certificate", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?issuerContains=Privacy<>Certificate", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -306,8 +306,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by a valid ValidOn date", func() {
 			It("Should get a list of TpmIdentityCertificates which are valid on the ValidOn date", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validOn="+url.QueryEscape(time.Now().Format(time.RFC3339)), nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?validOn="+url.QueryEscape(time.Now().Format(time.RFC3339)), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -323,8 +323,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by invalid ValidOn date", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validOn="+url.QueryEscape(time.Now().Format(time.RFC3339)+"0000000000000"), nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?validOn="+url.QueryEscape(time.Now().Format(time.RFC3339)+"0000000000000"), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -335,8 +335,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by valid ValidBefore date", func() {
 			It("Should get a list of TpmIdentityCertificates which are valid before the ValidBefore date", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validBefore="+url.QueryEscape(time.Now().AddDate(-1, 0, 0).Format(time.RFC3339)), nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?validBefore="+url.QueryEscape(time.Now().AddDate(-1, 0, 0).Format(time.RFC3339)), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -352,8 +352,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by invalid ValidBefore date", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validBefore="+time.Now().Format(time.RFC3339)+"01010101010", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?validBefore="+time.Now().Format(time.RFC3339)+"01010101010", nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -364,8 +364,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by valid ValidAfter date", func() {
 			It("Should get a list of TpmIdentityCertificates which are valid after the ValidAfter date", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validAfter="+url.QueryEscape(time.Now().AddDate(1, 0, 0).Format(time.RFC3339)), nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?validAfter="+url.QueryEscape(time.Now().AddDate(1, 0, 0).Format(time.RFC3339)), nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -381,8 +381,8 @@ var _ = Describe("TpmIdentityCertController", func() {
 
 		Context("When filtered by invalid ValidAfter date", func() {
 			It("Should fail to get TpmIdentityCertificates", func() {
-				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-identity-certificates?validAfter="+time.Now().Format(time.RFC3339)+"ABC", nil)
+				router.Handle("/tpm-identity-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(tpmIdentityCertController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-identity-certificates?validAfter="+time.Now().Format(time.RFC3339)+"ABC", nil)
 				Expect(err).ToNot(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()

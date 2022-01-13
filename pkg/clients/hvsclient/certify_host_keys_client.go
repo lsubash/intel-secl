@@ -62,7 +62,7 @@ func (client certifyHostKeysClientImpl) SendCertifyHostKeyRequest(key *wlaModel.
 		return nil, errors.Wrap(err, "hvsclient/certify_host_keys_client.go:SendCertifyHostKeyRequest() error marshalling signing/binding key info")
 	}
 
-	req, err := http.NewRequest("POST", certifyKeyUrl.String(), bytes.NewBuffer(kiJSON))
+	req, err := http.NewRequest(http.MethodPost, certifyKeyUrl.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/certify_host_keys_client.go:SendCertifyHostKeyRequest() Failed to create request for certifying signing/binding Key")
 	}

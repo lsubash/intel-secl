@@ -90,7 +90,7 @@ var _ = Describe("KeyController", func() {
 	Describe("Create a new Key", func() {
 		Context("Provide a valid Create request", func() {
 			It("Should create a new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "AES",
@@ -99,7 +99,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -120,7 +120,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Create request that contains non-existent key-transfer-policy", func() {
 			It("Should fail to create new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "AES",
@@ -130,7 +130,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -144,7 +144,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Create request without algorithm", func() {
 			It("Should fail to create new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"key_length": 256
@@ -152,7 +152,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -166,7 +166,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Create request that contains invalid algorithm", func() {
 			It("Should fail to create new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "XYZ",
@@ -175,7 +175,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -189,7 +189,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Create request without key length", func() {
 			It("Should fail to create new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "AES"
@@ -197,7 +197,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -211,7 +211,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Create request that contains invalid key length", func() {
 			It("Should fail to create new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "AES",
@@ -220,7 +220,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -234,7 +234,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Create request without curve type", func() {
 			It("Should fail to create new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "EC"
@@ -242,7 +242,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -256,7 +256,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Create request that contains invalid curve type", func() {
 			It("Should fail to create new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "EC",
@@ -265,7 +265,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -282,7 +282,7 @@ var _ = Describe("KeyController", func() {
 	Describe("Register a new Key", func() {
 		Context("Provide a valid Register request", func() {
 			It("Should register a new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "AES",
@@ -292,7 +292,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -313,7 +313,7 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a Register request that contains malformed key", func() {
 			It("Should fail to register new Key", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods("POST")
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Create))).Methods(http.MethodPost)
 				keyJson := `{
 								"key_information": {
 									"algorithm": "AES",
@@ -323,7 +323,7 @@ var _ = Describe("KeyController", func() {
 							}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys",
 					strings.NewReader(keyJson),
 				)
@@ -341,11 +341,11 @@ var _ = Describe("KeyController", func() {
 	Describe("Transfer using public key", func() {
 		Context("Provide a valid public key", func() {
 			It("Should transfer an existing symmetric Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods(http.MethodPost)
 				envelopeKey := string(validEnvelopeKey)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(envelopeKey),
 				)
@@ -359,11 +359,11 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a valid public key", func() {
 			It("Should transfer an existing Private Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods(http.MethodPost)
 				envelopeKey := string(validEnvelopeKey)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/87d59b82-33b7-47e7-8fcb-6f7f12c82719/transfer",
 					strings.NewReader(envelopeKey),
 				)
@@ -377,11 +377,11 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a public key without PUBLIC KEY headers", func() {
 			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods(http.MethodPost)
 				envelopeKey := invalidEnvelopeKey
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(envelopeKey),
 				)
@@ -395,12 +395,12 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a public key without DER data", func() {
 			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods(http.MethodPost)
 				envelopeKey := `-----BEGIN PUBLIC KEY-----
 -----END PUBLIC KEY-----`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(envelopeKey),
 				)
@@ -414,11 +414,11 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a non-existent Key id", func() {
 			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Transfer))).Methods(http.MethodPost)
 				envelopeKey := string(validEnvelopeKey)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/73755fda-c910-46be-821f-e8ddeab189e9/transfer",
 					strings.NewReader(envelopeKey),
 				)
@@ -435,11 +435,11 @@ var _ = Describe("KeyController", func() {
 	Describe("Transfer using saml report", func() {
 		Context("Provide a valid saml report", func() {
 			It("Should transfer an existing Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
 				samlReport := string(validSamlReport)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(samlReport),
 				)
@@ -453,11 +453,11 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a saml report with overall trust false", func() {
 			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
 				samlReport := strings.ReplaceAll(string(validSamlReport), "true", "false")
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(samlReport),
 				)
@@ -471,11 +471,11 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide a saml report with unknown signer", func() {
 			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
 				samlReport := string(invalidSamlReport)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(samlReport),
 				)
@@ -489,11 +489,11 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Provide an invalid saml report", func() {
 			It("Should fail to transfer Key", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods("POST")
+				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost)
 				samlReport := `saml`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
 					strings.NewReader(samlReport),
 				)
@@ -511,8 +511,8 @@ var _ = Describe("KeyController", func() {
 	Describe("Retrieve an existing Key", func() {
 		Context("Retrieve Key by ID", func() {
 			It("Should retrieve a Key", func() {
-				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -522,8 +522,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Retrieve Key by non-existent ID", func() {
 			It("Should fail to retrieve Key", func() {
-				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -537,8 +537,8 @@ var _ = Describe("KeyController", func() {
 	Describe("Delete an existing Key", func() {
 		Context("Delete Key by ID", func() {
 			It("Should delete a Key", func() {
-				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/keys/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -547,8 +547,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Delete Key by non-existent ID", func() {
 			It("Should fail to delete Key", func() {
-				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/keys/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+				router.Handle("/keys/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/keys/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -561,8 +561,8 @@ var _ = Describe("KeyController", func() {
 	Describe("Search for all the Keys", func() {
 		Context("Get all the Keys", func() {
 			It("Should get list of all the Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -577,8 +577,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with unknown query parameter", func() {
 			It("Should fail to get list of all the filtered Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?badparam=value", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?badparam=value", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -588,8 +588,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with valid algorithm param", func() {
 			It("Should get list of all the filtered Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?algorithm=AES", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?algorithm=AES", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -604,8 +604,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with invalid algorithm param", func() {
 			It("Should fail to get Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?algorithm=AE$", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?algorithm=AE$", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -615,8 +615,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with valid keyLength param", func() {
 			It("Should get list of all the filtered Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?keyLength=256", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?keyLength=256", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -631,8 +631,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with invalid keyLength param", func() {
 			It("Should fail to get Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?keyLength=abc", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?keyLength=abc", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -642,8 +642,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with valid curveType param", func() {
 			It("Should get list of all the filtered Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?curveType=prime256v1", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?curveType=prime256v1", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -658,8 +658,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with invalid curveType param", func() {
 			It("Should fail to get Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?curveType=primev!", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?curveType=primev!", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -669,8 +669,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with valid transferPolicyId param", func() {
 			It("Should get list of all the filtered Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?transferPolicyId=ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?transferPolicyId=ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -685,8 +685,8 @@ var _ = Describe("KeyController", func() {
 		})
 		Context("Get all the Keys with invalid transferPolicyId param", func() {
 			It("Should fail to get Keys", func() {
-				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/keys?transferPolicyId=e57e5ea0-d465-461e-882d-", nil)
+				router.Handle("/keys", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/keys?transferPolicyId=e57e5ea0-d465-461e-882d-", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()

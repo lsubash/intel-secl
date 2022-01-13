@@ -103,7 +103,7 @@ func mockGetHostReports(h string, c *config.Configuration, t *testing.T) (*saml.
 	defer server.Close()
 
 	osurl := server.URL + "/mtwilson/v2/reports?latestPerHost=true&hostName=%s"
-	method := "GET"
+	method := http.MethodGet
 
 	osurl = fmt.Sprintf(osurl, strings.ToLower(h))
 	tr := &http.Transport{

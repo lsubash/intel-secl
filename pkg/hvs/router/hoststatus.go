@@ -6,6 +6,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
@@ -23,11 +24,11 @@ func SetHostStatusRoutes(router *mux.Router, store *postgres.DataStore) *mux.Rou
 	hoststatusController := controllers.HostStatusController{Store: hoststatusStore}
 
 	router.Handle("/host-status", ErrorHandler(permissionsHandler(JsonResponseHandler(hoststatusController.Search),
-		[]string{constants.HostStatusSearch}))).Methods("GET")
+		[]string{constants.HostStatusSearch}))).Methods(http.MethodGet)
 
 	hostStatusIdExpr := fmt.Sprintf("%s%s", "/host-status/", validation.IdReg)
 	router.Handle(hostStatusIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hoststatusController.Retrieve),
-		[]string{constants.HostStatusRetrieve}))).Methods("GET")
+		[]string{constants.HostStatusRetrieve}))).Methods(http.MethodGet)
 
 	return router
 }

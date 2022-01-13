@@ -7,6 +7,7 @@ package tasks
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -193,7 +194,7 @@ func (tenantConnection TenantConnection) validateService() error {
 		}
 
 		res, err := k8sClient.SendRequest(&k8s.RequestParams{
-			Method: "GET",
+			Method: http.MethodGet,
 			URL:    parsedRequestURL,
 			Body:   nil,
 		})

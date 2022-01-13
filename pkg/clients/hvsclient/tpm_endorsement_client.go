@@ -38,7 +38,7 @@ func (client *tpmEndorsementsClientImpl) IsEkRegistered(hardwareUUID string) (bo
 	defer log.Trace("hvsclient/tpm_endorsement_client:IsEkRegistered() Leaving")
 
 	url := fmt.Sprintf("%stpm-endorsements?hardwareUuidEqualTo=%s", client.cfg.BaseURL, hardwareUUID)
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return false, errors.Wrap(err, "hvsclient/tpm_endorsement_client:IsEkRegistered() error creating request")
 	}
@@ -84,7 +84,7 @@ func (client *tpmEndorsementsClientImpl) RegisterEk(tpmEndorsement *hvs.TpmEndor
 	log.Tracef("hvsclient/tpm_endorsement_client:RegisterEk() Request body %s", string(jsonData))
 
 	url := fmt.Sprintf("%stpm-endorsements", client.cfg.BaseURL)
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return errors.Wrap(err, "hvsclient/tpm_endorsement_client:RegisterEk() error creating request")
 	}

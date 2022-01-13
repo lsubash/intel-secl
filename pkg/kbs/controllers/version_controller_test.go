@@ -29,8 +29,8 @@ var _ = Describe("VersionController", func() {
 	Describe("Get Version", func() {
 		Context("Get version details", func() {
 			It("Should return version", func() {
-				router.Handle("/version", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(versionController.GetVersion))).Methods("GET")
-				req, err := http.NewRequest("GET", "/version", nil)
+				router.Handle("/version", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(versionController.GetVersion))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/version", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)

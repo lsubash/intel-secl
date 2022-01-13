@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/controllers"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 // SetCACertificatesRoutes is used to set the endpoints for CA certificate handling APIs
@@ -17,6 +18,6 @@ func SetCACertificatesRoutes(router *mux.Router) *mux.Router {
 	defer log.Trace("router/ca_certificates:SetCACertificatesRoutes() Leaving")
 
 	caCertController := controllers.CACertificatesController{}
-	router.HandleFunc("/ca-certificates", caCertController.GetCACertificates).Methods("GET")
+	router.HandleFunc("/ca-certificates", caCertController.GetCACertificates).Methods(http.MethodGet)
 	return router
 }

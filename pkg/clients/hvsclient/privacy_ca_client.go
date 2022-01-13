@@ -49,7 +49,7 @@ func (client *privacyCAClientImpl) DownloadPrivacyCa() ([]byte, error) {
 
 	parsedUrl.Path = path.Join(parsedUrl.Path, "ca-certificates/aik")
 
-	request, err := http.NewRequest("GET", parsedUrl.String(), nil)
+	request, err := http.NewRequest(http.MethodGet, parsedUrl.String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/privacy_ca_client:DownloadPrivacyCa() error creating request")
 	}
@@ -122,7 +122,7 @@ func (client *privacyCAClientImpl) SendIdentityChallengeRequest(url *url.URL, pa
 
 	log.Debugf("ChallengeRequest: %s", jsonData)
 
-	request, err := http.NewRequest("POST", url.String(), bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, url.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/privacy_ca_client:SendIdentityChallengeRequest() error creating request")
 	}

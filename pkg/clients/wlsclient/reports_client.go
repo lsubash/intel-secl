@@ -40,7 +40,7 @@ func (client reportsClientImpl) PostVMReport(report []byte) error {
 
 	log.Debugf("wlsclient/reports_client:PostVMReport() WLS VM reports POST Request URL: %s", requestURL.String())
 
-	httpRequest, err := http.NewRequest("POST", requestURL.String(), bytes.NewBuffer(report))
+	httpRequest, err := http.NewRequest(http.MethodPost, requestURL.String(), bytes.NewBuffer(report))
 	if err != nil {
 		return errors.Wrap(err, "wlsclient/reports_client:PostVMReport() Failed to create WLS POST API request for vm reports")
 	}

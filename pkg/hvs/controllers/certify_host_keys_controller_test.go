@@ -75,7 +75,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 		Context("Provide valid data in request", func() {
 			It("Return Binding key certificate", func() {
 
-				router.Handle("/rpc/certify-host-binding-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifyBindingKey))).Methods("POST")
+				router.Handle("/rpc/certify-host-binding-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifyBindingKey))).Methods(http.MethodPost)
 
 				publicKeyModulus, _ := base64.StdEncoding.DecodeString("ARYAAQALAAIAcgAAABAAEAgAAAAAAAEAnY4+SdHJYtd2cWgZWJPZYlG77k4nty/4qTXW7ovbx08PCRI2XtiW3x8DaGEOsjpv43vc4GBXOyAP/zZxCBBUTnh8ZxbrQY33vEvK51phPC1ADabMpcmvgntNXOUbYOL95raQpAbA0+ksKpHlA0s+Yx6T5AsLypCYVoCQ+GQoN0pQu9JTmhlo7/+KVP87hmqMiziKr3dYrBDrDlwDd1+UgrN6UvweHNOtct5xKkXa5WCF2GrXTaDZNZpHyL6AXtblGkrnVFbfNGiIuOy1717YqjyCEikXmj1Ar67XogGS0/KG1Aug2C2xEI1wDEZUvkpHg9rU8AAbWhkp756xKFhIcw==")
 				tpmCertifyKey, _ := base64.StdEncoding.DecodeString("AJH/VENHgBcAIgAL1+gJcMsLhnCM31xJ1WGMdOfCoXGk+Lj9/cGDlbUGYdEABAD/VaoAAAAAhGT5nQAAAAgAAAAAAQAHACgACDIAACIAC/gUMncc7bnLWVlrtGaGT0WVlFXdxNwNVJW1DT1it8RkACIACyjbYjRmoPAu54z17ffnj+YxzjFx3yO6T2fqKRKy25vc")
@@ -93,7 +93,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				jsonData, _ := json.Marshal(regKeyInfoPayload)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/certify-host-binding-key",
 					bytes.NewBuffer(jsonData),
 				)
@@ -109,7 +109,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 		Context("Provide invalid data in request", func() {
 			It("Should get HTTP Status: 400", func() {
 
-				router.Handle("/rpc/certify-host-binding-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifyBindingKey))).Methods("POST")
+				router.Handle("/rpc/certify-host-binding-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifyBindingKey))).Methods(http.MethodPost)
 
 				publicKeyModulus, _ := base64.StdEncoding.DecodeString("ARYAAQALAAIAcgAAABAAEAgAAAAAAAEAnY4+SdHJYtd2cWgZWJPZYlG77k4nty/4qTXW7ovbx08PCRI2XtiW3x8DaGEOsjpv43vc4GBXOyAP/zZxCBBUTnh8ZxbrQY33vEvK51phPC1ADabMpcmvgntNXOUbYOL95raQpAbA0+ksKpHlA0s+Yx6T5AsLypCYVoCQ+GQoN0pQu9JTmhlo7/+KVP87hmqMiziKr3dYrBDrDlwDd1+UgrN6UvweHNOtct5xKkXa5WCF2GrXTaDZNZpHyL6AXtblGkrnVFbfNGiIuOy1717YqjyCEikXmj1Ar67XogGS0/KG1Aug2C2xEI1wDEZUvkpHg9rU8AAbWhkp756xKFhIcw==")
 				tpmCertifyKey, _ := base64.StdEncoding.DecodeString("CHJ/VENHgBcAIgAL1+gJcMsLhnCM31xJ1WGMdOfCoXGk+Lj9/cGDlbUGYdEABAD/VaoAAAAAhGT5nQAAAAgAAAAAAQAHACgACDIAACIAC/gUMncc7bnLWVlrtGaGT0WVlFXdxNwNVJW1DT1it8RkACIACyjbYjRmoPAu54z17ffnj+YxzjFx3yO6T2fqKRKy25vc")
@@ -127,7 +127,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				jsonData, _ := json.Marshal(regKeyInfoPayload)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/certify-host-binding-key",
 					bytes.NewBuffer(jsonData),
 				)
@@ -144,7 +144,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 	Describe("Create Signing key certificate", func() {
 		Context("Provide valid data in request", func() {
 			It("Return Signing key certificate", func() {
-				router.Handle("/rpc/certify-host-signing-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifySigningKey))).Methods("POST")
+				router.Handle("/rpc/certify-host-signing-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifySigningKey))).Methods(http.MethodPost)
 
 				publicKeyModulus, _ := base64.StdEncoding.DecodeString("ARYAAQALAAQAcgAAABAAEAgAAAAAAAEAlr9jyEGbgkQvVQnU8SYaNvYULm0AfHjslyc/vtBSjMMJXAQahvYP2L/bOyGsRDBbGo2Wq3OpEzphmH66wIhVhltZVA6e04vaFPSEATABMTuv5WPAPNvaFITPFAtdoTcZGsajPELuhw1+2NXMr4BG141vos9nltKqZ36XMAh8Mxmrb0Y+o+yGQWJxWvtxbxc4Q39d77SxUDkxMQgdVwWFapIQs09xh8x8TbaTLed6sdVZNisdlMlNVdhyIb81bXyigkMjnkCckxvjrGUs8eC6ZO/Z13dOU+A2j7nGpu5wXAmknxXfBobdRbUaHF/acp0YVHA0FL2f/hcy2zQWEO2FaQ==")
 				tpmCertifyKey, _ := base64.StdEncoding.DecodeString("AJH/VENHgBcAIgAL1+gJcMsLhnCM31xJ1WGMdOfCoXGk+Lj9/cGDlbUGYdEABAD/VaoAAAAAhGTwPgAAAAgAAAAAAQAHACgACDIAACIACwchoioo7NUmNBdN9SiGaeaoxJE47W5w6FoNGCGTv3mmACIACwtc+e+3ebKvGNTVz/gsvHQeC4R3fDIzRnmQ2ANXgn7O")
@@ -162,7 +162,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				jsonData, _ := json.Marshal(regKeyInfoPayload)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/certify-host-signing-key",
 					bytes.NewBuffer(jsonData),
 				)
@@ -177,7 +177,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 
 		Context("Provide invalid tpmCertifyKey in request", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/rpc/certify-host-signing-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifySigningKey))).Methods("POST")
+				router.Handle("/rpc/certify-host-signing-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifySigningKey))).Methods(http.MethodPost)
 
 				publicKeyModulus, _ := base64.StdEncoding.DecodeString("ARYAAQALAAQAcgAAABAAEAgAAAAAAAEAlr9jyEGbgkQvVQnU8SYaNvYULm0AfHjslyc/vtBSjMMJXAQahvYP2L/bOyGsRDBbGo2Wq3OpEzphmH66wIhVhltZVA6e04vaFPSEATABMTuv5WPAPNvaFITPFAtdoTcZGsajPELuhw1+2NXMr4BG141vos9nltKqZ36XMAh8Mxmrb0Y+o+yGQWJxWvtxbxc4Q39d77SxUDkxMQgdVwWFapIQs09xh8x8TbaTLed6sdVZNisdlMlNVdhyIb81bXyigkMjnkCckxvjrGUs8eC6ZO/Z13dOU+A2j7nGpu5wXAmknxXfBobdRbUaHF/acp0YVHA0FL2f/hcy2zQWEO2FaQ==")
 				tpmCertifyKey, _ := base64.StdEncoding.DecodeString("CHJ/VENHgBcAIgAL1+gJcMsLhnCM31xJ1WGMdOfCoXGk+Lj9/cGDlbUGYdEABAD/VaoAAAAAhGTwPgAAAAgAAAAAAQAHACgACDIAACIACwchoioo7NUmNBdN9SiGaeaoxJE47W5w6FoNGCGTv3mmACIACwtc+e+3ebKvGNTVz/gsvHQeC4R3fDIzRnmQ2ANXgn7O")
@@ -195,7 +195,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				jsonData, _ := json.Marshal(regKeyInfoPayload)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/certify-host-signing-key",
 					bytes.NewBuffer(jsonData),
 				)
@@ -210,7 +210,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 
 		Context("Provide invalid aikcert in request", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/rpc/certify-host-signing-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifySigningKey))).Methods("POST")
+				router.Handle("/rpc/certify-host-signing-key", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostKeysController.CertifySigningKey))).Methods(http.MethodPost)
 
 				publicKeyModulus, _ := base64.StdEncoding.DecodeString("ARYAAQALAAQAcgAAABAAEAgAAAAAAAEAlr9jyEGbgkQvVQnU8SYaNvYULm0AfHjslyc/vtBSjMMJXAQahvYP2L/bOyGsRDBbGo2Wq3OpEzphmH66wIhVhltZVA6e04vaFPSEATABMTuv5WPAPNvaFITPFAtdoTcZGsajPELuhw1+2NXMr4BG141vos9nltKqZ36XMAh8Mxmrb0Y+o+yGQWJxWvtxbxc4Q39d77SxUDkxMQgdVwWFapIQs09xh8x8TbaTLed6sdVZNisdlMlNVdhyIb81bXyigkMjnkCckxvjrGUs8eC6ZO/Z13dOU+A2j7nGpu5wXAmknxXfBobdRbUaHF/acp0YVHA0FL2f/hcy2zQWEO2FaQ==")
 				tpmCertifyKey, _ := base64.StdEncoding.DecodeString("CHJ/VENHgBcAIgAL1+gJcMsLhnCM31xJ1WGMdOfCoXGk+Lj9/cGDlbUGYdEABAD/VaoAAAAAhGTwPgAAAAgAAAAAAQAHACgACDIAACIACwchoioo7NUmNBdN9SiGaeaoxJE47W5w6FoNGCGTv3mmACIACwtc+e+3ebKvGNTVz/gsvHQeC4R3fDIzRnmQ2ANXgn7O")
@@ -229,7 +229,7 @@ var _ = Describe("CertifyHostKeysController", func() {
 				jsonData, _ := json.Marshal(regKeyInfoPayload)
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/rpc/certify-host-signing-key",
 					bytes.NewBuffer(jsonData),
 				)

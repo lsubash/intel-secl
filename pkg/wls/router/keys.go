@@ -11,6 +11,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/controllers"
+	"net/http"
 )
 
 // SetKeyRoutes registers routes for keys
@@ -22,7 +23,7 @@ func SetKeyRoutes(router *mux.Router, config *config.Configuration, certStore *c
 
 	router.Handle("/keys",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.RetrieveKey),
-			[]string{constants.KeysCreate}))).Methods("POST")
+			[]string{constants.KeysCreate}))).Methods(http.MethodPost)
 
 	return router
 }

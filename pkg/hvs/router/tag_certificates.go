@@ -7,6 +7,7 @@ package router
 import (
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
@@ -57,19 +58,19 @@ func SetTagCertificateRoutes(router *mux.Router, cfg *config.Configuration, flav
 		tagCertificateIdExpr := fmt.Sprintf("%s%s", TagCertificateEndpointPath+"/", validation.IdReg)
 		router.Handle(TagCertificateEndpointPath,
 			ErrorHandler(permissionsHandler(JsonResponseHandler(tagCertificateController.Create),
-				[]string{constants.TagCertificateCreate}))).Methods("POST")
+				[]string{constants.TagCertificateCreate}))).Methods(http.MethodPost)
 
 		router.Handle(TagCertificateEndpointPath,
 			ErrorHandler(permissionsHandler(JsonResponseHandler(tagCertificateController.Search),
-				[]string{constants.TagCertificateSearch}))).Methods("GET")
+				[]string{constants.TagCertificateSearch}))).Methods(http.MethodGet)
 
 		router.Handle(tagCertificateIdExpr,
 			ErrorHandler(permissionsHandler(ResponseHandler(tagCertificateController.Delete),
-				[]string{constants.TagCertificateDelete}))).Methods("DELETE")
+				[]string{constants.TagCertificateDelete}))).Methods(http.MethodDelete)
 
 		router.Handle(TagCertificateDeployEndpointPath,
 			ErrorHandler(permissionsHandler(JsonResponseHandler(tagCertificateController.Deploy),
-				[]string{constants.TagCertificateDeploy}))).Methods("POST")
+				[]string{constants.TagCertificateDeploy}))).Methods(http.MethodPost)
 	}
 	return router
 }

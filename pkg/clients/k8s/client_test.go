@@ -25,7 +25,7 @@ func mockServer(t *testing.T) *httptest.Server {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		w.Write([]byte("12345"))
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	return httptest.NewServer(r)
 
@@ -111,7 +111,7 @@ func TestSendRequest(t *testing.T) {
 		return
 	}
 	requestParams1 := RequestParams{
-		Method: "GET",
+		Method: http.MethodGet,
 		URL:    parsedUrl,
 	}
 	type args struct {
@@ -134,7 +134,7 @@ func TestSendRequest(t *testing.T) {
 			},
 			args: args{
 				reqParams: &RequestParams{
-					Method: "GET",
+					Method: http.MethodGet,
 					URL:    parsedUrl,
 				},
 			},

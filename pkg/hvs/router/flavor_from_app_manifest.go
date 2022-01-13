@@ -12,6 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	"net/http"
 )
 
 //SetFlavorFromAppManifestRoute registers routes for APIs that return software flavor from manifest
@@ -29,7 +30,7 @@ func SetFlavorFromAppManifestRoute(router *mux.Router, store *postgres.DataStore
 
 	router.Handle("/flavor-from-app-manifest",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorFromAppManifestController.CreateSoftwareFlavor),
-			[]string{constants.SoftwareFlavorCreate}))).Methods("POST")
+			[]string{constants.SoftwareFlavorCreate}))).Methods(http.MethodPost)
 
 	return router
 }

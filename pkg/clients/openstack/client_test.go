@@ -143,7 +143,7 @@ func TestSendRequest(t *testing.T) {
 		{
 			name: "Test For SendRequest with valid data",
 			reqParams: &RequestParams{
-				Method: "GET",
+				Method: http.MethodGet,
 				URL:    traitsUrl,
 				Body:   nil,
 			},
@@ -158,7 +158,7 @@ func TestSendRequest(t *testing.T) {
 		{
 			name: "Test For SendRequest with Invalid auth Url",
 			reqParams: &RequestParams{
-				Method: "GET",
+				Method: http.MethodGet,
 				URL:    traitsUrl,
 				Body:   nil,
 			},
@@ -173,7 +173,7 @@ func TestSendRequest(t *testing.T) {
 		{
 			name: "Test For SendRequest with Invalid data",
 			reqParams: &RequestParams{
-				Method: "GET",
+				Method: http.MethodGet,
 				URL:    traitsUrl,
 				Body:   nil,
 			},
@@ -351,7 +351,7 @@ func mockOpenstackServer(t *testing.T) *httptest.Server {
 			w.Write([]byte(""))
 			w.WriteHeader(401)
 		}
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 
 	r.HandleFunc("/traits", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -366,7 +366,7 @@ func mockOpenstackServer(t *testing.T) *httptest.Server {
 		} else {
 			w.WriteHeader(401)
 		}
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	return httptest.NewServer(r)
 

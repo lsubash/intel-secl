@@ -6,6 +6,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
@@ -26,19 +27,19 @@ func SetReportRoutes(router *mux.Router, store *postgres.DataStore) *mux.Router 
 
 	router.Handle("/reports",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Create),
-			[]string{constants.ReportsCreate}))).Methods("POST")
+			[]string{constants.ReportsCreate}))).Methods(http.MethodPost)
 
 	router.Handle(reportIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Retrieve),
-			[]string{constants.ReportsSearch}))).Methods("GET")
+			[]string{constants.ReportsSearch}))).Methods(http.MethodGet)
 
 	router.Handle("/reports",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Search),
-			[]string{constants.ReportsSearch}))).Methods("GET")
+			[]string{constants.ReportsSearch}))).Methods(http.MethodGet)
 
 	router.Handle(reportIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(reportController.Delete),
-			[]string{constants.ReportsDelete}))).Methods("DELETE")
+			[]string{constants.ReportsDelete}))).Methods(http.MethodDelete)
 
 	return router
 }

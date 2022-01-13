@@ -43,7 +43,7 @@ func (client reportsClientImpl) CreateSAMLReport(reportCreateRequest hvs.ReportC
 	}
 	reports, _ := parsedUrl.Parse("reports")
 	endpoint := parsedUrl.ResolveReference(reports)
-	req, err := http.NewRequest("POST", endpoint.String(), bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(http.MethodPost, endpoint.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/reports_client:CreateSAMLReport() Failed to instantiate http request to HVS")
 	}
@@ -109,7 +109,7 @@ func (client reportsClientImpl) CreateReportAsync(reportCreateRequest hvs.Report
 	parsedUrl.RawQuery = queryString.Encode()
 	endpoint := parsedUrl.ResolveReference(parsedUrl)
 
-	req, err := http.NewRequest("POST", endpoint.String(), bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(http.MethodPost, endpoint.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return errors.Wrap(err, "hvsclient/reports_client:CreateReportAsync() Failed to instantiate http request to HVS"), nil
 	}

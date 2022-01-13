@@ -68,7 +68,7 @@ func getHostsFromOpenstack(openstackDetails *OpenstackDetails) error {
 
 	log.Debug("openstackplugin/openstack_plugin:getHostsFromOpenstack() Sending request to Openstack client to get hosts")
 	res, err := openstackDetails.OpenstackClient.SendRequest(&openstackClient.RequestParams{
-		Method: "GET",
+		Method: http.MethodGet,
 		URL:    parsedUrl,
 		Body:   nil,
 	})
@@ -343,7 +343,7 @@ func getTraitsForResource(hostDetails *openstackHostDetails, openstackDetails *O
 
 	log.Debug("openstackplugin/openstack_plugin:getTraitsForResource() Sending request to get traits")
 	res, err := openstackDetails.OpenstackClient.SendRequest(&openstackClient.RequestParams{
-		Method: "GET",
+		Method: http.MethodGet,
 		URL:    parsedUrl,
 		Body:   nil,
 	})
@@ -402,7 +402,7 @@ func createCustomTraits(traits []string, openstackDetails *OpenstackDetails) err
 
 		log.Debug("openstackplugin/openstack_plugin:createCustomTraits() Sending request to create traits")
 		res, err := openstackDetails.OpenstackClient.SendRequest(&openstackClient.RequestParams{
-			Method: "PUT",
+			Method: http.MethodPut,
 			URL:    parsedUrl,
 			Body:   nil,
 		})
@@ -466,7 +466,7 @@ func associateTraitsForResource(hostDetails *openstackHostDetails, openstackDeta
 	}
 
 	res, err := openstackDetails.OpenstackClient.SendRequest(&openstackClient.RequestParams{
-		Method:            "PUT",
+		Method:            http.MethodPut,
 		URL:               parsedUrl,
 		Body:              payload,
 		AdditionalHeaders: map[string]string{"Content-Type": "application/json"},
@@ -500,7 +500,7 @@ func getAllCustomTraits(openstackDetails *OpenstackDetails) error {
 	}
 	log.Debug("openstackplugin/openstack_plugin:getAllCustomTraits() Sending request to get all custom traits")
 	res, err := openstackDetails.OpenstackClient.SendRequest(&openstackClient.RequestParams{
-		Method: "GET",
+		Method: http.MethodGet,
 		URL:    parsedUrl,
 		Body:   nil,
 	})
@@ -558,7 +558,7 @@ func deleteNonAssociatedTraits(openstackDetails *OpenstackDetails) error {
 		}
 		log.Debug("openstackplugin/openstack_plugin:deleteNonAssociatedTraits() Sending request to delete non associated traits")
 		res, err := openstackDetails.OpenstackClient.SendRequest(&openstackClient.RequestParams{
-			Method:            "DELETE",
+			Method:            http.MethodDelete,
 			URL:               parsedUrl,
 			Body:              nil,
 			AdditionalHeaders: map[string]string{"Content-Type": "application/json"},

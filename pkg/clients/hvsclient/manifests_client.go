@@ -56,7 +56,7 @@ func (client *manifestsClientImpl) getManifestXml(params map[string]string) ([]b
 
 	parsedUrl.Path = path.Join(parsedUrl.Path, "manifests")
 
-	request, err := http.NewRequest("GET", parsedUrl.String(), nil)
+	request, err := http.NewRequest(http.MethodGet, parsedUrl.String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "hvsclient/manifests_client:getManifestXml() error creating request")
 	}

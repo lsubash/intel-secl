@@ -115,7 +115,7 @@ func (c *JwtClient) FetchCCTUsingJWT(bearerToken string, customClaims types.Cust
 	if err != nil {
 		return nil, err
 	}
-	req, _ := http.NewRequest("POST", customClaimsUrl, buf)
+	req, _ := http.NewRequest(http.MethodPost, customClaimsUrl, buf)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/jwt")
 	req.Header.Set("Authorization", "Bearer "+bearerToken)
@@ -148,7 +148,7 @@ func (c *JwtClient) fetchToken(userCred *types.UserCred) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req, _ := http.NewRequest("POST", jwtUrl, buf)
+	req, _ := http.NewRequest(http.MethodPost, jwtUrl, buf)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/jwt")
 

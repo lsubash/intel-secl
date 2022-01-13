@@ -67,7 +67,7 @@ func GetHosts(k8sDetails *KubernetesDetails) error {
 	}
 
 	res, err := k8sDetails.K8sClient.SendRequest(&k8s.RequestParams{
-		Method: "GET",
+		Method: http.MethodGet,
 		URL:    parsedUrl,
 		Body:   nil,
 	})
@@ -228,7 +228,7 @@ func UpdateCRD(k8sDetails *KubernetesDetails) error {
 		return errors.Wrap(err, "k8splugin/k8s_plugin:UpdateCRD() : Unable to parse the url")
 	}
 	res, err := k8sDetails.K8sClient.SendRequest(&k8s.RequestParams{
-		Method: "GET",
+		Method: http.MethodGet,
 		URL:    parsedUrl,
 		Body:   nil,
 	})
@@ -352,7 +352,7 @@ func PutCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 	}
 
 	res, err := k8sDetails.K8sClient.SendRequest(&k8s.RequestParams{
-		Method:            "PUT",
+		Method:            http.MethodPut,
 		URL:               parsedUrl,
 		Body:              payload,
 		AdditionalHeaders: map[string]string{"Content-Type": "application/json"},
@@ -393,7 +393,7 @@ func PostCRD(k8sDetails *KubernetesDetails, crd *model.CRD) error {
 	}
 
 	_, err = k8sDetails.K8sClient.SendRequest(&k8s.RequestParams{
-		Method:            "POST",
+		Method:            http.MethodPost,
 		URL:               parsedUrl,
 		Body:              payload,
 		AdditionalHeaders: map[string]string{"Content-Type": "application/json"},

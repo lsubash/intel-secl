@@ -45,7 +45,7 @@ func VerifyQuote(quote string, nonce string, cfg *config.Configuration, caCertDi
 	}
 
 	url := cfg.Skc.SQVSUrl + constants.VerifyQuote
-	req, err := http.NewRequest("POST", url, buffer)
+	req, err := http.NewRequest(http.MethodPost, url, buffer)
 	if err != nil {
 		return nil, errors.Wrap(err, "session/quote_verifier:VerifyQuote() Error in Creating request")
 	}

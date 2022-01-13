@@ -32,7 +32,7 @@ func (c Client) GetSamlReports(url string) ([]byte, error) {
 	defer log.Trace("vs/client:GetSamlReports() Leaving")
 
 	// Create a new request using http
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "vs/clients:GetSamlReports() Error forming request")
 	}
@@ -54,7 +54,7 @@ func (c Client) GetCaCerts(domain string) ([]byte, error) {
 		return nil, errors.Wrap(err, "vs/client:GetCaCerts() Error parsing URL")
 	}
 
-	req, err := http.NewRequest("GET", requestURL.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, requestURL.String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "vs/client:GetCaCerts() Error forming request")
 	}

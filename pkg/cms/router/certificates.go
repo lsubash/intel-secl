@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/controllers"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 // SetCertificatesRoutes is used to set the endpoints for certificate handling APIs
@@ -18,6 +19,6 @@ func SetCertificatesRoutes(router *mux.Router, config *config.Configuration) *mu
 	defer log.Trace("router/certificates:SetCertificatesRoutes() Leaving")
 
 	certController := controllers.CertificatesController{Config: config}
-	router.HandleFunc("/certificates", certController.GetCertificates).Methods("POST")
+	router.HandleFunc("/certificates", certController.GetCertificates).Methods(http.MethodPost)
 	return router
 }

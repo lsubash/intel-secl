@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
+	"net/http"
 )
 
 //SetManifestsRoute registers routes for manifests api
@@ -22,7 +23,7 @@ func SetManifestsRoute(router *mux.Router, store *postgres.DataStore) *mux.Route
 
 	router.Handle("/manifests",
 		ErrorHandler(permissionsHandler(XMLResponseHandler(manifestsController.GetManifest),
-			[]string{constants.FlavorSearch}))).Methods("GET")
+			[]string{constants.FlavorSearch}))).Methods(http.MethodGet)
 
 	return router
 }

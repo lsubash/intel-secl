@@ -9,6 +9,7 @@ import (
 	types "github.com/intel-secl/intel-secl/v5/pkg/ihub/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"testing"
@@ -187,7 +188,7 @@ func TestUpdateCRD(t *testing.T) {
 			args: args{
 				k:                k1,
 				isSGXAttestation: false,
-				httpMethodType:   "PUT",
+				httpMethodType:   http.MethodPut,
 			},
 			wantErr: false,
 		},
@@ -196,7 +197,7 @@ func TestUpdateCRD(t *testing.T) {
 			args: args{
 				k:                k1,
 				isSGXAttestation: true,
-				httpMethodType:   "PUT",
+				httpMethodType:   http.MethodPut,
 			},
 			wantErr: false,
 		},
@@ -205,7 +206,7 @@ func TestUpdateCRD(t *testing.T) {
 			args: args{
 				k:                k1,
 				isSGXAttestation: false,
-				httpMethodType:   "POST",
+				httpMethodType:   http.MethodPost,
 			},
 			wantErr: false,
 		},
@@ -214,7 +215,7 @@ func TestUpdateCRD(t *testing.T) {
 			args: args{
 				k:                k1,
 				isSGXAttestation: true,
-				httpMethodType:   "POST",
+				httpMethodType:   http.MethodPost,
 			},
 			wantErr: false,
 		},
@@ -248,9 +249,9 @@ func TestUpdateCRD(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.args.httpMethodType == "POST" {
+			if tt.args.httpMethodType == http.MethodPost {
 				tt.args.k.Config.Endpoint.CRDName = "custom-isecl-not-found"
-			} else if tt.args.httpMethodType == "PUT" {
+			} else if tt.args.httpMethodType == http.MethodPut {
 				tt.args.k.Config.Endpoint.CRDName = "custom-isecl"
 			}
 

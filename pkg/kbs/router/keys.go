@@ -14,6 +14,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
+	"net/http"
 )
 
 //setKeyRoutes registers routes to perform Key CRUD operations
@@ -29,23 +30,23 @@ func setKeyRoutes(router *mux.Router, endpointUrl string, config domain.KeyContr
 
 	router.Handle("/keys",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.Create),
-			[]string{constants.KeyCreate, constants.KeyRegister}))).Methods("POST")
+			[]string{constants.KeyCreate, constants.KeyRegister}))).Methods(http.MethodPost)
 
 	router.Handle(keyIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.Retrieve),
-			[]string{constants.KeyRetrieve}))).Methods("GET")
+			[]string{constants.KeyRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(keyIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.Delete),
-			[]string{constants.KeyDelete}))).Methods("DELETE")
+			[]string{constants.KeyDelete}))).Methods(http.MethodDelete)
 
 	router.Handle("/keys",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.Search),
-			[]string{constants.KeySearch}))).Methods("GET")
+			[]string{constants.KeySearch}))).Methods(http.MethodGet)
 
 	router.Handle(keyIdExpr+"/transfer",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.Transfer),
-			[]string{constants.KeyTransfer}))).Methods("POST")
+			[]string{constants.KeyTransfer}))).Methods(http.MethodPost)
 
 	return router
 }
@@ -62,7 +63,7 @@ func setKeyTransferRoutes(router *mux.Router, endpointUrl string, config domain.
 	keyIdExpr := "/keys/" + validation.IdReg
 
 	router.Handle(keyIdExpr+"/transfer",
-		ErrorHandler(ResponseHandler(keyController.TransferWithSaml))).Methods("POST").Headers("Accept", consts.HTTPMediaTypeOctetStream)
+		ErrorHandler(ResponseHandler(keyController.TransferWithSaml))).Methods(http.MethodPost).Headers("Accept", consts.HTTPMediaTypeOctetStream)
 
 	return router
 }
@@ -80,7 +81,7 @@ func setSKCKeyTransferRoutes(router *mux.Router, kbsConfig *config.Configuration
 
 	router.Handle(keyIdExpr+"/dhsm2-transfer",
 		ErrorHandler(permissionsHandlerUsingTLSMAuth(JsonResponseHandler(skcController.TransferApplicationKey),
-			kbsConfig.AASApiUrl, kbsConfig.KBS))).Methods("GET")
+			kbsConfig.AASApiUrl, kbsConfig.KBS))).Methods(http.MethodGet)
 
 	return router
 }

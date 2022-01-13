@@ -12,6 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
+	"net/http"
 )
 
 // SetFlavorGroupRoutes registers routes for flavorgroups
@@ -33,19 +34,19 @@ func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorg
 	flavorGroupIdExpr := fmt.Sprintf("%s%s", "/flavorgroups/", validation.IdReg)
 	router.Handle("/flavorgroups",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.Create),
-			[]string{constants.FlavorGroupCreate}))).Methods("POST")
+			[]string{constants.FlavorGroupCreate}))).Methods(http.MethodPost)
 
 	router.Handle("/flavorgroups",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.Search),
-			[]string{constants.FlavorGroupSearch}))).Methods("GET")
+			[]string{constants.FlavorGroupSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorGroupIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(flavorgroupController.Delete),
-			[]string{constants.FlavorGroupDelete}))).Methods("DELETE")
+			[]string{constants.FlavorGroupDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(flavorGroupIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.Retrieve),
-			[]string{constants.FlavorGroupRetrieve}))).Methods("GET")
+			[]string{constants.FlavorGroupRetrieve}))).Methods(http.MethodGet)
 
 	// routes for FlavorGroupFlavorLink APIs
 	fgFlavorLinkCreateSearchExpr := fmt.Sprintf("/flavorgroups/{fgID:%s}/flavors", validation.UUIDReg)
@@ -53,19 +54,19 @@ func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorg
 
 	router.Handle(fgFlavorLinkCreateSearchExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.AddFlavor),
-			[]string{constants.FlavorGroupCreate}))).Methods("POST")
+			[]string{constants.FlavorGroupCreate}))).Methods(http.MethodPost)
 
 	router.Handle(fgFlavorLinkRetrieveDeleteExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.RetrieveFlavor),
-			[]string{constants.FlavorGroupRetrieve}))).Methods("GET")
+			[]string{constants.FlavorGroupRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(fgFlavorLinkRetrieveDeleteExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(flavorgroupController.RemoveFlavor),
-			[]string{constants.FlavorGroupDelete}))).Methods("DELETE")
+			[]string{constants.FlavorGroupDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(fgFlavorLinkCreateSearchExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.SearchFlavors),
-			[]string{constants.FlavorGroupSearch}))).Methods("GET")
+			[]string{constants.FlavorGroupSearch}))).Methods(http.MethodGet)
 
 	return router
 }

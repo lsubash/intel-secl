@@ -164,7 +164,7 @@ func getCertificateFromCMS(certType string, keyAlg string, keyLen int, cmsBaseUr
 	certificates, _ := url.Parse("certificates?certType=" + certType)
 	endpoint := url.ResolveReference(certificates)
 	csrPemBytes := pem.EncodeToMemory(&pem.Block{Type: "BEGIN CERTIFICATE REQUEST", Bytes: csrData})
-	req, err := http.NewRequest("POST", endpoint.String(), bytes.NewBuffer(csrPemBytes))
+	req, err := http.NewRequest(http.MethodPost, endpoint.String(), bytes.NewBuffer(csrPemBytes))
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "Failed to instantiate http request to CMS")
 	}

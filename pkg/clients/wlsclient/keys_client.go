@@ -46,7 +46,7 @@ func (client keysClientImpl) GetKeyWithURL(keyUrl string, hardwareUUID string) (
 	}
 	jbody, err := json.Marshal(rBody)
 
-	httpRequest, err := http.NewRequest("POST", requestURL.String(), bytes.NewBuffer(jbody))
+	httpRequest, err := http.NewRequest(http.MethodPost, requestURL.String(), bytes.NewBuffer(jbody))
 	if err != nil {
 		return retKey, err
 	}

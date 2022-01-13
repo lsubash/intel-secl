@@ -11,6 +11,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/domain"
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
+	"net/http"
 )
 
 func SetJwtTokenRoutes(r *mux.Router, db domain.AASDatabase, tokFactory *jwtauth.JwtFactory) *mux.Router {
@@ -21,7 +22,7 @@ func SetJwtTokenRoutes(r *mux.Router, db domain.AASDatabase, tokFactory *jwtauth
 		Database:     db,
 		TokenFactory: tokFactory,
 	}
-	r.Handle("/token", ErrorHandler(ResponseHandler(controller.CreateJwtToken, "application/jwt"))).Methods("POST")
+	r.Handle("/token", ErrorHandler(ResponseHandler(controller.CreateJwtToken, "application/jwt"))).Methods(http.MethodPost)
 	return r
 }
 
@@ -34,7 +35,7 @@ func SetAuthJwtTokenRoutes(r *mux.Router, db domain.AASDatabase, tokFactory *jwt
 		TokenFactory: tokFactory,
 	}
 	r.Handle("/custom-claims-token", ErrorHandler(permissionsHandler(ResponseHandler(controller.CreateCustomClaimsJwtToken,
-		"application/jwt"), []string{consts.CustomClaimsCreate}))).Methods("POST")
+		"application/jwt"), []string{consts.CustomClaimsCreate}))).Methods(http.MethodPost)
 
 	return r
 }

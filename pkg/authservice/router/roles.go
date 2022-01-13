@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/domain"
+	"net/http"
 )
 
 func SetRolesRoutes(r *mux.Router, db domain.AASDatabase) *mux.Router {
@@ -17,10 +18,10 @@ func SetRolesRoutes(r *mux.Router, db domain.AASDatabase) *mux.Router {
 
 	controller := controllers.RolesController{Database: db}
 
-	r.Handle("/roles", ErrorHandler(ResponseHandler(controller.CreateRole, "application/json"))).Methods("POST")
-	r.Handle("/roles", ErrorHandler(ResponseHandler(controller.QueryRoles, "application/json"))).Methods("GET")
-	r.Handle("/roles/{id}", ErrorHandler(ResponseHandler(controller.DeleteRole, ""))).Methods("DELETE")
-	r.Handle("/roles/{id}", ErrorHandler(ResponseHandler(controller.GetRole, "application/json"))).Methods("GET")
+	r.Handle("/roles", ErrorHandler(ResponseHandler(controller.CreateRole, "application/json"))).Methods(http.MethodPost)
+	r.Handle("/roles", ErrorHandler(ResponseHandler(controller.QueryRoles, "application/json"))).Methods(http.MethodGet)
+	r.Handle("/roles/{id}", ErrorHandler(ResponseHandler(controller.DeleteRole, ""))).Methods(http.MethodDelete)
+	r.Handle("/roles/{id}", ErrorHandler(ResponseHandler(controller.GetRole, "application/json"))).Methods(http.MethodGet)
 	r.Handle("/roles/{id}", ErrorHandler(ResponseHandler(controller.UpdateRole, ""))).Methods("PATCH")
 	return r
 }

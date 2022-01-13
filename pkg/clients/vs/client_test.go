@@ -30,7 +30,7 @@ func mockServer(t *testing.T) *httptest.Server {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		w.Write([]byte(AASToken))
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 
 	router.HandleFunc("/mtwilson/v2/reports", func(w http.ResponseWriter, router *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -40,7 +40,7 @@ func mockServer(t *testing.T) *httptest.Server {
 			t.Log("vs/client_test:mockServer(): Unable to read file", err)
 		}
 		w.Write(samlReport)
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
 	return httptest.NewServer(router)
 

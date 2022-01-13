@@ -35,11 +35,11 @@ var _ = Describe("ReportController", func() {
 	Describe("Create Report", func() {
 		Context("When a empty Report Create Request is passed", func() {
 			It("A HTTP Status: 400 response is received", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods("POST")
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods(http.MethodPost)
 				// Create Request body
 				createfReq := ``
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/reports",
 					strings.NewReader(createfReq),
 				)
@@ -54,7 +54,7 @@ var _ = Describe("ReportController", func() {
 
 		Context("When a VALID Report Create Request is passed", func() {
 			It("A new Report record is created and HTTP Status: 201 response is received", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods("POST")
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods(http.MethodPost)
 				createfReq := `{
 					"instance_manifest": {
 						"instance_info": {
@@ -88,7 +88,7 @@ var _ = Describe("ReportController", func() {
 				"signature": "KcC6UI6C5vLDrBIQx/EU9ceNPJDP6fjrF7F+6pxJYoA50rwx7ZI0ULbL2HXQiD82oQltqzj/n0KzY8JxY0PhIuG1w2vF58xOOzlxFP4w3BF6PSMW7wggwr1sj0TvlLcoyO7jXiK4nIlNfOqj6VaS/ynzMDGSSZvYkQ46SvAVdd0k57jHNG4TBrlqW+PWrM3xsqUrUeSVWCTH13G7qk6P4yPBnSerbmMBT4zuiodL+B0FsSlXorE6bZ/zt2N836DtL42eIbc7YXigLtvmE48M15kzO3cfQAsHva5MPx0S0rHsVSYaD5vFiQdRKBIdEmZWcZK2rfXUHwVAloWQAjZaCQ=="
 				}`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/reports",
 					strings.NewReader(createfReq),
 				)
@@ -103,12 +103,12 @@ var _ = Describe("ReportController", func() {
 
 		Context("When invalid Content-Type is provided", func() {
 			It("A HTTP Status: 415 response is received", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods("POST")
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods(http.MethodPost)
 				// Create Request body
 				createfReq := ``
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/reports",
 					strings.NewReader(createfReq),
 				)
@@ -123,7 +123,7 @@ var _ = Describe("ReportController", func() {
 
 		Context("When a INVALID Report Create Request is passed", func() {
 			It("Report is not created and HTTP Status: 400 response is received", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods("POST")
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Create))).Methods(http.MethodPost)
 
 				createfReq := `{
 					"instance_manifest": {
@@ -139,7 +139,7 @@ var _ = Describe("ReportController", func() {
 				}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/reports",
 					strings.NewReader(createfReq),
 				)
@@ -157,8 +157,8 @@ var _ = Describe("ReportController", func() {
 	Describe("Search Report", func() {
 		Context("When no filter arguments are passed", func() {
 			It("All Report records are returned and a 200 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -170,8 +170,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When filtered by Report id", func() {
 			It("Should get a single Report entry and a 200 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?id=f1c45b32-53cb-4982-9962-b04724f86b21", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?id=f1c45b32-53cb-4982-9962-b04724f86b21", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -187,8 +187,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When invalid report id format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?id=xc45b32-53cb-4982-9962-b04724f86b21", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?id=xc45b32-53cb-4982-9962-b04724f86b21", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -199,8 +199,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When filtered by Hardware uuid", func() {
 			It("Should get Report and a 200 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?hostHardwareId=00964993-89c1-e711-906e-00163566263e", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?hostHardwareId=00964993-89c1-e711-906e-00163566263e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -216,8 +216,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When invalid hardware uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?hostHardwareId=xyz993-89c1-e711-906e-00163566263e", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?hostHardwareId=xyz993-89c1-e711-906e-00163566263e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -228,8 +228,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When filtered by Instance ID ", func() {
 			It("Should get Report and a 200 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?instanceId=bd06385a-5530-4644-a510-e384b8c3323a", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?instanceId=bd06385a-5530-4644-a510-e384b8c3323a", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -245,8 +245,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When invalid instance id format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?instanceId=x-5530-4644-a510-e384b8c3323a", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?instanceId=x-5530-4644-a510-e384b8c3323a", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -257,8 +257,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When filtered by NumberOfDays ", func() {
 			It("Should get Report and a 200 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?numberOfDays=1", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?numberOfDays=1", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -274,8 +274,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When negative numberOfDays is provided", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?numberOfDays=-111", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?numberOfDays=-111", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -286,8 +286,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When filtered by FromDate and ToDate ", func() {
 			It("Should get Report and a 200 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?fromDate=2021-06-01&toDate=2021-06-24", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?fromDate=2021-06-01&toDate=2021-06-24", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -303,8 +303,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("When invalid Date format is provided", func() {
 			It("Should not get Report and a 400 response code", func() {
-				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports?fromDate=202122-06-01&toDate=2021221-0612-24", nil)
+				router.Handle("/reports", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?fromDate=202122-06-01&toDate=2021221-0612-24", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -319,8 +319,8 @@ var _ = Describe("ReportController", func() {
 	Describe("Delete Report by ID", func() {
 		Context("Delete Report by ID from data store", func() {
 			It("Should delete Report and return a 204 response code", func() {
-				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(reportController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/reports/f1c45b32-53cb-4982-9962-b04724f86b21", nil)
+				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(reportController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/reports/f1c45b32-53cb-4982-9962-b04724f86b21", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -330,8 +330,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("Delete Report by incorrect ID from data store", func() {
 			It("Should fail to delete Report and return a 404 response code", func() {
-				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(reportController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/reports/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
+				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(reportController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/reports/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -344,8 +344,8 @@ var _ = Describe("ReportController", func() {
 	Describe("Retrieve Report by ID", func() {
 		Context("Retrieve Report by ID from data store", func() {
 			It("Should Retrieve Report and return a 200 response code", func() {
-				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports/f1c45b32-53cb-4982-9962-b04724f86b21", nil)
+				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports/f1c45b32-53cb-4982-9962-b04724f86b21", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -356,8 +356,8 @@ var _ = Describe("ReportController", func() {
 
 		Context("Retrieve Report by incorrect ID from data store", func() {
 			It("Should fail to Retrieve Report and return a 404 response code", func() {
-				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/reports/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
+				router.Handle("/reports/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(reportController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()

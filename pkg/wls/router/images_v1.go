@@ -13,6 +13,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/postgres"
+	"net/http"
 )
 
 // SetImageRoutes registers routes for image
@@ -31,11 +32,11 @@ func SetImageRoutesV1(router *mux.Router, store *postgres.DataStore, conf *confi
 
 	router.Handle(flavorsExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.GetAllAssociatedFlavorsv1),
-			[]string{constants.ImageFlavorsSearch}))).Methods("GET")
+			[]string{constants.ImageFlavorsSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(imageController.GetAssociatedFlavorv1),
-			[]string{constants.ImageFlavorsRetrieve}))).Methods("GET")
+			[]string{constants.ImageFlavorsRetrieve}))).Methods(http.MethodGet)
 
 	return router
 }

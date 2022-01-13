@@ -38,8 +38,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Retrieve all the flavors Associated with Image ID", func() {
 		Context("A valid image ID is provided", func() {
 			It("Should Retrieve all the associated Flavor and return a 200 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavorsv1))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavorsv1))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -49,8 +49,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When non-existing image ID is provided", func() {
 			It("Should Not Retrieve associated Flavor and return a 404 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavorsv1))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/1d61f86c-c522-4506-a3a0-a97e85c8d33e/flavors", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavorsv1))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/1d61f86c-c522-4506-a3a0-a97e85c8d33e/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -60,8 +60,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When wrong format image id is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavorsv1))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/xd61f86c-c522-4506-a3a0-a97e85c8d33/flavors", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavorsv1))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/xd61f86c-c522-4506-a3a0-a97e85c8d33/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -75,8 +75,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Retrieve the complete flavor Associated with Image ID", func() {
 		Context("A valid image ID and flavor id is provided", func() {
 			It("Should associated Flavor and return a 200 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -87,8 +87,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Non existing flavor id is provided", func() {
 			It("Should not Retrieve Flavor and return a 404 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -99,8 +99,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Wrong format flavor ID is passed", func() {
 			It("Should not Retrieve Flavor and return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/xfff021e-9669-4e53-9224-8880fb4e408/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/xfff021e-9669-4e53-9224-8880fb4e408/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -111,8 +111,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Wrong format image ID is passed", func() {
 			It("Should not Retrieve Flavor and return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/xd61f86c-c522-4506-a3a0-a97e85c8d3e", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavorv1))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/xd61f86c-c522-4506-a3a0-a97e85c8d3e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()

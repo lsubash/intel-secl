@@ -6,6 +6,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
@@ -29,28 +30,28 @@ func SetFlavorTemplateRoutes(router *mux.Router, store *postgres.DataStore, flav
 
 	router.Handle("/flavor-templates",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorTemplateController.Create),
-			[]string{constants.FlavorTemplateCreate}))).Methods("POST")
+			[]string{constants.FlavorTemplateCreate}))).Methods(http.MethodPost)
 
 	router.Handle(flavorTemplateIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorTemplateController.Retrieve),
-			[]string{constants.FlavorTemplateRetrieve}))).Methods("GET")
+			[]string{constants.FlavorTemplateRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle("/flavor-templates",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorTemplateController.Search),
-			[]string{constants.FlavorTemplateSearch}))).Methods("GET")
+			[]string{constants.FlavorTemplateSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorTemplateIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorTemplateController.Delete),
-			[]string{constants.FlavorTemplateDelete}))).Methods("DELETE")
+			[]string{constants.FlavorTemplateDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(flavorgroupExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(flavorTemplateController.AddFlavorgroup),
-		[]string{constants.FlavorTemplateCreate}))).Methods("POST")
+		[]string{constants.FlavorTemplateCreate}))).Methods(http.MethodPost)
 	router.Handle(flavorgroupIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(flavorTemplateController.RetrieveFlavorgroup),
-		[]string{constants.FlavorTemplateRetrieve}))).Methods("GET")
+		[]string{constants.FlavorTemplateRetrieve}))).Methods(http.MethodGet)
 	router.Handle(flavorgroupIdExpr, ErrorHandler(permissionsHandler(ResponseHandler(flavorTemplateController.RemoveFlavorgroup),
-		[]string{constants.FlavorTemplateDelete}))).Methods("DELETE")
+		[]string{constants.FlavorTemplateDelete}))).Methods(http.MethodDelete)
 	router.Handle(flavorgroupExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(flavorTemplateController.SearchFlavorgroups),
-		[]string{constants.FlavorTemplateSearch}))).Methods("GET")
+		[]string{constants.FlavorTemplateSearch}))).Methods(http.MethodGet)
 
 	return router
 }

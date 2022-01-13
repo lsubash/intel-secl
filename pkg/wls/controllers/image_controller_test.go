@@ -59,8 +59,8 @@ var _ = Describe("ImageController", func() {
 				defer a.Close()
 				time.Sleep(1 * time.Second)
 
-				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods("GET").Queries("hardware_uuid", "{hardware_uuid}")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavor-key?hardware_uuid=00964993-89C1-E711-906E-00163566263E", nil)
+				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods(http.MethodGet).Queries("hardware_uuid", "{hardware_uuid}")
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavor-key?hardware_uuid=00964993-89C1-E711-906E-00163566263E", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -70,8 +70,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When an invalid image id is passed", func() {
 			It("A HTTP Status: 404 response is received", func() {
-				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods("GET").Queries("hardware_uuid", "{hardware_uuid}")
-				req, err := http.NewRequest("GET", "/images/1d61f86c-c522-4506-a3a0-a97e85c8d33e/flavor-key?hardware_uuid=00964993-89C1-E711-906E-00163566263E", nil)
+				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods(http.MethodGet).Queries("hardware_uuid", "{hardware_uuid}")
+				req, err := http.NewRequest(http.MethodGet, "/images/1d61f86c-c522-4506-a3a0-a97e85c8d33e/flavor-key?hardware_uuid=00964993-89C1-E711-906E-00163566263E", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -81,8 +81,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When an invalid hardware uuid is passed", func() {
 			It("A HTTP Status: 400 response is received", func() {
-				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods("GET").Queries("hardware_uuid", "{hardware_uuid}")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavor-key?hardware_uuid=1d61f86c-c522-4506-a3a0-a97e85c8d33", nil)
+				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods(http.MethodGet).Queries("hardware_uuid", "{hardware_uuid}")
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavor-key?hardware_uuid=1d61f86c-c522-4506-a3a0-a97e85c8d33", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -92,8 +92,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When wrong format image id is passed", func() {
 			It("A HTTP Status: 400 response is received", func() {
-				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods("GET").Queries("hardware_uuid", "{hardware_uuid}")
-				req, err := http.NewRequest("GET", "/images/kfff021e-9669-4e53-9224-8880fb4e408/flavor-key?hardware_uuid=1d61f86c-c522-4506-a3a0-a97e85c8d33", nil)
+				router.Handle("/images/{id}/flavor-key", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorAndKey))).Methods(http.MethodGet).Queries("hardware_uuid", "{hardware_uuid}")
+				req, err := http.NewRequest(http.MethodGet, "/images/kfff021e-9669-4e53-9224-8880fb4e408/flavor-key?hardware_uuid=1d61f86c-c522-4506-a3a0-a97e85c8d33", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -106,8 +106,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Update Associated Flavor", func() {
 		Context("when a valid image id and flavor ID is provided", func() {
 			It("Should return 200", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/3d41c64f-ee70-4cbf-bdde-a03835a21625", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/3d41c64f-ee70-4cbf-bdde-a03835a21625", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -117,8 +117,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When invalid flavor uuid format is provided", func() {
 			It("Should return 400", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/xd41c64f-ee70-4cbf-bdde-a03835a2162", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/xd41c64f-ee70-4cbf-bdde-a03835a2162", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -128,8 +128,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When invalid image uuid format is provided", func() {
 			It("Should return 400", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/xfff021e-9669-4e53-9224-8880fb4e4081/flavors/3d41c64f-ee70-4cbf-bdde-a03835a21625", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/xfff021e-9669-4e53-9224-8880fb4e4081/flavors/3d41c64f-ee70-4cbf-bdde-a03835a21625", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -142,11 +142,11 @@ var _ = Describe("ImageController", func() {
 	Describe("Create Image", func() {
 		Context("When a empty Image Create Request is passed", func() {
 			It("A HTTP Status: 400 response is received", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods("POST")
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods(http.MethodPost)
 				// Create Request body
 				createfReq := ``
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/images",
 					strings.NewReader(createfReq),
 				)
@@ -160,11 +160,11 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When invalid content-type is passed", func() {
 			It("A HTTP Status: 415 response is received", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods("POST")
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods(http.MethodPost)
 				// Create Request body
 				createfReq := ``
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/images",
 					strings.NewReader(createfReq),
 				)
@@ -178,7 +178,7 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When a VALID Image Create Request is passed", func() {
 			It("A new Image record is created and HTTP Status: 201 response is received", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods("POST")
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods(http.MethodPost)
 
 				createfReq := `{
 		   				 "id": "ffff021e-9669-4e53-9224-8880fb4e4081",
@@ -187,7 +187,7 @@ var _ = Describe("ImageController", func() {
 		    ]
 		}`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/images",
 					strings.NewReader(createfReq),
 				)
@@ -201,14 +201,14 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When invalid JSON body is passed", func() {
 			It("A HTTP Status: 400 response is received", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods("POST")
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods(http.MethodPost)
 
 				createfReq := `{
 		   				 "id": "ffff021e-9669-4e53-9224-8880fb4e4081",
 		    ]
 		}`
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/images",
 					strings.NewReader(createfReq),
 				)
@@ -227,8 +227,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When filtered by image id and flavor id", func() {
 			It("Should get a single Flavor entry and a 200 response code", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images?image_id=ffff021e-9669-4e53-9224-8880fb4e4081&flavor_id=9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images?image_id=ffff021e-9669-4e53-9224-8880fb4e4081&flavor_id=9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -244,8 +244,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When filtered by Image id", func() {
 			It("Should get a single Flavor entry and a 200 response code", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images?image_id=ffff021e-9669-4e53-9224-8880fb4e4081", nil)
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images?image_id=ffff021e-9669-4e53-9224-8880fb4e4081", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -262,8 +262,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid image uuid format is passed", func() {
 			It("Should return 400", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images?image_id=xd61f86c-c522-4506-a3a0-a97e85c8d33", nil)
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images?image_id=xd61f86c-c522-4506-a3a0-a97e85c8d33", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -274,8 +274,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid flavor uuid format is passed", func() {
 			It("Should return 400", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images?flavor_id=xyz1f86c-c522-4506-a3a0-a97e85c8d33", nil)
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images?flavor_id=xyz1f86c-c522-4506-a3a0-a97e85c8d33", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -286,8 +286,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When a valid flavor id is passed", func() {
 			It("Should return 200", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images?flavor_id=9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images?flavor_id=9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -303,8 +303,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When filtered by Image id which doesn't exists", func() {
 			It("Should get a empty list and a 200 response code", func() {
-				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images?image_id=1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
+				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images?image_id=1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -318,8 +318,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Delete Image by ID", func() {
 		Context("Delete Image by ID from data store", func() {
 			It("Should delete Image and return a 204 response code", func() {
-				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/images/ffff021e-9669-4e53-9224-8880fb4e4081", nil)
+				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/images/ffff021e-9669-4e53-9224-8880fb4e4081", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -329,8 +329,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid image uuid format is passed", func() {
 			It("Should not delete Image and return a 400 response code", func() {
-				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/images/zfff021e-9669-4e53-9224-8880fb4e408", nil)
+				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/images/zfff021e-9669-4e53-9224-8880fb4e408", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -340,8 +340,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Non-existing image id is passed", func() {
 			It("Should fail to delete Flavor and return a 404 response code", func() {
-				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/images/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
+				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/images/cf197a51-8362-465f-9ec1-d88ad0023a27", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -353,8 +353,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Delete Image flavor association", func() {
 		Context("A valid image id and flavor id is provided", func() {
 			It("Should delete Image Flavor Association and return a 204 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/58967607-6292-4d53-815c-5efbd1fc8818", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/58967607-6292-4d53-815c-5efbd1fc8818", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -364,8 +364,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid image uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/images/xfff021e-9669-4e53-9224-8880fb4e408/flavors/58967607-6292-4d53-815c-5efbd1fc8818", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/images/xfff021e-9669-4e53-9224-8880fb4e408/flavors/58967607-6292-4d53-815c-5efbd1fc8818", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -375,8 +375,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid flavor uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/y8967607-6292-4d53-815c-5efbd1fc881", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/y8967607-6292-4d53-815c-5efbd1fc881", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -386,8 +386,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Non existing image id and flavor id is provided", func() {
 			It("Should fail to delete association and return a 404 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.ResponseHandler(imageController.DeleteImageFlavorAssociation))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/dfa22f83-b6dd-4bf3-9b07-ff1fa01eb69f", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -400,8 +400,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Retrieve Image by ID", func() {
 		Context("A valid image ID is provided", func() {
 			It("Should Retrieve image and return a 200 response code", func() {
-				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081", nil)
+				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -412,8 +412,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid image uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/zfff021e-9669-4e53-9224-8880fb4e408", nil)
+				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/zfff021e-9669-4e53-9224-8880fb4e408", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -423,8 +423,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("Retrieve Image by incorrect ID from data store", func() {
 			It("Should fail to Retrieve Image and return a 404 response code", func() {
-				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/b3096138-692d-48fe-b386-81a9d67c085d", nil)
+				router.Handle("/images/{id}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/b3096138-692d-48fe-b386-81a9d67c085d", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -437,8 +437,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Retrieve complete Flavor by image ID and flavor_part", func() {
 		Context("A valid image ID and flavor_part is provided", func() {
 			It("Should Retrieve Flavor and return a 200 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods("GET").Queries("flavor_part", "{flavor_part}")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors?flavor_part=IMAGE", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods(http.MethodGet).Queries("flavor_part", "{flavor_part}")
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors?flavor_part=IMAGE", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -450,8 +450,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Non existing image is provided", func() {
 			It("Should not Retrieve flavor and return a 404 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods("GET").Queries("flavor_part", "{flavor_part}")
-				req, err := http.NewRequest("GET", "/images/b3096138-692d-48fe-b386-81a9d67c085d/flavors?flavor_part=IMAGE", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods(http.MethodGet).Queries("flavor_part", "{flavor_part}")
+				req, err := http.NewRequest(http.MethodGet, "/images/b3096138-692d-48fe-b386-81a9d67c085d/flavors?flavor_part=IMAGE", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -462,8 +462,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When Flavor part is null", func() {
 			It("Should not Retrieve flavor and return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods("GET").Queries("flavor_part", "{flavor_part}")
-				req, err := http.NewRequest("GET", "/images/b3096138-692d-48fe-b386-81a9d67c085d/flavors?flavor_part=", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods(http.MethodGet).Queries("flavor_part", "{flavor_part}")
+				req, err := http.NewRequest(http.MethodGet, "/images/b3096138-692d-48fe-b386-81a9d67c085d/flavors?flavor_part=", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -474,8 +474,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When Invalid string name is provided in flavor part", func() {
 			It("Should not Retrieve flavor and return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods("GET").Queries("flavor_part", "{flavor_part}")
-				req, err := http.NewRequest("GET", "/images/b3096138-692d-48fe-b386-81a9d67c085d/flavors?flavor_part=????", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods(http.MethodGet).Queries("flavor_part", "{flavor_part}")
+				req, err := http.NewRequest(http.MethodGet, "/images/b3096138-692d-48fe-b386-81a9d67c085d/flavors?flavor_part=????", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -486,8 +486,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid flavor uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods("GET").Queries("flavor_part", "{flavor_part}")
-				req, err := http.NewRequest("GET", "/images/z3096138-692d-48fe-b386-81a9d67c0/flavors?flavor_part=IMAGE", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods(http.MethodGet).Queries("flavor_part", "{flavor_part}")
+				req, err := http.NewRequest(http.MethodGet, "/images/z3096138-692d-48fe-b386-81a9d67c0/flavors?flavor_part=IMAGE", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -498,8 +498,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Image ID and invalid flavor part is provided", func() {
 			It("Should fail to Retrieve flavor and return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods("GET").Queries("flavor_part", "{flavor_part}")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors?flavor_part=xjyzg", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.RetrieveFlavorForFlavorPart))).Methods(http.MethodGet).Queries("flavor_part", "{flavor_part}")
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors?flavor_part=xjyzg", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -513,8 +513,8 @@ var _ = Describe("ImageController", func() {
 	Describe("Retrieve all the flavor ids Associated with Image ID", func() {
 		Context("A valid image ID is provided", func() {
 			It("Should Retrieve all the associated Flavor and return a 200 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavors))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavors))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -525,8 +525,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("When invalid image uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavors))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/zz61f86c-c522-4506-a3a0-a97e85c8d3/flavors", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavors))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/zz61f86c-c522-4506-a3a0-a97e85c8d3/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -537,8 +537,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("Non-existing image ID is provided", func() {
 			It("Should not Retrieve Flavor and return 404 response code", func() {
-				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavors))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/1d61f86c-c522-4506-a3a0-a97e85c8d33e/flavors", nil)
+				router.Handle("/images/{id}/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAllAssociatedFlavors))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/1d61f86c-c522-4506-a3a0-a97e85c8d33e/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -552,8 +552,8 @@ var _ = Describe("ImageController", func() {
 
 		Context("A valid image ID and flavor id is provided", func() {
 			It("Should Retrieve associated Flavor and return a 200 response code", func() {
-				router.Handle("/v2/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods("GET")
-				req, err := http.NewRequest("GET", "/v2/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
+				router.Handle("/v2/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/v2/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/9541a9f0-b427-4a0a-8e25-12f50edd3e66", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -563,8 +563,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("Non existing image id and flavor id is provided", func() {
 			It("Should not Retrieve Flavor and return a 404 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -574,8 +574,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When invalid image uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/z021e-9669-4e53-9224-8880fb4e4081/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/z021e-9669-4e53-9224-8880fb4e4081/flavors/1d61f86c-c522-4506-a3a0-a97e85c8d33e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -585,8 +585,8 @@ var _ = Describe("ImageController", func() {
 		})
 		Context("When invalid flavor uuid format is passed", func() {
 			It("Should return a 400 response code", func() {
-				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods("GET")
-				req, err := http.NewRequest("GET", "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/z1f86c-c522-4506-a3a0-a97e85c8d33e", nil)
+				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.GetAssociatedFlavor))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/z1f86c-c522-4506-a3a0-a97e85c8d33e", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -606,7 +606,7 @@ func mockHVS(addr string) *http.Server {
 		w.Header().Set("Content-Type", "application/samlassertion+xml")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		w.Write([]byte(saml))
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 	h := &http.Server{
 		Addr:    addr,
 		Handler: r,
@@ -625,7 +625,7 @@ func mockAAS(addr string) *http.Server {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		w.Write([]byte(BearerToken))
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 	h := &http.Server{
 		Addr:    addr,
 		Handler: r,
@@ -647,7 +647,7 @@ func mockKBS(addr string) *http.Server {
 		I9Iri2+YRM6sGVg8ZkzcCmFd+CoTNy+cw/Y9AQ==`)
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		w.Write(enc)
-	}).Methods("POST")
+	}).Methods(http.MethodPost)
 	h := &http.Server{
 		Addr:    addr,
 		Handler: r,

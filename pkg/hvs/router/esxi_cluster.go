@@ -7,6 +7,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
@@ -37,19 +38,19 @@ func SetESXiClusterRoutes(router *mux.Router, store *postgres.DataStore,
 
 	router.Handle("/esxi-cluster",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(esxiClusterController.Create),
-			[]string{constants.ESXiClusterCreate}))).Methods("POST")
+			[]string{constants.ESXiClusterCreate}))).Methods(http.MethodPost)
 
 	router.Handle("/esxi-cluster",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(esxiClusterController.Search),
-			[]string{constants.ESXiClusterSearch}))).Methods("GET")
+			[]string{constants.ESXiClusterSearch}))).Methods(http.MethodGet)
 
 	router.Handle(esxiClusterIdExpr,
 		ErrorHandler(permissionsHandler(ResponseHandler(esxiClusterController.Delete),
-			[]string{constants.ESXiClusterDelete}))).Methods("DELETE")
+			[]string{constants.ESXiClusterDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(esxiClusterIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(esxiClusterController.Retrieve),
-			[]string{constants.ESXiClusterRetrieve}))).Methods("GET")
+			[]string{constants.ESXiClusterRetrieve}))).Methods(http.MethodGet)
 
 	return router
 }

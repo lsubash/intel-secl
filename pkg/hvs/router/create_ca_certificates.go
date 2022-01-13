@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	"net/http"
 )
 
 func SetCreateCaCertificatesRoutes(router *mux.Router, certStore *crypt.CertificatesStore) *mux.Router {
@@ -20,6 +21,6 @@ func SetCreateCaCertificatesRoutes(router *mux.Router, certStore *crypt.Certific
 
 	router.Handle("/ca-certificates",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(caCertController.Create),
-			[]string{constants.CaCertificatesCreate}))).Methods("POST")
+			[]string{constants.CaCertificatesCreate}))).Methods(http.MethodPost)
 	return router
 }

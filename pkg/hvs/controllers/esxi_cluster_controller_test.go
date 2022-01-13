@@ -70,8 +70,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Search esxi cluster records when no filter arguments are passed", func() {
 			It("All ESXi cluster records are returned", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/esxi-cluster", nil)
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -88,8 +88,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Search esxi cluster records when filtered by ESXi cluster id", func() {
 			It("Should get a single ESXi cluster entry", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/esxi-cluster?id=40c6ec42-ee9a-4d8a-842b-cdcd0fefa9c0", nil)
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?id=40c6ec42-ee9a-4d8a-842b-cdcd0fefa9c0", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -106,8 +106,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Search esxi cluster records when filtered by an invalid ESXi cluster id", func() {
 			It("Should get a HTTP bad request status", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET",
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet,
 					"/esxi-cluster?id=13885605-a0ee-41f20000000000000000000000-b6fc-fd82edc487ad", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -125,8 +125,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Search esxi cluster records when filtered by ESXi cluster name", func() {
 			It("Should get a single ESXi cluster entry", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/esxi-cluster?clusterName=Cluster 1", nil)
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?clusterName=Cluster 1", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -143,8 +143,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Search esxi cluster records when filtered by ESXi cluster name", func() {
 			It("Should not get any ESXi cluster entry", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/esxi-cluster?clusterName=Unregistered cluster", nil)
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?clusterName=Unregistered cluster", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -163,8 +163,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Retrieve ESXi cluster by valid ID from data store", func() {
 			It("Should retrieve ESXi cluster", func() {
 				router.Handle("/esxi-cluster/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/esxi-cluster/f3c6a763-51cd-436c-a828-c2ce6964c823", nil)
+					esxiClusterController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster/f3c6a763-51cd-436c-a828-c2ce6964c823", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -176,8 +176,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Try to retrieve ESXi cluster by non-existent ID from data store", func() {
 			It("Should fail to retrieve ESXi cluster", func() {
 				router.Handle("/esxi-cluster/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/esxi-cluster/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+					esxiClusterController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -196,12 +196,12 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Provide a valid ESXi cluster data", func() {
 			It("Should create ESXi cluster entry", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Create))).Methods("POST")
+					esxiClusterController.Create))).Methods(http.MethodPost)
 				esxiClusterRequestJson := `{
 					"connection_string": "https://ip3.com:443/sdk;u=username;p=password",
 					"cluster_name": "New Cluster"
 				}`
-				req, err := http.NewRequest("POST", "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
@@ -213,12 +213,12 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Provide an invalid request body to create a new ESXi cluster record", func() {
 			It("Should have HTTP bad request status", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
-					esxiClusterController.Create))).Methods("POST")
+					esxiClusterController.Create))).Methods(http.MethodPost)
 				esxiClusterRequestJson := `{
 					"connectionString": "https://ip3.com:443/sdk;u=username;p=password",
 					"clusterName": "New Cluster"
 				}`
-				req, err := http.NewRequest("POST", "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
@@ -233,8 +233,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Delete ESXi cluster by valid ID from data store", func() {
 			It("Should Delete ESXi cluster", func() {
 				router.Handle("/esxi-cluster/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(
-					esxiClusterController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/esxi-cluster/f3c6a763-51cd-436c-a828-c2ce6964c823", nil)
+					esxiClusterController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/esxi-cluster/f3c6a763-51cd-436c-a828-c2ce6964c823", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -245,8 +245,8 @@ var _ = Describe("ESXiClusterController", func() {
 		Context("Try to delete ESXi cluster by non-existent ID from data store", func() {
 			It("Should fail to delete ESXi cluster", func() {
 				router.Handle("/esxi-cluster/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(
-					esxiClusterController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/esxi-cluster/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+					esxiClusterController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/esxi-cluster/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)

@@ -51,7 +51,7 @@ func (client *flavorsClientImpl) CreateFlavor(flavorCreateRequest *hvs.FlavorCre
 	}
 
 	parsedUrl.Path = path.Join(parsedUrl.Path, "flavors")
-	request, err := http.NewRequest("POST", parsedUrl.String(), bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, parsedUrl.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return flavors, errors.Wrap(err, "hvsclient/flavors_client:CreateFlavor() error creating request")
 	}

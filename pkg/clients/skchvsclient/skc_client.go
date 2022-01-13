@@ -31,7 +31,7 @@ func (c Client) GetSGXPlatformData(url string) ([]byte, error) {
 	defer log.Trace("skchvsclient/skc_client:GetSGXPlatformData() Leaving")
 
 	// Create a new request using http
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "skchvsclient/skc_client:GetSGXPlatformData() Error Forming request")
 	}
@@ -49,7 +49,7 @@ func (c Client) GetSHVSVersion(url string) ([]byte, error) {
 	log.Trace("skchvsclient/skc_client:GetSHVSVersion() Entering")
 	defer log.Trace("skchvsclient/skc_client:GetSHVSVersion() Leaving")
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "skchvsclient/skc_client:GetSHVSVersion() Error forming request")
 	}

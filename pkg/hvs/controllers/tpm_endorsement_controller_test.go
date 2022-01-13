@@ -38,8 +38,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		Context("Get all TpmEndorsements from data store", func() {
 			It("Should get list of TpmEndorsements", func() {
 
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -54,8 +54,8 @@ var _ = Describe("TpmEndorsementController", func() {
 
 		Context("Search TpmEndorsements from data store based on issuerEqualTo as filter criteria", func() {
 			It("Should get filtered list of TpmEndorsements", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements?issuerEqualTo=CN=Infineon OPTIGA(TM) RSA Manufacturing CA 007,OU=OPTIGA(TM) TPM2.0,O=Infineon Technologies AG,C=DE", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?issuerEqualTo=CN=Infineon OPTIGA(TM) RSA Manufacturing CA 007,OU=OPTIGA(TM) TPM2.0,O=Infineon Technologies AG,C=DE", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -69,8 +69,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Search TpmEndorsements from data store based on commentContains as filter criteria", func() {
 			It("Should get filtered list of TpmEndorsements", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements?commentContains=trust agent", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?commentContains=trust agent", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -85,8 +85,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Search TpmEndorsements from data store based on hardwareUuidEqualTo filter criteria", func() {
 			It("Should get list of TpmEndorsements", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements?hardwareUuidEqualTo=ee37c360-7eae-4250-a677-6ee12adce8e3", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?hardwareUuidEqualTo=ee37c360-7eae-4250-a677-6ee12adce8e3", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -101,8 +101,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Search TpmEndorsements from data store based on commentEqualTo as filter criteria", func() {
 			It("Should get filtered list of TpmEndorsements", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements?commentEqualTo=registered by trust agent", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?commentEqualTo=registered by trust agent", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -117,8 +117,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Search TpmEndorsements from data store based on revoked as filter criteria", func() {
 			It("Should get filtered list of TpmEndorsements", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements?revokedEqualTo=false", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?revokedEqualTo=false", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -133,8 +133,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Search TpmEndorsements from data store based on commentContains as filter criteria with special characters", func() {
 			It("Should return bad request error", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements?commentContains=trust%20>-agent", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?commentContains=trust%20>-agent", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -144,8 +144,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Search TpmEndorsements from data store with invalid id", func() {
 			It("Should return bad request error", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements?id=ijogoirjti", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?id=ijogoirjti", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -160,8 +160,8 @@ var _ = Describe("TpmEndorsementController", func() {
 	Describe("Get TpmEndorsement by ID", func() {
 		Context("Retrieve TpmEndorsement by ID from data store", func() {
 			It("Should retrieve TpmEndorsement", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Retrieve))).Methods("GET")
-				req, err := http.NewRequest("GET", "/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -171,8 +171,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Try to retrieve TpmEndorsement by invalid ID from data store", func() {
 			It("Should fail to retrieve TpmEndorsement", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Retrieve))).Methods("GET")
-				req, _ := http.NewRequest("GET", "/tpm-endorsements/73755fda-c910-46be-821f-e8ddeab189e9", nil)
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Retrieve))).Methods(http.MethodGet)
+				req, _ := http.NewRequest(http.MethodGet, "/tpm-endorsements/73755fda-c910-46be-821f-e8ddeab189e9", nil)
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -185,8 +185,8 @@ var _ = Describe("TpmEndorsementController", func() {
 	Describe("Delete TpmEndorsement by ID", func() {
 		Context("Delete TpmEndorsement by ID from data store", func() {
 			It("Should delete TpmEndorsement", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -195,8 +195,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Delete TpmEndorsement, given invalid ID", func() {
 			It("Should fail to delete TpmEndorsement", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.Delete))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e6", nil)
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.Delete))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e6", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -209,8 +209,8 @@ var _ = Describe("TpmEndorsementController", func() {
 	Describe("Delete TpmEndorsement by criteria", func() {
 		Context("Delete TpmEndorsement for filter revoked=false", func() {
 			It("Should delete TpmEndorsement", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.DeleteCollection))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/tpm-endorsements?revokedEqualTo=false", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.DeleteCollection))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/tpm-endorsements?revokedEqualTo=false", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -219,8 +219,8 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Delete TpmEndorsement by incorrect ID from data store", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.DeleteCollection))).Methods("DELETE")
-				req, err := http.NewRequest("DELETE", "/tpm-endorsements?id=ijogoirjti", nil)
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(tpmEndorsmentController.DeleteCollection))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/tpm-endorsements?id=ijogoirjti", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -232,7 +232,7 @@ var _ = Describe("TpmEndorsementController", func() {
 	Describe("Post a new TpmEndorsement", func() {
 		Context("Provide a valid TpmEndorsement data", func() {
 			It("Should create a new TpmEndorsement and get HTTP Status: 201", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods("POST")
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods(http.MethodPost)
 				tpmEndorsementJson := `{ 
                                         "hardware_uuid": "eb829e60-c8ef-46ab-ba33-6e62df3062a7",
                                         "issuer": "C = DE, O = Infineon Technologies AG, OU = OPTIGA(TM) TPM2.0, CN = Infineon OPTIGA(TM) RSA Manufacturing CA 007",
@@ -240,7 +240,7 @@ var _ = Describe("TpmEndorsementController", func() {
                                        }`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/tpm-endorsements",
 					strings.NewReader(tpmEndorsementJson),
 				)
@@ -254,7 +254,7 @@ var _ = Describe("TpmEndorsementController", func() {
 		})
 		Context("Provide a TpmEndorsement data that contains duplicate hardware_uuid", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods("POST")
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods(http.MethodPost)
 				tpmEndorsementJson := `{
                             			"hardware_uuid": "ge37c360-7eae-4250-a677-6ee12adce8e3",
 										"issuer": "CN=Infineon OPTIGA(TM) RSA Manufacturing CA",
@@ -262,7 +262,7 @@ var _ = Describe("TpmEndorsementController", func() {
 									}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/tpm-endorsements",
 					strings.NewReader(tpmEndorsementJson),
 				)
@@ -277,7 +277,7 @@ var _ = Describe("TpmEndorsementController", func() {
 
 		Context("Provide a TpmEndorsement data invalid data", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods("POST")
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods(http.MethodPost)
 				tpmEndorsementJson := `{
 										"hardware_uuid": "ge37c360-7eae-4250-a677-6ee12",
 										"issuer": "CN=Infineon OPTIGA(TM) RSA Manufacturing CA",
@@ -285,7 +285,7 @@ var _ = Describe("TpmEndorsementController", func() {
 										}`
 
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/tpm-endorsements",
 					strings.NewReader(tpmEndorsementJson),
 				)
@@ -300,10 +300,10 @@ var _ = Describe("TpmEndorsementController", func() {
 
 		Context("Provide a empty data  in request", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods("POST")
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods(http.MethodPost)
 				data := ``
 				req, err := http.NewRequest(
-					"POST",
+					http.MethodPost,
 					"/tpm-endorsements",
 					strings.NewReader(data),
 				)
@@ -321,7 +321,7 @@ var _ = Describe("TpmEndorsementController", func() {
 	Describe("Update TpmEndorsement", func() {
 		Context("Provide a valid TpmEndorsement data", func() {
 			It("Should update TpmEndorsement and get HTTP Status: 200", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Update))).Methods("PUT")
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Update))).Methods(http.MethodPut)
 				tpmEndorsementJson := `{ 
                                         "hardware_uuid": "ee37c360-7eae-4250-a677-6ee12adce8e3",
                                         "issuer": "CN=Infineon OPTIGA(TM) RSA Manufacturing CA",
@@ -329,7 +329,7 @@ var _ = Describe("TpmEndorsementController", func() {
                                        }`
 
 				req, err := http.NewRequest(
-					"PUT",
+					http.MethodPut,
 					"/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e2",
 					strings.NewReader(tpmEndorsementJson),
 				)
@@ -344,7 +344,7 @@ var _ = Describe("TpmEndorsementController", func() {
 
 		Context("Provide a TpmEndorsement data that does not exist", func() {
 			It("Should get HTTP Status: 404", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Update))).Methods("PUT")
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Update))).Methods(http.MethodPut)
 				tpmEndorsementJson := `{
 										"hardware_uuid": "ee37c360-7eae-4250-a677-6ee12adce8e5",
 										"issuer": "CN=Infineon OPTIGA(TM) RSA Manufacturing CA",
@@ -352,7 +352,7 @@ var _ = Describe("TpmEndorsementController", func() {
 										}`
 
 				req, err := http.NewRequest(
-					"PUT",
+					http.MethodPut,
 					"/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e9",
 					strings.NewReader(tpmEndorsementJson),
 				)
@@ -367,7 +367,7 @@ var _ = Describe("TpmEndorsementController", func() {
 
 		Context("Provide a invalid data", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Update))).Methods("PUT")
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Update))).Methods(http.MethodPut)
 				tpmEndorsementJson := `{
                             "hardware_uuid": "ee37c360-7eae-4250-a677-6ee12adce",
 							"issuer": "CN=Infineon OPTIGA(TM) RSA Manufacturing CA",
@@ -375,7 +375,7 @@ var _ = Describe("TpmEndorsementController", func() {
 									}`
 
 				req, err := http.NewRequest(
-					"PUT",
+					http.MethodPut,
 					"/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e4",
 					strings.NewReader(tpmEndorsementJson),
 				)
@@ -390,10 +390,10 @@ var _ = Describe("TpmEndorsementController", func() {
 
 		Context("Provide a empty data  in request", func() {
 			It("Should get HTTP Status: 400", func() {
-				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods("PUT")
+				router.Handle("/tpm-endorsements/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods(http.MethodPut)
 				data := ``
 				req, err := http.NewRequest(
-					"PUT",
+					http.MethodPut,
 					"/tpm-endorsements/ee37c360-7eae-4250-a677-6ee12adce8e2",
 					strings.NewReader(data),
 				)

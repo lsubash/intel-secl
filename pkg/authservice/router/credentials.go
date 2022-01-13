@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/controllers"
+	"net/http"
 	"time"
 )
 
@@ -18,7 +19,7 @@ func SetCredentialsRoutes(r *mux.Router, userCredentialValidity time.Duration) *
 
 	controller := controllers.CredentialsController{UserCredentialValidity: userCredentialValidity}
 	r.Handle("/credentials", ErrorHandler(permissionsHandler(ResponseHandler(controller.CreateCredentials,
-		"text/plain"), []string{consts.CredentialCreate}))).Methods("POST")
+		"text/plain"), []string{consts.CredentialCreate}))).Methods(http.MethodPost)
 
 	return r
 }

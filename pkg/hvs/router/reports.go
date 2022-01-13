@@ -6,6 +6,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
@@ -30,23 +31,23 @@ func SetReportRoutes(router *mux.Router, store *postgres.DataStore, hostTrustMan
 
 	router.Handle("/reports",
 		ErrorHandler(permissionsHandler(ResponseHandler(reportController.CreateSaml),
-			[]string{constants.ReportCreate}))).Methods("POST").Headers("Accept", consts.HTTPMediaTypeSaml)
+			[]string{constants.ReportCreate}))).Methods(http.MethodPost).Headers("Accept", consts.HTTPMediaTypeSaml)
 
 	router.Handle("/reports",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Create),
-			[]string{constants.ReportCreate}))).Methods("POST")
+			[]string{constants.ReportCreate}))).Methods(http.MethodPost)
 
 	router.Handle("/reports",
 		ErrorHandler(permissionsHandler(ResponseHandler(reportController.SearchSaml),
-			[]string{constants.ReportSearch}))).Methods("GET").Headers("Accept", consts.HTTPMediaTypeSaml)
+			[]string{constants.ReportSearch}))).Methods(http.MethodGet).Headers("Accept", consts.HTTPMediaTypeSaml)
 
 	router.Handle(reportIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Retrieve),
-			[]string{constants.ReportRetrieve}))).Methods("GET")
+			[]string{constants.ReportRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle("/reports",
 		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Search),
-			[]string{constants.ReportSearch}))).Methods("GET")
+			[]string{constants.ReportSearch}))).Methods(http.MethodGet)
 
 	return router
 }
