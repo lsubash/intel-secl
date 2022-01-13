@@ -12,7 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var defaultLog = log.GetDefaultLogger()

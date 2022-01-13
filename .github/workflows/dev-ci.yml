@@ -2,104 +2,105 @@ name: pipeline
 
 on:
   push:
-    branches: [v*/develop]
+    branches: [ v*/develop ]
   pull_request:
-    branches: [v*/develop, master]
+    branches: [ v*/develop, master ]
 
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: 'Log level'
         required: true
         default: 'warning'
 
 jobs:
-
   sanity-test-build:
     runs-on: RHEL8
-    container: golang:1.16
+    # TODO: inject using secret
+    container: amr-registry.caas.intel.com/isecl/iseclbuilder:v5.0.0
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: AutoModality/action-clean@v1
+      - uses: actions/checkout@v2
 
-    - name: Add Running Label
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v2
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        script: |
-          github.issues.setLabels({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            labels: [':arrows_counterclockwise:']
-          })
+      - name: Add Running Label
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.setLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [':arrows_counterclockwise:']
+            })
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16.7
+      - name: Check-linting-issues
+        run: |
+          if [ "$(gofmt -l . | wc -l)"  -gt 0 ]; then exit 1; fi
 
-    - name: Check-linting-issues
-      run: |
-        if [ "$(gofmt -l . | wc -l)"  -gt 0 ]; then exit 1; fi
+      - name: Run-unit-tests
+        id: coverage-percent
+        shell: bash
+        run: |
+          make test
+          value=`go tool cover -func cover.out | grep total | awk '{print $3}'`
+          echo "::set-output name=coverage::$value"
+          echo $value
 
-    - name: Run-unit-tests
-      id: coverage-percent
-      shell: bash
-      run: |
-        make test
-        value=`go tool cover -func cover.out | grep total | awk '{print $3}'`
-        echo "::set-output name=coverage::$value"
-        echo $value
+      - name: Add Coverage Label
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.setLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['COV: ${{steps.coverage-percent.outputs.coverage}}']
+            })
 
-    - name: Add Coverage Label
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v2
-      with:
-       github-token: ${{secrets.GITHUB_TOKEN}}
-       script: |
-         github.issues.setLabels({
-           issue_number: context.issue.number,
-           owner: context.repo.owner,
-           repo: context.repo.repo,
-           labels: ['COV: ${{steps.coverage-percent.outputs.coverage}}']
-         })
-         
-    - name: Build-cms
-      run: make cms
+      - name: Build-cms
+        run: make cms
 
-    - name: Build-authservice
-      run: make authservice
+      - name: Build-authservice
+        run: make authservice
 
-    - name: Build-hvs
-      run: make hvs
+      - name: Build-hvs
+        run: make hvs
 
-    - name: Build-ihub
-      run: make ihub
+      - name: Build-ihub
+        run: make ihub
 
-    - name: Build-wpm
-      run: make wpm
+      - name: Build-wpm
+        run: make wpm
 
-    - name: Build-wls
-      run: make wls
+      - name: Build-wls
+        run: make wls
 
-    - name: Build-kbs
-      run: make kbs
+      - name: Build-kbs
+        run: make kbs
 
-    - name: Build-admission-controller
-      run: make admission-controller
+      - name: Build-tagent
+        run: make tagent
 
-    - name: Build-k8s-controller
-      run: make isecl-k8s-controller
+      - name: Build-admission-controller
+        run: make admission-controller
 
-    - name: Build-k8s-scheduler
-      run: make isecl-k8s-scheduler
+      - name: Build-k8s-controller
+        run: make isecl-k8s-controller
+
+      - name: Build-k8s-scheduler
+        run: make isecl-k8s-scheduler
 
   docker-push:
     if: github.event_name == 'push'
     needs: [ sanity-test-build ]
     runs-on: RHEL8
+    # TODO: inject using secret
+    container: amr-registry.caas.intel.com/isecl/iseclbuilder:v5.0.0
     env:
       http_proxy: ${{ secrets.HTTP_PROXY }}
       https_proxy: ${{ secrets.HTTPS_PROXY }}
@@ -107,54 +108,55 @@ jobs:
       DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: AutoModality/action-clean@v1
+      - uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16.7
+      - name: Build-cms-docker
+        run: |
+          make cms-docker
+          docker push `docker images | grep cms | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-cms-docker
-      run: |
-        make cms-docker
-        docker push `docker images | grep cms | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-authservice-docker
+        run: |
+          make authservice-docker
+          docker push `docker images | grep authservice | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-authservice-docker
-      run: |
-        make authservice-docker
-        docker push `docker images | grep authservice | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-hvs-docker
+        run: |
+          make hvs-docker
+          docker push `docker images | grep hvs | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-hvs-docker
-      run: |
-        make hvs-docker
-        docker push `docker images | grep hvs | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-ihub-docker
+        run: |
+          make ihub-docker
+          docker push `docker images | grep ihub | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-ihub-docker
-      run: |
-        make ihub-docker
-        docker push `docker images | grep ihub | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-wls-docker
+        run: |
+          make wls-docker
+          docker push `docker images | grep wls | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-wls-docker
-      run: |
-        make wls-docker
-        docker push `docker images | grep wls | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-kbs-docker
+        run: |
+          make kbs-docker
+          docker push `docker images | grep kbs | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-kbs-docker
-      run: |
-        make kbs-docker
-        docker push `docker images | grep kbs | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-tagent-docker
+        run: |
+          make tagent-docker
+          docker push `docker images | grep tagent | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-admission-controller-docker
-      run: |
-        make admission-controller-docker
-        docker push `docker images | grep admission-controller | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-admission-controller-docker
+        run: |
+          make admission-controller-docker
+          docker push `docker images | grep admission-controller | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-k8s-controller-docker
-      run: |
-        make isecl-k8s-controller-docker
-        docker push `docker images | grep isecl-k8s-controller | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-k8s-controller-docker
+        run: |
+          make isecl-k8s-controller-docker
+          docker push `docker images | grep isecl-k8s-controller | awk '{print $1":"$2}' | awk 'NR==1'`
 
-    - name: Build-k8s-scheduler-docker
-      run: |
-        make isecl-k8s-scheduler-docker
-        docker push `docker images | grep isecl-k8s-scheduler | awk '{print $1":"$2}' | awk 'NR==1'`
+      - name: Build-k8s-scheduler-docker
+        run: |
+          make isecl-k8s-scheduler-docker
+          docker push `docker images | grep isecl-k8s-scheduler | awk '{print $1":"$2}' | awk 'NR==1'`

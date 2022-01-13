@@ -17,7 +17,7 @@
       - deployments/installer
     expire_in: 1 week
   rules:
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /develop$/'
+    - if: "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /develop$/"
       when: on_success
 
 .installer-normal-components:
@@ -47,3 +47,9 @@ package:authservice:installer:
 
 package:wpm:installer:
   extends: .installer-normal-components
+
+package:tagent:installer:
+  extends: .installer-normal-components
+  script:
+    - apt -yq update && apt -yq install libtss2-dev libssl-dev
+    - make $COMPONENT_IN_JOB

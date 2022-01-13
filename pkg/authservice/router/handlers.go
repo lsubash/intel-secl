@@ -10,6 +10,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/auth"
 	comctx "github.com/intel-secl/intel-secl/v5/pkg/lib/common/context"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/pkg/errors"
 	"net/http"
@@ -19,10 +20,7 @@ import (
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 )
 
-// endpointHandler which writes generic response
-type endpointHandler func(w http.ResponseWriter, r *http.Request) error
-
-func permissionsHandler(eh endpointHandler, permissionNames []string) endpointHandler {
+func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
 	defaultLog.Trace("router/handlers:permissionsHandler() Entering")
 	defer defaultLog.Trace("router/handlers:permissionsHandler() Leaving")
 
@@ -53,7 +51,7 @@ func permissionsHandler(eh endpointHandler, permissionNames []string) endpointHa
 }
 
 // Generic handler for writing response header and body for all handler functions
-func ResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, int, error), contentType string) endpointHandler {
+func ResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, int, error), contentType string) middleware.EndpointHandler {
 	defaultLog.Trace("router/handlers:ResponseHandler() Entering")
 	defer defaultLog.Trace("router/handlers:ResponseHandler() Leaving")
 
@@ -76,7 +74,7 @@ func ResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, in
 	}
 }
 
-func ErrorHandler(eh endpointHandler) http.HandlerFunc {
+func ErrorHandler(eh middleware.EndpointHandler) http.HandlerFunc {
 	defaultLog.Trace("router/handlers:ErrorHandler() Entering")
 	defer defaultLog.Trace("router/handlers:ErrorHandler() Leaving")
 	return func(w http.ResponseWriter, r *http.Request) {

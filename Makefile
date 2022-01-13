@@ -10,12 +10,16 @@ else
 	undefine DOCKER_PROXY_FLAGS
 endif
 
-TARGETS = cms kbs ihub hvs authservice wpm wls
+TARGETS = cms kbs ihub hvs authservice wpm wls tagent
 K8S_EXTENSIONS_TARGETS = admission-controller isecl-k8s-controller isecl-k8s-scheduler
-K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls $(K8S_EXTENSIONS_TARGETS)
+K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls tagent $(K8S_EXTENSIONS_TARGETS)
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
+		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
+
+tagent:
+	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct CGO_CFLAGS_ALLOW="-f.*"  \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 $(K8S_EXTENSIONS_TARGETS):
@@ -33,16 +37,31 @@ config-upgrade-binary:
 	cp -a upgrades/manifest/ installer/
 	cp -a upgrades/$*/* installer/
 	if [ -d "./installer/db" ]; then \
-	     rm -rf ./installer/db ;\
-	     cd ./upgrades/$*/db && make all && cd - ;\
-	     mkdir -p ./installer/database && cp -a ./upgrades/$*/db/out/* ./installer/database/ ;\
+		 rm -rf ./installer/db ;\
+		 cd ./upgrades/$*/db && make all && cd - ;\
+		 mkdir -p ./installer/database && cp -a ./upgrades/$*/db/out/* ./installer/database/ ;\
 	fi
 	mv installer/build/* installer/
 	chmod +x installer/*.sh
 	cp cmd/$*/$* installer/$*
 
-%-installer: %-pre-installer %
-	makeself installer deployments/installer/$*-$(VERSION).bin "$* $(VERSION)" ./install.sh
+tagent-pre-installer: tagent config-upgrade-binary
+	mkdir -p installer
+	cp -r build/linux/tagent/* installer/
+	cp pkg/lib/common/upgrades/config-upgrade installer/
+	cp pkg/lib/common/upgrades/*.sh installer/
+	cp -a upgrades/manifest/ installer/
+	cp -a upgrades/tagent/* installer/
+
+	$(MAKE) -C pkg/tagent/tboot-xm package
+	cp pkg/tagent/tboot-xm/out/application-agent*.bin installer/
+
+	mv installer/build/* installer/
+	chmod +x installer/*.sh
+	cp cmd/tagent/tagent installer/tagent
+
+tagent-installer: tagent-pre-installer
+	makeself installer deployments/installer/trustagent-$(VERSION).bin "TrustAgent $(VERSION)" ./install.sh
 	rm -rf installer
 
 %-docker: %
@@ -102,8 +121,9 @@ download-eca:
 	rm -rf certs
 
 test:
-	env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
-	go test ./... -coverprofile cover.out
+	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
+	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct go build github.com/intel-secl/pkg/tagent/...
+	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct go test ./... -coverprofile cover.out
 	go tool cover -func cover.out
 	go tool cover -html=cover.out -o cover.html
 

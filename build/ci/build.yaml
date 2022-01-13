@@ -13,8 +13,8 @@
     - apt-get install -yq libssl-dev
   artifacts:
     paths:
-    - cmd
-    - build/linux/kbs
+      - cmd
+      - build/linux/kbs
     expire_in: 3 hour
 
 .build-normal-components:
@@ -39,14 +39,10 @@ build:wpm:
   extends: .build-normal-components
 
 build:kbs:
-  extends: .build-common
+  extends: .build-normal-components
+
+build:tagent:
+  extends: .build-normal-components
   script:
-    - git clone https://github.com/openkmip/libkmip.git
-    - cd libkmip
-    - git reset --hard f7793891c994d927c11ba7206e8aa0383ed7528d
-    - make
-    - make install
-    - ldconfig
-    - cd $CI_PROJECT_DIR
-    - cp /usr/local/lib/libkmip.so.0.2 build/linux/kbs/
-    - make kbs
+    - apt -yq update && apt -yq install libtss2-dev libssl-dev
+    - make $COMPONENT_IN_JOB

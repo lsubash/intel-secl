@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -26,9 +27,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// endpointHandler which writes generic response
-type endpointHandler func(w http.ResponseWriter, r *http.Request) error
-
 type privilegeError struct {
 	StatusCode int
 	Message    string
@@ -39,7 +37,7 @@ func (err privilegeError) Error() string {
 }
 
 // Generic handler for writing response header and body for all handler functions
-func ResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, int, error)) endpointHandler {
+func ResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, int, error)) middleware.EndpointHandler {
 	defaultLog.Trace("router/handlers:ResponseHandler() Entering")
 	defer defaultLog.Trace("router/handlers:ResponseHandler() Leaving")
 
@@ -61,7 +59,7 @@ func ResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, in
 
 // JsonResponseHandler  is the same as http.JsonResponseHandler, but returns an error that can be handled by a generic
 //// middleware handler
-func JsonResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, int, error)) endpointHandler {
+func JsonResponseHandler(h func(http.ResponseWriter, *http.Request) (interface{}, int, error)) middleware.EndpointHandler {
 	defaultLog.Trace("router/handlers:JsonResponseHandler() Entering")
 	defer defaultLog.Trace("router/handlers:JsonResponseHandler() Leaving")
 
@@ -104,7 +102,7 @@ func errorFormatter(err error, status int) error {
 	return err
 }
 
-func permissionsHandler(eh endpointHandler, permissionNames []string) endpointHandler {
+func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
 	defaultLog.Trace("router/handlers:permissionsHandler() Entering")
 	defer defaultLog.Trace("router/handlers:permissionsHandler() Leaving")
 
@@ -133,7 +131,7 @@ func permissionsHandler(eh endpointHandler, permissionNames []string) endpointHa
 	}
 }
 
-func permissionsHandlerUsingTLSMAuth(eh endpointHandler, aasAPIUrl string, kbsConfig config.KBSConfig) endpointHandler {
+func permissionsHandlerUsingTLSMAuth(eh middleware.EndpointHandler, aasAPIUrl string, kbsConfig config.KBSConfig) middleware.EndpointHandler {
 	defaultLog.Trace("router/handlers:permissionsHandlerUsingTLSMAuth() Entering")
 	defer defaultLog.Trace("router/handlers:permissionsHandlerUsingTLSMAuth() Leaving")
 
@@ -212,7 +210,7 @@ func permissionsHandlerUsingTLSMAuth(eh endpointHandler, aasAPIUrl string, kbsCo
 	}
 }
 
-func ErrorHandler(eh endpointHandler) http.HandlerFunc {
+func ErrorHandler(eh middleware.EndpointHandler) http.HandlerFunc {
 	defaultLog.Trace("router/handlers:ErrorHandler() Entering")
 	defer defaultLog.Trace("router/handlers:ErrorHandler() Leaving")
 	return func(w http.ResponseWriter, r *http.Request) {

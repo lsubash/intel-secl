@@ -12,7 +12,7 @@ import (
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
