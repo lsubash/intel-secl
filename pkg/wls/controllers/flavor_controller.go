@@ -25,6 +25,8 @@ type FlavorController struct {
 	FStore domain.FlavorStore
 }
 
+const duplicateKeyError = "duplicate key"
+
 func NewFlavorController(fs domain.FlavorStore) *FlavorController {
 	return &FlavorController{
 		FStore: fs,
@@ -43,10 +45,41 @@ func (fcon *FlavorController) Create(w http.ResponseWriter, r *http.Request) (in
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
 	}
 
+	if f.ImageFlavor.Meta.Description.FlavorPart == "" || (f.ImageFlavor.Meta.Description.FlavorPart != "CONTAINER_IMAGE" && f.ImageFlavor.Meta.Description.FlavorPart != "IMAGE") {
+		defaultLog.Errorf("controllers/flavor_controller/flavors:create() : Failed to create flavor: flavor_part should be either of CONTAINER_IMAGE or IMAGE")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "flavor_part should be either of CONTAINER_IMAGE or IMAGE"}
+	}
+
+	if f.Signature == "" {
+		defaultLog.Errorf("controllers/flavor_controller/flavors:create() : Failed to create flavor: Flavor signature is not provided")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Flavor signature is not provided"}
+	}
+
+	flavorDoesNotExist := false
+	_, err = fcon.FStore.Retrieve(f.ImageFlavor.Meta.ID)
+	if err != nil {
+		if strings.Contains(err.Error(), commErr.RowsNotFound) {
+			flavorDoesNotExist = true
+		} else {
+			secLog.WithError(err).WithField("id", f.ImageFlavor.Meta.ID).Info(
+				"controllers/flavor_controller:Create() failed to retrieve Flavor")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve Flavor with the given ID"}
+		}
+	}
+
+	if !flavorDoesNotExist {
+		defaultLog.WithError(err).Error("controllers/flavor_controller:Create() Flavor with given ID already exist")
+		return nil, http.StatusConflict, &commErr.ResourceError{Message: "Flavor with given ID already exists"}
+	}
+
 	createdFlavor, err := fcon.FStore.Create(&f)
 	if err != nil {
-		defaultLog.WithError(err).Error("controllers/flavor_controller:Create() Create Flavor failed")
-		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
+		if strings.Contains(err.Error(), duplicateKeyError) {
+			return nil, http.StatusConflict, &commErr.ResourceError{Message: "Flavor with given label already exists"}
+		} else {
+			defaultLog.WithError(err).Error("controllers/flavor_controller:Create() Create Flavor failed")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
+		}
 	}
 	defaultLog.Info("Flavors created successfully")
 	secLog.Infof("%s: Flavor created by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)

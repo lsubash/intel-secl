@@ -26,17 +26,6 @@ func NewFlavorStore(store *DataStore) *FlavorStore {
 func (fs *FlavorStore) Create(f *flvr.SignedImageFlavor) (*flvr.SignedImageFlavor, error) {
 	defaultLog.Trace("postgres/flavor_store:Create() Entering")
 	defer defaultLog.Trace("postgres/flavor_store:Create() Leaving")
-	if f == nil || f.Signature == "" || f.ImageFlavor.Meta.Description.Label == "" {
-		return nil, errors.New("postgres/flavor_store:Create()- invalid input : must have content, signature and the label for the flavor")
-	}
-
-	if f.ImageFlavor.Meta.ID == uuid.Nil {
-		newUuid, err := uuid.NewRandom()
-		if err != nil {
-			return nil, errors.Wrap(err, "postgres/flavor_store:Create() failed to create new UUID")
-		}
-		f.ImageFlavor.Meta.ID = newUuid
-	}
 
 	dbf := flavor{
 		ID:         f.ImageFlavor.Meta.ID,

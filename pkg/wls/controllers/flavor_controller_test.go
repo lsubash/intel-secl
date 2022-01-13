@@ -54,8 +54,8 @@ var _ = Describe("FlavorController", func() {
 			})
 		})
 
-		Context("When a VALID Flavor Create Request is passed", func() {
-			It("A new Flavor record is created and HTTP Status: 201 response is received", func() {
+		Context("When a VALID Flavor Create Request is passed which already exist in database", func() {
+			It("A new Flavor record is created and HTTP Status: 409 response is received", func() {
 				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Create))).Methods("POST")
 
 				createfReq := `{
@@ -86,7 +86,7 @@ var _ = Describe("FlavorController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusCreated))
+				Expect(w.Code).To(Equal(http.StatusConflict))
 			})
 		})
 
