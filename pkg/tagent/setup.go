@@ -276,6 +276,10 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 			return nil, errors.Errorf("%s is not set", constants.EnvBearerToken)
 		}
 
+		if !strings.HasSuffix(aasUrl, "/") {
+			aasUrl += "/"
+		}
+
 		aasCP = aas.DefaultAasClientProvider{
 			AasUrl:      aasUrl,
 			BearerToken: bearerToken,

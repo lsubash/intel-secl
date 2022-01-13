@@ -10,7 +10,7 @@
 
     #  Install Development tools (gcc 8.3.1, ldd v2.28) tss2 and other dependencies
     - yum -y group install "Development Tools"
-    - yum -y install makeself gdb wget openssl-devel sudo tpm2-tools tpm2-tss-devel
+    - yum -y install makeself gdb wget openssl-devel sudo tpm2-tools tpm2-tss-devel git
 
     # install go...
     - export GOLANG_TAR=go1.16.7.linux-amd64.tar.gz

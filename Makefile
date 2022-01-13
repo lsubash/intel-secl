@@ -45,6 +45,10 @@ config-upgrade-binary:
 	chmod +x installer/*.sh
 	cp cmd/$*/$* installer/$*
 
+%-installer: %-pre-installer %
+	makeself installer deployments/installer/$*-$(VERSION).bin "$* $(VERSION)" ./install.sh
+	rm -rf installer
+
 tagent-pre-installer: tagent config-upgrade-binary
 	mkdir -p installer
 	cp -r build/linux/tagent/* installer/

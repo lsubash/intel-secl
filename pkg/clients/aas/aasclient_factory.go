@@ -28,7 +28,7 @@ func (aasCp DefaultAasClientProvider) GetAasClient() (Client, error) {
 	}
 
 	// validate AAS URL
-	if err := validation.ValidateURL(aasCp.AasUrl, map[string]byte{"http": 0, "https": 0}, "/v1/aas"); err != nil {
+	if err := validation.ValidateURL(aasCp.AasUrl, map[string]byte{"http": 0, "https": 0}, "/aas/v1/"); err != nil {
 		return Client{}, errors.Wrap(err, "invalid AAS base URL")
 	}
 
