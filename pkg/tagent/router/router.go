@@ -42,24 +42,20 @@ func InitRoutes(trustedJWTSigningCertsDir, trustedCaCertsDir string, requestHand
 	router := mux.NewRouter()
 	// ISECL-8715 - Prevent potential open redirects to external URLs
 	router.SkipClean(true)
-
-	defineSubRoutes(router, requestHandler)
-
-	// use permission-based access control for webservices
-	authRouter := router.PathPrefix("/v2/").Subrouter()
-	authRouter.Use(middleware.NewTokenAuth(trustedJWTSigningCertsDir, trustedCaCertsDir, fnGetJwtCerts, cacheTime))
-
+	defineSubRoutes(router, trustedJWTSigningCertsDir, trustedCaCertsDir, requestHandler)
 	return router
 }
 
-func defineSubRoutes(router *mux.Router, requestHandler common.RequestHandler) {
+func defineSubRoutes(router *mux.Router, trustedJWTSigningCertsDir, trustedCaCertsDir string, requestHandler common.RequestHandler) {
 	log.Trace("router/router:defineSubRoutes() Entering")
 	defer log.Trace("router/router:defineSubRoutes() Leaving")
 
 	serviceApi := "/" + constants.ApiVersion
 	subRouter := router.PathPrefix(serviceApi).Subrouter()
-	setVersionRoutes(subRouter)
+	subRouter = setVersionRoutes(subRouter)
 
+	subRouter = router.PathPrefix(serviceApi).Subrouter()
+	subRouter.Use(middleware.NewTokenAuth(trustedJWTSigningCertsDir, trustedCaCertsDir, fnGetJwtCerts, cacheTime))
 	subRouter.HandleFunc("/aik", errorHandler(requiresPermission(controllers.GetAik(requestHandler), []string{getAIKPerm}))).Methods(http.MethodGet)
 	subRouter.HandleFunc("/host", errorHandler(requiresPermission(controllers.GetPlatformInfo(requestHandler), []string{getHostInfoPerm}))).Methods(http.MethodGet)
 	subRouter.HandleFunc("/tpm/quote", errorHandler(requiresPermission(controllers.GetTpmQuote(requestHandler), []string{postQuotePerm}))).Methods(http.MethodPost)
@@ -69,10 +65,10 @@ func defineSubRoutes(router *mux.Router, requestHandler common.RequestHandler) {
 	subRouter.HandleFunc("/deploy/manifest", errorHandler(requiresPermission(controllers.DeployManifest(requestHandler), []string{postDeployManifestPerm}))).Methods(http.MethodPost)
 }
 
-func setVersionRoutes(router *mux.Router) {
+func setVersionRoutes(router *mux.Router) *mux.Router {
 	log.Trace("router/router:setVersionRoutes() Entering")
 	defer log.Trace("router/router:setVersionRoutes() Leaving")
 
-	noAuthRouter := router.PathPrefix("/v2/").Subrouter()
-	noAuthRouter.HandleFunc("/version", errorHandler(controllers.GetVersion())).Methods(http.MethodGet)
+	router.HandleFunc("/version", errorHandler(controllers.GetVersion())).Methods(http.MethodGet)
+	return router
 }
