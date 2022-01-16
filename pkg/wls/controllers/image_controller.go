@@ -326,14 +326,9 @@ func (icon *ImageController) Search(w http.ResponseWriter, r *http.Request) (int
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve image - Failed to retrieve Images by filter criteria"}
 	}
 
-	if images == nil {
-		// coerce to return empty list instead of null
-		images = []model.Image{}
-	}
-
 	defaultLog.Info("controllers/images_controller:Search() Successfully queried Images by filter criteria")
 	secLog.Infof("%s: Flavor Searched by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
-	return images, http.StatusOK, nil
+	return model.ImageCollection{Images: images}, http.StatusOK, nil
 }
 
 func (icon *ImageController) UpdateAssociatedFlavor(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {

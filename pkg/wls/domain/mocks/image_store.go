@@ -222,7 +222,7 @@ func (store MockImageStore) RetrieveImageFlavor(imageUUID uuid.UUID) (*wls.Signe
 	return store.ImageStore.RetrieveImageFlavor(imageUUID)
 }
 
-func (store MockImageStore) Search(filter model.ImageFilter) ([]model.Image, error) {
+func (store MockImageStore) Search(filter model.ImageFilter) ([]*model.ImageFilter, error) {
 
 	store.Mock.MatchExpectationsInOrder(false)
 

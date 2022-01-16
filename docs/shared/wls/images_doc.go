@@ -102,7 +102,8 @@ type SwaggImageInfo struct {
 //
 // x-sample-call-endpoint: https://wls.com:5000/wls/v2/images/image_id=ffff021e-9669-4e53-9224-8880fb4e4081
 // x-sample-call-output: |
-//  [
+// {
+//    "imageFlavor": [
 //    {
 //        "id": "ffff021e-9669-4e53-9224-8880fb4e4081",
 //        "flavor_ids": [
@@ -110,6 +111,7 @@ type SwaggImageInfo struct {
 //        ]
 //    }
 //  ]
+//}
 // ---
 
 // swagger:operation GET /images/{image_id} Images Retrieve-Image

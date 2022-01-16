@@ -22,6 +22,10 @@ type ImageFilter struct {
 	ImageID  uuid.UUID `json:"image_id,omitempty"`
 }
 
+type ImageCollection struct {
+	Images []*ImageFilter `json:"imageFlavor"`
+}
+
 // Saml is used to represent saml report struct
 type Saml struct {
 	XMLName   xml.Name    `xml:"Assertion"`

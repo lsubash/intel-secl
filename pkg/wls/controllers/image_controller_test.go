@@ -235,10 +235,10 @@ var _ = Describe("ImageController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var imgResultSet []model.Image
+				var imgResultSet model.ImageCollection
 				err = json.Unmarshal(w.Body.Bytes(), &imgResultSet)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(imgResultSet)).To(Equal(1))
+				Expect(len(imgResultSet.Images)).To(Equal(1))
 			})
 		})
 
@@ -252,10 +252,10 @@ var _ = Describe("ImageController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var imgResultSet []model.Image
+				var imgResultSet model.ImageCollection
 				err = json.Unmarshal(w.Body.Bytes(), &imgResultSet)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(imgResultSet)).To(Equal(1))
+				Expect(len(imgResultSet.Images)).To(Equal(1))
 
 			})
 		})
@@ -294,10 +294,10 @@ var _ = Describe("ImageController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var imgResultSet []model.Image
+				var imgResultSet model.ImageCollection
 				err = json.Unmarshal(w.Body.Bytes(), &imgResultSet)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(imgResultSet)).To(Equal(1))
+				Expect(len(imgResultSet.Images)).To(Equal(1))
 			})
 		})
 

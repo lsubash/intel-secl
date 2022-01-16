@@ -165,11 +165,10 @@ func (i *ImageStore) RetrieveImageFlavor(imageUUID uuid.UUID) (*wls.SignedImageF
 }
 
 //Search fetches image for the given filter criteria
-func (i *ImageStore) Search(filter model.ImageFilter) ([]model.Image, error) {
+func (i *ImageStore) Search(filter model.ImageFilter) ([]*model.ImageFilter, error) {
 	defaultLog.Trace("postgres/image_store:Search() Entering")
 	defer defaultLog.Trace("postgres/image_store:Search() Leaving")
 
-	var imgResultSet []model.Image
 	var rows *sql.Rows
 	var err error
 	var tx *gorm.DB
@@ -193,17 +192,15 @@ func (i *ImageStore) Search(filter model.ImageFilter) ([]model.Image, error) {
 		}
 	}()
 
-	var img model.Image
-	var imgflvr imageFlavor
+	imgflvrs := []*model.ImageFilter{}
 	for rows.Next() {
-		if err := rows.Scan(&imgflvr.ImageId, &imgflvr.FlavorId); err != nil {
+		imgflvr := model.ImageFilter{}
+		if err := rows.Scan(&imgflvr.ImageID, &imgflvr.FlavorID); err != nil {
 			return nil, errors.Wrap(err, "postgres/image_store:Search() failed to scan record")
 		}
-		img.ID = imgflvr.ImageId
-		img.FlavorIDs = append(img.FlavorIDs, imgflvr.FlavorId)
+		imgflvrs = append(imgflvrs, &imgflvr)
 	}
-	imgResultSet = append(imgResultSet, img)
-	return imgResultSet, nil
+	return imgflvrs, nil
 }
 
 //Update updates the new association with the already existing image id

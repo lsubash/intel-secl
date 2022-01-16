@@ -33,7 +33,7 @@ type (
 		Retrieve(uuid uuid.UUID) (*model.Image, error)
 		RetrieveAssociatedFlavorByFlavorPart(imageUUID uuid.UUID, flavorPart string) (*wls.SignedImageFlavor, error)
 		RetrieveImageFlavor(imageUUID uuid.UUID) (*wls.SignedImageFlavor, error)
-		Search(filter model.ImageFilter) ([]model.Image, error)
+		Search(filter model.ImageFilter) ([]*model.ImageFilter, error)
 		Update(imageUUID uuid.UUID, flavorUUID uuid.UUID) error
 		RetrieveFlavors(uuid uuid.UUID) (*model.Image, error)
 		RetrieveFlavor(imageUUID uuid.UUID, flavorUUID uuid.UUID) (*model.Image, error)
