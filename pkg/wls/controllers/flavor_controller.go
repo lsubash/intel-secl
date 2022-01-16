@@ -18,6 +18,7 @@ import (
 	dm "github.com/intel-secl/intel-secl/v5/pkg/wls/domain/model"
 	"github.com/pkg/errors"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -26,6 +27,8 @@ type FlavorController struct {
 }
 
 const duplicateKeyError = "duplicate key"
+
+var flavorSearchParams = map[string]bool{"id": true, "label": true}
 
 func NewFlavorController(fs domain.FlavorStore) *FlavorController {
 	return &FlavorController{
@@ -86,6 +89,18 @@ func (fcon *FlavorController) Create(w http.ResponseWriter, r *http.Request) (in
 	return createdFlavor, http.StatusCreated, nil
 }
 
+func ValidateQueryParams(params url.Values, validQueries map[string]bool) error {
+	defaultLog.Trace("controllers/flavor_controller:ValidateQueryParams() Entering")
+	defer defaultLog.Trace("controllers/flavor_controller:ValidateQueryParams() Leaving")
+
+	for param := range params {
+		if _, hasQuery := validQueries[param]; !hasQuery {
+			return errors.New("Invalid query parameter provided. Refer to product guide for details.")
+		}
+	}
+	return nil
+}
+
 func (fcon *FlavorController) Search(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/flavor_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/flavor_controller:Search() Leaving")
@@ -95,9 +110,9 @@ func (fcon *FlavorController) Search(w http.ResponseWriter, r *http.Request) (in
 	id := r.URL.Query().Get("id")
 	label := r.URL.Query().Get("label")
 
-	if label == "" && id == "" {
-		secLog.Errorf("controllers/flavor_controller:Search() Invalid filter criteria. Allowed filter criterias are id and label")
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Allowed filter criteria are id and label"}
+	if err := ValidateQueryParams(r.URL.Query(), flavorSearchParams); err != nil {
+		secLog.Errorf("controllers/flavor_controller:Search() %s", err.Error())
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid filter criteria provided, allowed filter criterias are id and label"}
 	}
 
 	filterCriteria, err := validateFlavorFilterCriteria(id, label)

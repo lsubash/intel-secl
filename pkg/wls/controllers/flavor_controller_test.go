@@ -146,14 +146,15 @@ var _ = Describe("FlavorController", func() {
 	// Specs for HTTP Get to "/flavors"
 	Describe("Search Flavor", func() {
 		Context("When no arguments are passed", func() {
-			It("At least one parameter is required and a 400 response code", func() {
-				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
-				req, err := http.NewRequest(http.MethodGet, "/flavors", nil)
+
+			It("At least one parameter is required and a 200 response code", func() {
+				router.Handle("/flavors", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(flavorController.Search))).Methods("GET")
+				req, err := http.NewRequest("GET", "/flavors", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
+				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
 

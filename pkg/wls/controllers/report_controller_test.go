@@ -178,10 +178,10 @@ var _ = Describe("ReportController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var rCollection []model.Report
+				var rCollection *model.ReportCollection
 				err = json.Unmarshal(w.Body.Bytes(), &rCollection)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(rCollection)).To(Equal(1))
+				Expect(len(rCollection.Report)).To(Equal(1))
 			})
 		})
 
@@ -207,10 +207,10 @@ var _ = Describe("ReportController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var rCollection []model.Report
+				var rCollection *model.ReportCollection
 				err = json.Unmarshal(w.Body.Bytes(), &rCollection)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(rCollection)).To(Equal(1))
+				Expect(len(rCollection.Report)).To(Equal(1))
 			})
 		})
 
@@ -236,10 +236,10 @@ var _ = Describe("ReportController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var rCollection []model.Report
+				var rCollection *model.ReportCollection
 				err = json.Unmarshal(w.Body.Bytes(), &rCollection)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(rCollection)).To(Equal(1))
+				Expect(len(rCollection.Report)).To(Equal(1))
 			})
 		})
 
@@ -265,10 +265,10 @@ var _ = Describe("ReportController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var rCollection []model.Report
+				var rCollection *model.ReportCollection
 				err = json.Unmarshal(w.Body.Bytes(), &rCollection)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(rCollection)).To(Equal(1))
+				Expect(len(rCollection.Report)).To(Equal(1))
 			})
 		})
 
@@ -294,10 +294,10 @@ var _ = Describe("ReportController", func() {
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var rCollection []model.Report
+				var rCollection *model.ReportCollection
 				err = json.Unmarshal(w.Body.Bytes(), &rCollection)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(rCollection)).To(Equal(1))
+				Expect(len(rCollection.Report)).To(Equal(1))
 			})
 		})
 

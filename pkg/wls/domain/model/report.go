@@ -29,3 +29,7 @@ type ReportFilter struct {
 	FromDate     time.Time
 	ToDate       time.Time
 }
+
+type ReportCollection struct {
+	Report []Report `json:"reports"`
+}

@@ -49,7 +49,6 @@ func (fs *FlavorStore) Search(flavorFilter *model.FlavorFilter) ([]flvr.SignedIm
 	defer defaultLog.Trace("postgres/flavor_store:Search() Leaving")
 
 	var tx *gorm.DB
-	var flvrResultSet = []flvr.SignedImageFlavor{}
 
 	tx = fs.Store.Db.Table("flavor f").Select("f.content, f.signature")
 	tx = buildFlavorSearchQuery(tx, flavorFilter)
@@ -70,6 +69,7 @@ func (fs *FlavorStore) Search(flavorFilter *model.FlavorFilter) ([]flvr.SignedIm
 		}
 	}()
 
+	var flvrResultSet = []flvr.SignedImageFlavor{}
 	for rows.Next() {
 		flavor := flvr.SignedImageFlavor{}
 		if err := rows.Scan((*PGFlavorContent)(&flavor.ImageFlavor), &flavor.Signature); err != nil {

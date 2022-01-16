@@ -262,22 +262,22 @@ type SwaggReportsResponse struct {
 //      When the filter is true and no other query parameter is specified, error response will be returned. Default value is true.
 //   in: query
 //   type: boolean
-// - name: instance_id
+// - name: instanceId
 //   description: Unique ID of the VM.
 //   in: query
 //   type: string
 //   format: uuid
-// - name: report_id
+// - name: id
 //   description: Unique ID of the report.
 //   in: query
 //   type: string
 //   format: uuid
-// - name: hardware_uuid
+// - name: hostHardwareId
 //   description: Unique hardware UUID of the host.
 //   in: query
 //   type: string
 //   format: uuid
-// - name: from_date
+// - name: fromDate
 //   description: Reports returned will be restricted to after this date. from_date should be given in date format yyyy-mm-ddTHH:mm:ss.
 //   in: query
 //   type: string
@@ -285,12 +285,12 @@ type SwaggReportsResponse struct {
 //   description: Reports returned will be restricted to before this date. to_date should be given in date format yyyy-mm-ddTHH:mm:ss.
 //   in: query
 //   type: string
-// - name: latest_per_vm
+// - name: latestPerVM
 //   description: |
 //      By default this is set to TRUE, returning only the latest report for each VM.
 //   in: query
 //   type: boolean
-// - name: num_of_days
+// - name: numberOfDays
 //   description: |
 //      Results returned will be restricted to between the current date and number of days prior.
 //      This option will override other date options.
@@ -302,8 +302,10 @@ type SwaggReportsResponse struct {
 //     schema:
 //       "$ref": "#/definitions/ReportsResponse"
 //
-// x-sample-call-endpoint: https://wls.com:5000/wls/v2/reports?report_id=f52023eb-7991-47ba-91fc-c43bd9d80c29
+// x-sample-call-endpoint: https://wls.com:5000/wls/v2/reports?id=f52023eb-7991-47ba-91fc-c43bd9d80c29
 // x-sample-call-output: |
+//{
+//    "reports": [
 //  {
 //   "id": "f52023eb-7991-47ba-91fc-c43bd9d80c29",
 //   "instance_manifest": {
@@ -398,6 +400,8 @@ type SwaggReportsResponse struct {
 //    zwxPTHdN4kcC8I2iMxQVzsqV/TL39QUGlwhtYLJOqEaJ5sDqbmnW9XVO6TaEkcagHoF3Je+iglVbMmL7cfpySlppU9+TO6tSYlLP/nX53mEhBgN4ANSQ0gKNQR3izG
 //    Ca8mHgqGWnoahrR/dHHWADrKDF6SeMbmvo0e4/EOXaO89QyPrGwF8kuzI04HpXUWlOYfaubKkNHi3gckXFzNB84nhrp0SNz3RHxNEkA=="
 //  }
+//]
+//}
 
 // ---
 

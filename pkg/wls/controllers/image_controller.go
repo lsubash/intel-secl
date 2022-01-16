@@ -40,7 +40,8 @@ func NewImageController(imgs domain.ImageStore, fs domain.FlavorStore, conf *con
 	}
 }
 
-var AllowedFlavorPart = [2]string{"CONTAINER_IMAGE", "IMAGE"}
+var imageSearchParams = map[string]bool{"flavor_id": true, "image_id": true}
+var allowedFlavorPart = [2]string{"CONTAINER_IMAGE", "IMAGE"}
 
 func (icon *ImageController) Create(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/image_controller:Create() Entering")
@@ -208,7 +209,7 @@ func (icon *ImageController) RetrieveFlavorForFlavorPart(w http.ResponseWriter, 
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Failed to retrieve flavor - Invalid flavor part string format"}
 	}
 
-	if flavorPart == AllowedFlavorPart[0] || flavorPart == AllowedFlavorPart[1] {
+	if flavorPart == allowedFlavorPart[0] || flavorPart == allowedFlavorPart[1] {
 		flavor, err := icon.IStore.RetrieveAssociatedFlavorByFlavorPart(imageId, flavorPart)
 
 		if err != nil {
@@ -289,6 +290,11 @@ func (icon *ImageController) RetrieveFlavorAndKey(w http.ResponseWriter, r *http
 func (icon *ImageController) Search(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/images_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/images_controller:Search() Leaving")
+
+	if err := ValidateQueryParams(r.URL.Query(), imageSearchParams); err != nil {
+		secLog.Errorf("controllers/images_controller:Search() %s", err.Error())
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid filter criteria provided, allowed filter criterias are flavor_id, image_id"}
+	}
 
 	locator := model.ImageFilter{}
 

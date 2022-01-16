@@ -30,6 +30,8 @@ func NewReportController(rs domain.ReportStore) *ReportController {
 	return &ReportController{rs}
 }
 
+var reportSearchParams = map[string]bool{"id": true, "instanceId": true, "hostHardwareId": true, "fromDate": true, "latestPerVM": true, "numberOfDays": true, "toDate": true}
+
 func (rc ReportController) Create(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/report_controller:Create() Entering")
 	defer defaultLog.Trace("controllers/report_controller:Create() Leaving")
@@ -75,6 +77,11 @@ func (rc ReportController) Search(w http.ResponseWriter, r *http.Request) (inter
 	defaultLog.Trace("controllers/report_controller:Search() Entering")
 	defer defaultLog.Trace("controllers/report_controller:Search() Leaving")
 
+	if err := ValidateQueryParams(r.URL.Query(), reportSearchParams); err != nil {
+		secLog.Errorf("controllers/report_controller:Search() %s", err.Error())
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid filter criteria provided, allowed filter criterias are id, instanceId, hostHardwareId, fromDate, latestPerVM, numberOfDays"}
+	}
+
 	// get the ReportFilterCriteria
 	reportFilterCriteria, err := getReportFilterCriteria(r.URL.Query())
 	if err != nil {
@@ -87,8 +94,14 @@ func (rc ReportController) Search(w http.ResponseWriter, r *http.Request) (inter
 		defaultLog.WithError(err).Warnf("controllers/report_controller:Search() Report search operation failed")
 		return nil, http.StatusInternalServerError, errors.Errorf("Report search operation failed")
 	}
+
+	if reportCollection == nil {
+		// coerce to return empty list instead of null
+		reportCollection = []model.Report{}
+	}
+
 	secLog.Infof("%s: Reports searched by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
-	return reportCollection, http.StatusOK, nil
+	return model.ReportCollection{Report: reportCollection}, http.StatusOK, nil
 }
 
 func (rc ReportController) Retrieve(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
