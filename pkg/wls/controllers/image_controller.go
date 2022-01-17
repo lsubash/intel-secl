@@ -83,6 +83,23 @@ func (icon *ImageController) Create(w http.ResponseWriter, r *http.Request) (int
 		}
 	}
 
+	imageDoesNotExist := false
+	_, err := icon.IStore.Retrieve(formBody.ID)
+	if err != nil {
+		if strings.Contains(err.Error(), commErr.RowsNotFound) {
+			imageDoesNotExist = true
+		} else {
+			secLog.WithError(err).WithField("id", formBody.ID).Info(
+				"controllers/image_controller:Create() failed to retrieve image")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve image with the given ID"}
+		}
+	}
+
+	if !imageDoesNotExist {
+		defaultLog.WithError(err).Error("controllers/image_controller:Create() Image with given ID already exist")
+		return nil, http.StatusConflict, &commErr.ResourceError{Message: "Image with given ID already exists"}
+	}
+
 	if err := icon.IStore.Create(&formBody); err != nil {
 		switch err {
 		case postgres.ErrImageAssociationFlavorDoesNotExist:

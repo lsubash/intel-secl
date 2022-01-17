@@ -176,8 +176,8 @@ var _ = Describe("ImageController", func() {
 				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
 			})
 		})
-		Context("When a VALID Image Create Request is passed", func() {
-			It("A new Image record is created and HTTP Status: 201 response is received", func() {
+		Context("When a VALID already existing Image Create Request is passed", func() {
+			It("An already existing image record is created and HTTP Status: 409 response is received", func() {
 				router.Handle("/images", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.Create))).Methods(http.MethodPost)
 
 				createfReq := `{
@@ -196,7 +196,7 @@ var _ = Describe("ImageController", func() {
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusCreated))
+				Expect(w.Code).To(Equal(http.StatusConflict))
 			})
 		})
 		Context("When invalid JSON body is passed", func() {
