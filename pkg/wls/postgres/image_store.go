@@ -54,10 +54,7 @@ func (i *ImageStore) Create(img *model.Image) error {
 	if err != nil {
 		return errors.Wrap(err, "postgres/image_store: Create() Failed to create image")
 	}
-	if len(img.FlavorIDs) > 1 {
-		defaultLog.Warning("postgres/image_store:Create() Only one flavor can be associated with an image, rest of the flavors will be ignored")
-		return errors.New("Only one flavor can be associated with an image")
-	}
+
 	defaultLog.Info("postgres/image_store:Create() Successfully Create image flavor association")
 	return nil
 }

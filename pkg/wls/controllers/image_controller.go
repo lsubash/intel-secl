@@ -64,6 +64,11 @@ func (icon *ImageController) Create(w http.ResponseWriter, r *http.Request) (int
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
 	}
 
+	if len(formBody.FlavorIDs) != 1 {
+		defaultLog.Error("controllers/image_controller:create(): only one flavor can be associated with an image")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Only one flavor can be associated with an image"}
+	}
+
 	// validate input format
 	if err := validation.ValidateUUIDv4(formBody.ID.String()); err != nil {
 		secLog.WithError(err).Errorf("controllers/image_controller:Create() %s : Invalid image UUID format", message.InvalidInputProtocolViolation)
@@ -72,7 +77,7 @@ func (icon *ImageController) Create(w http.ResponseWriter, r *http.Request) (int
 
 	for i := range formBody.FlavorIDs {
 		if err := validation.ValidateUUIDv4(formBody.FlavorIDs[i].String()); err != nil {
-			secLog.Errorf("resource/images:create() %s : Invalid flavor UUID format", message.InvalidInputProtocolViolation)
+			secLog.Errorf("controllers/image_controller:create() %s : Invalid flavor UUID format", message.InvalidInputProtocolViolation)
 			secLog.Tracef("%+v", err)
 			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid flavor UUID format"}
 		}
