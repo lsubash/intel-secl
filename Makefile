@@ -106,7 +106,7 @@ hvs-docker: hvs
 	swagger generate spec -w ./docs/shared/$* -o ./docs/swagger/$*-openapi.yml
 	swagger validate ./docs/swagger/$*-openapi.yml
 
-installer: clean $(patsubst %, %-installer, $(TARGETS)) aas-manager
+installer: clean $(patsubst %, %-installer, $(TARGETS)) aas-manager isecl-k8s-extensions-installer
 
 docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 
@@ -152,7 +152,7 @@ authservice-k8s: authservice-oci-archive aas-manager
 	cp tools/aas-manager/populate-users deployments/k8s/aas/populate-users
 	cp tools/aas-manager/populate-users.env deployments/k8s/aas/populate-users.env
 
-all: clean installer test k8s k8s-extensions-installer
+all: clean installer test k8s
 
 clean:
 	rm -f cover.*
