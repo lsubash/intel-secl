@@ -32,7 +32,7 @@ type (
 
 	imageFlavor struct {
 		ImageId  uuid.UUID `gorm:"type:uuid;primary_key;"`
-		FlavorId uuid.UUID `gorm:"type:uuid REFERENCES flavor(Id) ON UPDATE CASCADE ON DELETE CASCADE;not null;unique_index:idx_image_flavor;"`
+		FlavorId uuid.UUID `gorm:"type:uuid REFERENCES flavor(Id) ON UPDATE CASCADE ON DELETE CASCADE;not null;unique;unique_index:idx_image_flavor;"`
 	}
 
 	report struct {

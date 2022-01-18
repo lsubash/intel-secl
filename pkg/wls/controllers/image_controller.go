@@ -389,6 +389,9 @@ func (icon *ImageController) UpdateAssociatedFlavor(w http.ResponseWriter, r *ht
 		} else if err == postgres.ErrImageDoesNotExist {
 			defaultLog.Errorf("controllers/image_controller:UpdateAssociatedFlavor() Image does not exist in database")
 			return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Image does not exist in database to update"}
+		} else if strings.Contains(err.Error(), duplicateKeyError) {
+			defaultLog.WithField("flavorUUID", flavorUUID).WithError(err).Errorf("controllers/image_controller:update() %s : flavor with UUID already associated with image", message.AppRuntimeErr)
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Given flavor is already associated with an image"}
 		}
 		defaultLog.Errorf("controllers/image_controller: Failed to update image/flavor association - Backend error")
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to update image/flavor association - Backend error"}

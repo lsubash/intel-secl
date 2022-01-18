@@ -107,7 +107,7 @@ var _ = Describe("ImageController", func() {
 		Context("when a valid image id and flavor ID is provided", func() {
 			It("Should return 200", func() {
 				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods(http.MethodGet)
-				req, err := http.NewRequest(http.MethodGet, "/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/3d41c64f-ee70-4cbf-bdde-a03835a21625", nil)
+				req, err := http.NewRequest(http.MethodGet, "/images/249c94f7-218e-4774-b8d1-28f6c05e1830/flavors/85acb16d-3f88-45d2-b320-27c4dde2ff07", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -115,6 +115,7 @@ var _ = Describe("ImageController", func() {
 				Expect(w.Code).To(Equal(http.StatusOK))
 			})
 		})
+
 		Context("When invalid flavor uuid format is provided", func() {
 			It("Should return 400", func() {
 				router.Handle("/images/{id}/flavors/{flavorID}", wlsRoutes.ErrorHandler(wlsRoutes.JsonResponseHandler(imageController.UpdateAssociatedFlavor))).Methods(http.MethodGet)

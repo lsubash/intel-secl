@@ -71,20 +71,10 @@ func (store *MockImageStore) Create(image *model.Image) error {
 	if err != nil {
 		defaultLog.WithError(err).Errorf("Error creating unmarshalling data")
 	}
-	var fContentBytes, _ = json.Marshal(&f.Content)
 
 	store.Mock.ExpectQuery(`SELECT \* FROM "image_flavor"  WHERE "image_flavor"."image_id" = \$1 AND \(\(image_id in \(\$2\)\)\) ORDER BY "image_flavor"."image_id" ASC LIMIT 1`).
 		WithArgs("ffff021e-9669-4e53-9224-8880fb4e4081", "ffff021e-9669-4e53-9224-8880fb4e4081").
 		WillReturnRows(sqlmock.NewRows(imageFlavorCols))
-
-	store.Mock.ExpectQuery(`SELECT \* FROM "flavor" (.+)`).
-		WithArgs("9541a9f0-b427-4a0a-8e25-12f50edd3e66").
-		WillReturnRows(sqlmock.NewRows(flavorAllCols).
-			AddRow(f.ID, f.CreatedAt, f.Label, f.FlavorPart, fContentBytes, f.Signature))
-
-	store.Mock.ExpectQuery(`SELECT \* FROM "flavor" (.+)`).
-		WithArgs("3d41c64f-ee70-4cbf-bdde-a03835a21625").
-		WillReturnRows(sqlmock.NewRows(flavorAllCols))
 
 	var imgf model.Image
 	err = json.Unmarshal([]byte(imageMap["ffff021e-9669-4e53-9224-8880fb4e4081"]), &imgf)
@@ -260,36 +250,14 @@ func (store MockImageStore) Update(imageUUID uuid.UUID, flavorUUID uuid.UUID) er
 	var fContentBytes, _ = json.Marshal(&f.Content)
 
 	store.Mock.ExpectQuery(`SELECT \* FROM "image_flavor"  WHERE "image_flavor"."image_id" = \$1 AND \(\(image_id = \$2\)\) ORDER BY "image_flavor"."image_id" ASC LIMIT 1`).
-		WithArgs("ffff021e-9669-4e53-9224-8880fb4e4081", "ffff021e-9669-4e53-9224-8880fb4e4081").
-		WillReturnRows(sqlmock.NewRows(imageFlavorCols).AddRow("ffff021e-9669-4e53-9224-8880fb4e4081", "3d41c64f-ee70-4cbf-bdde-a03835a21625"))
+		WithArgs("249c94f7-218e-4774-b8d1-28f6c05e1830", "249c94f7-218e-4774-b8d1-28f6c05e1830").
+		WillReturnRows(sqlmock.NewRows(imageFlavorCols).AddRow("249c94f7-218e-4774-b8d1-28f6c05e1830", "6f79534e-8758-4d20-b981-1f7a5d369eca"))
 
-	store.Mock.ExpectQuery(`SELECT \* FROM "flavor"  WHERE "flavor"."id" = \$1 AND \(\(id = \$2\)\) ORDER BY "flavor"."id" ASC LIMIT 1`).
-		WithArgs("3d41c64f-ee70-4cbf-bdde-a03835a21625", "3d41c64f-ee70-4cbf-bdde-a03835a21625").
-		WillReturnRows(sqlmock.NewRows(flavorAllCols).AddRow(f.ID, f.CreatedAt, f.Label, f.FlavorPart, fContentBytes, f.Signature))
+	store.Mock.ExpectQuery(`SELECT \* FROM "flavor"  WHERE "flavor"."id" = \$1 AND \(\(id = \$2\)\) ORDER BY "flavor"."id" ASC LIMIT 1`).WithArgs("85acb16d-3f88-45d2-b320-27c4dde2ff07", "85acb16d-3f88-45d2-b320-27c4dde2ff07").WillReturnRows(sqlmock.NewRows(flavorAllCols).AddRow(f.ID, f.CreatedAt, f.Label, f.FlavorPart, fContentBytes, f.Signature))
 
 	store.Mock.ExpectExec(`UPDATE "image_flavor" SET "flavor_id" = \$1  WHERE \(image_id=\$2\)`).
-		WithArgs("3d41c64f-ee70-4cbf-bdde-a03835a21625", "ffff021e-9669-4e53-9224-8880fb4e4081").
+		WithArgs("85acb16d-3f88-45d2-b320-27c4dde2ff07", "249c94f7-218e-4774-b8d1-28f6c05e1830").
 		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	store.Mock.ExpectQuery(`SELECT \* FROM "image_flavor"  WHERE \(image_id = \$1 and flavor_id=\$2\)`).
-		WithArgs("ffff021e-9669-4e53-9224-8880fb4e4081", "9541a9f0-b427-4a0a-8e25-12f50edd3e66").
-		WillReturnRows(sqlmock.NewRows(imageFlavorCols))
-
-	store.Mock.ExpectQuery(`SELECT \* FROM "image_flavor"  WHERE \(image_id = \$1 and flavor_id=\$2\)`).
-		WithArgs("ffff021e-9669-4e53-9224-8880fb4e4081", "3d41c64f-ee70-4cbf-bdde-a03835a21625").
-		WillReturnRows(sqlmock.NewRows(imageFlavorCols))
-
-	store.Mock.ExpectQuery(`SELECT \* FROM \"image_flavor\"  WHERE \(image_id = \$1\)`).
-		WithArgs("ffff021e-9669-4e53-9224-8880fb4e4081").WillReturnRows(sqlmock.NewRows(imageFlavorCols))
-
-	store.Mock.ExpectQuery(`SELECT \* FROM "flavor" (.+))`).
-		WillReturnRows(sqlmock.NewRows(flavorAllCols).
-			AddRow(f.ID, f.CreatedAt, f.Label, f.FlavorPart, fContentBytes, f.Signature))
-
-	store.Mock.ExpectQuery(`INSERT INTO "image_flavor" (.+)`).
-		WithArgs("ffff021e-9669-4e53-9224-8880fb4e4081", "9541a9f0-b427-4a0a-8e25-12f50edd3e66").
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).
-			AddRow("ffff021e-9669-4e53-9224-8880fb4e4081"))
 
 	store.Mock.ExpectCommit()
 
