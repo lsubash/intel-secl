@@ -554,7 +554,7 @@ func (a *App) GetNewOrExistingUserID(name, password string, forceUpdatePassword 
 		if password == "" {
 			return "", fmt.Errorf("Password not supplied and no flag to generate password. Use --genpassword flag to generate password")
 		}
-		newUser, err := aascl.CreateUser(aas.UserCreate{name, password})
+		newUser, err := aascl.CreateUser(aas.UserCreate{Name: name, Password: password})
 		if err != nil {
 			return "", err
 		}
@@ -565,7 +565,7 @@ func (a *App) GetNewOrExistingUserID(name, password string, forceUpdatePassword 
 
 		// if password is empty and we have to generate password, generate password and set it
 		if forceUpdatePassword {
-			if err := aascl.UpdateUser(users[0].ID, aas.UserCreate{name, password}); err != nil {
+			if err := aascl.UpdateUser(users[0].ID, aas.UserCreate{Name: name, Password: password}); err != nil {
 				return "", fmt.Errorf("Could not update the user : %s's password", name)
 			}
 		}
@@ -682,7 +682,7 @@ func (a *App) AddUsersAndRoles(asr *AasUsersAndRolesSetup) error {
 	if err != nil {
 		return err
 	}
-	aascl := &claas.Client{asr.AasApiUrl, token, clients.HTTPClientTLSNoVerify()}
+	aascl := &claas.Client{BaseURL: asr.AasApiUrl, JWTToken: token, HTTPClient: clients.HTTPClientTLSNoVerify()}
 
 	for idx := range asr.UsersAndRoles {
 		userid := ""
@@ -725,7 +725,7 @@ func (a *App) AddUsersAndRoles(asr *AasUsersAndRolesSetup) error {
 		}
 
 		fmt.Println("\nAdding Roles to user RolesIDs :", roleList)
-		if err = aascl.AddRoleToUser(userid, aas.RoleIDs{roleList}); err != nil {
+		if err = aascl.AddRoleToUser(userid, aas.RoleIDs{RoleUUIDs: roleList}); err != nil {
 			return fmt.Errorf("Could not add roles to user - %s", asr.UsersAndRoles[idx].Name)
 		}
 

@@ -52,13 +52,13 @@ func (em *IntegrityMatches) Apply(manifest interface{}) (bool, []wls.Fault) {
 			if manifest.ImageIntegrityEnforced {
 				return true, nil
 			}
-			return false, []wls.Fault{wls.Fault{"integrity_enforced is \"true\" but Manifest.ImageIntegrityEnforced is \"false\"", nil}}
+			return false, []wls.Fault{{Description: "integrity_enforced is \"true\" but Manifest.ImageIntegrityEnforced is \"false\"", Cause: nil}}
 		} else {
 			if !manifest.ImageIntegrityEnforced {
 				return true, nil
 			}
-			return false, []wls.Fault{wls.Fault{"integrity_enforced is \"false\" but Manifest.ImageIntegrityEnforced is \"true\"", nil}}
+			return false, []wls.Fault{{Description: "integrity_enforced is \"false\" but Manifest.ImageIntegrityEnforced is \"true\"", Cause: nil}}
 		}
 	}
-	return false, []wls.Fault{wls.Fault{"invalid manifest type for rule", errors.New("failed to type assert manifest")}}
+	return false, []wls.Fault{{Description: "invalid manifest type for rule", Cause: errors.New("failed to type assert manifest")}}
 }

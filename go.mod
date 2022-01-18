@@ -9,6 +9,7 @@ require (
 	github.com/containers/ocicrypt v1.1.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
 	github.com/gin-gonic/gin v1.7.4
 	github.com/google/uuid v1.2.0
@@ -36,6 +37,8 @@ require (
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/net v0.0.0-20210520170846-37e1c6afe023
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22
+	google.golang.org/grpc v1.38.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/api v0.22.4
 	k8s.io/apimachinery v0.22.4

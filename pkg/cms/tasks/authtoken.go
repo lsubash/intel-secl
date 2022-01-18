@@ -7,15 +7,16 @@ package tasks
 import (
 	"encoding/pem"
 	"fmt"
+	"io"
+	"os"
+	"time"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/pkg/errors"
-	"io"
-	"os"
-	"time"
 )
 
 type CmsAuthToken struct {
@@ -62,10 +63,10 @@ func createCmsAuthToken(at CmsAuthToken) (err error) {
 	}
 
 	ur := []ct.RoleInfo{
-		{"CMS", constants.CertApproverGroupName, "CN=" + at.AasJwtCn + ";CERTTYPE=JWT-Signing"},
-		{"CMS", constants.CertApproverGroupName, "CN=" + at.AasTlsCn + ";SAN=" + at.AasTlsSan + ";CERTTYPE=TLS"},
+		{Service: "CMS", Name: constants.CertApproverGroupName, Context: "CN=" + at.AasJwtCn + ";CERTTYPE=JWT-Signing"},
+		{Service: "CMS", Name: constants.CertApproverGroupName, Context: "CN=" + at.AasTlsCn + ";SAN=" + at.AasTlsSan + ";CERTTYPE=TLS"},
 	}
-	claims := ct.RoleSlice{ur}
+	claims := ct.RoleSlice{Roles: ur}
 
 	log.Infof("tasks/authtoken:Run() AAS setup JWT token claims - %v", claims)
 	jwt, err := factory.Create(&claims, "CMS JWT Token", 0)

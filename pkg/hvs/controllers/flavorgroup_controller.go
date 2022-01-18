@@ -111,7 +111,7 @@ func (controller FlavorgroupController) Search(w http.ResponseWriter, r *http.Re
 			flavorgroupId, err := uuid.Parse(id)
 			if err != nil {
 				secLog.WithError(err).Error("controllers/flavorgroup_controller:Search() Invalid id query param value, must be UUID")
-				return nil, http.StatusBadRequest, &commErr.ResourceError{"Invalid id query param value, must be UUID"}
+				return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid id query param value, must be UUID"}
 			}
 			filter.Ids = []uuid.UUID{flavorgroupId}
 		}
@@ -124,14 +124,14 @@ func (controller FlavorgroupController) Search(w http.ResponseWriter, r *http.Re
 	flavorgroups, err := controller.FlavorGroupStore.Search(filter)
 	if err != nil {
 		secLog.WithError(err).Error("controllers/flavorgroup_controller:Search() Flavorgroup get all failed")
-		return nil, http.StatusInternalServerError, &commErr.ResourceError{"Unable to search Flavorgroups"}
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Unable to search Flavorgroups"}
 	}
 
 	flavorgroupCollection, err := controller.getAssociatedFlavorAndTemplates(flavorgroups, includeFlavorContent)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavorgroup_controller:Search() Error getting flavor(s) " +
 			"associated with flavor group")
-		return nil, http.StatusInternalServerError, &commErr.ResourceError{"Unable to search Flavorgroups"}
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Unable to search Flavorgroups"}
 	}
 
 	secLog.Infof("%s: Return flavorgroup query to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)

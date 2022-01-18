@@ -12,11 +12,11 @@ const EncryptionMatchesName = "EncryptionMatches"
 
 func newEncryptionMatches(imageType string, encryptionRequired bool) *wls.EncryptionMatches {
 	return &wls.EncryptionMatches{
-		EncryptionMatchesName,
-		[]string{imageType},
-		wls.ExpectedEncryption{
-			"encryption_required",
-			encryptionRequired,
+		RuleName: EncryptionMatchesName,
+		Markers:  []string{imageType},
+		Expected: wls.ExpectedEncryption{
+			Name:  "encryption_required",
+			Value: encryptionRequired,
 		},
 	}
 }

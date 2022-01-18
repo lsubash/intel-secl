@@ -35,4 +35,4 @@ go build ./...
 ```
 
 # Links
-https://01.org/intel-secl/
+https://intel-secl.github.io/docs/

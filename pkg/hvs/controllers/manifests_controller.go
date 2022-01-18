@@ -6,8 +6,9 @@
 package controllers
 
 import (
-	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"net/http"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	dm "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
@@ -51,7 +52,7 @@ func (controller ManifestsController) GetManifest(w http.ResponseWriter, r *http
 	if signedFlavors == nil || len(signedFlavors) == 0 {
 		secLog.WithError(err).Errorf("controllers/manifests_controller:"+
 			"GetManifest() %s : Flavor with given details does not exist", commLogMsg.InvalidInputBadParam)
-		return "", http.StatusNotFound, &commErr.ResourceError{"Flavor with given details does not exist"}
+		return "", http.StatusNotFound, &commErr.ResourceError{Message: "Flavor with given details does not exist"}
 	}
 
 	var fmc util.FlavorToManifestConverter

@@ -82,8 +82,8 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			for key := range tt.EnvValues {
+		for key := range tt.EnvValues {
+			t.Run(tt.name, func(t *testing.T) {
 				os.Unsetenv(key)
 				os.Setenv(key, tt.EnvValues[key])
 				defer func() {
@@ -93,12 +93,11 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 					}
 				}()
 
-			}
-
-			if err := tt.attestationService.Run(); (err != nil) != tt.wantErr {
-				t.Errorf("tasks/attestation_service_connection_test:TestAttestationServiceConnectionRun() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+				if err := tt.attestationService.Run(); (err != nil) != tt.wantErr {
+					t.Errorf("tasks/attestation_service_connection_test:TestAttestationServiceConnectionRun() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			})
+		}
 	}
 }
 

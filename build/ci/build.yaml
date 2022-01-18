@@ -46,3 +46,10 @@ build:tagent:
   script:
     - apt -yq update && apt -yq install libtss2-dev libssl-dev
     - make $COMPONENT_IN_JOB
+
+build:wlagent:
+  extends: .build-normal-components
+  script:
+    - apt -yq update && apt -yq install libtss2-dev libssl-dev
+    - make $COMPONENT_IN_JOB
+

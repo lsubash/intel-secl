@@ -137,7 +137,7 @@ func (r *PostgresUserStore) GetPermissions(u types.User, rs *types.RoleSearch) (
 		return nil, nil
 	}
 
-	curr := ct.PermissionInfo{res[0].Service, res[0].Context, []string{res[0].Rule}}
+	curr := ct.PermissionInfo{Service: res[0].Service, Context: res[0].Context, Rules: []string{res[0].Rule}}
 	defaultLog.Info("First record:", res[0])
 	for i := 1; i < len(res); i++ {
 		defaultLog.Info("Record ", i, ":", res[i])
@@ -145,7 +145,7 @@ func (r *PostgresUserStore) GetPermissions(u types.User, rs *types.RoleSearch) (
 			curr.Rules = append(curr.Rules, res[i].Rule)
 		} else {
 			userPerms = append(userPerms, curr)
-			curr = ct.PermissionInfo{res[i].Service, res[i].Context, []string{res[i].Rule}}
+			curr = ct.PermissionInfo{Service: res[i].Service, Context: res[i].Context, Rules: []string{res[i].Rule}}
 		}
 	}
 	userPerms = append(userPerms, curr)

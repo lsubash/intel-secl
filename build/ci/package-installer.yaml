@@ -53,3 +53,9 @@ package:tagent:installer:
   script:
     - apt -yq update && apt -yq install libtss2-dev libssl-dev
     - make $COMPONENT_IN_JOB
+
+package:wlagent:installer:
+  extends: .installer-normal-components
+  script:
+    - apt -yq update && apt -yq install libtss2-dev libssl-dev
+    - make $COMPONENT_IN_JOB

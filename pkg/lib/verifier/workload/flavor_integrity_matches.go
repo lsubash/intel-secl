@@ -52,6 +52,6 @@ func (em *FlavorIntegrityMatches) Apply(flavor interface{}) (bool, []flvr.Fault)
 	if flavorTrusted {
 		return true, nil
 	} else {
-		return false, []flvr.Fault{flvr.Fault{"Flavor is not trusted", nil}}
+		return false, []flvr.Fault{{Description: "Flavor is not trusted", Cause: nil}}
 	}
 }

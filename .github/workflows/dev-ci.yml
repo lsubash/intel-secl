@@ -86,6 +86,9 @@ jobs:
       - name: Build-tagent
         run: make tagent
 
+      - name: Build-wlagent
+        run: make wlagent
+
       - name: Build-admission-controller
         run: make admission-controller
 
@@ -145,6 +148,11 @@ jobs:
         run: |
           make tagent-docker
           docker push `docker images | grep tagent | awk '{print $1":"$2}' | awk 'NR==1'`
+
+      - name: Build-wlagent-docker
+        run: |
+          make wlagent-docker
+          docker push `docker images | grep wlagent | awk '{print $1":"$2}' | awk 'NR==1'`
 
       - name: Build-admission-controller-docker
         run: |

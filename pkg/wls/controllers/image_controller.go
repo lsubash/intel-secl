@@ -280,26 +280,28 @@ func (icon *ImageController) RetrieveFlavorAndKey(w http.ResponseWriter, r *http
 
 	keyUrl := flavor.ImageFlavor.Encryption.KeyURL
 	// Check if flavor keyUrl is not empty
-	if flavor.ImageFlavor.EncryptionRequired && len(flavor.ImageFlavor.Encryption.KeyURL) > 0 {
-		key, err := transfer_key(true, hwid, keyUrl, id.String(), icon.conf, icon.CertStore)
-		if err != nil {
-			defaultLog.WithField("imageUUID", id).WithField("hardwareUUID", hwid).WithError(err).Error("controllers/images_controller:RetrieveFlavorAndKey() Error while retrieving key")
-			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: " Error while retrieving key"}
-		}
+	if flavor.ImageFlavor.EncryptionRequired {
+		if len(flavor.ImageFlavor.Encryption.KeyURL) > 0 {
+			key, err := transfer_key(true, hwid, keyUrl, id.String(), icon.conf, icon.CertStore)
+			if err != nil {
+				defaultLog.WithField("imageUUID", id).WithField("hardwareUUID", hwid).WithError(err).Error("controllers/images_controller:RetrieveFlavorAndKey() Error while retrieving key")
+				return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: " Error while retrieving key"}
+			}
 
-		// got key data
-		flavorKey := wls.FlavorKey{
-			Flavor:    flavor.ImageFlavor,
-			Signature: flavor.Signature,
-			Key:       key,
-		}
+			// got key data
+			flavorKey := wls.FlavorKey{
+				Flavor:    flavor.ImageFlavor,
+				Signature: flavor.Signature,
+				Key:       key,
+			}
 
-		defaultLog.WithField("imageUUID", id).WithField("hardwareUUID", hwid).Info("controllers/images_controller:RetrieveFlavorAndKey() Successfully retrieved FlavorKey")
-		secLog.Infof("%s: Flavor Retrieved by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
-		return flavorKey, http.StatusOK, nil
-	} else {
-		defaultLog.WithField("imageUUID", id).Errorf("controllers/images_controller:RetrieveFlavorAndKey() Key URL is empty")
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Key URL is empty"}
+			defaultLog.WithField("imageUUID", id).WithField("hardwareUUID", hwid).Info("controllers/images_controller:RetrieveFlavorAndKey() Successfully retrieved FlavorKey")
+			secLog.Infof("%s: Flavor Retrieved by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
+			return flavorKey, http.StatusOK, nil
+		} else {
+			defaultLog.WithField("imageUUID", id).Errorf("controllers/images_controller:RetrieveFlavorAndKey() Key URL is empty")
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Key URL is empty"}
+		}
 	}
 	// just return the flavor
 	flavorKey := wls.FlavorKey{Flavor: flavor.ImageFlavor, Signature: flavor.Signature}
@@ -307,6 +309,7 @@ func (icon *ImageController) RetrieveFlavorAndKey(w http.ResponseWriter, r *http
 	defaultLog.WithField("imageUUID", id).WithField("hardwareUUID", hwid).Info("controllers/images_controller:RetrieveFlavorAndKey() Successfully retrieved Flavor and Key")
 	secLog.Infof("%s: Flavor Retrieved by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
 	return flavorKey, http.StatusOK, nil
+
 }
 
 func (icon *ImageController) Search(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {

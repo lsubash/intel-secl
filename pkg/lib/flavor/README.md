@@ -20,4 +20,4 @@ When integrated with the Host Verification service, Flavor would be equivalent t
 *Note: All dependencies are listed in go.mod*
 
 # Links
-https://01.org/intel-secl/
+https://intel-secl.github.io/docs/

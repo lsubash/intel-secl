@@ -1,0 +1,14 @@
+[Unit]
+Description=wlagent
+
+[Service]
+Type=simple
+
+WorkingDirectory=/opt/workload-agent/bin/
+ExecStart=/opt/workload-agent/bin/wlagent runservice
+TimeoutStartSec=0
+Restart=on-failure
+PermissionsStartOnly=true
+
+[Install]
+WantedBy=multi-user.target

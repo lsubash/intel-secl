@@ -1,0 +1,23 @@
+binding-key-secret: {{.bindingkeysecret}}
+signing-key-secret: {{.signingkeysecret}}
+hvs:
+    api-url: {{.hvs.apiurl}}
+wls:
+    api-url: {{.wls.apiurl}}
+wla:
+    api-user-name:  {{.wla.apiusername}}
+    api-password:  {{.wla.apipassword}}
+trustagent:
+    config-dir: {{.trustagent.configdir}}
+    aik-pem-file: {{.trustagent.aikpemfile}}
+    user: {{.trustagent.user}}
+aas:
+    base-url: {{.aas.baseurl}}
+cms:
+    base-url: {{.cms.baseurl}}
+    tls-cert-sha384: {{.cmstlscertdigest}}
+skip-flavor-signature-verification: {{.skipflavorsignatureverification}}
+log:
+    max-length: {{.logmaxlength}}
+    enable-stdout: {{.logenablestdout}}
+    level: {{.loglevel}}

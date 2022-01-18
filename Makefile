@@ -10,9 +10,9 @@ else
 	undefine DOCKER_PROXY_FLAGS
 endif
 
-TARGETS = cms kbs ihub hvs authservice wpm wls tagent
+TARGETS = cms kbs ihub hvs authservice wpm wls tagent wlagent
 K8S_EXTENSIONS_TARGETS = admission-controller isecl-k8s-controller isecl-k8s-scheduler
-K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls tagent $(K8S_EXTENSIONS_TARGETS)
+K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls tagent wlagent $(K8S_EXTENSIONS_TARGETS)
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
@@ -21,6 +21,10 @@ $(TARGETS):
 tagent:
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct CGO_CFLAGS_ALLOW="-f.*"  \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
+
+wlagent:
+	cd cmd/wlagent && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct CGO_CFLAGS_ALLOW="-f.*"  \
+		go build -ldflags "-extldflags=-Wl,--allow-multiple-definition -X github.com/intel-secl/intel-secl/v5/pkg/wlagent/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/wlagent/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/wlagent/version.GitHash=$(GITCOMMIT)" -o wlagent
 
 $(K8S_EXTENSIONS_TARGETS):
 	cd cmd/isecl-k8s-extensions/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
@@ -68,12 +72,9 @@ tagent-installer: tagent-pre-installer
 	makeself installer deployments/installer/trustagent-$(VERSION).bin "TrustAgent $(VERSION)" ./install.sh
 	rm -rf installer
 
-%-docker: %
-	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/$*/Dockerfile -t $(DOCKER_REGISTRY)isecl/$*:$(VERSION)-$(GITCOMMIT) .
-
-hvs-docker: hvs
-	cd ./upgrades/hvs/db && make all && cd -
-	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/hvs/Dockerfile -t $(DOCKER_REGISTRY)isecl/hvs:$(VERSION)-$(GITCOMMIT) .
+wlagent-installer: wlagent-pre-installer
+	makeself installer deployments/installer/workload-agent-$(VERSION).bin "Workload Agent $(VERSION)" ./install.sh
+	rm -rf installer
 
 isecl-k8s-extensions-pre-installer: clean $(patsubst %, %-oci-archive, $(K8S_EXTENSIONS_TARGETS))
 
@@ -91,6 +92,13 @@ isecl-k8s-extensions-installer: isecl-k8s-extensions-pre-installer
 	cp -r build/k8s/isecl-k8s-extensions/admission-controller/* installer/isecl-k8s-extensions/yamls
 	cp -r build/linux/isecl-k8s-extensions/config-files/* installer/isecl-k8s-extensions/
 	cd installer/ && tar -zcvf isecl-k8s-extensions-$(VERSION).tar.gz isecl-k8s-extensions
+
+%-docker: %
+	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/$*/Dockerfile -t $(DOCKER_REGISTRY)isecl/$*:$(VERSION)-$(GITCOMMIT) .
+
+hvs-docker: hvs
+	cd ./upgrades/hvs/db && make all && cd -
+	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/hvs/Dockerfile -t $(DOCKER_REGISTRY)isecl/hvs:$(VERSION)-$(GITCOMMIT) .
 
 %-swagger:
 	env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
@@ -131,10 +139,6 @@ test:
 	go tool cover -func cover.out
 	go tool cover -html=cover.out -o cover.html
 
-authservice-k8s: authservice-oci-archive aas-manager
-	cp -r build/k8s/aas deployments/k8s/
-	cp tools/aas-manager/populate-users deployments/k8s/aas/populate-users
-	cp tools/aas-manager/populate-users.env deployments/k8s/aas/populate-users.env
 k8s: $(patsubst %, %-k8s, $(K8S_TARGETS))
 
 %-k8s:  %-oci-archive
@@ -142,6 +146,11 @@ k8s: $(patsubst %, %-k8s, $(K8S_TARGETS))
 		cp -r build/k8s/$* deployments/k8s/ ;\
 	fi
 	cp tools/download-tls-certs.sh deployments/k8s/
+
+authservice-k8s: authservice-oci-archive aas-manager
+	cp -r build/k8s/aas deployments/k8s/
+	cp tools/aas-manager/populate-users deployments/k8s/aas/populate-users
+	cp tools/aas-manager/populate-users.env deployments/k8s/aas/populate-users.env
 
 all: clean installer test k8s k8s-extensions-installer
 

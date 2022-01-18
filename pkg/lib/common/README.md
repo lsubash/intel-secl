@@ -24,4 +24,4 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 *Note: All dependencies are listed in go.mod*
 
 # Links
-https://01.org/intel-secl/
+https://intel-secl.github.io/docs/

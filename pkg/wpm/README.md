@@ -49,7 +49,6 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ### Build full installer
 
 Supports the following use cases:
-- Virtual machine confidentiality
 - Container confidentiality using skopeo and cri-o
 
 
@@ -85,4 +84,4 @@ make wpm-installer
 
 # Links
 
-https://01.org/intel-secl/
+https://intel-secl.github.io/docs/
