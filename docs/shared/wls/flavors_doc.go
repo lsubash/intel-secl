@@ -31,6 +31,13 @@ type SwaggFlavorsResponse struct {
 	Body FlavorsResponse
 }
 
+// SignedFlavorCollection response payload
+// swagger:response SignedFlavorCollection
+type SignedFlavorCollection struct{
+	// in:body
+	Body flvr.SignedFlavorCollection
+}
+
 // swagger:operation POST /flavors Flavors createFlavor
 // ---
 //
@@ -145,6 +152,7 @@ type SwaggFlavorsResponse struct {
 //   in: path
 //   required: true
 //   type: string
+//   format: uuid
 // responses:
 //   '200':
 //     description: Successfully retrieved the flavor for the specified flavor id
@@ -188,13 +196,19 @@ type SwaggFlavorsResponse struct {
 // - name: id
 //   description: Unique ID of the flavor.
 //   in: query
-//   required: true
+//   required: false
+//   type: string
+//   format: uuid
+// - name: label
+//   description: flavor label.
+//   in: query
+//   required: false
 //   type: string
 // responses:
 //   '200':
 //     description: Successfully retrieved the flavor for the specified flavor id or flavor label.
 //     schema:
-//       "$ref": "#/definitions/ImageFlavor"
+//       "$ref": "#/definitions/SignedFlavorCollection"
 //
 // x-sample-call-endpoint: |
 //    https://wls.com:5000/wls/v2/flavors?id=d6129610-4c8f-4ac4-8823-df4e925688c4

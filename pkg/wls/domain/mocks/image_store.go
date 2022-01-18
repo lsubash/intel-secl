@@ -147,7 +147,7 @@ func (store MockImageStore) Retrieve(uuid uuid.UUID) (*model.Image, error) {
 
 	store.Mock.MatchExpectationsInOrder(false)
 
-	var imgf wls.ImageFlavor
+	var imgf wls.ImageFilter
 	err := json.Unmarshal([]byte(imageMap["ffff021e-9669-4e53-9224-8880fb4e4081"]), &imgf)
 	if err != nil {
 		defaultLog.WithError(err).Errorf("Error creating unmarshalling data")

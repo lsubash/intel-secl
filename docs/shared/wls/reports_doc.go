@@ -22,6 +22,14 @@ type ReportsResponse struct {
 	Body wls.ReportsResponse
 }
 
+// ReportCollection response payload
+// swagger:response ReportCollection
+type ReportCollection struct {
+	// in:body
+	Body wls.ReportCollection
+}
+
+
 // swagger:operation POST /reports Reports Create-Reports
 // ---
 //
@@ -256,12 +264,6 @@ type ReportsResponse struct {
 // produces:
 //  - application/json
 // parameters:
-// - name: filter
-//   description: |
-//      Boolean value to indicate whether the response should be filtered to return no results instead of listing all reports.
-//      When the filter is true and no other query parameter is specified, error response will be returned. Default value is true.
-//   in: query
-//   type: boolean
 // - name: instanceId
 //   description: Unique ID of the VM.
 //   in: query
@@ -278,11 +280,11 @@ type ReportsResponse struct {
 //   type: string
 //   format: uuid
 // - name: fromDate
-//   description: Reports returned will be restricted to after this date. from_date should be given in date format yyyy-mm-ddTHH:mm:ss.
+//   description: Reports returned will be restricted to after this date. fromDate should be given in date format yyyy-mm-ddTHH:mm:ss.
 //   in: query
 //   type: string
-// - name: to_date
-//   description: Reports returned will be restricted to before this date. to_date should be given in date format yyyy-mm-ddTHH:mm:ss.
+// - name: toDate
+//   description: Reports returned will be restricted to before this date. toDate should be given in date format yyyy-mm-ddTHH:mm:ss.
 //   in: query
 //   type: string
 // - name: latestPerVM
@@ -300,7 +302,7 @@ type ReportsResponse struct {
 //   '200':
 //     description: Successfully retrieved the reports based on filter criteria.
 //     schema:
-//       "$ref": "#/definitions/ReportsResponse"
+//       "$ref": "#/definitions/ReportCollection"
 //
 // x-sample-call-endpoint: https://wls.com:5000/wls/v2/reports?id=f52023eb-7991-47ba-91fc-c43bd9d80c29
 // x-sample-call-output: |

@@ -55,6 +55,10 @@ type Report struct {
 
 type ReportsResponse []Report
 
+type ReportCollection struct{
+	Report []Report `json:"reports"`
+}
+
 // Name returns the name of the EncryptionMatches Rule.
 func (em *EncryptionMatches) Name() string {
 	return em.RuleName

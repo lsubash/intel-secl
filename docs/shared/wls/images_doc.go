@@ -22,6 +22,13 @@ type ImageInfo struct {
 	Body wls.ImageInfo
 }
 
+// ImageFlavorCollection request payload
+// swagger:parameters ImageFlavorCollection
+type ImageFlavorCollection struct{
+	// in:body
+	Body wls.ImageFlavorCollection
+}
+
 // swagger:operation POST /images Images createImage
 // ---
 //
@@ -77,13 +84,6 @@ type ImageInfo struct {
 // produces:
 //  - application/json
 // parameters:
-// - name: filter
-//   description: |
-//      Boolean value to indicate whether the response should be filtered to return specific images instead of
-//      listing all images. When the filter is true and no other query parameter is specified, error response will be returned.
-//      Default value is true.
-//   in: query
-//   type: boolean
 // - name: flavor_id
 //   description: Unique ID of the flavor.
 //   in: query
@@ -98,7 +98,7 @@ type ImageInfo struct {
 //   '200':
 //     description: Successfully retrieved the images based on the provided filter criteria.
 //     schema:
-//       "$ref": "#/definitions/ImagesResponse"
+//       "$ref": "#/definitions/ImageFlavorCollection"
 //
 // x-sample-call-endpoint: https://wls.com:5000/wls/v2/images/image_id=ffff021e-9669-4e53-9224-8880fb4e4081
 // x-sample-call-output: |
@@ -207,7 +207,7 @@ type ImageInfo struct {
 //    201 Created
 // ---
 
-// swagger:operation DELETE /images/{image_id}/flavors/{flavor_id} Delete ImageFlavor Association
+// swagger:operation DELETE /images/{image_id}/flavors/{flavor_id} ImageFlavor deleteImageFlavorAssociation
 // ---
 // description: |
 //   Removes the specified flavor associated with an image id from the workload service database.
@@ -265,7 +265,7 @@ type ImageInfo struct {
 //   '200':
 //     description: Successfully retrieved the specified flavor associated with the image.
 //     schema:
-//      "$ref": "#/definitions/ImageFlavor"
+//      "$ref": "#/definitions/ImageInfo"
 //
 // x-sample-call-endpoint: |
 //    https://wls.com:5000/wls/v2/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors/d6129610-4c8f-4ac4-8823-df4e925688c4
@@ -305,10 +305,10 @@ type ImageInfo struct {
 //   '200':
 //     description: Successfully retrieved the flavor containing the provided flavor part.
 //     schema:
-//      "$ref": "#/definitions/SignedImageFlavor"
+//      "$ref": "#/definitions/ImageInfo"
 //
 // x-sample-call-endpoint: |
-//    https://wls.com:5000/wls/v2/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors?flavor_part=CONTAINER_IMAGE
+//    https://wls.com:5000/wls/v2/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors
 // x-sample-call-output: |
 //    {
 //       "id": "ffff021e-9669-4e53-9224-8880fb4e4081",
@@ -318,65 +318,3 @@ type ImageInfo struct {
 //    }
 // ---
 
-// swagger:operation GET /images/{image_id}/flavors ImageFlavor getImageFlavors
-// ---
-// description: |
-//   Retrieves all the associated flavors for the specified image.
-//   A valid bearer token should be provided to authorize this REST call.
-//
-// security:
-//  - bearerAuth: []
-// produces:
-//  - application/json
-// parameters:
-// - name: image_id
-//   description: Unique ID of the image.
-//   in: path
-//   required: true
-//   type: string
-//   format: uuid
-// responses:
-//   '200':
-//     description: Successfully retrieved the associated flavors for the specified image.
-//     schema:
-//       "$ref": "#/definitions/FlavorsResponse"
-//
-// x-sample-call-endpoint: https://wls.com:5000/wls/v2/images/ffff021e-9669-4e53-9224-8880fb4e4081/flavors
-// x-sample-call-output: |
-//  [
-//    {
-//        "flavor": {
-//            "meta": {
-//                "id": "d6129610-4c8f-4ac4-8823-df4e925688c4",
-//                "description": {
-//                    "flavor_part": "CONTAINER_IMAGE",
-//                    "label": "label_image-test-4"
-//                }
-//            },
-//            "encryption_required": true,
-//            "encryption": {
-//                "key_url": "https://10.105.168.234:443/v1/keys/60a9fe49-612f-4b66-bf86-b75c7873f3b3/transfer",
-//                "digest": "3JiqO+O4JaL2qQxpzRhTHrsFpDGIUDV8fTWsXnjHVKY="
-//            },
-//            "integrity_enforced": false
-//        }
-//    },
-//    {
-//        "flavor": {
-//            "meta": {
-//                "id": "d6129610-4c8f-4ac4-8823-df4e925688c3",
-//                "description": {
-//                    "flavor_part": "CONTAINER_IMAGE",
-//                    "label": "label_image-test-3"
-//                }
-//            },
-//            "encryption_required": true,
-//            "encryption": {
-//                "key_url": "https://10.105.168.234:443/v1/keys/60a9fe49-612f-4b66-bf86-b75c7873f3b3/transfer",
-//                "digest": "3JiqO+O4JaL2qQxpzRhTHrsFpDGIUDV8fTWsXnjHVKY="
-//            },
-//            "integrity_enforced": false
-//        }
-//    }
-//  ]
-// ---

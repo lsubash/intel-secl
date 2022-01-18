@@ -19,3 +19,7 @@ type SignedImageFlavor struct {
 	ImageFlavor wls.Image `json:"flavor"`
 	Signature   string    `json:"signature"`
 }
+
+type SignedFlavorCollection struct {
+	Flavors []wls.SignedImageFlavor `json:"signed_flavors"`
+}
