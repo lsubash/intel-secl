@@ -10,14 +10,14 @@ import (
 
 // ImagesResponse response payload
 // swagger:response ImagesResponse
-type SwaggImagesResponse struct {
+type ImagesResponse struct {
 	// in:body
 	Body wls.ImagesResponse
 }
 
 // ImageInfo request payload
 // swagger:parameters ImageInfo
-type SwaggImageInfo struct {
+type ImageInfo struct {
 	// in:body
 	Body wls.ImageInfo
 }
@@ -102,16 +102,16 @@ type SwaggImageInfo struct {
 //
 // x-sample-call-endpoint: https://wls.com:5000/wls/v2/images/image_id=ffff021e-9669-4e53-9224-8880fb4e4081
 // x-sample-call-output: |
-// {
-//    "imageFlavor": [
 //    {
-//        "id": "ffff021e-9669-4e53-9224-8880fb4e4081",
-//        "flavor_ids": [
-//            "d6129610-4c8f-4ac4-8823-df4e925688c4",
+//        "imageFlavor": [
+//            {
+//                "id": "ffff021e-9669-4e53-9224-8880fb4e4081",
+//                "flavor_ids": [
+//                    "d6129610-4c8f-4ac4-8823-df4e925688c4"
+//                ]
+//            }
 //        ]
 //    }
-//  ]
-//}
 // ---
 
 // swagger:operation GET /images/{image_id} Images Retrieve-Image
