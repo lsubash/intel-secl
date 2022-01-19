@@ -36,15 +36,19 @@ type DBSetup struct {
 // this is only used here, better don't put in constants package
 const defaultSSLCertFilePath = constants.ConfigDir + "wlsdbsslcert.pem"
 
-const DbEnvHelpPrompt = "Following environment variables are required for Database related setups:"
+const dbEnvRequiredVarsHelpPrompt = "Following environment variables are required for Database related setups:"
+const dbEnvOptionalVarsPrompt = "Following environment variables are optional for Database related setups:"
 
-var DbEnvHelp = map[string]string{
+var dbEnvRequiredVarsHelp = map[string]string{
+	"DB_NAME":     "Database name, or use WLS_DB_NAME alternatively",
+	"DB_USERNAME": "Database username, or use WLS_DB_USERNAME alternatively",
+	"DB_PASSWORD": "Database password, or use WLS_DB_PASSWORD alternatively",
+}
+
+var dbEnvOptionalVarsHelp = map[string]string{
 	"DB_VENDOR":              "Vendor of database, or use WLS alternatively",
 	"DB_HOST":                "Database host name, or use WLS_DB_HOSTNAME alternatively",
 	"DB_PORT":                "Database port, or use WLS_DB_PORT alternatively",
-	"DB_NAME":                "Database name, or use WLS_DB_NAME alternatively",
-	"DB_USERNAME":            "Database username, or use WLS_DB_USERNAME alternatively",
-	"DB_PASSWORD":            "Database password, or use WLS_DB_PASSWORD alternatively",
 	"DB_SSL_MODE":            "Database SSL mode, or use WLS_DB_SSL_MODE alternatively",
 	"DB_SSL_CERT":            "Database SSL certificate, or use WLS_DB_SSLCERT alternatively",
 	"DB_SSL_CERT_SOURCE":     "Database SSL certificate to be copied from, or use WLS_DB_SSLCERTSRC alternatively",
@@ -159,7 +163,9 @@ func (t *DBSetup) Validate() error {
 }
 
 func (t *DBSetup) PrintHelp(w io.Writer) {
-	setup.PrintEnvHelp(w, DbEnvHelpPrompt, t.envPrefix, DbEnvHelp)
+	setup.PrintEnvHelp(w, dbEnvRequiredVarsHelpPrompt, t.envPrefix, dbEnvRequiredVarsHelp)
+	fmt.Fprintln(w, "")
+	setup.PrintEnvHelp(w, dbEnvOptionalVarsPrompt, t.envPrefix, dbEnvOptionalVarsHelp)
 	fmt.Fprintln(w, "")
 }
 

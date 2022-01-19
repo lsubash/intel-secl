@@ -131,8 +131,8 @@ func (dc *DownloadCert) Validate() error {
 func (t *DownloadCert) PrintHelp(w io.Writer) {
 	PrintEnvHelp(w, downloadCAEnvHelpPrompt2+t.commandName, "", downloadCAEnvHelp2)
 	if t.commandName == "download-cert-tls" {
-		PrintEnvHelp(w, downloadCAEnvHelpPrompt+t.commandName, t.envPrefix, downloadCAEnvCommonHelp)
 		PrintEnvHelp(w, "", t.envPrefix, downloadTlsCAEnvHelp)
+		PrintEnvHelp(w, downloadCAEnvHelpPrompt+t.commandName, t.envPrefix, downloadCAEnvCommonHelp)
 	} else if t.commandName == "download-cert-saml" {
 		PrintEnvHelp(w, downloadCAEnvHelpPrompt+t.commandName, t.envPrefix, downloadCAEnvCommonHelp)
 		PrintEnvHelp(w, "", t.envPrefix, downloadSamlCAEnvHelp)

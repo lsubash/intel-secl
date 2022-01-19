@@ -26,11 +26,10 @@ type UpdateServiceConfig struct {
 	ConsoleWriter io.Writer
 }
 
-const envHelpPrompt = "Following environment variables are required for update-service-config setup:"
+const requiredEnvHelpPrompt = "Following environment variables are required for update-service-config setup:"
+const optionalEnvHelpPrompt = "Following environment variables are optional for update-service-config setup:"
 
-var envHelp = map[string]string{
-	"SERVICE_USERNAME":           "The service username as configured in AAS",
-	"SERVICE_PASSWORD":           "The service password as configured in AAS",
+var optionalEnvHelp = map[string]string{
 	"LOG_LEVEL":                  "Log level",
 	"LOG_MAX_LENGTH":             "Max length of log statement",
 	"LOG_ENABLE_STDOUT":          "Enable console log",
@@ -42,6 +41,11 @@ var envHelp = map[string]string{
 	"SERVER_WRITE_TIMEOUT":       "Request Write Timeout Duration in Seconds",
 	"SERVER_IDLE_TIMEOUT":        "Request Idle Timeout in Seconds",
 	"SERVER_MAX_HEADER_BYTES":    "Max Length Of Request Header in Bytes ",
+}
+
+var requiredEnvHelp = map[string]string{
+	"SERVICE_USERNAME": "The service username as configured in AAS",
+	"SERVICE_PASSWORD": "The service password as configured in AAS",
 }
 
 func (uc UpdateServiceConfig) Run() error {
@@ -99,7 +103,9 @@ func (uc UpdateServiceConfig) Validate() error {
 }
 
 func (uc UpdateServiceConfig) PrintHelp(w io.Writer) {
-	setup.PrintEnvHelp(w, envHelpPrompt, "", envHelp)
+	setup.PrintEnvHelp(w, requiredEnvHelpPrompt, "", requiredEnvHelp)
+	fmt.Fprintln(w, "")
+	setup.PrintEnvHelp(w, optionalEnvHelpPrompt, "", optionalEnvHelp)
 	fmt.Fprintln(w, "")
 }
 
