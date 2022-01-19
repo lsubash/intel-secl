@@ -76,7 +76,7 @@ wlagent-installer: wlagent-pre-installer
 	makeself installer deployments/installer/workload-agent-$(VERSION).bin "Workload Agent $(VERSION)" ./install.sh
 	rm -rf installer
 
-isecl-k8s-extensions-pre-installer: clean $(patsubst %, %-oci-archive, $(K8S_EXTENSIONS_TARGETS))
+isecl-k8s-extensions-pre-installer: $(patsubst %, %-oci-archive, $(K8S_EXTENSIONS_TARGETS))
 
 isecl-k8s-extensions-installer: isecl-k8s-extensions-pre-installer
 	mkdir -p installer/isecl-k8s-extensions/yamls
