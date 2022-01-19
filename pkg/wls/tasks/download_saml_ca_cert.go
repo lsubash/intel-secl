@@ -28,7 +28,6 @@ func (dc DownloadSamlCaCert) Run() error {
 	log.Trace("tasks/download_saml_ca_cert:Run() Entering")
 	defer log.Trace("tasks/download_saml_ca_cert:Run() Leaving")
 
-	log.Info("tasks/download_saml_ca_cert:Run() Downloading SAML CA certificates.")
 	if dc.BearerToken == "" {
 		fmt.Fprintln(os.Stderr, "BEARER_TOKEN is not defined in environment")
 		return errors.New("BEARER_TOKEN is not defined in environment")
@@ -64,8 +63,6 @@ func (dc DownloadSamlCaCert) Validate() error {
 	log.Trace("tasks/download_saml_ca_cert:Validate() Entering")
 	defer log.Trace("tasks/download_saml_ca_cert:Validate() Leaving")
 
-	log.Info("tasks/download_saml_ca_cert:Validate() Validation for downloading SAML CA certificates from HVS.")
-
 	if _, err := os.Stat(constants.SamlCaCertFilePath); os.IsNotExist(err) {
 		return errors.Wrap(err, "tasks/download_saml_ca_cert:Validate() HVS SAML CA cert does not exist")
 	}
@@ -75,8 +72,8 @@ func (dc DownloadSamlCaCert) Validate() error {
 
 func (dc DownloadSamlCaCert) PrintHelp(w io.Writer) {
 	var envHelp = map[string]string{
-		"ATTESTATION_TYPE":        "Type of Attestation Service",
-		"ATTESTATION_SERVICE_URL": "Base URL for the Attestation Service",
+		"HVS_URL":      "HVS Base URL",
+		"BEARER_TOKEN": "Bearer token",
 	}
 	setup.PrintEnvHelp(w, "Following environment variables are required for download-saml-cert:", "", envHelp)
 	fmt.Fprintln(w, "")
