@@ -33,7 +33,7 @@ type SwaggFlavorsResponse struct {
 
 // SignedFlavorCollection response payload
 // swagger:response SignedFlavorCollection
-type SignedFlavorCollection struct{
+type SignedFlavorCollection struct {
 	// in:body
 	Body flvr.SignedFlavorCollection
 }

@@ -24,7 +24,7 @@ type ImageInfo struct {
 
 // ImageFlavorCollection request payload
 // swagger:parameters ImageFlavorCollection
-type ImageFlavorCollection struct{
+type ImageFlavorCollection struct {
 	// in:body
 	Body wls.ImageFlavorCollection
 }
@@ -317,4 +317,3 @@ type ImageFlavorCollection struct{
 //        ]
 //    }
 // ---
-

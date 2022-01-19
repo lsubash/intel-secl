@@ -38,6 +38,7 @@ jobs:
 
       - name: Check-linting-issues
         run: |
+          gofmt -l .
           if [ "$(gofmt -l . | wc -l)"  -gt 0 ]; then exit 1; fi
 
       - name: Run-unit-tests
@@ -63,31 +64,31 @@ jobs:
             })
 
       - name: Build-cms
-        run: make cms
+        run: make cms-installer
 
       - name: Build-authservice
-        run: make authservice
+        run: make authservice-installer
 
       - name: Build-hvs
-        run: make hvs
+        run: make hvs-installer
 
       - name: Build-ihub
-        run: make ihub
+        run: make ihub-installer
 
       - name: Build-wpm
-        run: make wpm
+        run: make wpm-installer
 
       - name: Build-wls
-        run: make wls
+        run: make wls-installer
 
       - name: Build-kbs
-        run: make kbs
+        run: make kbs-installer
 
       - name: Build-tagent
-        run: make tagent
+        run: make tagent-installer
 
       - name: Build-wlagent
-        run: make wlagent
+        run: make wlagent-installer
 
       - name: Build-admission-controller
         run: make admission-controller
@@ -97,74 +98,3 @@ jobs:
 
       - name: Build-k8s-scheduler
         run: make isecl-k8s-scheduler
-
-  docker-push:
-    if: github.event_name == 'push'
-    needs: [ sanity-test-build ]
-    runs-on: RHEL8
-    # TODO: inject using secret
-    container: amr-registry.caas.intel.com/isecl/iseclbuilder:v5.0.0
-    env:
-      http_proxy: ${{ secrets.HTTP_PROXY }}
-      https_proxy: ${{ secrets.HTTPS_PROXY }}
-      no_proxy: localhost,127.0.0.1,0.0.0.0
-      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-
-    steps:
-      - uses: AutoModality/action-clean@v1
-      - uses: actions/checkout@v2
-
-      - name: Build-cms-docker
-        run: |
-          make cms-docker
-          docker push `docker images | grep cms | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-authservice-docker
-        run: |
-          make authservice-docker
-          docker push `docker images | grep authservice | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-hvs-docker
-        run: |
-          make hvs-docker
-          docker push `docker images | grep hvs | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-ihub-docker
-        run: |
-          make ihub-docker
-          docker push `docker images | grep ihub | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-wls-docker
-        run: |
-          make wls-docker
-          docker push `docker images | grep wls | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-kbs-docker
-        run: |
-          make kbs-docker
-          docker push `docker images | grep kbs | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-tagent-docker
-        run: |
-          make tagent-docker
-          docker push `docker images | grep tagent | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-wlagent-docker
-        run: |
-          make wlagent-docker
-          docker push `docker images | grep wlagent | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-admission-controller-docker
-        run: |
-          make admission-controller-docker
-          docker push `docker images | grep admission-controller | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-k8s-controller-docker
-        run: |
-          make isecl-k8s-controller-docker
-          docker push `docker images | grep isecl-k8s-controller | awk '{print $1":"$2}' | awk 'NR==1'`
-
-      - name: Build-k8s-scheduler-docker
-        run: |
-          make isecl-k8s-scheduler-docker
-          docker push `docker images | grep isecl-k8s-scheduler | awk '{print $1":"$2}' | awk 'NR==1'`

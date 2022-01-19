@@ -20,9 +20,6 @@ type ImageFilter struct {
 	ImageID  uuid.UUID `json:"image_id,omitempty"`
 }
 
-
-type ImageFlavorCollection struct{
+type ImageFlavorCollection struct {
 	Images []ImageFilter `json:"imageFlavor"`
 }
-
-

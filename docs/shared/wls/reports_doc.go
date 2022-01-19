@@ -29,7 +29,6 @@ type ReportCollection struct {
 	Body wls.ReportCollection
 }
 
-
 // swagger:operation POST /reports Reports Create-Reports
 // ---
 //

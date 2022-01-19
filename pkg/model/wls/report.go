@@ -55,7 +55,7 @@ type Report struct {
 
 type ReportsResponse []Report
 
-type ReportCollection struct{
+type ReportCollection struct {
 	Report []Report `json:"reports"`
 }
 
