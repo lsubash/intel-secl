@@ -38,8 +38,11 @@ const (
 	TrustedCaCertsDir         = ConfigDir + "certs/trustedca/"
 	TrustedKeysDir            = ConfigDir + "trusted-keys/"
 
+	//saml directory
+
+	SamlCaCertDir = ConfigDir + "certs/saml/"
 	// saml key and cert
-	SamlCaCertFilePath = TrustedCaCertsDir + "SamlCaCert.pem"
+	SamlCaCertFilePath = SamlCaCertDir + "SamlCaCert.pem"
 )
 
 // jwt constants
