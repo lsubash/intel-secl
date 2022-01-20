@@ -73,7 +73,7 @@ func (dc DownloadSamlCaCert) Validate() error {
 func (dc DownloadSamlCaCert) PrintHelp(w io.Writer) {
 	var envHelp = map[string]string{
 		"HVS_URL":      "HVS Base URL",
-		"BEARER_TOKEN": "Bearer token",
+		"BEARER_TOKEN": "Bearer token is required to access HVS API",
 	}
 	setup.PrintEnvHelp(w, "Following environment variables are required for download-saml-cert:", "", envHelp)
 	fmt.Fprintln(w, "")
