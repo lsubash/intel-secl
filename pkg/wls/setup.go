@@ -182,7 +182,6 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		ConsoleWriter:     a.consoleWriter(),
 		SamlCertPath:      constants.SamlCaCertFilePath,
 		TrustedCaCertsDir: constants.TrustedCaCertsDir,
-		BearerToken:       viper.GetString("bearer-token"),
 	})
 	return runner, nil
 }

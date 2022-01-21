@@ -6,14 +6,16 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients/hvsclient"
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/vs"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
+	"net/url"
 	"os"
+	"strings"
 )
 
 type DownloadSamlCaCert struct {
@@ -21,40 +23,44 @@ type DownloadSamlCaCert struct {
 	ConsoleWriter     io.Writer
 	SamlCertPath      string
 	TrustedCaCertsDir string
-	BearerToken       string
 }
 
 func (dc DownloadSamlCaCert) Run() error {
 	log.Trace("tasks/download_saml_ca_cert:Run() Entering")
 	defer log.Trace("tasks/download_saml_ca_cert:Run() Leaving")
 
-	if dc.BearerToken == "" {
-		fmt.Fprintln(os.Stderr, "BEARER_TOKEN is not defined in environment")
-		return errors.New("BEARER_TOKEN is not defined in environment")
+	hvsUrl := dc.HvsApiUrl
+	if hvsUrl == "" {
+		fmt.Fprintln(dc.ConsoleWriter, "tasks/download_saml_cert:Run() HVS_URL is not set")
+		return nil
 	}
 
-	vsClientFactory, err := hvsclient.NewVSClientFactory(dc.HvsApiUrl, dc.BearerToken, dc.TrustedCaCertsDir)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "tasks/download_saml_ca_cert:Run() Error while instantiating VSClientFactory")
-		return errors.Wrap(err, "tasks/download_saml_ca_cert:Run() Error while instantiating VSClientFactory")
+	if !strings.HasSuffix(hvsUrl, "/") {
+		hvsUrl = hvsUrl + "/"
 	}
 
-	caCertsClient, err := vsClientFactory.CACertificatesClient()
+	baseURL, err := url.Parse(hvsUrl)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "tasks/download_saml_ca_cert:Run() Error while getting CACertificatesClient")
-		return errors.Wrap(err, "tasks/download_saml_ca_cert:Run() Error while getting CACertificatesClient")
+		return errors.Wrap(err, "tasks/download_saml_cert:Run() Error in parsing Host Verification Service URL")
 	}
 
-	cacerts, err := caCertsClient.GetCaCertsInPem("saml")
+	vsClient := &vs.Client{
+		BaseURL: baseURL,
+	}
+
+	caCerts, err := vsClient.GetCaCerts("saml")
 	if err != nil {
-		log.Error("tasks/download_saml_ca_cert:Run() Failed to read HVS response body for GET SAML ca-certificates API")
-		return errors.Wrap(err, "tasks/download_saml_ca_cert:Run() Error while getting SAML CA certificates")
+		return errors.Wrap(err, "tasks/download_saml_cert:Run() Failed to get SAML ca-certificates from HVS")
 	}
 
 	//write the output to a file
-	err = ioutil.WriteFile(constants.SamlCaCertFilePath, cacerts, 0644)
+	err = ioutil.WriteFile(constants.SamlCaCertFilePath, caCerts, 0644)
 	if err != nil {
 		return errors.Wrapf(err, "tasks/download_saml_ca_cert:Run() Error while writing file:%s", constants.SamlCaCertFilePath)
+	}
+	err = os.Chmod(constants.SamlCaCertFilePath, 0640)
+	if err != nil {
+		return errors.Wrapf(err, "tasks/download_saml_cert:Run() Error while changing file permission for file :%s", constants.SamlCaCertFilePath)
 	}
 	return nil
 }
@@ -72,8 +78,7 @@ func (dc DownloadSamlCaCert) Validate() error {
 
 func (dc DownloadSamlCaCert) PrintHelp(w io.Writer) {
 	var envHelp = map[string]string{
-		"HVS_URL":      "HVS Base URL",
-		"BEARER_TOKEN": "Bearer token is required to access HVS API",
+		"HVS_URL": "HVS Base URL",
 	}
 	setup.PrintEnvHelp(w, "Following environment variables are required for download-saml-cert:", "", envHelp)
 	fmt.Fprintln(w, "")

@@ -132,6 +132,7 @@ func (t *DownloadCert) PrintHelp(w io.Writer) {
 	PrintEnvHelp(w, downloadCAEnvHelpPrompt2+t.commandName, "", downloadCAEnvHelp2)
 	if t.commandName == "download-cert-tls" {
 		PrintEnvHelp(w, "", t.envPrefix, downloadTlsCAEnvHelp)
+		fmt.Fprintln(w, "")
 		PrintEnvHelp(w, downloadCAEnvHelpPrompt+t.commandName, t.envPrefix, downloadCAEnvCommonHelp)
 	} else if t.commandName == "download-cert-saml" {
 		PrintEnvHelp(w, downloadCAEnvHelpPrompt+t.commandName, t.envPrefix, downloadCAEnvCommonHelp)
@@ -139,7 +140,6 @@ func (t *DownloadCert) PrintHelp(w io.Writer) {
 	} else {
 		PrintEnvHelp(w, downloadCAEnvHelpPrompt+t.commandName, t.envPrefix, downloadCAEnvCommonHelp)
 	}
-
 	fmt.Fprintln(w, "")
 }
 

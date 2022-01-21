@@ -79,7 +79,10 @@ func PrintEnvHelp(w io.Writer, prompt, envPrefix string, keysAndHelp map[string]
 	if w == nil || keysAndHelp == nil {
 		return
 	}
-	fmt.Fprintln(w, prompt)
+
+	if prompt != "" {
+		fmt.Fprintln(w, prompt)
+	}
 
 	tabW := new(tabwriter.Writer)
 	defer func() {
