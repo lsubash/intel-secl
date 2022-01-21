@@ -36,6 +36,7 @@ func (tenantConnection TenantConnection) Run() error {
 	}
 
 	tenantConf := tenantConnection.TenantConfig
+	tenantConf.Type = endPointType
 
 	if endPointType == constants.K8sTenant {
 		k8sURL := viper.GetString("kubernetes-url")
@@ -89,8 +90,10 @@ func (tenantConnection TenantConnection) Run() error {
 // Validate checks whether or not the tenant Connection setup task was completed successfully
 func (tenantConnection TenantConnection) Validate() error {
 	conf := tenantConnection.TenantConfig
-	if conf.URL == "" || conf.Type != constants.K8sTenant {
-		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: URL & Type is not set")
+	if conf.URL == "" {
+		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: URL is not set")
+	} else if conf.Type != constants.K8sTenant {
+		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: Type is not set")
 	} else if conf.Type == constants.K8sTenant && conf.CRDName == "" && conf.Token == "" && conf.CertFile == "" {
 		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: K8s credentials are not set ")
 	}
@@ -140,7 +143,7 @@ func (tenantConnection TenantConnection) validateService() error {
 
 func (tenantConnection TenantConnection) PrintHelp(w io.Writer) {
 	var envHelp = map[string]string{
-		"TENANT": "Type of Tenant Service (OpenStack or Kubernetes)",
+		"TENANT": "Type of Tenant Service (Kubernetes)",
 	}
 
 	var k8sEnv = map[string]string{
