@@ -28,8 +28,10 @@ func setKeyTransferRoutes(router *mux.Router, endpointUrl string, config domain.
 	keyTransferController := controllers.NewKeyTransferController(remoteManager, policyStore, config, apsClient, aasClient)
 	keyIdExpr := "/keys/" + validation.IdReg
 
+	// For the below handlers Accept type needs to be explicitly added, otherwise the key transfer api requests for header with accept application/octet-stream
+	// will be handled by JsonResponseHandler as per the order and respond with 415 status code.
 	router.Handle(keyIdExpr+"/transfer",
-		ErrorHandler(JsonResponseHandler(keyTransferController.Transfer))).Methods("POST")
+		ErrorHandler(JsonResponseHandler(keyTransferController.Transfer))).Methods("POST").Headers("Accept", consts.HTTPMediaTypeJson)
 
 	router.Handle(keyIdExpr+"/transfer",
 		ErrorHandler(ResponseHandler(keyTransferController.TransferWithSaml))).Methods("POST").Headers("Accept", consts.HTTPMediaTypeOctetStream)
