@@ -13,7 +13,7 @@ const (
 	ConfigFileName                  = "config"
 	ConfigFilePath                  = ConfigDir + ConfigFileName + ".yml"
 	BinDir                          = InstallationDir + "bin/"
-	ExecLinkPath                    = "/usr/bin/tagent/"
+	ExecLinkPath                    = "/usr/bin/tagent"
 	LogDir                          = "/var/log/trustagent/"
 	HttpLogFile                     = LogDir + "http.log"
 	DefaultLogFilePath              = LogDir + "trustagent.log"

@@ -116,11 +116,14 @@ func (a *App) uninstall() error {
 		}
 	}
 
-	// cleanup linked binaries from tagent
-	fmt.Println("removing : ", a.execLinkPath())
-	err = os.Remove(a.execLinkPath())
-	if err != nil {
-		log.WithError(err).Error("error removing ", a.execLinkPath())
+	//
+	// remove tagent symlink (in /usr/bin/tagent)
+	//
+	if _, err := os.Stat(constants.ExecLinkPath); err == nil {
+		err = os.Remove(a.execLinkPath())
+		if err != nil {
+			log.WithError(err).Warnf("main:uninstall() An error occurred removing the trustagent symlink: %s", err)
+		}
 	}
 
 	//
