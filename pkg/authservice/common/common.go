@@ -24,12 +24,10 @@ var defaultLog = log.GetDefaultLogger()
 
 var defend *defender.Defender
 
-func init() {
-	c, _ := config.LoadConfiguration()
-
-	defend = defender.New(c.AuthDefender.MaxAttempts,
-		time.Duration(c.AuthDefender.IntervalMins)*time.Minute,
-		time.Duration(c.AuthDefender.LockoutDurationMins)*time.Minute)
+func InitDefender(maxAttempts, intervalMins, lockoutDurationMins int) {
+	defend = defender.New(maxAttempts,
+		time.Duration(intervalMins)*time.Minute,
+		time.Duration(lockoutDurationMins)*time.Minute)
 	quit := make(chan struct{})
 
 	go defend.CleanupTask(quit)

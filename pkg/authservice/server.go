@@ -10,6 +10,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/gorilla/handlers"
+	comm "github.com/intel-secl/intel-secl/v5/pkg/authservice/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/router"
@@ -62,6 +63,10 @@ func (a *App) startServer() error {
 	if c == nil {
 		return errors.New("Failed to load configuration")
 	}
+
+	// initialize defender
+	comm.InitDefender(c.AuthDefender.MaxAttempts, c.AuthDefender.IntervalMins, c.AuthDefender.LockoutDurationMins)
+
 	// initialize log
 	if err := a.configureLogs(c.Log.EnableStdout, true); err != nil {
 		return err

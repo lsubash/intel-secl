@@ -6,6 +6,7 @@ package middleware
 
 import (
 	"errors"
+	comm "github.com/intel-secl/intel-secl/v5/pkg/authservice/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/postgres/mock"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/types"
 	"net/http"
@@ -29,6 +30,9 @@ func setupRouter() *mux.Router {
 			return nil, errors.New("no user")
 		},
 	}
+	// initialize defender
+	comm.InitDefender(5, 5, 15)
+
 	m := NewBasicAuth(mockRepo)
 	r := mux.NewRouter()
 	r.Use(m)
