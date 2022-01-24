@@ -5,6 +5,7 @@
 package service
 
 import (
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/version"
 	"golang.org/x/net/proxy"
 
 	"crypto/tls"
@@ -14,8 +15,6 @@ import (
 	"time"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/util"
-
 	"github.com/pkg/errors"
 
 	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
@@ -34,7 +33,6 @@ func newOutboundService(natsParameters *NatsParameters, handler common.RequestHa
 		handler:        handler,
 		natsParameters: *natsParameters,
 	}, nil
-
 }
 
 type trustAgentOutboundService struct {
@@ -227,12 +225,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 	_, err = subscriber.natsConnection.Subscribe(versionSubject, func(m *nats.Msg) error {
 		defer recoverFunc()
 
-		versionInfo, err := util.GetVersionInfo()
-		if err != nil {
-			log.WithError(err).Error("Failed to handle version-request")
-		}
-
-		return subscriber.natsConnection.Publish(m.Reply, versionInfo)
+		return subscriber.natsConnection.Publish(m.Reply, version.GetVersion())
 	})
 	if err != nil {
 		return errors.Wrapf(err, "NATs client failed to create subscription to version messages")

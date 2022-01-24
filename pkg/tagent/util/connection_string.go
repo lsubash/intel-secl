@@ -16,7 +16,6 @@ import (
 )
 
 var log = commLog.GetDefaultLogger()
-var secLog = commLog.GetSecurityLogger()
 
 func GetCurrentIP() (net.IP, error) {
 
