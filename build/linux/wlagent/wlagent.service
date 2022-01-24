@@ -5,7 +5,7 @@ Description=wlagent
 Type=simple
 
 WorkingDirectory=/opt/workload-agent/bin/
-ExecStart=/opt/workload-agent/bin/wlagent runservice
+ExecStart=/opt/workload-agent/bin/wlagent rungrpcservice
 TimeoutStartSec=0
 Restart=on-failure
 PermissionsStartOnly=true

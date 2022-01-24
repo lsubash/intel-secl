@@ -191,7 +191,6 @@ func (a *App) Run(args []string) error {
 		_ = a.stop()
 		if err := removeservice(); err == nil {
 			fmt.Println("Workload Agent Service Removed...")
-			secLog.Info("Service Removed")
 		}
 
 		deleteFile(constants.WlagentSymLink)

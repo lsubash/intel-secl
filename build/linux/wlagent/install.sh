@@ -80,7 +80,6 @@ fi
 cd "$(dirname "$0")"
 
 # load installer environment file, if present
-# TODO: ISECL-8364 Resolve flow/steps for using 'env' files when installing workload-agent
 if [ -f ~/trustagent.env ]; then
   echo "Loading environment variables from $(cd ~ && pwd)/trustagent.env"
   . ~/trustagent.env
@@ -236,9 +235,13 @@ cp -f wlagent $WORKLOAD_AGENT_BIN
 chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $WORKLOAD_AGENT_BIN/wlagent
 ln -sfT $WORKLOAD_AGENT_BIN/wlagent /usr/local/bin/wlagent
 
+# Install systemd script and Enable systemd service
+cp -f wlagent.service $WORKLOAD_AGENT_HOME
+systemctl enable $WORKLOAD_AGENT_HOME/wlagent.service
+
 # exit workload-agent setup if WORKLOAD_AGENT_NOSETUP is set
 if [ "$WORKLOAD_AGENT_NOSETUP" == "true" ]; then
-  echo "$WORKLOAD_AGENT_NOSETUP is set. So, skipping the workload-agent setup task."
+  echo "WORKLOAD_AGENT_NOSETUP is set to true. So, skipping the workload-agent setup task."
   exit 0
 fi
 
@@ -289,7 +292,6 @@ check_env_var_present() {
 
 # start with all_env_vars_present=1 and let the check_env_vars_present() method override
 # to false if any of the required vars are not set
-
 all_env_vars_present=1
 
 required_vars="HVS_URL WLS_API_URL WLA_SERVICE_USERNAME WLA_SERVICE_PASSWORD CMS_TLS_CERT_SHA384 AAS_API_URL CMS_BASE_URL"
@@ -325,13 +327,6 @@ if [ "$WA_WITH_CONTAINER_SECURITY_CRIO" == "y" ] || [ "$WA_WITH_CONTAINER_SECURI
 
   sed -i "s/runservice/rungrpcservice/g" wlagent.service
 fi
-
-# Enable systemd service and start it
-cp -f wlagent.service $WORKLOAD_AGENT_HOME
-systemctl enable $WORKLOAD_AGENT_HOME/wlagent.service
-
-# Enable systemd service and start it
-systemctl start wlagent
 
 if [ $setup_complete -ne 0 ]; then
   echo_failure "Installation completed with errors."
