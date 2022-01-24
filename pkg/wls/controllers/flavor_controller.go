@@ -28,6 +28,8 @@ type FlavorController struct {
 
 const duplicateKeyError = "duplicate key"
 
+const MaxQueryParamsLength = 10
+
 var flavorSearchParams = map[string]bool{"id": true, "label": true}
 
 func NewFlavorController(fs domain.FlavorStore) *FlavorController {
@@ -92,6 +94,10 @@ func (fcon *FlavorController) Create(w http.ResponseWriter, r *http.Request) (in
 func ValidateQueryParams(params url.Values, validQueries map[string]bool) error {
 	defaultLog.Trace("controllers/flavor_controller:ValidateQueryParams() Entering")
 	defer defaultLog.Trace("controllers/flavor_controller:ValidateQueryParams() Leaving")
+
+	if len(params) > MaxQueryParamsLength {
+		return errors.New("Invalid query parameters provided. Number of query parameters exceeded maximum value")
+	}
 
 	for param := range params {
 		if _, hasQuery := validQueries[param]; !hasQuery {
