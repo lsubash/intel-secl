@@ -62,7 +62,7 @@ func HttpHandleUserAuth(u domain.UserStore, username, password string) (int, err
 		if defend.Inc(username) {
 			return http.StatusTooManyRequests, fmt.Errorf("Authentication failure - maximum login attempts exceeded for user : %s. Banned !", username)
 		}
-		return http.StatusUnauthorized, fmt.Errorf("BasicAuth failure: password mismatch, user: %s, error : %s", username, err)
+		return http.StatusUnauthorized, fmt.Errorf("invalid username or password provided")
 	}
 	// If we found the user earlier in the defend list, we should now remove as user is authorized
 	if foundInDefendList {
