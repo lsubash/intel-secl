@@ -24,6 +24,9 @@ Available Commands:
   stop                             Stop the trust agent service.
   status                           Get the status of the trust agent service.
   fetch-ekcert-with-issuer         Print Tpm Endorsement Certificate in Base64 encoded string along with issuer
+                                   Optional environment variables:
+                                   - TPM_OWNER_SECRET=<40 byte hex>                    : When provided, command uses the 40 character hex string for the TPM owner password.
+                                                                                         Command uses empty string as owner password when not provided.
 
 Setup command usage:  tagent setup [cmd] [-f <env-file>]
 
@@ -93,7 +96,7 @@ Available Tasks for 'setup', all commands support env file flag
                                                         - BEARER_TOKEN=<token>                              : for authenticating with VS
                                                     Optional environment variables:
                                                         - TPM_OWNER_SECRET=<40 byte hex>                    : When provided, setup uses the 40 character hex string for the TPM
-                                                                                                              owner password. Auto-generated when not provided.
+                                                                                                              owner password. Setup uses empty string when not provided.
 
   create-host                                 - Registers the trust agent with the verification service.
                                                     Required environment variables:
@@ -102,7 +105,7 @@ Available Tasks for 'setup', all commands support env file flag
                                                         - CURRENT_IP=<ip address of host>                   : IP or hostname of host with which the host will be registered with HVS
                                                     Optional environment variables:
                                                         - TPM_OWNER_SECRET=<40 byte hex>                    : When provided, setup uses the 40 character hex string for the TPM
-                                                                                                              owner password. Auto-generated when not provided.
+                                                                                                              owner password. Setup uses empty when not provided.
 
   create-host-unique-flavor                 - Populates the verification service with the host unique flavor
                                                     Required environment variables:

@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/tpmprovider"
 	"io"
 	"net/http"
 	"os"
@@ -453,11 +454,24 @@ func (a *App) Run(args []string) error {
 		}
 
 	case "fetch-ekcert-with-issuer":
-		if a.configuration() == nil {
-			return errors.New("Failed to load configuration")
+		var err error
+		if len(args) == 2 {
+			tpmOwnerSecret := os.Getenv(constants.EnvTPMOwnerSecret)
+			if len(tpmOwnerSecret) == 0 {
+				err = fetchEndorsementCert("")
+			} else {
+				if len(tpmOwnerSecret) != 40 {
+					return errors.New("Owner secret must be 40 characters long")
+				}
+				if validation.ValidateHexString(tpmOwnerSecret) != nil {
+					return errors.New("Owner secret must be hex string")
+				}
+				err = fetchEndorsementCert(tpmprovider.HEX_PREFIX + tpmOwnerSecret)
+			}
+		} else {
+			a.printUsage()
 		}
 
-		err := fetchEndorsementCert(a.config.Tpm.TagSecretKey)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "main:main() Error while running trustagent fetch-ekcert-with-issuer %s\n", err.Error())
 			os.Exit(1)
@@ -491,15 +505,22 @@ func fetchEndorsementCert(assetTagSecret string) error {
 		log.WithError(err).Error("main:fetchEndorsementCert() Could not pem encode cert")
 		return errors.New("Could not pem encode cert")
 	}
-	ekCert, err := x509.ParseCertificate(ekCertBytes)
+	ekCerts, err := x509.ParseCertificates(ekCertBytes)
 	if err != nil {
 		log.WithError(err).Error("main:fetchEndorsementCert() Error while parsing endorsement certificate in bytes into x509 certificate")
 		return errors.New("Error while parsing endorsement certificate in bytes into x509 certificate")
 	}
 
-	base64EncodedCert := base64.StdEncoding.EncodeToString(buf.Bytes())
-	fmt.Printf("Issuer: %s\n", ekCert.Issuer.CommonName)
-	fmt.Printf("TPM Endorsment Certificate Base64 Encoded: %s\n", base64EncodedCert)
+	for _, ekCert := range ekCerts {
+		fmt.Printf("Issuer: %s\n", ekCert.Issuer.CommonName)
+		buf := new(bytes.Buffer)
+		if err := pem.Encode(buf, &pem.Block{Type: "CERTIFICATE", Bytes: ekCert.Raw}); err != nil {
+			log.WithError(err).Error("main:fetchEndorsementCert() Could not pem encode cert")
+			return errors.New("Could not pem encode cert")
+		}
+		base64EncodedCert := base64.StdEncoding.EncodeToString(buf.Bytes())
+		fmt.Printf("TPM Endorsment Certificate Base64 Encoded: %s\n", base64EncodedCert)
+	}
 	return nil
 }
 
