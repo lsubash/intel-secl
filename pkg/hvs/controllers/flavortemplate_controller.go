@@ -449,8 +449,8 @@ func (ftc *FlavorTemplateController) SearchFlavorgroups(w http.ResponseWriter, r
 
 // validateFlavorTemplateCreateRequest This method is used to validate the flavor template
 func (ftc *FlavorTemplateController) ValidateFlavorTemplateCreateRequest(FlvrTemp hvs.FlavorTemplate, template string) (string, error) {
-	defaultLog.Trace("controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Entering")
-	defer defaultLog.Trace("controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Leaving")
+	defaultLog.Trace("controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Entering")
+	defer defaultLog.Trace("controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Leaving")
 	// Check whether the template is adhering to the schema
 	schemaLoader := gojsonschema.NewSchemaLoader()
 
@@ -458,8 +458,12 @@ func (ftc *FlavorTemplateController) ValidateFlavorTemplateCreateRequest(FlvrTem
 	if ftc.DefinitionsSchemaJSON == "" {
 		ftc.DefinitionsSchemaJSON, err = readJSON(ftc.CommonDefinitionsSchema)
 		if err != nil {
-			return "Unable to read the common definitions schema", errors.Wrap(err, "controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Unable to read the file"+consts.CommonDefinitionsSchema)
+			return "Unable to read the common definitions schema", errors.Wrap(err, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Unable to read the file"+consts.CommonDefinitionsSchema)
 		}
+	}
+
+	if validationErr := validation.ValidateStrings([]string{FlvrTemp.Label}); validationErr != nil {
+		return "Flavor template label is not in valid format", errors.Wrap(validationErr, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Flavor template label is not in valid format")
 	}
 
 	definitionsSchema := gojsonschema.NewStringLoader(ftc.DefinitionsSchemaJSON)
@@ -467,7 +471,7 @@ func (ftc *FlavorTemplateController) ValidateFlavorTemplateCreateRequest(FlvrTem
 	if ftc.TemplateSchemaJSON == "" {
 		ftc.TemplateSchemaJSON, err = readJSON(ftc.FlavorTemplateSchema)
 		if err != nil {
-			return "Unable to read the template schema", errors.Wrap(err, "controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Unable to read the file"+consts.FlavorTemplateSchema)
+			return "Unable to read the template schema", errors.Wrap(err, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Unable to read the file"+consts.FlavorTemplateSchema)
 		}
 	}
 
@@ -476,14 +480,14 @@ func (ftc *FlavorTemplateController) ValidateFlavorTemplateCreateRequest(FlvrTem
 
 	schema, err := schemaLoader.Compile(flvrTemplateSchema)
 	if err != nil {
-		return "Unable to compile the template", errors.Wrap(err, "controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Unable to compile the schemas")
+		return "Unable to compile the template", errors.Wrap(err, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Unable to compile the schemas")
 	}
 
 	documentLoader := gojsonschema.NewStringLoader(template)
 
 	result, err := schema.Validate(documentLoader)
 	if err != nil {
-		return "Unable to validate the template", errors.Wrap(err, "controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Unable to validate the template")
+		return "Unable to validate the template", errors.Wrap(err, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Unable to validate the template")
 	}
 
 	var errorMsg string
@@ -491,21 +495,21 @@ func (ftc *FlavorTemplateController) ValidateFlavorTemplateCreateRequest(FlvrTem
 		for _, desc := range result.Errors() {
 			errorMsg = errorMsg + fmt.Sprintf("- %s\n", desc)
 		}
-		return errorMsg, errors.New("controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() The provided template is not valid" + errorMsg)
+		return errorMsg, errors.New("controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() The provided template is not valid" + errorMsg)
 	}
 
-	defaultLog.Infof("controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() The provided template with template ID %s is valid", FlvrTemp.ID)
+	defaultLog.Infof("controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() The provided template with template ID %s is valid", FlvrTemp.ID)
 
 	//Validation the syntax of the conditions
 	tempDoc, err := jsonquery.Parse(strings.NewReader("{}"))
 	if err != nil {
-		return "", errors.Wrap(err, "controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Unable to parse json query")
+		return "", errors.Wrap(err, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Unable to parse json query")
 	}
 
 	for _, condition := range FlvrTemp.Condition {
 		_, err := jsonquery.Query(tempDoc, condition)
 		if err != nil {
-			return "Invalid syntax in condition statement", errors.Wrapf(err, "controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Invalid syntax in condition : %s", condition)
+			return "Invalid syntax in condition statement", errors.Wrapf(err, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Invalid syntax in condition : %s", condition)
 		}
 	}
 
@@ -530,7 +534,7 @@ func (ftc *FlavorTemplateController) ValidateFlavorTemplateCreateRequest(FlvrTem
 			if _, ok := temp[pcr.Index]; !ok {
 				temp[pcr.Index] = true
 			} else {
-				return "Template has duplicate banks for same PCR index", errors.New("controllers/flavortemplate_controller:validateFlavorTemplateCreateRequest() Template has duplicate banks for same PCR index")
+				return "Template has duplicate banks for same PCR index", errors.New("controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Template has duplicate banks for same PCR index")
 			}
 		}
 	}
