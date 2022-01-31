@@ -21,10 +21,10 @@ const createHostUniqueFlavorHelpPrompt = "Following environment variables are re
 	constants.CreateHostUniqueFlavorCommand + " setup:"
 
 var createHostUniqueFlavorEnvHelp = map[string]string{
-	constants.EnvMtwilsonAPIURL: "VS API URL",
-	constants.EnvBearerToken:    "JWT token for authenticating with VS",
-	constants.EnvCurrentIP:      "IP Address of TA deployed host",
-	constants.EnvTAHostId:       "Host ID of TA for NATS Connection",
+	constants.EnvVSAPIURL:    "VS API URL",
+	constants.EnvBearerToken: "JWT token for authenticating with VS",
+	constants.EnvCurrentIP:   "IP Address of TA deployed host",
+	constants.EnvTAHostId:    "Host ID of TA for NATS Connection",
 }
 
 type CreateHostUniqueFlavor struct {

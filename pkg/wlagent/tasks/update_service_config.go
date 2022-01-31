@@ -21,15 +21,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-const updateServiceConfigHelpPrompt = "Following environment variables are required for update-service-config setup:"
+const updateServiceConfigRequiredHelpPrompt = "Following environment variables are required for update-service-config setup:"
+const updateServiceConfigOptionalHelpPrompt = "Following environment variables are optional for update-service-config setup:"
 
-var updateServiceConfigEnvHelp = map[string]string{
+var updateServiceConfigRequiredEnvHelp = map[string]string{
+	constants.WlaUsernameEnv: "WLA Service Username",
+	constants.WlaPasswordEnv: "WLA Service Password",
+}
+
+var updateServiceConfigOptionalEnvHelp = map[string]string{
 	constants.LogLevelEnvVar:            "Log level",
 	constants.LogEntryMaxlengthEnv:      "Maximum length of each entry in a log",
 	constants.EnableConsoleLogEnv:       "<true/false> Workload Agent Enable standard output",
 	constants.WlsApiUrlEnv:              "Workload Service URL",
-	constants.WlaUsernameEnv:            "WLA Service Username",
-	constants.WlaPasswordEnv:            "WLA Service Password",
 	constants.SkipFlavorSignatureVerEnv: "<true/false> Skip flavor signature verification if set to true",
 }
 
@@ -93,7 +97,9 @@ func (uc UpdateServiceConfig) Validate() error {
 }
 
 func (uc UpdateServiceConfig) PrintHelp(w io.Writer) {
-	setup.PrintEnvHelp(w, updateServiceConfigHelpPrompt, "", updateServiceConfigEnvHelp)
+	setup.PrintEnvHelp(w, updateServiceConfigRequiredHelpPrompt, "", updateServiceConfigRequiredEnvHelp)
+	fmt.Fprintln(w, "")
+	setup.PrintEnvHelp(w, updateServiceConfigOptionalHelpPrompt, "", updateServiceConfigOptionalEnvHelp)
 	fmt.Fprintln(w, "")
 }
 

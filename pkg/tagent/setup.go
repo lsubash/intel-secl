@@ -27,6 +27,9 @@ import (
 	"github.com/spf13/viper"
 )
 
+var provisionAttestationTasks = []string{constants.DownloadPrivacyCACommand, constants.TakeOwnershipCommand, constants.DefineTagIndexCommand, constants.ProvisionAttestationIdentityKeyCommand, constants.ProvisionPrimaryKeyCommand}
+var updateCertificatesTasks = []string{constants.DownloadRootCACertCommand, constants.DownloadCertCommand}
+
 func runSetupTasksBatch(runner *setup.Runner, w io.Writer, isForced bool, cmds []string) error {
 	for _, cmd := range cmds {
 		if err := runner.Run(cmd, isForced); err != nil {
@@ -49,6 +52,7 @@ func (a *App) setup(args []string) error {
 	// look for cli flags
 	var ansFile string
 	var force bool
+	var err error
 	for i, s := range args {
 		if s == "-f" || s == "--file" {
 			if i+1 < len(args) {
@@ -62,22 +66,44 @@ func (a *App) setup(args []string) error {
 	}
 	// dump answer file to env
 	if ansFile != "" {
-		err := setup.ReadAnswerFileToEnv(ansFile)
+		err = setup.ReadAnswerFileToEnv(ansFile)
 		if err != nil {
 			return errors.Wrap(err, "Failed to read answer file")
 		}
 	}
+
+	var runner *setup.Runner
 	cmd := args[1]
-	runner, err := a.setupTaskRunner(cmd)
-	if err != nil {
-		return err
+	if len(args) > 2 && args[2] == "--help" {
+		runner, err = a.setupTaskRunner("")
+	} else {
+		runner, err = a.setupTaskRunner(cmd)
 	}
+
+	if err != nil {
+		return errors.Wrap(err, "Failed to run setup task runner")
+	}
+
 	// print help and return if applicable
 	if len(args) > 2 && args[2] == "--help" {
 		if cmd == "all" {
 			err = runner.PrintAllHelp()
 			if err != nil {
 				return errors.Wrap(err, "Failed to write to console")
+			}
+		} else if cmd == constants.ProvisionAttestationCommand && args[2] == "--help" {
+			for _, task := range provisionAttestationTasks {
+				err = runner.PrintHelp(task)
+				if err != nil {
+					return errors.Wrap(err, "Failed to write to console")
+				}
+			}
+		} else if cmd == constants.UpdateCertificatesCommand && args[2] == "--help" {
+			for _, task := range updateCertificatesTasks {
+				err = runner.PrintHelp(task)
+				if err != nil {
+					return errors.Wrap(err, "Failed to write to console")
+				}
 			}
 		} else {
 			err = runner.PrintHelp(cmd)
@@ -111,19 +137,10 @@ func (a *App) setup(args []string) error {
 		}
 
 	case constants.ProvisionAttestationCommand:
-		taskSet = []string{
-			constants.DownloadPrivacyCACommand,
-			constants.TakeOwnershipCommand,
-			constants.DefineTagIndexCommand,
-			constants.ProvisionAttestationIdentityKeyCommand,
-			constants.ProvisionPrimaryKeyCommand,
-		}
+		taskSet = provisionAttestationTasks
 
 	case constants.UpdateCertificatesCommand:
-		taskSet = []string{
-			constants.DownloadRootCACertCommand,
-			constants.DownloadCertCommand,
-		}
+		taskSet = updateCertificatesTasks
 
 	case constants.DownloadCredentialCommand:
 		if a.config.Mode == constants.CommunicationModeOutbound {
@@ -165,6 +182,7 @@ func (a *App) setup(args []string) error {
 
 // input string slice should start with setup
 func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
+
 	loadAlias()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(
 		constants.ViperKeyDashSeparator, constants.EnvNameSeparator,
@@ -230,6 +248,7 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 		return nil, err
 	}
 
+	// TODO: Move this code to corresponding set up task
 	// singular HVS client for all tasks that need one
 	var hvsClientFactory hvsclient.HVSClientFactory
 	switch cmd {
@@ -243,7 +262,7 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 		// validate the HVS url
 		hvsUrl := viper.GetString(constants.HvsUrlViperKey)
 		if _, err := url.ParseRequestURI(hvsUrl); err != nil {
-			return nil, errors.Wrapf(err, "Invalid %s", constants.EnvMtwilsonAPIURL)
+			return nil, errors.Wrapf(err, "Invalid %s", constants.EnvVSAPIURL)
 		}
 
 		// validate the bearer token

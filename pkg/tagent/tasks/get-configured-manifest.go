@@ -25,8 +25,10 @@ const getConfiguredManifestEnvHelpPrompt = "Following environment variables are 
 	constants.GetConfiguredManifestCommand + " setup:"
 
 var getConfiguredManifestEnvHelp = map[string]string{
-	constants.EnvMtwilsonAPIURL: "VS API URL",
-	constants.EnvBearerToken:    "JWT token for authenticating with VS",
+	constants.EnvVSAPIURL:     "VS API URL",
+	constants.EnvBearerToken:  "JWT token for authenticating with VS",
+	constants.EnvFlavorUUIDs:  "CSV list of flavor UUIDs, At least of one of flavor UUIDs or flavor labels is required",
+	constants.EnvFlavorLabels: "CSV list of flavor labels, At least of one of flavor UUIDs or flavor labels is required",
 }
 
 type GetConfiguredManifest struct {

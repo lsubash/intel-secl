@@ -30,7 +30,7 @@ const provisionAttestationIdentityKeyEnvHelpPrompt = "Following environment vari
 	constants.ProvisionAttestationIdentityKeyCommand + " setup:"
 
 var provisionAttestationIdentityKeyEnvHelp = map[string]string{
-	constants.EnvMtwilsonAPIURL: "VS API URL",
+	constants.EnvVSAPIURL:       "VS API URL",
 	constants.EnvBearerToken:    "JWT token for authenticating with VS",
 	constants.EnvTPMOwnerSecret: "TPM Owner Secret",
 }

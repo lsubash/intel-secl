@@ -20,9 +20,9 @@ const downloadPrivacyCAEnvHelpPrompt = "Following environment variables are requ
 	constants.DownloadPrivacyCACommand + " setup:"
 
 var downloadPrivacyCAEnvHelp = map[string]string{
-	constants.EnvMtwilsonAPIURL: "VS API URL",
-	constants.EnvBearerToken:    "JWT token for authenticating with VS",
-	constants.EnvCurrentIP:      "IP Address of TA deployed host",
+	constants.EnvVSAPIURL:    "VS API URL",
+	constants.EnvBearerToken: "JWT token for authenticating with VS",
+	constants.EnvCurrentIP:   "IP Address of TA deployed host",
 }
 
 type DownloadPrivacyCA struct {

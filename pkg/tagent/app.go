@@ -483,8 +483,9 @@ func (a *App) Run(args []string) error {
 			os.Exit(1)
 		}
 
-	case "help", "-help", "-h":
+	case "help", "-h", "--help":
 		a.printUsage()
+
 	default:
 		fmt.Fprintf(os.Stderr, "Invalid option: '%s'\n\n", cmd)
 		a.printUsage()

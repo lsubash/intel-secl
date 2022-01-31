@@ -19,10 +19,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const updateServiceConfigEnvHelpPrompt = "Following environment variables are required for " +
+const updateServiceConfigOptionalEnvHelpPrompt = "Following environment optional are required for " +
+	constants.UpdateServiceConfigCommand + " setup:"
+const updateServiceConfigRequiredEnvHelpPrompt = "Following environment variables are required for " +
 	constants.UpdateServiceConfigCommand + " setup:"
 
-var updateServiceConfigEnvHelp = map[string]string{
+var optionalEnvHelp = map[string]string{
 	constants.EnvTAPort:                    "Trust Agent Listener Port",
 	constants.EnvTAServerReadTimeout:       "Trustagent Server Read Timeout",
 	constants.EnvTAServerReadHeaderTimeout: "Trustagent Read Header Timeout",
@@ -33,6 +35,11 @@ var updateServiceConfigEnvHelp = map[string]string{
 	constants.EnvTALogEnableConsoleLog:     "Trustagent Enable standard output",
 	constants.EnvLogEntryMaxlength:         "Maximum length of each entry in a log",
 	constants.EnvNATServers:                "Comma-separated list of NATs servers",
+}
+
+var requiredEnvHelp = map[string]string{
+	constants.EnvServiceUser:     "The service username as configured in AAS",
+	constants.EnvServicePassword: "The service password as configured in AAS",
 }
 
 var log = commLog.GetDefaultLogger()
@@ -49,7 +56,9 @@ type UpdateServiceConfig struct {
 }
 
 func (uc UpdateServiceConfig) PrintHelp(w io.Writer) {
-	setup.PrintEnvHelp(w, updateServiceConfigEnvHelpPrompt, "", updateServiceConfigEnvHelp)
+	setup.PrintEnvHelp(w, updateServiceConfigRequiredEnvHelpPrompt, "", requiredEnvHelp)
+	fmt.Fprintln(w, "")
+	setup.PrintEnvHelp(w, updateServiceConfigOptionalEnvHelpPrompt, "", optionalEnvHelp)
 	fmt.Fprintln(w, "")
 }
 

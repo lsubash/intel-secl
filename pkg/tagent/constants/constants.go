@@ -79,7 +79,7 @@ const (
 // Env Variables
 const (
 	EnvTPMOwnerSecret            = "TPM_OWNER_SECRET"
-	EnvMtwilsonAPIURL            = "HVS_URL"
+	EnvVSAPIURL                  = "HVS_URL"
 	EnvTAPort                    = "TRUSTAGENT_PORT"
 	EnvCMSBaseURL                = "CMS_BASE_URL"
 	EnvCMSTLSCertDigest          = "CMS_TLS_CERT_SHA384"
@@ -99,6 +99,10 @@ const (
 	EnvTAServiceMode             = "TA_SERVICE_MODE"
 	EnvNATServers                = "NATS_SERVERS"
 	EnvTAHostId                  = "TA_HOST_ID"
+	EnvServiceUser               = "SERVICE_USERNAME"
+	EnvServicePassword           = "SERVICE_PASSWORD"
+	EnvFlavorUUIDs               = "FLAVOR_UUIDS"
+	EnvFlavorLabels              = "FLAVOR_LABELS"
 )
 
 // "TODO" comment -- the SHA constants should live in intel-secl/pkg/model/
