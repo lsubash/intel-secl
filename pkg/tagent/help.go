@@ -16,7 +16,7 @@ const helpStr = `Usage:
 
 Available Commands:
 
-  help|-h|--help                    Show this help message.
+  help|-h|--help                   Show this help message.
   setup [all] [task]               Run setup task.
   uninstall                        Uninstall trust agent.
   --version                        Print build version info.
@@ -25,8 +25,8 @@ Available Commands:
   status                           Get the status of the trust agent service.
   fetch-ekcert-with-issuer         Print Tpm Endorsement Certificate in Base64 encoded string along with issuer
                                    Optional environment variables:
-                                   - TPM_OWNER_SECRET=<40 byte hex>                    : When provided, command uses the 40 character hex string for the TPM owner password.
-                                                                                         Command uses empty string as owner password when not provided.
+                                   TPM_OWNER_SECRET=<40 byte hex>: When provided, command uses 40 character hex string as TPM owner secret.
+                                                                     Else, uses empty string as owner secret.
 
 Setup command usage:  tagent setup [cmd] [-f <env-file>]
 
