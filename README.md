@@ -14,7 +14,6 @@ use-cases. It applies the remote attestation fundamentals and standard specifica
 collection service, and an efficient verification engine to perform comprehensive trust evaluations. These trust
 evaluations can be used to govern different trust and security policies applied to any given workload.
 
-For more details please visit : <https://01.org/intel-secl>
 
 ## Architecture
 
