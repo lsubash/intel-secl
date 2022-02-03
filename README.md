@@ -65,11 +65,11 @@ example:
 
 For more details on the product, installation and deployment strategies, please go through following, (Refer to latest and use case wise guide)
 
-[https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-product-guide](https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-product-guide)
+[https://intel-secl.github.io/docs](https://intel-secl.github.io/docs)
 
 ### Release Notes
 
-[https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-release-notes](https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-release-notes)
+[https://intel-secl.github.io/docs/4.1/ReleaseNotes/ReleaseNotes](https://intel-secl.github.io/docs/4.1/ReleaseNotes/ReleaseNotes)
 
 ### Issues
 
