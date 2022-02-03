@@ -437,7 +437,7 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 		}
 		if kubernetes.Config.AttestationService.FDSBaseURL != "" {
 			log.Debugf("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching PlatformData for host %s from FDS", hostDetails.HostName)
-			platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostName, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
+			platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostID, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
 			if err != nil {
 				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get PlatformData for host %s from FDS", hostDetails.HostName)
 			} else {

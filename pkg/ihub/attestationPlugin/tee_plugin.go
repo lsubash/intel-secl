@@ -5,6 +5,7 @@
 package attestationPlugin
 
 import (
+	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/fds"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	fdsModel "github.com/intel-secl/intel-secl/v5/pkg/model/fds"
@@ -16,7 +17,7 @@ import (
 var FDSClient fds.Client
 
 // Retrieve platform data from FDS
-func GetHostPlatformData(hostName string, config *config.Configuration, certDirectory string) ([]*fdsModel.Host, error) {
+func GetHostPlatformData(hostHardwareUUID uuid.UUID, config *config.Configuration, certDirectory string) ([]*fdsModel.Host, error) {
 	log.Trace("attestationPlugin/tee_plugin:GetHostPlatformData() Entering")
 	defer log.Trace("attestationPlugin/tee_plugin:GetHostPlatformData() Leaving")
 
@@ -25,7 +26,7 @@ func GetHostPlatformData(hostName string, config *config.Configuration, certDire
 		return nil, errors.Wrap(err, "attestationPlugin/tee_plugin:GetHostPlatformData() Error in initialising FDS Client")
 	}
 
-	platformData, err := fdsClient.SearchHosts(&fdsModel.HostFilterCriteria{HostName: hostName})
+	platformData, err := fdsClient.SearchHosts(&fdsModel.HostFilterCriteria{HardwareId: hostHardwareUUID})
 	if err != nil {
 		return nil, errors.Wrap(err, "attestationPlugin/tee_plugin:GetHostPlatformData() Error in getting platform details from FDS")
 	}
