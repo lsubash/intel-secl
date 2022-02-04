@@ -4,21 +4,21 @@
 
 Following is the matrix of upgrade support for different components in Intel<sup>®</sup> SecL-DC
 
-Latest release: v4.0.1
+Latest release: v4.0.2
 
 #### Compatibility Matrix:
 | Component (v4) |  CMS                | AAS                    | WPM | KBS                    | TA     | AA | WLA | HVS                    | iHUB | WLS                    |
 |-------------|------------------------|------------------------|-----|------------------------|--------|----|-----|------------------------|------|------------------------|
 | CMS         | NA                     | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| AAS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| WPM         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA     | NA | NA  | NA                     | NA   | NA                     |
-| KBS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| TA          | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v4.0.0                 | NA  | NA                     | NA     | NA | NA  | v4.0.0                 | NA   | NA                     |
+| AAS         | v4.0.0, v4.0.1,v4.0.2,v4.0.2 | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
+| WPM         | v4.0.0, v4.0.1,v4.0.2 | v4.0.0, v4.0.1,v4.0.2 | NA  | v4.0.0, v4.0.1,v4.0.2 | NA     | NA | NA  | NA                     | NA   | NA                     |
+| KBS         | v4.0.0, v4.0.1,v4.0.2 | v4.0.0, v4.0.1,v4.0.2 | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
+| TA          | v4.0.0, v4.0.1,v4.0.2 | v4.0.0                 | NA  | NA                     | NA     | NA | NA  | v4.0.0                 | NA   | NA                     |
 | AA          | NA                     | NA                     | NA  | NA                     | NA     | NA | NA  | NA                     | NA   | NA                     |
-| WLA         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | v3.5.0, v3.6.0, v4.0.0, v4.0.1 |
-| HVS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v4.0.0                 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | NA                     |
-| iHUB        | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | NA                     | NA     | NA | NA  | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA   | NA                     |
-| WLS         | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA  | v3.5.0, v3.6.0, v4.0.0, v4.0.1 | NA     | NA | NA  | NA                     | NA   | NA                     |
+| WLA         | v4.0.0, v4.0.1,v4.0.2 | v4.0.0, v4.0.1,v4.0.2 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | v4.0.0, v4.0.1,v4.0.2 |
+| HVS         | v4.0.0, v4.0.1,v4.0.2 | v4.0.0                 | NA  | NA                     | v4.0.0 | NA | NA  | NA                     | NA   | NA                     |
+| iHUB        | v4.0.0, v4.0.1,v4.0.2 | v4.0.0, v4.0.1,v4.0.2 | NA  | NA                     | NA     | NA | NA  | v4.0.0, v4.0.1,v4.0.2 | NA   | NA                     |
+| WLS         | v4.0.0, v4.0.1,v4.0.2 | v4.0.0, v4.0.1,v4.0.2 | NA  | v4.0.0, v4.0.1,v4.0.2 | NA     | NA | NA  | NA                     | NA   | NA                     |
 
 #### Supported upgrade path:
 
@@ -26,21 +26,21 @@ Binary deployment:
 
 | Component | Abbreviation | Supports upgrade from  |
 |-----------|--------------|-----------------------|
-| Certificate Management Service           | CMS         |  v3.5.0, v3.6.0 |
-| Authentication and Authorization Service | AAS         |  v3.5.0, v3.6.0 |
-| Workload Policy Management               | WPM         |  v3.6.0         |
-| Key Broker Service                       | KBS         |  v3.5.0, v3.6.0 |
-| Trust Agent                              | TA          |  v3.5.0, v3.6.0 |
-| Application Agent                        | AA          |  v3.5.0, v3.6.0 |
-| Workload Agent                           | WLA         |  v3.5.0, v3.6.0 |
-| Host Verification Service                | HVS         |  v3.5.0, v3.6.0 |
-| Integration Hub                          | iHUB        |  v3.5.0, v3.6.0 |
-| Workload Service                         | WLS         |  v3.5.0, v3.6.0 |
-| SGX Caching Service                      | SCS         |  v3.5.0, v3.6.0 |
-| SGX Quote Verification Service           | SQVS        |  v3.5.0, v3.6.0 |
-| SGX Host Verification Service            | SHVS        |  v3.5.0, v3.6.0 |
-| SGX Agent                                | AGENT       |  v3.5.0, v3.6.0 |
-| SKC Client/Library                       | SKC Library |  v3.5.0, v3.6.0 |
+| Certificate Management Service           | CMS         |  v4.0.0, v4.0.1 |
+| Authentication and Authorization Service | AAS         |  v4.0.0, v4.0.1 |
+| Workload Policy Management               | WPM         |  v4.0.0, v4.0.1         |
+| Key Broker Service                       | KBS         |  v4.0.0, v4.0.1 |
+| Trust Agent                              | TA          |  v4.0.0, v4.0.1 |
+| Application Agent                        | AA          |  v4.0.0, v4.0.1 |
+| Workload Agent                           | WLA         |  v4.0.0, v4.0.1 |
+| Host Verification Service                | HVS         |  v4.0.0, v4.0.1 |
+| Integration Hub                          | iHUB        |  v4.0.0, v4.0.1 |
+| Workload Service                         | WLS         |  v4.0.0, v4.0.1 |
+| SGX Caching Service                      | SCS         |  v4.0.0, v4.0.1 |
+| SGX Quote Verification Service           | SQVS        |  v4.0.0, v4.0.1 |
+| SGX Host Verification Service            | SHVS        |  v4.0.0, v4.0.1 |
+| SGX Agent                                | AGENT       |  v4.0.0, v4.0.1 |
+| SKC Client/Library                       | SKC Library |  v4.0.0, v4.0.1 |
 
 
 NOTE:
@@ -52,30 +52,21 @@ Container deployment:
 
 | Component | Abbreviation | Supports upgrade from  |
 |-----------|--------------|-----------------------|
-| Certificate Management Service           | CMS         |  v3.6.0 |
-| Authentication and Authorization Service | AAS         |  v3.6.0 |
-| Workload Policy Management               | WPM         |  v3.6.0 |
-| Key Broker Service                       | KBS         |  v3.6.0 |
-| Trust Agent                              | TA          |  v3.6.0 |
-| Application Agent                        | AA          |  v3.6.0 |
-| Workload Agent                           | WLA         |  v3.6.0 |
-| Host Verification Service                | HVS         |  v3.6.0 |
-| Integration Hub                          | iHUB        |  v3.6.0 |
-| Workload Service                         | WLS         |  v3.6.0 |
-| SGX Caching Service                      | SCS         |  v3.6.0 |
-| SGX Quote Verification Service           | SQVS        |  v3.6.0 |
-| SGX Host Verification Service            | SHVS        |  v3.6.0 |
-| SGX Agent                                | AGENT       |  v3.6.0 |
-| SKC Client/Library                       | SKC Library |  v3.6.0 |
-
-##### Upgrade to v3.6.0:
-*iHUB* :
-iHUB in v3.6.0, has added multi instance installation support. Hence, it requires following ENV variables for the upgrade,
-
-```shell
-HVS_BASE_URL
-SHVS_BASE_URL
-```
+| Certificate Management Service           | CMS         |  v4.0.0, v4.0.1 |
+| Authentication and Authorization Service | AAS         |  v4.0.0, v4.0.1 |
+| Workload Policy Management               | WPM         |  v4.0.0, v4.0.1 |
+| Key Broker Service                       | KBS         |  v4.0.0, v4.0.1 |
+| Trust Agent                              | TA          |  v4.0.0, v4.0.1 |
+| Application Agent                        | AA          |  v4.0.0, v4.0.1 |
+| Workload Agent                           | WLA         |  v4.0.0, v4.0.1 |
+| Host Verification Service                | HVS         |  v4.0.0, v4.0.1 |
+| Integration Hub                          | iHUB        |  v4.0.0, v4.0.1 |
+| Workload Service                         | WLS         |  v4.0.0, v4.0.1 |
+| SGX Caching Service                      | SCS         |  v4.0.0, v4.0.1 |
+| SGX Quote Verification Service           | SQVS        |  v4.0.0, v4.0.1 |
+| SGX Host Verification Service            | SHVS        |  v4.0.0, v4.0.1 |
+| SGX Agent                                | AGENT       |  v4.0.0, v4.0.1 |
+| SKC Client/Library                       | SKC Library |  v4.0.0, v4.0.1 |
 
 ##### Upgrade to v4.0.0:
 *TA and WLA* :
