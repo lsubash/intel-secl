@@ -8,7 +8,6 @@ require (
 	github.com/cloudflare/cfssl v1.5.0
 	github.com/containers/ocicrypt v1.1.2
 	github.com/davecgh/go-spew v1.1.1
-	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
 	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/handlers v1.4.2
@@ -20,7 +19,6 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/mattermost/xml-roundtrip-validator v0.0.0-20201213122252-bcd7e1b9601e
 	github.com/nats-io/jwt/v2 v2.0.3
-	github.com/nats-io/nats-server/v2 v2.3.4 // indirect
 	github.com/nats-io/nats.go v1.11.1-0.20210623165838-4b75fc59ae30
 	github.com/nats-io/nkeys v0.3.0
 	github.com/onsi/ginkgo v1.13.0
