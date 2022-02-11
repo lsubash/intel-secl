@@ -68,6 +68,12 @@ func init() {
 	// set default value for aik
 	viper.SetDefault("aik-certificate-validity-years", constants.DefaultAikCertificateValidity)
 
+	//set default value for Aik Provisioning On EKCert Check
+	viper.SetDefault("require-ek-cert-for-host-provision", false)
+
+	//set default value for Quote Verify For Registration
+	viper.SetDefault("verify-quote-for-host-registration", false)
+
 	// set default values for server
 	viper.SetDefault("server-port", constants.DefaultHVSListenerPort)
 	viper.SetDefault("server-read-timeout", constants.DefaultReadTimeout)
@@ -101,11 +107,13 @@ func defaultConfig() *config.Configuration {
 	// support old hvs env
 	loadAlias()
 	return &config.Configuration{
-		AASApiUrl:        viper.GetString("aas-base-url"),
-		CMSBaseURL:       viper.GetString("cms-base-url"),
-		CmsTlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
-		Dek:              viper.GetString("data-encryption-key"),
-		AikCertValidity:  viper.GetInt("aik-certificate-validity-years"),
+		AASApiUrl:                      viper.GetString("aas-base-url"),
+		CMSBaseURL:                     viper.GetString("cms-base-url"),
+		CmsTlsCertDigest:               viper.GetString("cms-tls-cert-sha384"),
+		Dek:                            viper.GetString("data-encryption-key"),
+		AikCertValidity:                viper.GetInt("aik-certificate-validity-years"),
+		RequireEKCertForHostProvision:  viper.GetBool("require-ek-cert-for-host-provision"),
+		VerifyQuoteForHostRegistration: viper.GetBool("verify-quote-for-host-registration"),
 		AuditLog: config.AuditLogConfig{
 			MaxRowCount: viper.GetInt("audit-log-max-row-count"),
 			NumRotated:  viper.GetInt("audit-log-number-rotated"),

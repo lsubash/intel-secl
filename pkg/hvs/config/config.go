@@ -36,6 +36,9 @@ type Configuration struct {
 	Dek             string `yaml:"data-encryption-key" mapstructure:"data-encryption-key"`
 	AikCertValidity int    `yaml:"aik-certificate-validity-years" mapstructure:"aik-certificate-validity-years"`
 
+	RequireEKCertForHostProvision  bool `yaml:"require-ek-cert-for-host-provision" mapstructure:"require-ek-cert-for-host-provision"`
+	VerifyQuoteForHostRegistration bool `yaml:"verify-quote-for-host-registration" mapstructure:"verify-quote-for-host-registration"`
+
 	Server                   commConfig.ServerConfig `yaml:"server" mapstructure:"server"`
 	Log                      commConfig.LogConfig    `yaml:"log" mapstructure:"log"`
 	DB                       commConfig.DBConfig     `yaml:"db" mapstructure:"db"`

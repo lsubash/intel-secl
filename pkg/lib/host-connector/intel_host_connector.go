@@ -49,15 +49,11 @@ func (ic *IntelConnector) GetHostManifest(pcrList []int) (hvs.HostManifest, erro
 	return hostManifest, nil
 }
 
-//Separate function has been created that accepts nonce to support unit test.
-//Else it would be difficult to mock random nonce.
-func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int) (hvs.HostManifest, error) {
-	log.Trace("intel_host_connector:GetHostManifestAcceptNonce() Entering")
-	defer log.Trace("intel_host_connector:GetHostManifestAcceptNonce() Leaving")
+func (ic *IntelConnector) GetTPMQuoteResponse(nonce string, pcrList []int) (verificationNonceInBytes []byte, tpmQuoteInBytes []byte, aikCertificate *x509.Certificate, aikPem *pem.Block, tpmQuoteResponse taModel.TpmQuoteResponse, error error) {
+	log.Trace("intel_host_connector:GetTPMQuoteResponse() Entering")
+	defer log.Trace("intel_host_connector:GetTPMQuoteResponse() Leaving")
 
 	var verificationNonce string
-	var hostManifest hvs.HostManifest
-
 	//Hardcoded pcr list here since there is no use case for customized pcr list
 	if pcrList == nil || len(pcrList) == 0 {
 		log.Infof("intel_host_connector:GetHostManifestAcceptNonce() pcrList is empty")
@@ -67,10 +63,66 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	//check if AIK Certificate is present on host before getting host manifest
 	aikInDER, err := ic.client.GetAIK()
 	if err != nil || len(aikInDER) == 0 {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Invalid AIK"+
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.Wrap(err, "intel_host_connector:GetTPMQuoteResponse() Invalid AIK"+
 			"certificate returned by TA")
 	}
-	secLog.Debug("intel_host_connector:GetHostManifestAcceptNonce() Successfully received AIK certificate in DER format")
+	secLog.Debug("intel_host_connector:GetTPMQuoteResponse() Successfully received AIK certificate in DER format")
+
+	tpmQuoteResponse, err = ic.client.GetTPMQuote(nonce, pcrList, []string{})
+	if err != nil {
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.Wrap(err, "intel_host_connector:GetTPMQuoteResponse() Error getting TPM "+
+			"quote response")
+	}
+
+	nonceInBytes, err := base64.StdEncoding.DecodeString(nonce)
+	if err != nil {
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.Wrap(err, "intel_host_connector:GetTPMQuoteResponse() Base64 decode of TPM "+
+			"nonce failed")
+	}
+
+	verificationNonce, err = util.GetVerificationNonce(nonceInBytes, tpmQuoteResponse)
+	if err != nil {
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, err
+	}
+	secLog.Debug("intel_host_connector:GetTPMQuoteResponse() Updated Verification nonce is : ", verificationNonce)
+
+	aikCertInBytes, err := base64.StdEncoding.DecodeString(tpmQuoteResponse.Aik)
+	if err != nil {
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.Wrap(err, "intel_host_connector:GetTPMQuoteResponse() Error decoding"+
+			"AIK certificate to bytes")
+	}
+
+	//Convert base64 encoded AIK to Pem format
+	aikPem, _ = pem.Decode(aikCertInBytes)
+	aikCertificate, err = x509.ParseCertificate(aikPem.Bytes)
+
+	if err != nil {
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.Wrap(err, "intel_host_connector:GetTPMQuoteResponse() Error parsing "+
+			"AIK certicate")
+	}
+
+	tpmQuoteInBytes, err = base64.StdEncoding.DecodeString(tpmQuoteResponse.Quote)
+	if err != nil {
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.Wrap(err, "intel_host_connector:GetTPMQuoteResponse() Error converting "+
+			"tpm quote to bytes")
+	}
+
+	verificationNonceInBytes, err = base64.StdEncoding.DecodeString(verificationNonce)
+	if err != nil {
+		return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.Wrap(err, "intel_host_connector:GetTPMQuoteResponse() Error converting "+
+			"nonce to bytes")
+	}
+	return verificationNonceInBytes, tpmQuoteInBytes, aikCertificate, aikPem, tpmQuoteResponse, nil
+}
+
+//Separate function has been created that accepts nonce to support unit test.
+//Else it would be difficult to mock random nonce.
+func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int) (hvs.HostManifest, error) {
+	log.Trace("intel_host_connector:GetHostManifestAcceptNonce() Entering")
+	defer log.Trace("intel_host_connector:GetHostManifestAcceptNonce() Leaving")
+
+	var hostManifest hvs.HostManifest
+	var err error
 
 	hostManifest.HostInfo, err = ic.client.GetHostInfo()
 	if err != nil {
@@ -78,57 +130,21 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 			"host details from TA")
 	}
 
-	tpmQuoteResponse, err := ic.client.GetTPMQuote(nonce, pcrList, []string{})
-	if err != nil {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error getting TPM "+
-			"quote response")
-	}
+	verificationNonceInBytes, tpmQuoteInBytes, aikCertificate, aikPem, tpmQuoteResponse, err := ic.GetTPMQuoteResponse(nonce, pcrList)
 
-	nonceInBytes, err := base64.StdEncoding.DecodeString(nonce)
-	if err != nil {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Base64 decode of TPM "+
-			"nonce failed")
-	}
-
-	verificationNonce, err = util.GetVerificationNonce(nonceInBytes, tpmQuoteResponse)
-	if err != nil {
-		return hvs.HostManifest{}, err
-	}
-	secLog.Debug("intel_host_connector:GetHostManifestAcceptNonce() Updated Verification nonce is : ", verificationNonce)
-
-	aikCertInBytes, err := base64.StdEncoding.DecodeString(tpmQuoteResponse.Aik)
-	if err != nil {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error decoding"+
-			"AIK certificate to bytes")
-	}
-
-	//Convert base64 encoded AIK to Pem format
-	aikPem, _ := pem.Decode(aikCertInBytes)
-	aikCertificate, err := x509.ParseCertificate(aikPem.Bytes)
-
-	if err != nil {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error parsing "+
-			"AIK certicate")
-	}
-
-	tpmQuoteInBytes, err := base64.StdEncoding.DecodeString(tpmQuoteResponse.Quote)
-	if err != nil {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
-			"tpm quote to bytes")
-	}
-
-	verificationNonceInBytes, err := base64.StdEncoding.DecodeString(verificationNonce)
-	if err != nil {
-		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error converting "+
-			"nonce to bytes")
-	}
 	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Verifying quote and retrieving PCR manifest from TPM quote " +
 		"response ...")
-	pcrManifest, pcrsDigest, err := util.VerifyQuoteAndGetPCRManifest(tpmQuoteResponse.EventLog, verificationNonceInBytes,
+	pcrsDigest, buffer, err := util.VerifyQuoteAndGetPCRDetails(verificationNonceInBytes,
 		tpmQuoteInBytes, aikCertificate)
 	if err != nil {
 		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error verifying "+
 			"TPM Quote")
+	}
+
+	pcrManifest, err := util.GetPCRManifest(tpmQuoteResponse.EventLog, buffer)
+	if err != nil {
+		return hvs.HostManifest{}, errors.Wrap(err, "util/aik_quote_verifier:GetHostManifestAcceptNonce() Error "+
+			"retrieving PCR manifest from quote")
 	}
 	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Successfully retrieved PCR manifest from quote")
 

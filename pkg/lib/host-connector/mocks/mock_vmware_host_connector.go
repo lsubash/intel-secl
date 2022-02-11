@@ -6,6 +6,8 @@
 package mocks
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"github.com/intel-secl/intel-secl/v4/pkg/clients/vmware"
 	"github.com/intel-secl/intel-secl/v4/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v4/pkg/model/ta"
@@ -16,6 +18,11 @@ import (
 type MockVmwareConnector struct {
 	client *vmware.MockVMWareClient
 	mock.Mock
+}
+
+func (vhc *MockVmwareConnector) GetTPMQuoteResponse(nonce string, pcrList []int) ([]byte, []byte, *x509.Certificate, *pem.Block, taModel.TpmQuoteResponse, error) {
+	args := vhc.Called(nonce, pcrList)
+	return args.Get(0).([]byte), args.Get(1).([]byte), args.Get(2).(*x509.Certificate), args.Get(3).(*pem.Block), args.Get(4).(taModel.TpmQuoteResponse), args.Error(1)
 }
 
 func (vhc *MockVmwareConnector) GetHostDetails() (taModel.HostInfo, error) {

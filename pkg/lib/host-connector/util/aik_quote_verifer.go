@@ -60,11 +60,23 @@ type pcrSelection struct {
 	pcrSelected []byte
 }
 
-func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []byte, tpmQuoteInBytes []byte,
-	aikCertificate *x509.Certificate) (hvs.PcrManifest, []byte, error) {
+func GetPCRManifest(decodedEventLog string, buffer bytes.Buffer) (hvs.PcrManifest, error) {
+	log.Trace("util/aik_quote_verifier:GetPCRManifest() Entering")
+	defer log.Trace("util/aik_quote_verifier:GetPCRManifest() Leaving")
 
-	log.Trace("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() Entering")
-	defer log.Trace("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() Leaving")
+	pcrManifest, err := createPCRManifest(strings.Split(buffer.String(), "\n"), decodedEventLog)
+	if err != nil {
+		return hvs.PcrManifest{}, errors.Wrap(err, "util/aik_quote_verifier:GetPCRManifest() Error "+
+			"retrieving PCR manifest from quote")
+	}
+	log.Info("util/aik_quote_verifier:GetPCRManifest() Successfully created PCR manifest")
+	return pcrManifest, nil
+}
+
+func VerifyQuoteAndGetPCRDetails(verificationNonce []byte, tpmQuoteInBytes []byte, aikCertificate *x509.Certificate) ([]byte, bytes.Buffer, error) {
+	log.Trace("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() Entering")
+	defer log.Trace("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() Leaving")
+
 	hashAlgPcrSizeMap := make(map[int]int)
 	hashAlgPcrSizeMap[TPM_API_ALG_ID_SHA1] = SHA1_SIZE
 	hashAlgPcrSizeMap[TPM_API_ALG_ID_SHA256] = SHA256_SIZE
@@ -87,10 +99,10 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 
 	index += 2
 	tpm2bData := tpmQuoteInBytes[index : index+int(tpm2bDataSize)]
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() "+
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() "+
 		"Received nonce is : %s", base64.StdEncoding.EncodeToString(tpm2bData))
 	if !bytes.EqualFold(tpm2bData, verificationNonce) {
-		return hvs.PcrManifest{}, nil, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() Challenge " +
+		return nil, bytes.Buffer{}, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() Challenge " +
 			"and received nonce does not match")
 	}
 
@@ -106,9 +118,9 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 	index += 8  // skip over the firmware info - Not interested
 
 	pcrBankCount := binary.BigEndian.Uint32(tpmQuoteInBytes[index : index+4])
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() PCR bank count is : %v", pcrBankCount)
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() PCR bank count is : %v", pcrBankCount)
 	if pcrBankCount > MAX_PCR_BANKS {
-		return hvs.PcrManifest{}, nil, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() AIK Quote " +
+		return nil, bytes.Buffer{}, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() AIK Quote " +
 			"verification failed, Number of PCR selection array in " + "the quote is greater than 5. PCRBankCount " +
 			": " + fmt.Sprint(pcrBankCount))
 	}
@@ -125,10 +137,10 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 	}
 
 	tpm2bDigestSize := binary.BigEndian.Uint16(tpmQuoteInBytes[index : index+2])
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() tpm2bDigestSize is : %v", tpm2bDigestSize)
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() tpm2bDigestSize is : %v", tpm2bDigestSize)
 	index += 2
 	tpm2bDigest := tpmQuoteInBytes[index : index+int(tpm2bDigestSize)]
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest()  PCR manifest digest: %v", tpm2bDigest)
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails()  PCR manifest digest: %v", tpm2bDigest)
 
 	/* PART 2: TPMT_SIGNATURE
 	Skip the first 2 bytes having the quote info size and remaining bytes, which includes signer info, nonce, pcr selection
@@ -142,39 +154,39 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 	 * for now, it is TPM_ALG_RSASSA with value 0x0014
 	 */
 	tpmtSignatureAlg := binary.BigEndian.Uint16(tpmtSig[0:2])
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() TPM signature Algorithm: %v", tpmtSignatureAlg)
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() TPM signature Algorithm: %v", tpmtSignatureAlg)
 	/* hashAlg used by the signature algorithm indicated above
 	 * TPM_ALG_HASH
 	 * for TPM_ALG_RSASSA, the default hash algorithm is TPM_ALG_SHA256 with value 0x000b
 	 */
 	pos += 2
 	tpmtSignatureHashAlg := binary.BigEndian.Uint16(tpmtSig[pos : pos+2])
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() TPM signature Hash Algorithm: %v", tpmtSignatureHashAlg)
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() TPM signature Hash Algorithm: %v", tpmtSignatureHashAlg)
 
 	pos += 2
 	tpmtSignatureSize := binary.BigEndian.Uint16(tpmtSig[pos : pos+2])
 
 	pos += 2
 	tpmtSignature := tpmtSig[pos : pos+tpmtSignatureSize]
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() TPMT signature : %v", tpmtSignature)
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() TPMT signature : %v", tpmtSignature)
 
 	hash := sha256.New()
 	_, err := hash.Write(quoteInfo)
 	if err != nil {
-		return hvs.PcrManifest{}, nil, errors.Wrap(err, "Error writing quote information")
+		return nil, bytes.Buffer{}, errors.Wrap(err, "Error writing quote information")
 	}
 	pcrsDigest := hash.Sum(nil)
-	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() Quote signature : %v", pcrsDigest)
+	secLog.Debugf("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() Quote signature : %v", pcrsDigest)
 	err = rsa.VerifyPKCS1v15(aikCertificate.PublicKey.(*rsa.PublicKey), crypto.SHA256, pcrsDigest, tpmtSignature)
 	if err != nil {
-		return hvs.PcrManifest{}, nil, errors.Wrap(err, "util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() "+
+		return nil, bytes.Buffer{}, errors.Wrap(err, "util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() "+
 			"Error verifying pcrs digest")
 	}
 
 	pos += tpmtSignatureSize
 	pcrLen := uint16(len(tpmQuoteInBytes)) - (pos + tpmtSigIndex)
 	if pcrLen <= 0 {
-		return hvs.PcrManifest{}, nil, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() " +
+		return nil, bytes.Buffer{}, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() " +
 			"AIK Quote verification failed, No PCR values included in quote")
 	}
 	pcrs := tpmtSig[pos : pos+pcrLen]
@@ -183,16 +195,16 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 	count := 0
 	var pcrConcat []byte
 	var pcrSize int
-	var buffer bytes.Buffer
+	var pcrBuffer bytes.Buffer
 
 	for j := 0; j < int(pcrBankCount); j++ {
 		hashAlg := pcrSelection[j].hashAlg
 		if value, ok := hashAlgPcrSizeMap[int(hashAlg)]; ok {
 			pcrSize = value
 		} else {
-			secLog.Error("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() "+
+			secLog.Error("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() "+
 				"AIK Quote verification failed, Unsupported PCR banks, hash algorithm id : ", hashAlg)
-			return hvs.PcrManifest{}, nil, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest()" +
+			return nil, bytes.Buffer{}, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails()" +
 				"AIK Quote verification failed, Unsupported PCR banks, hash algorithm id : %s" + strconv.Itoa(int(hashAlg)))
 		}
 		/* For each pcr bank iterate through each pcr selection array.
@@ -207,19 +219,19 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 					pcrConcat = append(pcrConcat, pcrs[pcrPos:pcrPos+pcrSize]...)
 				}
 				if hashAlg == TPM_API_ALG_ID_SHA1 {
-					buffer.WriteString(fmt.Sprintf("%2d ", pcr))
+					pcrBuffer.WriteString(fmt.Sprintf("%2d ", pcr))
 				} else if hashAlg == TPM_API_ALG_ID_SHA256 {
-					buffer.WriteString(fmt.Sprintf("%2d_SHA256 ", pcr))
+					pcrBuffer.WriteString(fmt.Sprintf("%2d_SHA256 ", pcr))
 				} else if hashAlg == TPM_API_ALG_ID_SHA384 {
-					buffer.WriteString(fmt.Sprintf("%2d_SHA384 ", pcr))
+					pcrBuffer.WriteString(fmt.Sprintf("%2d_SHA384 ", pcr))
 				}
 				//Ignore the pcr banks other than SHA1 SHA256 and SHA384
 				if hashAlg == TPM_API_ALG_ID_SHA1 || hashAlg == TPM_API_ALG_ID_SHA256 || hashAlg == TPM_API_ALG_ID_SHA384 {
 					for i := 0; i < pcrSize; i++ {
-						buffer.WriteString(fmt.Sprintf("%02x", pcrs[pcrPos+i]))
+						pcrBuffer.WriteString(fmt.Sprintf("%02x", pcrs[pcrPos+i]))
 					}
 				}
-				buffer.WriteString("\n")
+				pcrBuffer.WriteString("\n")
 				count++
 				pcrPos += pcrSize
 			}
@@ -228,26 +240,18 @@ func VerifyQuoteAndGetPCRManifest(decodedEventLog string, verificationNonce []by
 	hash = sha256.New()
 	_, err = hash.Write(pcrConcat)
 	if err != nil {
-		return hvs.PcrManifest{}, nil, errors.Wrap(err, "Error writing pcr hash")
+		return nil, bytes.Buffer{}, errors.Wrap(err, "Error writing pcr hash")
 	}
 	pcrsDigest = hash.Sum(nil)
 
 	if !bytes.EqualFold(pcrsDigest, tpm2bDigest) {
-		log.Error("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() AIK Quote verification failed, Digest " +
+		log.Error("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() AIK Quote verification failed, Digest " +
 			"of Concatenated PCR values does not match with PCR digest in the quote")
-		return hvs.PcrManifest{}, nil, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() AIK Quote " +
+		return nil, bytes.Buffer{}, errors.New("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails() AIK Quote " +
 			"verification failed, Digest of Concatenated PCR values does not match with PCR digest in the quote")
 	}
-
-	log.Info("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest()  Successfully verified AIK Quote")
-
-	pcrManifest, err := createPCRManifest(strings.Split(buffer.String(), "\n"), decodedEventLog)
-	if err != nil {
-		return hvs.PcrManifest{}, nil, errors.Wrap(err, "util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() Error "+
-			"retrieving PCR manifest from quote")
-	}
-	log.Info("util/aik_quote_verifier:VerifyQuoteAndGetPCRManifest() Successfully created PCR manifest")
-	return pcrManifest, pcrsDigest, nil
+	log.Info("util/aik_quote_verifier:VerifyQuoteAndGetPCRDetails()  Successfully verified AIK Quote")
+	return pcrsDigest, pcrBuffer, nil
 }
 
 func GetVerificationNonce(nonce []byte, quoteResponse taModel.TpmQuoteResponse) (string, error) {
