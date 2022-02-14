@@ -45,10 +45,14 @@ type UserAndRolesCreate struct {
 }
 
 type AasUsersAndRolesSetup struct {
-	AasApiUrl        string               `json:"aas_api_url"`
-	AasAdminUserName string               `json:"aas_admin_username"`
-	AasAdminPassword string               `json:"aas_admin_password"`
-	UsersAndRoles    []UserAndRolesCreate `json:"users_and_roles"`
+	AasApiUrl                     string               `json:"aas_api_url"`
+	AasAdminUserName              string               `json:"aas_admin_username"`
+	AasAdminPassword              string               `json:"aas_admin_password"`
+	UsersAndRoles                 []UserAndRolesCreate `json:"users_and_roles"`
+	CCCAdminUsername              string               `json:"ccc_admin_username"`
+	CCCAdminPassword              string               `json:"ccc_admin_password"`
+	CustomClaimsComponents        string               `json:"custom_claim_components"`
+	CustomClaimsTokenValiditySecs string               `json:"custom_claims_token_validity_secs"`
 }
 
 type App struct {
@@ -537,6 +541,18 @@ func (a *App) LoadUserAndRolesJson(file string) (*AasUsersAndRolesSetup, error) 
 	if err := dec.Decode(&urc); err != nil {
 		return nil, fmt.Errorf("could not decode json file for user roles - %v", err)
 	}
+	// set up the app map with components that need custom claims token
+	ccc := strings.Split(urc.CustomClaimsComponents, ",")
+	a.CustomClaimsComponents = make(map[string]bool)
+	for _, component := range ccc {
+		if strings.TrimSpace(component) != "" {
+			a.CustomClaimsComponents[strings.TrimSpace(component)] = true
+		}
+	}
+	a.CCCAdminUsername = urc.CCCAdminUsername
+	a.CCCAdminPassword = urc.CCCAdminPassword
+	a.AasAPIUrl = urc.AasApiUrl
+	a.CustomClaimsTokenValiditySecs = urc.CustomClaimsTokenValiditySecs
 	return &urc, nil
 }
 
@@ -775,6 +791,9 @@ func (a *App) Setup(args []string) error {
 		if as, err = a.LoadUserAndRolesJson(jsonIn); err != nil {
 			fmt.Println(err)
 			return err
+		}
+		if cccAdmin := a.GetCCCAdminUser(); cccAdmin != nil {
+			as.UsersAndRoles = append(as.UsersAndRoles, *cccAdmin)
 		}
 
 	} else {
