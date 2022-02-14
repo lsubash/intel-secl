@@ -465,7 +465,7 @@ func (ftc *FlavorTemplateController) ValidateFlavorTemplateCreateRequest(FlvrTem
 	if validationErr := validation.ValidateStrings([]string{FlvrTemp.Label}); validationErr != nil {
 		return "Flavor template label is not in valid format", errors.Wrap(validationErr, "controllers/flavortemplate_controller:ValidateFlavorTemplateCreateRequest() Flavor template label is not in valid format")
 	}
-	
+
 	definitionsSchema := gojsonschema.NewStringLoader(ftc.DefinitionsSchemaJSON)
 
 	if ftc.TemplateSchemaJSON == "" {
