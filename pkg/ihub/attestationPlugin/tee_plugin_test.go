@@ -5,6 +5,7 @@
 package attestationPlugin
 
 import (
+	"github.com/google/uuid"
 	"io/ioutil"
 	"testing"
 
@@ -22,10 +23,10 @@ func TestGetHostReportsTee(t *testing.T) {
 		t.Log("attestationPlugin/tee_plugin_test:TestGetHostReportsTee(): Unable to read file", err)
 	}
 
-	sgxHostName := "localhost"
+	sgxHostHardwareID := uuid.MustParse("00b61da0-5ada-e811-906e-00163566263e")
 	type args struct {
-		hostIP string
-		config *config.Configuration
+		hostHardwareId uuid.UUID
+		config         *config.Configuration
 	}
 	tests := []struct {
 		name    string
@@ -36,7 +37,7 @@ func TestGetHostReportsTee(t *testing.T) {
 		{
 			name: "Valid Test: get-tee-host-platform-data",
 			args: args{
-				hostIP: sgxHostName,
+				hostHardwareId: sgxHostHardwareID,
 				config: &config.Configuration{
 					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
@@ -54,7 +55,7 @@ func TestGetHostReportsTee(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetHostPlatformData(tt.args.hostIP, tt.args.config, sampleRootCertDirPath)
+			got, err := GetHostPlatformData(tt.args.hostHardwareId, tt.args.config, sampleRootCertDirPath)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("TestGetHostReportsTee() error = %v, wantErr %v", err, tt.wantErr)
 				return
