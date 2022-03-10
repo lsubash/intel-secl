@@ -8,8 +8,6 @@ import (
 	"fmt"
 	e "github.com/intel-secl/intel-secl/v5/pkg/lib/common/exec"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
-	"github.com/intel-secl/intel-secl/v5/pkg/wls/postgres"
-	"github.com/pkg/errors"
 	"os"
 )
 
@@ -107,32 +105,5 @@ func (a *App) uninstall(purge bool) error {
 		defaultLog.WithError(err).Error("error stopping service")
 	}
 	fmt.Fprintln(a.consoleWriter(), "WLS Service uninstalled")
-	return nil
-}
-
-var tablesToDrop = []string{
-	"flavor",
-	"image_flavor",
-	"report",
-}
-
-func (a *App) eraseData() error {
-	if a.configuration() == nil {
-		return errors.New("Failed to load configuration file")
-	}
-	dbConf := a.configuration().DB
-	// test connection and create schemas
-	dataStore, err := postgres.NewDataStore(postgres.NewDatabaseConfig(constants.DBTypePostgres, &dbConf))
-	if err != nil {
-		return errors.Wrap(err, "Failed to connect database")
-	}
-	for _, t := range tablesToDrop {
-		sqlCmd := "DROP TABLE IF EXISTS " + t + " CASCADE;"
-		err = dataStore.ExecuteSql(&sqlCmd)
-		if err != nil {
-			return errors.Wrap(err, "Failed to execute query")
-		}
-	}
-	dataStore.Migrate()
 	return nil
 }

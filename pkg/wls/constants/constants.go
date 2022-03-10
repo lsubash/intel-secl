@@ -39,8 +39,8 @@ const (
 	TrustedKeysDir            = ConfigDir + "trusted-keys/"
 
 	//saml directory
-
 	SamlCaCertDir = ConfigDir + "certs/saml/"
+
 	// saml key and cert
 	SamlCaCertFilePath = SamlCaCertDir + "SamlCaCert.pem"
 )
@@ -82,22 +82,6 @@ const (
 	// default locations for tls certificate and key
 	DefaultTLSKeyFile  = ConfigDir + "tls.key"
 	DefaultTLSCertFile = ConfigDir + "tls-cert.pem"
-)
-
-// db constants
-const (
-	DBTypePostgres = "postgres"
-
-	DefaultDbConnRetryAttempts  = 4
-	DefaultDbConnRetryTime      = 1
-	DefaultSearchResultRowLimit = 10000
-
-	//Postgres connection SslModes
-	SslModeAllow      = "allow"
-	SslModePrefer     = "prefer"
-	SslModeVerifyCa   = "verify-ca"
-	SslModeRequire    = "require"
-	SslModeVerifyFull = "verify-full"
 )
 
 // these are used only when uninstalling service

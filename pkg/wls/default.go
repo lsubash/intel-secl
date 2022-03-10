@@ -33,15 +33,6 @@ func init() {
 	viper.SetDefault("server-idle-timeout", constants.DefaultIdleTimeout)
 	viper.SetDefault("server-max-header-bytes", constants.DefaultMaxHeaderBytes)
 
-	// set default for database ssl certificate
-	viper.SetDefault("db-vendor", "postgres")
-	viper.SetDefault("db-host", "localhost")
-	viper.SetDefault("db-port", "5432")
-	viper.SetDefault("db-name", "wls_db")
-	viper.SetDefault("db-ssl-mode", constants.SslModeVerifyFull)
-	viper.SetDefault("db-ssl-cert", constants.ConfigDir+"wlsdbsslcert.pem")
-	viper.SetDefault("db-conn-retry-attempts", constants.DefaultDbConnRetryAttempts)
-	viper.SetDefault("db-conn-retry-time", constants.DefaultDbConnRetryTime)
 }
 
 func defaultConfig() *config.Configuration {
@@ -71,15 +62,6 @@ func defaultConfig() *config.Configuration {
 
 func loadAlias() {
 	alias := map[string]string{
-		"db-host":                    "WLS_DB_HOSTNAME",
-		"db-vendor":                  "WLS_DB_VENDOR",
-		"db-port":                    "WLS_DB_PORT",
-		"db-name":                    "WLS_DB",
-		"db-username":                "WLS_DB_USERNAME",
-		"db-password":                "WLS_DB_PASSWORD",
-		"db-ssl-cert":                "WLS_DB_SSLCERT",
-		"db-ssl-cert-source":         "WLS_DB_SSLCERTSRC",
-		"db-ssl-mode":                "WLS_DB_SSL_MODE",
 		"tls-san-list":               "SAN_LIST",
 		"hvs-base-url":               "HVS_URL",
 		"aas-base-url":               "AAS_API_URL",

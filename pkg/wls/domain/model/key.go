@@ -7,24 +7,8 @@ package model
 
 import (
 	"encoding/xml"
-	"github.com/google/uuid"
 	"time"
 )
-
-type Image struct {
-	ID        uuid.UUID   `json:"id"`
-	FlavorIDs []uuid.UUID `json:"flavor_ids"`
-}
-
-// ImageFilter specifies query filter criteria for retrieving images. Each Field may be empty
-type ImageFilter struct {
-	FlavorID uuid.UUID `json:"flavor_id,omitempty"`
-	ImageID  uuid.UUID `json:"image_id,omitempty"`
-}
-
-type ImageCollection struct {
-	Images []*ImageFilter `json:"imageFlavor"`
-}
 
 // Saml is used to represent saml report struct
 type Saml struct {

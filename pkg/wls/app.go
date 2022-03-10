@@ -83,11 +83,6 @@ func (a *App) Run(args []string) error {
 			return errInvalidCmd
 		}
 		return a.status()
-	case "erase-data":
-		if len(args) != 2 {
-			return errInvalidCmd
-		}
-		return a.eraseData()
 	case "uninstall":
 		// the only allowed flag is --purge
 		purge := false

@@ -117,26 +117,6 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.ConsoleWriter = a.consoleWriter()
 	runner.ErrorWriter = a.errorWriter()
 
-	dbConf := commConfig.DBConfig{
-		Vendor:   viper.GetString("db-vendor"),
-		Host:     viper.GetString("db-host"),
-		Port:     viper.GetInt("db-port"),
-		DBName:   viper.GetString("db-name"),
-		Username: viper.GetString("db-username"),
-		Password: viper.GetString("db-password"),
-		SSLMode:  viper.GetString("db-ssl-mode"),
-		SSLCert:  viper.GetString("db-ssl-cert"),
-
-		ConnectionRetryAttempts: viper.GetInt("db-conn-retry-attempts"),
-		ConnectionRetryTime:     viper.GetInt("db-conn-retry-time"),
-	}
-	runner.AddTask("database", "", &tasks.DBSetup{
-		DBConfigPtr:   &a.Config.DB,
-		DBConfig:      dbConf,
-		SSLCertSource: viper.GetString("db-ssl-cert-source"),
-		ConsoleWriter: a.consoleWriter(),
-	})
-
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
 		CaCertDirPath: constants.TrustedCaCertsDir,
 		ConsoleWriter: a.consoleWriter(),

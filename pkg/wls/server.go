@@ -14,7 +14,6 @@ import (
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	wlsModel "github.com/intel-secl/intel-secl/v5/pkg/wls/domain/model"
-	"github.com/intel-secl/intel-secl/v5/pkg/wls/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/router"
 	"github.com/pkg/errors"
 	stdlog "log"
@@ -41,15 +40,9 @@ func (a *App) startServer() error {
 		return err
 	}
 
-	// Initialize Database
-	dataStore, err := postgres.InitDatabase(&c.DB)
-	if err != nil {
-		return errors.Wrap(err, "An error occurred while initializing Database")
-	}
-
 	certStore := crypt.LoadCertificates(a.loadCertPathStore(), wlsModel.GetUniqueCertTypes())
 	// Initialize routes
-	routes, err := router.InitRoutes(c, dataStore, certStore)
+	routes, err := router.InitRoutes(c, certStore)
 	if err != nil {
 		return errors.Wrap(err, "An error occurred while initializing routes")
 	}

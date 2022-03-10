@@ -24,7 +24,6 @@ type Configuration struct {
 	KeyCacheSeconds  int                      `yaml:"key-cache-seconds" mapstructure:"key-cache-seconds"`
 	Server           commConfig.ServerConfig  `yaml:"server" mapstructure:"server"`
 	Log              commConfig.LogConfig     `yaml:"log" mapstructure:"log"`
-	DB               commConfig.DBConfig      `yaml:"db" mapstructure:"db"`
 }
 
 // this function sets the configure file name and type

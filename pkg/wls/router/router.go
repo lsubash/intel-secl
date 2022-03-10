@@ -19,7 +19,6 @@ import (
 	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
-	"github.com/intel-secl/intel-secl/v5/pkg/wls/postgres"
 	"github.com/pkg/errors"
 )
 
@@ -31,7 +30,7 @@ type Router struct {
 }
 
 // InitRoutes registers all routes for the application.
-func InitRoutes(cfg *config.Configuration, dataStore *postgres.DataStore, certStore *crypt.CertificatesStore) (*mux.Router, error) {
+func InitRoutes(cfg *config.Configuration, certStore *crypt.CertificatesStore) (*mux.Router, error) {
 	defaultLog.Trace("router/router:InitRoutes() Entering")
 	defer defaultLog.Trace("router/router:InitRoutes() Leaving")
 
@@ -39,18 +38,15 @@ func InitRoutes(cfg *config.Configuration, dataStore *postgres.DataStore, certSt
 	router := mux.NewRouter()
 
 	router.SkipClean(true)
-	err := defineSubRoutes(router, strings.ToLower(constants.ServiceName), cfg, dataStore, certStore)
+	err := defineSubRoutes(router, strings.ToLower(constants.ServiceName), cfg, certStore)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not define sub routes")
 	}
-	err = defineSubRoutesV1(router, strings.ToLower(constants.ServiceName), cfg, dataStore, certStore)
-	if err != nil {
-		return nil, errors.Wrap(err, "Could not define sub routes")
-	}
+
 	return router, nil
 }
 
-func defineSubRoutes(router *mux.Router, service string, cfg *config.Configuration, dataStore *postgres.DataStore, certStore *crypt.CertificatesStore) error {
+func defineSubRoutes(router *mux.Router, service string, cfg *config.Configuration, certStore *crypt.CertificatesStore) error {
 	defaultLog.Trace("router/router:defineSubRoutes() Entering")
 	defer defaultLog.Trace("router/router:defineSubRoutes() Leaving")
 
@@ -66,29 +62,7 @@ func defineSubRoutes(router *mux.Router, service string, cfg *config.Configurati
 	subRouter.Use(cmw.NewTokenAuth(constants.TrustedJWTSigningCertsDir,
 		constants.TrustedCaCertsDir, cfgRouter.fnGetJwtCerts,
 		cacheTime))
-	subRouter = SetFlavorRoutes(subRouter, dataStore)
-	subRouter = SetReportRoutes(subRouter, dataStore)
-	subRouter = SetImageRoutes(subRouter, dataStore, cfg, certStore)
 	subRouter = SetKeyRoutes(subRouter, cfg, certStore)
-	return nil
-}
-
-func defineSubRoutesV1(router *mux.Router, service string, cfg *config.Configuration, dataStore *postgres.DataStore, certStore *crypt.CertificatesStore) error {
-	defaultLog.Trace("router/router:defineSubRoutes() Entering")
-	defer defaultLog.Trace("router/router:defineSubRoutes() Leaving")
-
-	serviceApi := "/" + service + "/v1/"
-	subRouter := router.PathPrefix(serviceApi).Subrouter()
-	cfgRouter := Router{cfg: cfg}
-	var cacheTime, err = time.ParseDuration(constants.JWTCertsCacheTime)
-	if err != nil {
-		return errors.Wrap(err, "Could not parse JWT Certificate cache time")
-	}
-	subRouter.Use(cmw.NewTokenAuth(constants.TrustedJWTSigningCertsDir,
-		constants.TrustedCaCertsDir, cfgRouter.fnGetJwtCerts,
-		cacheTime))
-
-	subRouter = SetImageRoutesV1(subRouter, dataStore, cfg, certStore)
 	return nil
 }
 
