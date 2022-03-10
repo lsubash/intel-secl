@@ -227,7 +227,7 @@ tpm_extend()
 	log "TPM Extend STARTED"
 	log "SHA hash will be used to extend PCR"
 	
-	tpm_version_file=$tmp_root/opt/trustagent/configuration/tpm-version
+	tpm_version_file=$tmp_root/etc/trustagent/tpm-version
 	log "tpm version file : $tpm_version_file"
 	event_log_file=$tmp_root/$manifest_path/ramfs/pcr_event_log
 	log "event log file : $event_log_file"

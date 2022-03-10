@@ -81,7 +81,7 @@ const (
 	TrustedCaCertsDir           = ConfigDirPath + "certs/trustedca/"
 	DefaultConfigFilePath       = ConfigDirPath + ConfigFileName + "." + ConfigFileExtension
 	DefaultTrustagentUser       = "tagent"
-	DefaultTrustagentConfigPath = "/opt/trustagent/configuration"
+	DefaultTrustagentConfigPath = "/etc/trustagent"
 	SystemCtlCmd                = "systemctl"
 	SystemctlStartOperation     = "start"
 	SystemctlStopOperation      = "stop"

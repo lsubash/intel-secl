@@ -9,10 +9,9 @@ import "time"
 const (
 	TlsKey                          = "tls"
 	InstallationDir                 = "/opt/trustagent/"
-	ConfigDir                       = InstallationDir + "configuration/"
+	ConfigDir                       = "/etc/trustagent/"
 	ConfigFileName                  = "config"
 	ConfigFilePath                  = ConfigDir + ConfigFileName + ".yml"
-	BinDir                          = InstallationDir + "bin/"
 	ExecLinkPath                    = "/usr/bin/tagent"
 	LogDir                          = "/var/log/trustagent/"
 	HttpLogFile                     = LogDir + "http.log"
@@ -59,7 +58,6 @@ const (
 	DefaultTaTlsCn                  = "Trust Agent TLS Certificate"
 	DefaultTaTlsSan                 = "127.0.0.1,localhost"
 	DefaultTaTlsSanSeparator        = ","
-	TrustAgentEnvMaxLength          = 10000
 	FlavorUUIDMaxLength             = 500
 	FlavorLabelsMaxLength           = 500
 	DefaultReadTimeout              = 30 * time.Second
@@ -67,7 +65,6 @@ const (
 	DefaultWriteTimeout             = 10 * time.Second
 	DefaultIdleTimeout              = 10 * time.Second
 	DefaultMaxHeaderBytes           = 1 << 20
-	AikSecretKeyFile                = ConfigDir + "aiksecretkey"
 	TagIndexSize                    = 48 // size of sha384 hash
 	CommunicationModeHttp           = "http"
 	CommunicationModeOutbound       = "outbound"
@@ -81,10 +78,7 @@ const (
 	EnvTPMOwnerSecret            = "TPM_OWNER_SECRET"
 	EnvVSAPIURL                  = "HVS_URL"
 	EnvTAPort                    = "TRUSTAGENT_PORT"
-	EnvCMSBaseURL                = "CMS_BASE_URL"
-	EnvCMSTLSCertDigest          = "CMS_TLS_CERT_SHA384"
 	EnvAASBaseURL                = "AAS_API_URL"
-	EnvTLSCertCommonName         = "TA_TLS_CERT_CN"
 	EnvCertSanList               = "SAN_LIST"
 	EnvCurrentIP                 = "CURRENT_IP"
 	EnvBearerToken               = "BEARER_TOKEN"
@@ -164,7 +158,6 @@ const (
 	TaLogLevelViperKey              = "log.level"
 	LogEnableStdoutViperKey         = "log.enable-stdout"
 	LogEntryMaxLengthViperKey       = "log.max-length"
-	ApiTokenViperKey                = "api-token"
 	ViperKeyDashSeparator           = "-"
 	ViperDotSeparator               = "."
 	EnvNameSeparator                = "_"

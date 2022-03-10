@@ -136,6 +136,15 @@ func (a *App) uninstall() error {
 		}
 	}
 
+	// remove all of tagent files (in /etc/trustagent)
+	//
+	if _, err := os.Stat(constants.ConfigDir); err == nil {
+		err = os.RemoveAll(constants.ConfigDir)
+		if err != nil {
+			log.WithError(err).Warnf("main:uninstall() An error occurred removing the trustagent configuration files: %s", err)
+		}
+	}
+
 	fmt.Println("TrustAgent files removed successfully")
 
 	return nil
