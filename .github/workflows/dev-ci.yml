@@ -1,8 +1,6 @@
 name: pipeline
 
 on:
-  push:
-    branches: [ v*/develop ]
   pull_request:
     branches: [ v*/develop, master ]
 
