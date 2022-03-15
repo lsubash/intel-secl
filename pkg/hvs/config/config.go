@@ -78,7 +78,7 @@ type NatsConfig struct {
 func init() {
 	viper.SetConfigName(constants.ConfigFile)
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(constants.ConfigDir)
 }
 
 // config is application specific

@@ -22,7 +22,7 @@ import (
 func init() {
 	viper.SetConfigName(constants.ConfigFileName)
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(constants.ConfigDirPath)
 }
 
 type HvsConfig struct {

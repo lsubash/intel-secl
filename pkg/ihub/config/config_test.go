@@ -59,7 +59,6 @@ func TestLoadConfiguration(t *testing.T) {
 					}
 				}()
 			}
-
 			viper.AddConfigPath(dir)
 			defer viper.Reset()
 

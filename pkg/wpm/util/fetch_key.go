@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/url"
 	"regexp"
@@ -29,7 +28,6 @@ func FetchKey(keyID string, assetTag string) ([]byte, string, error) {
 	log.Trace("pkg/wpm/util/encrypt.go:FetchKey() Entering")
 	defer log.Trace("pkg/wpm/util/encrypt.go:FetchKey() Leaving")
 
-	viper.AddConfigPath(consts.ConfigDir)
 	cfg, err := config.LoadConfiguration()
 	if err != nil {
 		return nil, "", errors.Wrap(err, "pkg/util/fetch_key.go:FetchKey() Error loading WPM configuration")

@@ -67,7 +67,7 @@ var secLog = commLog.GetSecurityLogger()
 func init() {
 	viper.SetConfigName(constants.ConfigFileName)
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(constants.ConfigDir)
 }
 
 // LoadConfiguration loads the persisted configuration from disk

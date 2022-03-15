@@ -70,7 +70,7 @@ type KmipConfig struct {
 func init() {
 	viper.SetConfigName(constants.ConfigFile)
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(constants.ConfigDir)
 }
 
 // LoadConfiguration loads application specific configuration from config.yml

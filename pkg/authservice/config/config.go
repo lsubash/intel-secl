@@ -62,7 +62,7 @@ type NatsEntityInfo struct {
 func init() {
 	viper.SetConfigName(constants.ConfigFile)
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(constants.ConfigDir)
 }
 
 func (conf *Configuration) Save(filename string) error {

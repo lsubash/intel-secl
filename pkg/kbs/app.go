@@ -18,7 +18,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 var errInvalidCmd = errors.New("Invalid input after command")
@@ -147,7 +146,6 @@ func (app *App) configuration() *config.Configuration {
 	if app.Config != nil {
 		return app.Config
 	}
-	viper.AddConfigPath(app.configDir())
 	config, err := config.LoadConfiguration()
 	if err == nil {
 		app.Config = config

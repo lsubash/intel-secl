@@ -14,7 +14,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"io"
 	"os"
 	"os/exec"
@@ -158,7 +157,6 @@ func (a *App) configuration() *config.Configuration {
 	if a.Config != nil {
 		return a.Config
 	}
-	viper.AddConfigPath(a.configDir())
 	c, err := config.LoadConfiguration()
 	if err == nil {
 		a.Config = c

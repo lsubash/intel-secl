@@ -16,7 +16,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/wlagent/constants"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"io"
 	"os"
 	"os/exec"
@@ -85,7 +84,9 @@ func (a *App) logWriter() io.Writer {
 }
 
 func (a *App) configuration() *config.Configuration {
-	viper.AddConfigPath(a.configDir())
+	if a.config != nil {
+		return a.config
+	}
 	c, err := config.LoadConfiguration()
 	if err == nil {
 		a.config = c

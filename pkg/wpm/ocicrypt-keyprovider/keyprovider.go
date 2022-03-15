@@ -13,7 +13,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/util"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 	"io"
 	"os"
 	"strings"
@@ -65,7 +64,6 @@ func GetKey(stdInput *os.File) error {
 	if err != nil {
 		return errors.Wrap(err, "Error while decoding KeyProviderKeyWrapProtocolInput")
 	}
-	viper.AddConfigPath(constants.ConfigDir)
 	cfg, err := config.LoadConfiguration()
 	if err != nil {
 		return errors.Wrap(err, "Error loading WPM configuration")

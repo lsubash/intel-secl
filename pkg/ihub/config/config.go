@@ -46,7 +46,7 @@ type Endpoint struct {
 func init() {
 	viper.SetConfigName(constants.ConfigFile)
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(constants.ConfigDir)
 }
 
 //SaveConfiguration method used to save the configuration

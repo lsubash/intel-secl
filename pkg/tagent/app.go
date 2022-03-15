@@ -21,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	"crypto/x509"
+	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/hvsclient"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
@@ -37,10 +39,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-
-	"crypto/x509"
-	"encoding/json"
 
 	_ "github.com/intel-secl/intel-secl/v5/docs/shared/tagent"
 )
@@ -203,7 +201,9 @@ func (a *App) httpLogWriter() io.Writer {
 }
 
 func (a *App) configuration() *config.TrustAgentConfiguration {
-	viper.AddConfigPath(a.configDir())
+	if a.config != nil {
+		return a.config
+	}
 	c, err := config.LoadConfiguration()
 	if err == nil {
 		a.config = c

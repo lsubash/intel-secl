@@ -40,7 +40,7 @@ type CACertConfig struct {
 func init() {
 	viper.SetConfigName(constants.ConfigFile)
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(constants.ConfigDir)
 }
 
 func (c *Configuration) Save(filename string) error {
