@@ -59,6 +59,7 @@ func defineSubRoutes(router *mux.Router, service string, cfg *config.Configurati
 	if err != nil {
 		return errors.Wrap(err, "Could not parse JWT Certificate cache time")
 	}
+	subRouter = router.PathPrefix(serviceApi).Subrouter()
 	subRouter.Use(cmw.NewTokenAuth(constants.TrustedJWTSigningCertsDir,
 		constants.TrustedCaCertsDir, cfgRouter.fnGetJwtCerts,
 		cacheTime))
