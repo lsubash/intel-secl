@@ -97,12 +97,12 @@ func (controller JwtTokenController) CreateCustomClaimsJwtToken(w http.ResponseW
 	dec.DisallowUnknownFields()
 	err := dec.Decode(&cc)
 	if err != nil {
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode request body"}
 	}
 
 	validationErr := validation.ValidateUserNameString(cc.Subject)
 	if validationErr != nil {
-		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: validationErr.Error()}
+		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Invalid subject provided"}
 	}
 
 	jwt, err := controller.TokenFactory.Create(&cc.Claims, cc.Subject, time.Duration(cc.ValiditySecs)*time.Second)
