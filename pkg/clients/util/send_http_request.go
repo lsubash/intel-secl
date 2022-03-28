@@ -67,15 +67,17 @@ func SendRequest(req *http.Request, aasURL, serviceUsername, servicePassword str
 	defer log.Trace("clients/send_http_request:SendRequest() Leaving")
 
 	response, err := GetHTTPResponse(req, trustedCaCerts, true, aasURL, serviceUsername, servicePassword)
+	if response != nil {
+		defer func() {
+			derr := response.Body.Close()
+			if derr != nil {
+				log.WithError(derr).Error("Error closing response body")
+			}
+		}()
+	}
 	if err != nil {
 		return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Error getting response")
 	}
-	defer func() {
-		derr := response.Body.Close()
-		if derr != nil {
-			log.WithError(derr).Error("Error closing response body")
-		}
-	}()
 
 	//create byte array of HTTP response body
 	body, err := ioutil.ReadAll(response.Body)
@@ -92,15 +94,17 @@ func SendNoAuthRequest(req *http.Request, trustedCaCerts []x509.Certificate) ([]
 	defer log.Trace("clients/send_http_request:SendNoAuthRequest() Leaving")
 
 	response, err := GetHTTPResponse(req, trustedCaCerts, false)
+	if response != nil {
+		defer func() {
+			derr := response.Body.Close()
+			if derr != nil {
+				log.WithError(derr).Error("Error closing response body")
+			}
+		}()
+	}
 	if err != nil {
 		return nil, errors.Wrap(err, "clients/send_http_request.go:SendNoAuthRequest() Error getting response")
 	}
-	defer func() {
-		derr := response.Body.Close()
-		if derr != nil {
-			log.WithError(derr).Error("Error closing response body")
-		}
-	}()
 
 	//create byte array of HTTP response body
 	body, err := ioutil.ReadAll(response.Body)
@@ -144,18 +148,20 @@ func GetHTTPResponse(req *http.Request, trustedCaCerts []x509.Certificate, addTo
 	}
 
 	response, err := client.Do(req)
+	req.Close = true
 	if err != nil {
-		return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
+		return response, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
 	}
 	if response.StatusCode == http.StatusUnauthorized && addToken {
 		// fetch token and try again
 		err = addJWTToken(aasClient, req, cred[1], cred[2], true)
 		if err != nil {
-			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to add JWT token")
+			return response, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to add JWT token")
 		}
 		response, err = client.Do(req)
+		req.Close = true
 		if err != nil {
-			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
+			return response, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
 		}
 	}
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusNoContent {
