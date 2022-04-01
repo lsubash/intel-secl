@@ -9,7 +9,7 @@ const (
 	ExplicitServiceName = "ISecL K8s Controller"
 )
 
-const LogFilePath = "/var/log/isecl-k8s-extensions/isecl-controller.log"
+const LogFilePath = "/var/log/isecl-k8s-controller/isecl-controller.log"
 
 // Env param handles
 const (

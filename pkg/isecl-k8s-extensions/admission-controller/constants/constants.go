@@ -13,9 +13,8 @@ const (
 	LogLevelEnv        = "LOG_LEVEL"
 	LogMaxLengthEnv    = "LOG_MAX_LENGTH"
 	PortEnv            = "PORT"
-	LogBasePath        = "/var/log/isecl-k8s-extensions/"
-	HttpLogFile        = LogBasePath + "isecl-admission-controller-http.log"
-	DefaultLogFilePath = LogBasePath + "isecl-admission-controller.log"
+	HttpLogFile        = "/var/log/admission-controller/admission-controller-http.log"
+	DefaultLogFilePath = "/var/log/admission-controller/admission-controller.log"
 )
 
 const (
