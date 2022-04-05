@@ -3,8 +3,10 @@
 
 ## Key features
 - Provides and retains encryption/decryption keys for virtual machine images / docker images
-- The Key Broker Service connects to a back-end 3rd Party KMIP-compliant key management service, like OpenStack Barbican, for key creation and vaulting services
-
+- The Key Broker Service connects to a back-end 3rd Party KMIP-compliant key management service for key creation and vaulting services
+- Provides and Retains Encryption keys for Secure Key Caching Usecase
+- Acts as relying party to facilitate attestation of SGX ECDSA Quote (Secure Key Caching Usecase)
+- Provides Key Transfer Policy validation engine to ensure keys are released to trusted clients
 
 ## Build Key Broker Service
 
