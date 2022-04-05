@@ -95,11 +95,11 @@ const (
 const (
 	SetupAllCommand            = "all"
 	DownloadRootCACertCommand  = "download-ca-cert"
-	RegisterSigningKeyCommand  = "RegisterSigningKey"
-	RegisterBindingKeyCommand  = "RegisterBindingKey"
+	RegisterSigningKeyCommand  = "register-signing-key"
+	RegisterBindingKeyCommand  = "register-binding-key"
 	UpdateServiceConfigCommand = "update-service-config"
-	CreateBindingKey           = "BindingKey"
-	CreateSigningKey           = "SigningKey"
+	CreateBindingKey           = "binding-key"
+	CreateSigningKey           = "signing-key"
 )
 
 // application constants(

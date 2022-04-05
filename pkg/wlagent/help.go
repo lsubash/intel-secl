@@ -22,10 +22,10 @@ const helpStr = `Usage:
 	    setup [task]           Run setup task
 	Available Tasks for setup:
 	    download-ca-cert       Download CMS root CA certificate
-	    SigningKey             Generate a TPM signing key
-	    BindingKey             Generate a TPM binding key
-	    RegisterSigningKey     Register a signing key with the host verification service
-	    RegisterBindingKey     Register a binding key with the host verification service
+	    signing-key             Generate a TPM signing key
+	    binding-Key             Generate a TPM binding key
+	    register-signing-key     Register a signing key with the host verification service
+	    register-binding-key     Register a binding key with the host verification service
 	    update-service-config  Updates service configuration`
 
 func (a *App) printUsage() {

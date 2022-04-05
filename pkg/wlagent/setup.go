@@ -106,7 +106,7 @@ func (a *App) setupTaskRunner() (*commSetup.Runner, error) {
 		constants.ViperDotSeparator, constants.EnvNameSeparator))
 	viper.AutomaticEnv()
 
-	if a.config == nil {
+	if a.configuration() == nil {
 		a.config = defaultConfig()
 	}
 
