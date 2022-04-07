@@ -65,7 +65,7 @@ id -u cms 2> /dev/null || useradd --comment "Certificate Management Service" --h
 
 mkdir -p $BIN_PATH && chown cms:cms $BIN_PATH/
 cp $COMPONENT_NAME $BIN_PATH/ && chown cms:cms $BIN_PATH/*
-chmod 750 $BIN_PATH/*
+chmod 700 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 # Create configuration directory in /etc

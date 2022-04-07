@@ -349,7 +349,7 @@ func SavePrivateKeyAsPKCS8(keyDer []byte, filePath string) error {
 		return fmt.Errorf("could not open private key file for writing: %v", err)
 	}
 	// private key should not be world readable
-	err = os.Chmod(filePath, 0640)
+	err = os.Chmod(filePath, 0600)
 	if err != nil {
 		return errors.Wrapf(err, "crypt/x509:SavePrivateKeyAsPKCS8() Error while changing file permission for file : %s", filePath)
 	}
@@ -425,7 +425,7 @@ func SavePemCertWithShortSha1FileName(certPem []byte, dir string) error {
 			log.WithError(derr).Error("Error closing file")
 		}
 	}()
-	err = os.Chmod(filePath, 0640)
+	err = os.Chmod(filePath, 0600)
 	if err != nil {
 		return fmt.Errorf("could not change file permissions: %s", filePath)
 	}
@@ -455,7 +455,7 @@ func SavePemCert(cert []byte, certFilePath string) (err error) {
 			log.WithError(derr).Error("Error closing file")
 		}
 	}()
-	err = os.Chmod(certFilePath, 0640)
+	err = os.Chmod(certFilePath, 0600)
 	if err != nil {
 		return fmt.Errorf("could not change file permissions: %s", certFilePath)
 	}

@@ -98,12 +98,12 @@ func (dc *DownloadCert) Run() error {
 
 	fi, err := os.Stat(dc.CertFile)
 	if err != nil || fi.Mode().IsRegular() {
-		err = ioutil.WriteFile(dc.CertFile, cert, 0644)
+		err = ioutil.WriteFile(dc.CertFile, cert, 0600)
 		if err != nil {
 			printToWriter(dc.ConsoleWriter, dc.commandName, "Failed to save certificate")
 			return errors.Wrap(err, "Could not store Certificate")
 		}
-		err = os.Chmod(dc.CertFile, 0644)
+		err = os.Chmod(dc.CertFile, 0600)
 		if err != nil {
 			printToWriter(dc.ConsoleWriter, dc.commandName, "Failed to change file permission")
 			return errors.Wrap(err, "Could not change file permission")
