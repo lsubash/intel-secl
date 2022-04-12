@@ -95,6 +95,107 @@ func (ktpc *KeyTransferPolicyController) Retrieve(responseWriter http.ResponseWr
 	return transferPolicy, http.StatusOK, nil
 }
 
+//Update : Function to update a key transfer policy
+func (ktpc *KeyTransferPolicyController) Update(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
+	defaultLog.Trace("controllers/key_transfer_policy_controller:Update() Entering")
+	defer defaultLog.Trace("controllers/key_transfer_policy_controller:Update() Leaving")
+
+	id := uuid.MustParse(mux.Vars(request)["id"])
+
+	if request.Header.Get("Content-Type") != constants.HTTPMediaTypeJson {
+		return nil, http.StatusUnsupportedMediaType, &commErr.ResourceError{Message: "Invalid Content-Type"}
+	}
+
+	if request.ContentLength == 0 {
+		secLog.Error("controllers/key_transfer_policy_controller:Update() The request body was not provided")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
+	}
+
+	var requestPolicy kbs.KeyTransferPolicy
+	// Decode the incoming json data to note struct
+	dec := json.NewDecoder(request.Body)
+	dec.DisallowUnknownFields()
+
+	err := dec.Decode(&requestPolicy)
+	if err != nil {
+		secLog.WithError(err).Errorf("controllers/key_transfer_policy_controller:Update() %s : Unable to decode JSON request body", commLogMsg.InvalidInputBadEncoding)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
+	}
+
+	if err := ValidateKeyTransferPolicy(requestPolicy); err != nil {
+		secLog.WithError(err).Error("controllers/key_transfer_policy_controller:Update() Input validation failed")
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Input validation failed"}
+	}
+
+	transferPolicy, err := ktpc.policyStore.Retrieve(id)
+	if err != nil {
+		if err.Error() == commErr.RecordNotFound {
+			defaultLog.Errorf("controllers/key_transfer_policy_controller:Update() Key transfer policy with specified id could not be located")
+			return nil, http.StatusNotFound, &commErr.ResourceError{Message: "Key transfer policy with specified id does not exist"}
+		} else {
+			defaultLog.WithError(err).Error("controllers/key_transfer_policy_controller:Update() Key transfer policy retrieve failed")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve key transfer policy"}
+		}
+	}
+
+	if err := CompareTransferPolicy(transferPolicy, &requestPolicy); err != nil {
+		secLog.WithError(err).Error("controllers/key_transfer_policy_controller:Update() transfer policy don't match")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Can't update the record."}
+	}
+
+	updatedPolicy, err := ktpc.policyStore.Update(transferPolicy)
+	if err != nil {
+		defaultLog.WithError(err).Error("controllers/key_transfer_policy_controller:Update() Key transfer policy update failed")
+		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to update key transfer policy"}
+	}
+
+	secLog.WithField("Id", updatedPolicy.ID).Infof("controllers/key_transfer_policy_controller:Update() %s: Key Transfer Policy updated by: %s", commLogMsg.PrivilegeModified, request.RemoteAddr)
+	return updatedPolicy, http.StatusOK, nil
+}
+
+func CompareTransferPolicy(retrievedPolicy *kbs.KeyTransferPolicy, inputPolicy *kbs.KeyTransferPolicy) error {
+	defaultLog.Trace("controllers/key_transfer_policy_controller:CompareTransferPolicy() Entering")
+	defer defaultLog.Trace("controllers/key_transfer_policy_controller:CompareTransferPolicy() Leaving")
+
+	if slice.Contains(inputPolicy.AttestationType, aps.SGX) && inputPolicy.SGX.Attributes != nil {
+		return UpdateSGXAttributes(retrievedPolicy.SGX.Attributes, inputPolicy.SGX.Attributes)
+	}
+	if slice.Contains(inputPolicy.AttestationType, aps.TDX) && inputPolicy.TDX.Attributes != nil {
+		return UpdateTDXAttributes(retrievedPolicy.TDX.Attributes, inputPolicy.TDX.Attributes)
+	} else {
+		return errors.New("controllers/key_transfer_policy_controller:CompareTransferPolicy() Incorrect attestation type in key transfer policy")
+	}
+}
+
+func UpdateTDXAttributes(retrievedPolicy *kbs.TdxAttributes, inputPolicy *kbs.TdxAttributes) error {
+	defaultLog.Trace("controllers/key_transfer_policy_controller:UpdateTDXAttributes() Entering")
+	defer defaultLog.Trace("controllers/key_transfer_policy_controller:UpdateTDXAttributes() Leaving")
+
+	retrievedPolicy.MrSignerSeam = inputPolicy.MrSignerSeam
+	retrievedPolicy.MrSeam = inputPolicy.MrSeam
+	retrievedPolicy.SeamSvn = inputPolicy.SeamSvn
+	retrievedPolicy.MRTD = inputPolicy.MRTD
+	retrievedPolicy.RTMR0 = inputPolicy.RTMR0
+	retrievedPolicy.RTMR1 = inputPolicy.RTMR1
+	retrievedPolicy.RTMR2 = inputPolicy.RTMR2
+	retrievedPolicy.RTMR3 = inputPolicy.RTMR3
+	retrievedPolicy.EnforceTCBUptoDate = inputPolicy.EnforceTCBUptoDate
+	return nil
+}
+
+func UpdateSGXAttributes(retrievedPolicy *kbs.SgxAttributes, inputPolicy *kbs.SgxAttributes) error {
+	defaultLog.Trace("controllers/key_transfer_policy_controller:UpdateSGXAttributes() Entering")
+	defer defaultLog.Trace("controllers/key_transfer_policy_controller:UpdateSGXAttributes() Leaving")
+
+	retrievedPolicy.MrSigner = inputPolicy.MrSigner
+	retrievedPolicy.IsvProductId = inputPolicy.IsvProductId
+	retrievedPolicy.MrEnclave = inputPolicy.MrEnclave
+	retrievedPolicy.IsvSvn = inputPolicy.IsvSvn
+	retrievedPolicy.ClientPermissions = inputPolicy.ClientPermissions
+	retrievedPolicy.EnforceTCBUptoDate = inputPolicy.EnforceTCBUptoDate
+	return nil
+}
+
 //Delete : Function to delete a key transfer policy
 func (ktpc *KeyTransferPolicyController) Delete(responseWriter http.ResponseWriter, request *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_policy_controller:Delete() Entering")

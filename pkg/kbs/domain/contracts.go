@@ -21,6 +21,7 @@ type (
 	KeyTransferPolicyStore interface {
 		Create(attributes *kbs.KeyTransferPolicy) (*kbs.KeyTransferPolicy, error)
 		Retrieve(uuid.UUID) (*kbs.KeyTransferPolicy, error)
+		Update(attributes *kbs.KeyTransferPolicy) (*kbs.KeyTransferPolicy, error)
 		Delete(uuid.UUID) error
 		Search(criteria *models.KeyTransferPolicyFilterCriteria) ([]kbs.KeyTransferPolicy, error)
 	}

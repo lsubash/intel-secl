@@ -37,6 +37,7 @@ func (ktps *KeyTransferPolicyStore) Create(policy *kbs.KeyTransferPolicy) (*kbs.
 	}
 	policy.ID = newUuid
 	policy.CreatedAt = time.Now().UTC()
+	policy.UpdatedAt = policy.CreatedAt
 	bytes, err := json.Marshal(policy)
 	if err != nil {
 		return nil, errors.Wrap(err, "directory/key_transfer_policy_store:Create() Failed to marshal key transfer policy")
@@ -70,6 +71,23 @@ func (ktps *KeyTransferPolicyStore) Retrieve(id uuid.UUID) (*kbs.KeyTransferPoli
 	}
 
 	return &policy, nil
+}
+
+func (ktps *KeyTransferPolicyStore) Update(policy *kbs.KeyTransferPolicy) (*kbs.KeyTransferPolicy, error) {
+	defaultLog.Trace("directory/key_transfer_policy_store:Update() Entering")
+	defer defaultLog.Trace("directory/key_transfer_policy_store:Update() Leaving")
+
+	policy.UpdatedAt = time.Now().UTC()
+	bytes, err := json.Marshal(policy)
+	if err != nil {
+		return nil, errors.Wrap(err, "directory/key_transfer_policy_store:Update() Failed to marshal key transfer policy")
+	}
+	err = ioutil.WriteFile(filepath.Join(ktps.dir, policy.ID.String()), bytes, 0600)
+	if err != nil {
+		return nil, errors.Wrap(err, "directory/key_transfer_policy_store:Update() Error in saving key transfer policy")
+	}
+
+	return policy, nil
 }
 
 func (ktps *KeyTransferPolicyStore) Delete(id uuid.UUID) error {

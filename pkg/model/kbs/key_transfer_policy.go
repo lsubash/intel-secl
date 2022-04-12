@@ -16,6 +16,7 @@ type KeyTransferPolicy struct {
 	// swagger:strfmt uuid
 	ID              uuid.UUID             `json:"id,omitempty"`
 	CreatedAt       time.Time             `json:"created_at,omitempty"`
+	UpdatedAt       time.Time             `json:"updated_at,omitempty"`
 	AttestationType []aps.AttestationType `json:"attestation_type"`
 	TDX             *TdxPolicy            `json:"tdx,omitempty"`
 	SGX             *SgxPolicy            `json:"sgx,omitempty"`

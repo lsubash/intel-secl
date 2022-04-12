@@ -140,6 +140,62 @@ var _ = Describe("KeyTransferPolicyController", func() {
 		})
 	})
 
+	// Specs for HTTP Put to "/key-transfer-policies/{id}"
+	Describe("Update Key Transfer Policy", func() {
+		Context("Provide a valid Update request", func() {
+			It("Should update an existing  Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Update))).Methods(http.MethodPut)
+				policyJson := `{
+							"attestation_type": ["SGX"],
+							"sgx": {
+								"attributes": {
+									"mrsigner": ["dd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
+									"isvprodid": [0]
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/key-transfer-policies/ee37c360-7eae-4250-a677-6ee12adce8e2",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+		Context("Update Key Transfer Policy by non-existent ID", func() {
+			It("Should fail to update Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Update))).Methods(http.MethodPut)
+				policyJson := `{
+					"attestation_type": ["SGX"],
+					"sgx": {
+						"attributes": {
+							"mrsigner": ["dd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
+							"isvprodid": [0]
+						}
+					}
+				}`
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/key-transfer-policies/e57e5ea0-d465-461e-882d-1600090caa0d",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusNotFound))
+			})
+		})
+	})
+
 	// Specs for HTTP Delete to "/key-transfer-policies/{id}"
 	Describe("Delete an existing Key Transfer Policy", func() {
 		Context("Delete Key Transfer Policy by ID", func() {

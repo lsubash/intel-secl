@@ -36,6 +36,15 @@ func (store *MockKeyTransferPolicyStore) Retrieve(id uuid.UUID) (*kbs.KeyTransfe
 	return nil, errors.New(commErr.RecordNotFound)
 }
 
+// Update KeyTransferPolicy record in the store
+func (store *MockKeyTransferPolicyStore) Update(policy *kbs.KeyTransferPolicy) (*kbs.KeyTransferPolicy, error) {
+	if p, ok := store.KeyTransferPolicyStore[policy.ID]; ok {
+		store.KeyTransferPolicyStore[p.ID] = policy
+		return p, nil
+	}
+	return nil, errors.New(commErr.RecordNotFound)
+}
+
 // Delete deletes KeyTransferPolicy from the store
 func (store *MockKeyTransferPolicyStore) Delete(id uuid.UUID) error {
 	if _, ok := store.KeyTransferPolicyStore[id]; ok {
@@ -71,6 +80,7 @@ func NewFakeKeyTransferPolicyStore() *MockKeyTransferPolicyStore {
 	_, err := store.Create(&kbs.KeyTransferPolicy{
 		ID:              uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e2"),
 		CreatedAt:       time.Now().UTC(),
+		UpdatedAt:       time.Now().UTC(),
 		AttestationType: []aps.AttestationType{aps.SGX},
 		SGX: &kbs.SgxPolicy{
 			Attributes: &kbs.SgxAttributes{
@@ -90,6 +100,7 @@ func NewFakeKeyTransferPolicyStore() *MockKeyTransferPolicyStore {
 	_, err = store.Create(&kbs.KeyTransferPolicy{
 		ID:              uuid.MustParse("73755fda-c910-46be-821f-e8ddeab189e9"),
 		CreatedAt:       time.Now().UTC(),
+		UpdatedAt:       time.Now().UTC(),
 		AttestationType: []aps.AttestationType{aps.SGX},
 		SGX: &kbs.SgxPolicy{
 			Attributes: &kbs.SgxAttributes{

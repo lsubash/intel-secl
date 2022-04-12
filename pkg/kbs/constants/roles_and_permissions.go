@@ -27,6 +27,7 @@ const (
 
 	KeyTransferPolicyCreate   = "key_transfer_policies:create"
 	KeyTransferPolicyRetrieve = "key_transfer_policies:retrieve"
+	KeyTransferPolicyUpdate   = "key_transfer_policies:update"
 	KeyTransferPolicyDelete   = "key_transfer_policies:delete"
 	KeyTransferPolicySearch   = "key_transfer_policies:search"
 )
