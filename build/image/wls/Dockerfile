@@ -14,6 +14,14 @@ COPY cmd/wls/wls  /usr/bin/wls
 
 COPY build/image/wls/entrypoint.sh /entrypoint.sh
 
-RUN touch /.container-env && chmod +x /entrypoint.sh
+RUN mkdir -p /config
+
+COPY upgrades/ihub/config/* /config/
+
+COPY pkg/lib/common/upgrades/container_upgrade.sh /container_upgrade.sh
+
+COPY pkg/lib/common/upgrades/config_upgrade.sh /config_upgrade.sh
+
+RUN touch /.container-env && chmod +x /entrypoint.sh /container_upgrade.sh /config_upgrade.sh /config
 
 ENTRYPOINT ["/entrypoint.sh"]
