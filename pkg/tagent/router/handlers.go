@@ -72,12 +72,10 @@ func fnGetJwtCerts() error {
 		return nil
 	}
 
-	aasURL := cfg.Aas.BaseURL
-
-	url := aasURL + "jwt-certificates"
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	jwtUrl := clients.ResolvePath(cfg.Aas.BaseURL, "jwt-certificates")
+	req, _ := http.NewRequest(http.MethodGet, jwtUrl, nil)
 	req.Header.Add("accept", "application/x-pem-file")
-	secLog.Debugf("router/handlers::fnGetJwtCerts() Connecting to AAS Endpoint %s", url)
+	secLog.Debugf("router/handlers::fnGetJwtCerts() Connecting to AAS Endpoint %s", jwtUrl)
 
 	caCerts, err := crypt.GetCertsFromDir(constants.TrustedCaCertsDir)
 	if err != nil {
