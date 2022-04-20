@@ -18,6 +18,7 @@ import (
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	stdlog "log"
@@ -88,7 +89,8 @@ func (a *App) startServer() error {
 
 	// Initialize routes
 	routes := router.InitRoutes(c, dataStore, jwtFactory)
-
+	loggerMiddleware := middleware.LogWriterMiddleware{a.logWriter()}
+	routes.Use(loggerMiddleware.WriteDurationLog())
 	// ISECL-8715 - Prevent potential open redirects to external URLs
 	routes.SkipClean(true)
 

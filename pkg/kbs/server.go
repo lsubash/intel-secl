@@ -28,6 +28,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	"github.com/pkg/errors"
 )
 
@@ -90,7 +91,8 @@ func (app *App) startServer() error {
 
 	// Initialize routes
 	routes := router.InitRoutes(configuration, kcc, km, apsClient, aasClient)
-
+	loggerMiddleware := middleware.LogWriterMiddleware{app.logWriter()}
+	routes.Use(loggerMiddleware.WriteDurationLog())
 	defaultLog.Info("kbs/server:startServer() Starting server")
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS12,

@@ -18,10 +18,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/gorilla/handlers"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
+	"github.com/pkg/errors"
 	stdlog "log"
 
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
@@ -45,7 +45,8 @@ func (a *App) startServer() error {
 
 	// Initialize routes
 	routes := router.InitRoutes(c)
-
+	loggerMiddleware := middleware.LogWriterMiddleware{a.logWriter()}
+	routes.Use(loggerMiddleware.WriteDurationLog())
 	tlsconfig := &tls.Config{
 		MinVersion: tls.VersionTLS13,
 		CipherSuites: []uint16{tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,

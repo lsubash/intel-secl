@@ -12,6 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	wlsModel "github.com/intel-secl/intel-secl/v5/pkg/wls/domain/model"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/router"
@@ -46,7 +47,8 @@ func (a *App) startServer() error {
 	if err != nil {
 		return errors.Wrap(err, "An error occurred while initializing routes")
 	}
-
+	loggerMiddleware := middleware.LogWriterMiddleware{a.logWriter()}
+	routes.Use(loggerMiddleware.WriteDurationLog())
 	defaultLog.Info("Starting server")
 	// WLS is a user-facing service, hence keeping support for TLS version v12
 	tlsConfig := &tls.Config{
