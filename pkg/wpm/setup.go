@@ -5,7 +5,6 @@
 package wpm
 
 import (
-	"crypto/x509/pkix"
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
@@ -111,38 +110,10 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		CmsBaseURL:    viper.GetString("cms-base-url"),
 		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
 	})
-	runner.AddTask("download-cert-flavor-signing", "flavor-signing", a.downloadCertTask("flavor-signing"))
 	runner.AddTask("create-envelope-key", "", &tasks.CreateEnvelopeKey{
 		EnvelopePrivatekeyLocation: constants.EnvelopePrivatekeyLocation,
 		EnvelopePublickeyLocation:  constants.EnvelopePublickeyLocation,
 		KeyAlgorithmLength:         constants.DefaultKeyAlgorithmLength,
 	})
 	return runner, nil
-}
-
-func (a *App) downloadCertTask(certType string) setup.Task {
-	certTypeReq := certType
-	var updateConfig = &a.configuration().FlavorSigning
-
-	if updateConfig != nil {
-		updateConfig.KeyFile = viper.GetString(certType + "-key-file")
-		updateConfig.CertFile = viper.GetString(certType + "-cert-file")
-		updateConfig.CommonName = viper.GetString(certType + "-common-name")
-	}
-	return &setup.DownloadCert{
-		KeyFile:      viper.GetString(certType + "-key-file"),
-		CertFile:     viper.GetString(certType + "-cert-file"),
-		KeyAlgorithm: constants.DefaultKeyAlgorithm,
-		KeyLength:    constants.DefaultKeyAlgorithmLength,
-		Subject: pkix.Name{
-			CommonName: viper.GetString(certType + "-common-name"),
-		},
-		CertType: certTypeReq,
-
-		CaCertDirPath: constants.TrustedCaCertsDir,
-		SanList:       constants.DefaultWpmSan,
-		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
-	}
 }
