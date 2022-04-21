@@ -101,7 +101,7 @@ hvs-docker: hvs
 	cd ./upgrades/hvs/db && make all && cd -
 	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/hvs/Dockerfile -t $(DOCKER_REGISTRY)isecl/hvs:$(VERSION)-$(GITCOMMIT) .
 
-tagent-docker: config-upgrade-binary
+tagent-docker: tagent config-upgrade-binary
 	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/tagent/Dockerfile -t $(DOCKER_REGISTRY)isecl/tagent:$(VERSION)-$(GITCOMMIT) .
 
 %-swagger:
