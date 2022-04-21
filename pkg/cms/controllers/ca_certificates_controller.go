@@ -7,6 +7,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/constants"
+	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 )
 
 type CACertificatesController struct {
+	CaAttribs map[string]constants.CaAttrib
 }
 
 //GetCACertificates is used to get the root CA certificate upon JWT validation
@@ -22,7 +24,7 @@ func (controller CACertificatesController) GetCACertificates(httpWriter http.Res
 	defer log.Trace("resource/ca_certificates:GetCACertificates() Leaving")
 
 	httpWriter.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
-	if httpRequest.Header.Get("Accept") != "application/x-pem-file" {
+	if httpRequest.Header.Get("Accept") != consts.HTTPMediaTypePemFile {
 		httpWriter.WriteHeader(http.StatusNotAcceptable)
 		_, err := httpWriter.Write([]byte("Accept type not supported"))
 		if err != nil {
@@ -36,7 +38,7 @@ func (controller CACertificatesController) GetCACertificates(httpWriter http.Res
 		issuingCa = "root"
 	}
 	log.Debugf("resource/ca_certificates:GetCACertificates() Requesting CA certificate for - %v", issuingCa)
-	caCertificateBytes, err := getCaCert(issuingCa)
+	caCertificateBytes, err := getCaCert(issuingCa, controller.CaAttribs)
 	if err != nil {
 		log.WithError(err).Errorf("resource/ca_certificates:GetCACertificates() Cannot load Issuing CA - %v", issuingCa)
 		if strings.Contains(err.Error(), "Invalid Query parameter") {
@@ -55,7 +57,7 @@ func (controller CACertificatesController) GetCACertificates(httpWriter http.Res
 		}
 		return
 	}
-	httpWriter.Header().Set("Content-Type", "application/x-pem-file")
+	httpWriter.Header().Set("Content-Type", consts.HTTPMediaTypePemFile)
 	httpWriter.WriteHeader(http.StatusOK)
 	_, err = httpWriter.Write(caCertificateBytes)
 	if err != nil {
@@ -65,11 +67,11 @@ func (controller CACertificatesController) GetCACertificates(httpWriter http.Res
 	return
 }
 
-func getCaCert(issuingCa string) ([]byte, error) {
+func getCaCert(issuingCa string, CaAttribs map[string]constants.CaAttrib) ([]byte, error) {
 	log.Trace("resource/ca_certificates:getCaCert() Entering")
 	defer log.Trace("resource/ca_certificates:getCaCert() Leaving")
 
-	attr := constants.GetCaAttribs(issuingCa)
+	attr := constants.GetCaAttribs(issuingCa, CaAttribs)
 	if attr.CommonName == "" {
 		return nil, fmt.Errorf("Invalid Query parameter issuingCa: %v", issuingCa)
 	} else {

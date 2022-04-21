@@ -25,13 +25,16 @@ import (
 )
 
 // Should move this to lib common, as it is duplicated across CMS and TDA
-
 type TLS struct {
 	ConsoleWriter    io.Writer
 	TLSCertDigestPtr *string
 	TLSSanList       string
 	envPrefix        string
 	commandName      string
+	TLSKeyPath       string
+	TLSCertPath      string
+	SerialNumberPath string
+	CaAttribs        map[string]constants.CaAttrib
 }
 
 const tlsEnvHelpPrompt = "Following environment variables are required for tls setup:"
@@ -58,7 +61,7 @@ func outboundHost() (string, error) {
 	return (conn.LocalAddr().(*net.UDPAddr)).IP.String(), nil
 }
 
-func createTLSCert(hosts string, ca *x509.Certificate, caKey interface{}) (key []byte, cert []byte, err error) {
+func (ts TLS) createTLSCert(hosts string, ca *x509.Certificate, caKey interface{}) (key []byte, cert []byte, err error) {
 	log.Trace("tasks/tls:createTLSCert() Entering")
 	defer log.Trace("tasks/tls:createTLSCert() Leaving")
 
@@ -78,7 +81,7 @@ func createTLSCert(hosts string, ca *x509.Certificate, caKey interface{}) (key [
 		return nil, nil, errors.Wrap(err, "tasks/tls:createTLSCert() Could not parse CSR")
 	}
 
-	serialNumber, err := utils.GetNextSerialNumber()
+	serialNumber, err := utils.GetNextSerialNumber(ts.SerialNumberPath)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "tasks/tls:createTLSCert() Could get next serial number")
 	}
@@ -125,24 +128,27 @@ func (ts TLS) Run() error {
 		}
 	}
 
-	tlsCaAttr := constants.GetCaAttribs(constants.Tls)
+	tlsCaAttr := constants.GetCaAttribs(constants.Tls, ts.CaAttribs)
 	tlsCaCert, tlsCaPrivKey, err := crypt.LoadX509CertAndPrivateKey(tlsCaAttr.CertPath, tlsCaAttr.KeyPath)
-	key, cert, err := createTLSCert(ts.TLSSanList, tlsCaCert, tlsCaPrivKey)
+	if err != nil {
+		return errors.Wrap(err, "tasks/tls:Run() Could not load cert and private key")
+	}
+	key, cert, err := ts.createTLSCert(ts.TLSSanList, tlsCaCert, tlsCaPrivKey)
 	if err != nil {
 		return errors.Wrap(err, "tasks/tls:Run() Could not create TLS certificate")
 	}
-	err = crypt.SavePrivateKeyAsPKCS8(key, constants.TLSKeyPath)
+	err = crypt.SavePrivateKeyAsPKCS8(key, ts.TLSKeyPath)
 	if err != nil {
 		return errors.Wrap(err, "tasks/tls:Run() Could not save TLS private key")
 	}
 	// we need to store the TLS cert as a chain since Web server should send the
 	// entire certificate chain minus the root
-	err = crypt.SavePemCertChain(constants.TLSCertPath, cert, tlsCaCert.Raw)
+	err = crypt.SavePemCertChain(ts.TLSCertPath, cert, tlsCaCert.Raw)
 	if err != nil {
 		return errors.Wrap(err, "tasks/tls:Run() Could not save TLS certificate")
 	}
 
-	tlsCertificateBytes, err := ioutil.ReadFile(constants.TLSCertPath)
+	tlsCertificateBytes, err := ioutil.ReadFile(ts.TLSCertPath)
 	if err != nil {
 		return errors.Wrap(err, "tasks/tls:Run() Could not read TLS cert")
 	}
@@ -162,11 +168,11 @@ func (ts TLS) Validate() error {
 	defer log.Trace("tasks/tls:Validate() Leaving")
 
 	fmt.Fprintln(ts.ConsoleWriter, "Validating tls setup...")
-	_, err := os.Stat(constants.TLSCertPath)
+	_, err := os.Stat(ts.TLSCertPath)
 	if os.IsNotExist(err) {
 		return errors.Wrap(err, "tasks/tls:Validate() TLSCertFile is not configured")
 	}
-	_, err = os.Stat(constants.TLSKeyPath)
+	_, err = os.Stat(ts.TLSKeyPath)
 	if os.IsNotExist(err) {
 		return errors.Wrap(err, "tasks/tls:Validate() TLSKeyFile is not configured")
 	}

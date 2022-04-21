@@ -22,23 +22,25 @@ import (
 const intermediateCAEnvHelpPrompt = "Following environment variables are required for intermediate-ca setup:"
 
 type IntermediateCa struct {
-	ConsoleWriter io.Writer
-	Config        *config.CACertConfig
-	envPrefix     string
-	commandName   string
+	ConsoleWriter    io.Writer
+	Config           *config.CACertConfig
+	envPrefix        string
+	commandName      string
+	SerialNumberPath string
+	CaAttribs        map[string]constants.CaAttrib
 }
 
-func createIntermediateCACert(cfg *config.CACertConfig, cn string) (privKey crypto.PrivateKey, cert []byte, err error) {
+func (ca IntermediateCa) createIntermediateCACert(cfg *config.CACertConfig, cn string) (privKey crypto.PrivateKey, cert []byte, err error) {
 	log.Trace("tasks/intermediate_ca:createIntermediateCACert() Entering")
 	defer log.Trace("tasks/intermediate_ca:createIntermediateCACert() Leaving")
 
-	rCaAttr := constants.GetCaAttribs(constants.Root)
+	rCaAttr := constants.GetCaAttribs(constants.Root, ca.CaAttribs)
 
 	privKey, pubKey, err := crypt.GenerateKeyPair(constants.DefaultKeyAlgorithm, constants.DefaultKeyAlgorithmLength)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "tasks/intermediate_ca:createIntermediateCACert() Could not generate key pair")
 	}
-	caCertTemplate, err := getCACertTemplate(cfg, cn, rCaAttr.CommonName, pubKey)
+	caCertTemplate, err := getCACertTemplate(cfg, cn, rCaAttr.CommonName, pubKey, ca.SerialNumberPath)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "tasks/intermediate_ca:createIntermediateCACert() Could not generate Certificate Template")
 	}
@@ -72,7 +74,7 @@ func (ca IntermediateCa) Run() error {
 	if interCAType == "" {
 		cas = constants.GetIntermediateCAs()
 	} else {
-		if attr := constants.GetCaAttribs(interCAType); attr.CommonName == "" {
+		if attr := constants.GetCaAttribs(interCAType, ca.CaAttribs); attr.CommonName == "" {
 			// the type passed in does not match with one of the supported intermediaries
 			return errors.New("tasks/intermediate_ca:Run() could not find matching Intermediary Certificate. Please check help for list of Intermediary CAs supported")
 		}
@@ -81,8 +83,8 @@ func (ca IntermediateCa) Run() error {
 
 	for _, interCa := range cas {
 		fmt.Fprintln(ca.ConsoleWriter, "Creating intermediate CA ", interCa)
-		caAttr := constants.GetCaAttribs(interCa)
-		privKey, cert, err := createIntermediateCACert(ca.Config, caAttr.CommonName)
+		caAttr := constants.GetCaAttribs(interCa, ca.CaAttribs)
+		privKey, cert, err := ca.createIntermediateCACert(ca.Config, caAttr.CommonName)
 		if err != nil {
 			return errors.Wrap(err, "tasks/intermediate_ca:Run() Could not create intemediate CA")
 		}
@@ -112,7 +114,7 @@ func (ca IntermediateCa) Validate() error {
 	cas := constants.GetIntermediateCAs()
 	for _, interCa := range cas {
 
-		caAttr := constants.GetCaAttribs(interCa)
+		caAttr := constants.GetCaAttribs(interCa, ca.CaAttribs)
 
 		_, err := os.Stat(caAttr.CertPath)
 		if os.IsNotExist(err) {

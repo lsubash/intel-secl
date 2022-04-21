@@ -28,12 +28,25 @@ const (
 	RootCADirPath                  = ConfigDir + "root-ca/"
 	RootCACertPath                 = RootCADirPath + "root-ca-cert.pem"
 	RootCAKeyPath                  = ConfigDir + "root-ca.key"
+	RootCaCertFile                 = "root-ca-cert.pem"
+	RootCaKeyFile                  = "root-ca.key"
 	IntermediateCADirPath          = ConfigDir + "intermediate-ca/"
 	TLSCertPath                    = ConfigDir + "tls-cert.pem"
 	TLSKeyPath                     = ConfigDir + "tls.key"
+	TLSCertFile                    = "tls-cert.pem"
+	TLSKeyFile                     = "tls.key"
 	SerialNumberPath               = ConfigDir + "serial-number"
+	TlsCaCertFile                  = "tls-ca.pem"
+	TlsCaKeyFile                   = "tls-ca.key"
+	TlsClientCaCertFile            = "tls-client-ca.pem"
+	TlsClientCaKeyFile             = "tls-client-ca.key"
+	SigningCaCertFile              = "signing-ca.pem"
+	SigningCaKeyFile               = "signing-ca.key"
 	ServiceRemoveCmd               = "systemctl disable cms"
 	DefaultRootCACommonName        = "CMSCA"
+	DefaultTlsCACommonName         = "CMS TLS CA"
+	DefaultTlsClientCaCommonName   = "CMS TLS Client CA"
+	DefaultSigningCaCommonName     = "CMS Signing CA"
 	DefaultPort                    = 8445
 	DefaultOrganization            = "INTEL"
 	DefaultCountry                 = "US"
@@ -69,11 +82,11 @@ const (
 	Signing   = "Signing"
 )
 
-var mp = map[string]CaAttrib{
-	Root:      {"CMSCA", RootCACertPath, RootCAKeyPath},
-	Tls:       {"CMS TLS CA", IntermediateCADirPath + "tls-ca.pem", IntermediateCADirPath + "tls-ca.key"},
-	TlsClient: {"CMS TLS Client CA", IntermediateCADirPath + "tls-client-ca.pem", IntermediateCADirPath + "tls-client-ca.key"},
-	Signing:   {"CMS Signing CA", IntermediateCADirPath + "signing-ca.pem", IntermediateCADirPath + "signing-ca.key"},
+var CertStoreMap = map[string]CaAttrib{
+	Root:      {DefaultRootCACommonName, RootCACertPath, RootCAKeyPath},
+	Tls:       {DefaultTlsCACommonName, IntermediateCADirPath + TlsCaCertFile, IntermediateCADirPath + TlsCaKeyFile},
+	TlsClient: {DefaultTlsClientCaCommonName, IntermediateCADirPath + TlsClientCaCertFile, IntermediateCADirPath + TlsClientCaKeyFile},
+	Signing:   {DefaultSigningCaCommonName, IntermediateCADirPath + SigningCaCertFile, IntermediateCADirPath + SigningCaKeyFile},
 }
 
 func GetIntermediateCAs() []string {
@@ -83,11 +96,11 @@ func GetIntermediateCAs() []string {
 	return []string{Tls, TlsClient, Signing}
 }
 
-func GetCaAttribs(t string) CaAttrib {
+func GetCaAttribs(t string, mpCaAtttibs map[string]CaAttrib) CaAttrib {
 	log.Trace("constants/constants:GetCaAttribs() Entering")
 	defer log.Trace("constants/constants:GetCaAttribs() Leaving")
 
-	if val, found := mp[t]; found {
+	if val, found := mpCaAtttibs[t]; found {
 		return val
 	}
 	return CaAttrib{}

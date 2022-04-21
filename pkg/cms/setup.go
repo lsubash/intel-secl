@@ -119,7 +119,6 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner := setup.NewRunner()
 	runner.ConsoleWriter = a.consoleWriter()
 	runner.ErrorWriter = a.errorWriter()
-
 	runner.AddTask("root-ca", "", &tasks.RootCa{
 		ConsoleWriter:   a.consoleWriter(),
 		CACertConfigPtr: &a.Config.CACert,
@@ -130,22 +129,32 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 			Province:     viper.GetString("cms-ca-province"),
 			Country:      viper.GetString("cms-ca-country"),
 		},
+		SerialNumberPath: constants.SerialNumberPath,
+		CaAttribs:        constants.CertStoreMap,
 	})
 	runner.AddTask("intermediate-ca", "", &tasks.IntermediateCa{
-		ConsoleWriter: a.consoleWriter(),
-		Config:        &a.Config.CACert,
+		ConsoleWriter:    a.consoleWriter(),
+		Config:           &a.Config.CACert,
+		SerialNumberPath: constants.SerialNumberPath,
+		CaAttribs:        constants.CertStoreMap,
 	})
 	runner.AddTask("tls", "", &tasks.TLS{
 		ConsoleWriter:    a.consoleWriter(),
 		TLSCertDigestPtr: &a.Config.TlsCertDigest,
 		TLSSanList:       a.Config.TlsSanList,
+		TLSKeyPath:       constants.TLSKeyPath,
+		TLSCertPath:      constants.TLSCertPath,
+		SerialNumberPath: constants.SerialNumberPath,
+		CaAttribs:        constants.CertStoreMap,
 	})
 	runner.AddTask("cms-auth-token", "", &tasks.CmsAuthToken{
-		ConsoleWriter: a.consoleWriter(),
-		AasTlsCn:      a.Config.AasTlsCn,
-		AasJwtCn:      a.Config.AasJwtCn,
-		AasTlsSan:     a.Config.AasTlsSan,
-		TokenDuration: a.Config.TokenDurationMins,
+		ConsoleWriter:             a.consoleWriter(),
+		AasTlsCn:                  a.Config.AasTlsCn,
+		AasJwtCn:                  a.Config.AasJwtCn,
+		AasTlsSan:                 a.Config.AasTlsSan,
+		TokenDuration:             a.Config.TokenDurationMins,
+		TrustedJWTSigningCertsDir: constants.TrustedJWTSigningCertsDir,
+		TokenKeyFile:              constants.TokenKeyFile,
 	})
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: a.consoleWriter(),

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2019 Intel Corporation
+* Copyright (C) 2022 Intel Corporation
 * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -14,9 +14,9 @@ import (
 	"testing"
 )
 
-func TestTlsRunAndValidate(t *testing.T) {
-	log.Trace("tasks/tls_test:TestTlsRunAndValidate() Entering")
-	defer log.Trace("tasks/tls_test:TestTlsRunAndValidate() Leaving")
+func TestIntermediateCaRunAndValidate(t *testing.T) {
+	log.Trace("tasks/intermediate_ca_test:TestIntermediateCaRunAndValidate() Entering")
+	defer log.Trace("tasks/intermediate_ca_test:TestIntermediateCaRunAndValidate() Leaving")
 
 	path, mockPathCert := CreateTestFilePath()
 	c := config.Configuration{}
@@ -33,8 +33,10 @@ func TestTlsRunAndValidate(t *testing.T) {
 		SerialNumberPath: path + MockSerialNo,
 		CaAttribs:        mockPathCert,
 	}
+
 	rootca.Run()
-	intermediateca := IntermediateCa{
+
+	ca := IntermediateCa{
 		ConsoleWriter: os.Stdout,
 		Config: &config.CACertConfig{
 			Validity:     constants.DefaultCACertValidity,
@@ -47,37 +49,17 @@ func TestTlsRunAndValidate(t *testing.T) {
 		CaAttribs:        mockPathCert,
 	}
 
-	intermediateca.Run()
-	ca := TLS{
-		ConsoleWriter:    os.Stdout,
-		TLSCertDigestPtr: &c.TlsCertDigest,
-		TLSSanList:       "10.10.10.10,9.9.9.9",
-		TLSKeyPath:       path + constants.TLSKeyFile,
-		TLSCertPath:      path + constants.TLSCertFile,
-		SerialNumberPath: path + MockSerialNo,
-		CaAttribs:        mockPathCert,
-	}
-
 	err := ca.Run()
 	assert.NoError(t, err)
-	errValidation := ca.Validate()
-	assert.NoError(t, errValidation)
-	os.Remove(path + constants.TLSKeyFile)
+	errValidate := ca.Validate()
+	assert.NoError(t, errValidate)
+	os.Remove(constants.GetCaAttribs(constants.Tls, mockPathCert).KeyPath)
 	errValidationKey := ca.Validate()
 	assert.Error(t, errValidationKey)
-	os.Remove(path + constants.TLSCertFile)
+	os.Remove(constants.GetCaAttribs(constants.Tls, mockPathCert).CertPath)
 	errValidationCert := ca.Validate()
 	assert.Error(t, errValidationCert)
 	ca.PrintHelp(bytes.NewBufferString("test"))
 	ca.SetName("test", "test")
 	DeleteTestFilePath(path)
-}
-
-func TestOutboundHost(t *testing.T) {
-	log.Trace("tasks/tls_test:TestOutboundHost() Entering")
-	defer log.Trace("tasks/tls_test:TestOutboundHost() Leaving")
-
-	host, err := outboundHost()
-	assert.NoError(t, err)
-	assert.NotNil(t, host)
 }

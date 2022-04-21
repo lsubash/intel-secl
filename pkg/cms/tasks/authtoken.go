@@ -7,26 +7,27 @@ package tasks
 import (
 	"encoding/pem"
 	"fmt"
-	"io"
-	"os"
-	"time"
-
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/pkg/errors"
+	"io"
+	"os"
+	"time"
 )
 
 type CmsAuthToken struct {
-	ConsoleWriter io.Writer
-	AasTlsCn      string
-	AasJwtCn      string
-	AasTlsSan     string
-	TokenDuration int
-	envPrefix     string
-	commandName   string
+	ConsoleWriter             io.Writer
+	AasTlsCn                  string
+	AasJwtCn                  string
+	AasTlsSan                 string
+	TokenDuration             int
+	envPrefix                 string
+	commandName               string
+	TrustedJWTSigningCertsDir string
+	TokenKeyFile              string
 }
 
 const authTokenEnvHelpPrompt = "Following environment variables are required for authToken setup:"
@@ -46,12 +47,12 @@ func createCmsAuthToken(at CmsAuthToken) (err error) {
 		return errors.Wrap(err, "tasks/authtoken:createCmsAuthToken() Could not create CMS JWT certificate")
 	}
 
-	err = crypt.SavePrivateKeyAsPKCS8(key, constants.TrustedJWTSigningCertsDir+constants.TokenKeyFile)
+	err = crypt.SavePrivateKeyAsPKCS8(key, at.TrustedJWTSigningCertsDir+at.TokenKeyFile)
 	if err != nil {
 		return errors.Wrap(err, "tasks/authtoken:createCmsAuthToken() Could not save CMS JWT private key")
 	}
 	certPemBytes := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert})
-	err = crypt.SavePemCertWithShortSha1FileName(certPemBytes, constants.TrustedJWTSigningCertsDir)
+	err = crypt.SavePemCertWithShortSha1FileName(certPemBytes, at.TrustedJWTSigningCertsDir)
 	if err != nil {
 		return errors.Wrap(err, "tasks/authtoken:createCmsAuthToken() Could not save CMS JWT certificate")
 	}
@@ -96,7 +97,7 @@ func (at CmsAuthToken) Validate() error {
 	defer log.Trace("tasks/authtoken:Validate() Leaving")
 
 	fmt.Fprintln(at.ConsoleWriter, "Validating auth token setup...")
-	_, err := os.Stat(constants.TrustedJWTSigningCertsDir + constants.TokenKeyFile)
+	_, err := os.Stat(at.TrustedJWTSigningCertsDir + at.TokenKeyFile)
 	if os.IsNotExist(err) {
 		return errors.Wrap(err, "tasks/authtoken:Validate() Auth Token is not configured")
 	}

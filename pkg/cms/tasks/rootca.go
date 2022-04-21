@@ -28,8 +28,10 @@ type RootCa struct {
 	ConsoleWriter   io.Writer
 	CACertConfigPtr *config.CACertConfig
 	config.CACertConfig
-	envPrefix   string
-	commandName string
+	envPrefix        string
+	commandName      string
+	SerialNumberPath string
+	CaAttribs        map[string]constants.CaAttrib
 }
 
 const rootCAEnvHelpPrompt = "Following environment variables are required for root-ca setup:"
@@ -42,7 +44,7 @@ var rootCAEnvHelp = map[string]string{
 	"CMS_CA_COUNTRY":       "CA Certificate Country",
 }
 
-func GetCACertDefaultTemplate(cfg *config.CACertConfig, cn string, parent string) (x509.Certificate, error) {
+func GetCACertDefaultTemplate(cfg *config.CACertConfig, cn string, parent string, SerialNumberPath string) (x509.Certificate, error) {
 	log.Trace("tasks/rootca:GetCACertDefaultTemplate() Entering")
 	defer log.Trace("tasks/rootca:GetCACertDefaultTemplate() Leaving")
 
@@ -64,16 +66,16 @@ func GetCACertDefaultTemplate(cfg *config.CACertConfig, cn string, parent string
 		BasicConstraintsValid: true,
 		IsCA:                  true,
 	}
-	serialNumber, err := utils.GetNextSerialNumber()
+	serialNumber, err := utils.GetNextSerialNumber(SerialNumberPath)
 	tmplt.SerialNumber = serialNumber
 	return tmplt, errors.Wrap(err, "tasks/rootca:GetCACertDefaultTemplate() Could not get next serial number for certificate")
 }
 
-func getCACertTemplate(cfg *config.CACertConfig, cn string, parCn string, pubKey crypto.PublicKey) (x509.Certificate, error) {
+func getCACertTemplate(cfg *config.CACertConfig, cn string, parCn string, pubKey crypto.PublicKey, SerialNumberPath string) (x509.Certificate, error) {
 	log.Trace("tasks/rootca:getCACertTemplate() Entering")
 	defer log.Trace("tasks/rootca:getCACertTemplate() Leaving")
 
-	tmplt, err := GetCACertDefaultTemplate(cfg, cn, parCn)
+	tmplt, err := GetCACertDefaultTemplate(cfg, cn, parCn, SerialNumberPath)
 	if err != nil {
 		return tmplt, errors.Wrap(err, "tasks/rootca:getCACertTemplate() Could not get CA template")
 	}
@@ -85,7 +87,7 @@ func getCACertTemplate(cfg *config.CACertConfig, cn string, parCn string, pubKey
 	return tmplt, err
 }
 
-func createRootCACert(cfg *config.CACertConfig) (privKey crypto.PrivateKey, cert []byte, err error) {
+func (ca RootCa) createRootCACert(cfg *config.CACertConfig) (privKey crypto.PrivateKey, cert []byte, err error) {
 	log.Trace("tasks/rootca:createRootCACert() Entering")
 	defer log.Trace("tasks/rootca:createRootCACert() Leaving")
 
@@ -93,8 +95,8 @@ func createRootCACert(cfg *config.CACertConfig) (privKey crypto.PrivateKey, cert
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "tasks/rootca:createRootCACert() Could not create root key pair")
 	}
-	caCertTemplate, err := getCACertTemplate(cfg, constants.GetCaAttribs(constants.Root).CommonName,
-		constants.GetCaAttribs(constants.Root).CommonName, pubKey)
+	caCertTemplate, err := getCACertTemplate(cfg, constants.GetCaAttribs(constants.Root, ca.CaAttribs).CommonName,
+		constants.GetCaAttribs(constants.Root, ca.CaAttribs).CommonName, pubKey, ca.SerialNumberPath)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "tasks/rootca:createRootCACert() Could not create CA certificate template")
 	}
@@ -135,7 +137,7 @@ func (ca RootCa) Run() error {
 	if err != nil {
 		return err
 	}
-	privKey, cert, err := createRootCACert(&ca.CACertConfig)
+	privKey, cert, err := ca.createRootCACert(&ca.CACertConfig)
 	if err != nil {
 		return errors.Wrap(err, "tasks/rootca:Run() Could not create root certificate")
 	}
@@ -145,11 +147,11 @@ func (ca RootCa) Run() error {
 	}
 
 	//Store key and certificate
-	err = crypt.SavePrivateKeyAsPKCS8(key, constants.RootCAKeyPath)
+	err = crypt.SavePrivateKeyAsPKCS8(key, constants.GetCaAttribs(constants.Root, ca.CaAttribs).KeyPath)
 	if err != nil {
 		return errors.Wrap(err, "tasks/rootca:Run() Could not save root private key")
 	}
-	err = crypt.SavePemCert(cert, constants.RootCACertPath)
+	err = crypt.SavePemCert(cert, constants.GetCaAttribs(constants.Root, ca.CaAttribs).CertPath)
 	if err != nil {
 		return errors.Wrap(err, "tasks/rootca:Run() Could not save root certificate")
 	}
@@ -161,11 +163,11 @@ func (ca RootCa) Validate() error {
 	log.Trace("tasks/rootca:Validate() Entering")
 	defer log.Trace("tasks/rootca:Validate() Leaving")
 
-	_, err := os.Stat(constants.RootCACertPath)
+	_, err := os.Stat(constants.GetCaAttribs(constants.Root, ca.CaAttribs).CertPath)
 	if os.IsNotExist(err) {
 		return errors.Wrap(err, "tasks/rootca:Validate() RootCACertFile is not configured")
 	}
-	_, err = os.Stat(constants.RootCAKeyPath)
+	_, err = os.Stat(constants.GetCaAttribs(constants.Root, ca.CaAttribs).KeyPath)
 	if os.IsNotExist(err) {
 		return errors.Wrap(err, "tasks/rootca:Validate() RootCAKeyFile is not configured")
 	}

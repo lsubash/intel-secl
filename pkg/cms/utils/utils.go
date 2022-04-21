@@ -5,7 +5,6 @@
 package utils
 
 import (
-	"github.com/intel-secl/intel-secl/v5/pkg/cms/constants"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"math/big"
@@ -17,17 +16,17 @@ func Message(status bool, message string) map[string]interface{} {
 	return map[string]interface{}{"status": status, "message": message}
 }
 
-func GetNextSerialNumber() (*big.Int, error) {
-	serialNumberNew, err := ReadSerialNumber()
+func GetNextSerialNumber(serialNumberPath string) (*big.Int, error) {
+	serialNumberNew, err := ReadSerialNumber(serialNumberPath)
 	if err != nil && strings.Contains(err.Error(), "no such file") {
 		serialNumberNew = big.NewInt(0)
-		err = WriteSerialNumber(serialNumberNew)
+		err = WriteSerialNumber(serialNumberPath, serialNumberNew)
 		return serialNumberNew, errors.Wrap(err, "utils/utils:GetNextSerialNumber() Cannot write to Serial Number file")
 	} else if err != nil {
 		return nil, errors.Wrap(err, "utils/utils:GetNextSerialNumber() Cannot read from Serial Number file")
 	} else {
 		serialNumberNew = serialNumberNew.Add(serialNumberNew, big.NewInt(1))
-		err = WriteSerialNumber(serialNumberNew)
+		err = WriteSerialNumber(serialNumberPath, serialNumberNew)
 		if err != nil {
 			return nil, errors.Wrap(err, "utils/utils:GetNextSerialNumber() Cannot write to Serial Number file")
 		}
@@ -35,8 +34,8 @@ func GetNextSerialNumber() (*big.Int, error) {
 	}
 }
 
-func ReadSerialNumber() (*big.Int, error) {
-	sn, err := ioutil.ReadFile(constants.SerialNumberPath)
+func ReadSerialNumber(serialNumberPath string) (*big.Int, error) {
+	sn, err := ioutil.ReadFile(serialNumberPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "utils/utils:ReadSerialNumber() Could not read serial number")
 	} else {
@@ -46,12 +45,12 @@ func ReadSerialNumber() (*big.Int, error) {
 	}
 }
 
-func WriteSerialNumber(serialNumber *big.Int) error {
-	err := ioutil.WriteFile(constants.SerialNumberPath, serialNumber.Bytes(), 0660)
+func WriteSerialNumber(serialNumberPath string, serialNumber *big.Int) error {
+	err := ioutil.WriteFile(serialNumberPath, serialNumber.Bytes(), 0600)
 	if err != nil {
 		return errors.Wrap(err, "utils/utils:WriteSerialNumber() Failed to write serial-number to file")
 	}
-	err = os.Chmod(constants.SerialNumberPath, 0660)
+	err = os.Chmod(serialNumberPath, 0600)
 	if err != nil {
 		return errors.Wrap(err, "utils/utils:WriteSerialNumber() Failed to update file permissions")
 	}
