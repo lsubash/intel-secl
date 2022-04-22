@@ -23,6 +23,9 @@ var jwtTokenMap = sync.Map{}
 var log = commLog.GetDefaultLogger()
 var secLog = commLog.GetSecurityLogger()
 
+var httpClient *http.Client
+var httpsClient *http.Client
+
 func addJWTToken(aasClient *aas.JwtClient, req *http.Request, serviceUsername, servicePassword string, forceFetch bool) error {
 	log.Trace("clients/send_http_request:addJWTToken() Entering")
 	defer log.Trace("clients/send_http_request:addJWTToken() Leaving")
@@ -67,17 +70,15 @@ func SendRequest(req *http.Request, aasURL, serviceUsername, servicePassword str
 	defer log.Trace("clients/send_http_request:SendRequest() Leaving")
 
 	response, err := GetHTTPResponse(req, trustedCaCerts, true, aasURL, serviceUsername, servicePassword)
-	if response != nil {
-		defer func() {
-			derr := response.Body.Close()
-			if derr != nil {
-				log.WithError(derr).Error("Error closing response body")
-			}
-		}()
-	}
 	if err != nil {
 		return nil, errors.Wrap(err, "clients/send_http_request.go:SendRequest() Error getting response")
 	}
+	defer func() {
+		derr := response.Body.Close()
+		if derr != nil {
+			log.WithError(derr).Error("Error closing response body")
+		}
+	}()
 
 	//create byte array of HTTP response body
 	body, err := ioutil.ReadAll(response.Body)
@@ -94,17 +95,15 @@ func SendNoAuthRequest(req *http.Request, trustedCaCerts []x509.Certificate) ([]
 	defer log.Trace("clients/send_http_request:SendNoAuthRequest() Leaving")
 
 	response, err := GetHTTPResponse(req, trustedCaCerts, false)
-	if response != nil {
-		defer func() {
-			derr := response.Body.Close()
-			if derr != nil {
-				log.WithError(derr).Error("Error closing response body")
-			}
-		}()
-	}
 	if err != nil {
 		return nil, errors.Wrap(err, "clients/send_http_request.go:SendNoAuthRequest() Error getting response")
 	}
+	defer func() {
+		derr := response.Body.Close()
+		if derr != nil {
+			log.WithError(derr).Error("Error closing response body")
+		}
+	}()
 
 	//create byte array of HTTP response body
 	body, err := ioutil.ReadAll(response.Body)
@@ -125,12 +124,15 @@ func GetHTTPResponse(req *http.Request, trustedCaCerts []x509.Certificate, addTo
 	var client *http.Client
 	//This has to be done for dynamic loading or unloading of certificates
 	if len(trustedCaCerts) == 0 {
-		client = clients.HTTPClientTLSNoVerify()
-	} else {
-		client, err = clients.HTTPClientWithCA(trustedCaCerts)
-		if err != nil {
-			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to create http client")
+		if httpClient == nil {
+			httpClient = clients.HTTPClientTLSNoVerify()
 		}
+		client = httpClient
+	} else {
+		if httpsClient == nil {
+			httpsClient, _ = clients.HTTPClientWithCA(trustedCaCerts)
+		}
+		client = httpsClient
 	}
 	log.Debug("clients/send_http_request:SendNoAuthRequest() HTTP client successfully created")
 
@@ -138,7 +140,6 @@ func GetHTTPResponse(req *http.Request, trustedCaCerts []x509.Certificate, addTo
 	if addToken {
 		aasClient = aas.NewJWTClient(cred[0])
 		aasClient.HTTPClient = client
-		client = aasClient.HTTPClient
 		log.Debug("clients/send_http_request:GetHTTPResponse() AAS client successfully created")
 
 		err = addJWTToken(aasClient, req, cred[1], cred[2], false)
@@ -148,20 +149,18 @@ func GetHTTPResponse(req *http.Request, trustedCaCerts []x509.Certificate, addTo
 	}
 
 	response, err := client.Do(req)
-	req.Close = true
 	if err != nil {
-		return response, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
+		return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
 	}
 	if response.StatusCode == http.StatusUnauthorized && addToken {
 		// fetch token and try again
 		err = addJWTToken(aasClient, req, cred[1], cred[2], true)
 		if err != nil {
-			return response, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to add JWT token")
+			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Failed to add JWT token")
 		}
 		response, err = client.Do(req)
-		req.Close = true
 		if err != nil {
-			return response, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
+			return nil, errors.Wrap(err, "clients/send_http_request.go:GetHTTPResponse() Error from response")
 		}
 	}
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusNoContent {
