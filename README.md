@@ -26,9 +26,9 @@ The below diagram depicts the high level architecture of the Intel<sup>®</sup>S
 | Component | Abbreviation | Github Repository URL |
 |-----------|--------------|-----------------------|
 | Certificate Management Service           | CMS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/cms](https://github.com/intel-secl/intel-secl/tree/master/pkg/cms) |
-| Authentication and Authorization Service | AAS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/aas](https://github.com/intel-secl/intel-secl/tree/master/pkg/aas) |
+| Authentication and Authorization Service | AAS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/authservice](https://github.com/intel-secl/intel-secl/tree/master/pkg/authservice) |
 | Workload Policy Management               | WPM         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/wpm](https://github.com/intel-secl/intel-secl/tree/master/pkg/wpm) |
-| Key Broker Service                       | KBS         | [https://github.com/intel-secl/tree/master/pkg/kbs](https://github.com/intel-secl/tree/master/pkg/kbs) |
+| Key Broker Service                       | KBS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/kbs](https://github.com/intel-secl/intel-secl/tree/master/pkg/kbs) |
 | Trust Agent                              | TA          | [https://github.com/intel-secl/go-trustagent](https://github.com/intel-secl/go-trustagent) |
 | Application Agent                        | AA          | [https://github.com/intel-secl/go-trustagent/tree/master/tboot-xm](https://github.com/intel-secl/go-trustagent/tree/master/tboot-xm) |
 | Workload Agent                           | WLA         | [https://github.com/intel-secl/workload-agent](https://github.com/intel-secl/workload-agent) |
