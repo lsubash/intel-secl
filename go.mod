@@ -8,8 +8,6 @@ require (
 	github.com/cloudflare/cfssl v1.5.0
 	github.com/containers/ocicrypt v1.1.2
 	github.com/davecgh/go-spew v1.1.1
-	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
-	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
 	github.com/gin-gonic/gin v1.7.4
 	github.com/google/uuid v1.2.0

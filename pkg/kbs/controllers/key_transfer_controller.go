@@ -208,7 +208,7 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 				return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "attestation-token is not valid for attestation-type in key-transfer policy"}
 			}
 
-			transferResponse, httpStatus, err := kc.validateClaimsAndGetKey(tokenClaims, transferPolicy, key.KeyInformation.Algorithm, keyTransferRequest.UserData, keyId)
+			transferResponse, httpStatus, err := kc.validateClaimsAndGetKey(tokenClaims, transferPolicy, key.KeyInformation.Algorithm, keyId)
 			if err != nil {
 				return nil, httpStatus, err
 			}
@@ -268,7 +268,7 @@ func (kc *KeyTransferController) Transfer(responseWriter http.ResponseWriter, re
 			return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Failed to authenticate attestation-token"}
 		}
 		tokenClaims := claims.(*aps.AttestationTokenClaim)
-		transferResponse, httpStatus, err := kc.validateClaimsAndGetKey(tokenClaims, transferPolicy, key.KeyInformation.Algorithm, keyTransferRequest.UserData, keyId)
+		transferResponse, httpStatus, err := kc.validateClaimsAndGetKey(tokenClaims, transferPolicy, key.KeyInformation.Algorithm, keyId)
 		if err != nil {
 			return nil, httpStatus, err
 		}
@@ -354,7 +354,7 @@ func (kc *KeyTransferController) fnGetJwtSigningCerts(attestationToken bool, jwt
 	return nil
 }
 
-func (kc *KeyTransferController) validateClaimsAndGetKey(tokenClaims *aps.AttestationTokenClaim, transferPolicy *kbs.KeyTransferPolicy, keyAlgorithm, userData string, keyId uuid.UUID) (interface{}, int, error) {
+func (kc *KeyTransferController) validateClaimsAndGetKey(tokenClaims *aps.AttestationTokenClaim, transferPolicy *kbs.KeyTransferPolicy, keyAlgorithm string, keyId uuid.UUID) (interface{}, int, error) {
 	defaultLog.Trace("controllers/key_transfer_controller:validateClaimsAndGetKey() Entering")
 	defer defaultLog.Trace("controllers/key_transfer_controller:validateClaimsAndGetKey() Leaving")
 
@@ -364,7 +364,7 @@ func (kc *KeyTransferController) validateClaimsAndGetKey(tokenClaims *aps.Attest
 		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Token claims validation against key-policy failed"}
 	}
 
-	response, httpStatus, err := kc.getWrappedKey(keyAlgorithm, userData, keyId)
+	response, httpStatus, err := kc.getWrappedKey(keyAlgorithm, tokenClaims.TeeHeldData, keyId)
 	if err != nil {
 		return nil, httpStatus, err
 	}
