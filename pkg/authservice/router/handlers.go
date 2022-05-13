@@ -26,6 +26,7 @@ func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string)
 
 	return func(w http.ResponseWriter, r *http.Request) error {
 		privileges, err := comctx.GetUserPermissions(r)
+		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			_, writeErr := w.Write([]byte("Could not get user permissions from http context"))

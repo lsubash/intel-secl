@@ -54,13 +54,13 @@ func (app *App) startDaemon() error {
 
 	if configuration.Endpoint.Type == constants.K8sTenant {
 
-		privateKey, err := crypt.GetPrivateKeyFromPKCS8File(app.configDir() + constants.PrivatekeyLocation)
+		privateKey, err := crypt.GetPrivateKeyFromPKCS8File(app.configDir() + constants.PrivateKeyLocation)
 		if err != nil {
 			return errors.Wrap(err, "startService:startDaemon() Error in reading the ihub private key from file")
 		}
 		k.PrivateKey = privateKey
 
-		publicKeyBytes, err := ioutil.ReadFile(app.configDir() + constants.PublickeyLocation)
+		publicKeyBytes, err := ioutil.ReadFile(app.configDir() + constants.PublicKeyLocation)
 		if err != nil {
 			return errors.Wrap(err, "startService:startDaemon() : Error in reading the ihub public key from file")
 		}
@@ -137,6 +137,5 @@ func (app *App) kickOffPlugins(k k8splugin.KubernetesDetails) {
 		if err != nil {
 			log.WithError(err).Error("startService:kickOffPlugins() : Error in pushing Kubernetes CRDs")
 		}
-
 	}
 }

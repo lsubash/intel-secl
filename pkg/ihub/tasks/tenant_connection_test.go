@@ -162,6 +162,40 @@ func TestTenantConnectionValidate(t *testing.T) {
 	server := testutility.MockServer(t)
 	defer server.Close()
 
+	tests := []struct {
+		name             string
+		tenantConnection TenantConnection
+		wantErr          bool
+	}{
+		{
+			name: "tenant-connection-validate k8s negative test",
+			tenantConnection: TenantConnection{
+				TenantConfig: &config.Endpoint{
+					URL:      "",
+					CRDName:  "",
+					Token:    "",
+					CertFile: "",
+				},
+				ConsoleWriter: os.Stdout,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if err := tt.tenantConnection.Validate(); (err != nil) != tt.wantErr {
+				t.Errorf("tasks/tenant_connection_test:TestTenantConnectionValidate(): error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestTenantConnection_validateService(t *testing.T) {
+
+	server := testutility.MockServer(t)
+	defer server.Close()
+
 	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)
 
 	t2 := TenantConnection{

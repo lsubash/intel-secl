@@ -7,7 +7,9 @@ package mocks
 //go:generate mockgen -destination=mock_intel_host_connector.go -package=host_connector github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector MockIntelConnector
 
 import (
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/ta"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
@@ -19,6 +21,11 @@ import (
 type MockIntelConnector struct {
 	client *ta.MockTAClient
 	mock.Mock
+}
+
+func (ihc *MockIntelConnector) GetTPMQuoteResponse(nonce string, pcrList []int) ([]byte, []byte, *x509.Certificate, *pem.Block, taModel.TpmQuoteResponse, error) {
+	args := ihc.Called(nonce, pcrList)
+	return args.Get(0).([]byte), args.Get(1).([]byte), args.Get(2).(*x509.Certificate), args.Get(3).(*pem.Block), args.Get(4).(taModel.TpmQuoteResponse), args.Error(1)
 }
 
 func (ihc *MockIntelConnector) GetHostDetails() (taModel.HostInfo, error) {

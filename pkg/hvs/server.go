@@ -175,10 +175,11 @@ func initHostControllerConfig(cfg *config.Configuration, certStore *crypt.Certif
 	hcProvider := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates, cfg.NATS.Servers)
 
 	hcc := domain.HostControllerConfig{
-		HostConnectorProvider: hcProvider,
-		DataEncryptionKey:     getDecodedDek(cfg),
-		Username:              cfg.HVS.Username,
-		Password:              cfg.HVS.Password,
+		HostConnectorProvider:          hcProvider,
+		DataEncryptionKey:              getDecodedDek(cfg),
+		Username:                       cfg.HVS.Username,
+		Password:                       cfg.HVS.Password,
+		VerifyQuoteForHostRegistration: cfg.VerifyQuoteForHostRegistration,
 	}
 	return hcc
 }

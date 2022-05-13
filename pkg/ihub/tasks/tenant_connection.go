@@ -93,11 +93,21 @@ func (tenantConnection TenantConnection) Run() error {
 func (tenantConnection TenantConnection) Validate() error {
 
 	conf := tenantConnection.TenantConfig
-	if conf.URL == "" || conf.Type != constants.K8sTenant {
-		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: URL & Type is not set")
+	if conf.URL == "" {
+		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: URL is not set")
+	} else if conf.Type != constants.K8sTenant {
+		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: Type is not set")
 	} else if conf.Type == constants.K8sTenant && conf.CRDName == "" && conf.Token == "" && conf.CertFile == "" {
 		return errors.New("tasks/tenant_connection:Validate() Endpoint Connection: K8s credentials are not set ")
 	}
+	//validating the service url
+	return tenantConnection.validateService()
+}
+
+//validates the tenant service connection is successful or not by hitting the service url's
+func (tenantConnection TenantConnection) validateService() error {
+
+	conf := tenantConnection.TenantConfig
 
 	if conf.Type == constants.K8sTenant {
 		parsedUrl, err := url.Parse(conf.URL)

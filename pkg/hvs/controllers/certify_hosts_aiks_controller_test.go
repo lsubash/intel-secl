@@ -39,11 +39,12 @@ var _ = Describe("CertifyHostAiksController", func() {
 	var certifyHostAiksController *controllers.CertifyHostAiksController
 	var cacert *x509.Certificate
 	ecStore := mocks.MockTpmEndorsementStore{}
+	var requireEKCertForHostProvision = false
 
 	BeforeEach(func() {
 		router = mux.NewRouter()
 		cacert = &(*certStore)[models.CaCertTypesPrivacyCa.String()].Certificates[0]
-		certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "../domain/mocks/resources/aik-reqs-dir/", true)
+		certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, &ecStore, 2, "../domain/mocks/resources/aik-reqs-dir/", true, requireEKCertForHostProvision)
 	})
 
 	Describe("Create Identity Proof request", func() {
@@ -67,6 +68,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 				identityChallengeRequest.IdentityRequest = identityReq
 				ekCertBytes, _ := base64.StdEncoding.DecodeString("MIIEnDCCA4SgAwIBAgIEKqkMMTANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCREUxITAfBgNVBAoMGEluZmluZW9uIFRlY2hub2xvZ2llcyBBRzEaMBgGA1UECwwRT1BUSUdBKFRNKSBUUE0yLjAxNTAzBgNVBAMMLEluZmluZW9uIE9QVElHQShUTSkgUlNBIE1hbnVmYWN0dXJpbmcgQ0EgMDA3MB4XDTE1MTIyMjEzMDY0NFoXDTMwMTIyMjEzMDY0NFowADCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJGeto1E37hKCFGcDY7KV6o3eYKGdpRGtCCQutI3XdeOROfI3IVAC647apI7b75+7q8XrBqV9oHYLKHcM/xKw4m48/c8W3qRwQlrmXKfxgmeuKEbGceVqI2vrMHio4GhDRb+ppeIDN8nDOEN8w7Td+iOSL5QBNseLCtS8E2fKSviH3YLNeZZG/JSFYpB4R7iV/FaG/KX2FIR/qChg7Esr+BL++52ByD85gmvY4f6ffWEtSirqYAnhnC4blU3bwl1dnbtFTWIFFUgRQB/RAlZ13TcapqvR6PNlNKfXvPK8imINFaUcHG3aEMwWEPV6+01ZM3h5QsLcg7P75gurmT5S08CAwEAAaOCAZgwggGUMFsGCCsGAQUFBwEBBE8wTTBLBggrBgEFBQcwAoY/aHR0cDovL3BraS5pbmZpbmVvbi5jb20vT3B0aWdhUnNhTWZyQ0EwMDcvT3B0aWdhUnNhTWZyQ0EwMDcuY3J0MA4GA1UdDwEB/wQEAwIAIDBYBgNVHREBAf8ETjBMpEowSDEWMBQGBWeBBQIBDAtpZDo0OTQ2NTgwMDEaMBgGBWeBBQICDA9TTEIgOTY3MCBUUE0yLjAxEjAQBgVngQUCAwwHaWQ6MDcyODAMBgNVHRMBAf8EAjAAMFAGA1UdHwRJMEcwRaBDoEGGP2h0dHA6Ly9wa2kuaW5maW5lb24uY29tL09wdGlnYVJzYU1mckNBMDA3L09wdGlnYVJzYU1mckNBMDA3LmNybDAVBgNVHSAEDjAMMAoGCCqCFABEARQBMB8GA1UdIwQYMBaAFJx99akcPUm75zeNSroS/454otdcMBAGA1UdJQQJMAcGBWeBBQgBMCEGA1UdCQQaMBgwFgYFZ4EFAhAxDTALDAMyLjACAQACAXQwDQYJKoZIhvcNAQELBQADggEBAATaII6W4g9Y10nwgaH76NxORIg9EdO9NzoDpjW+9F/8duFM+6N0Qu//yB6qpR7ZyKYBOdF5eJLsWFYpj2akRZhKuixH6xjR3XGapvimW5pTQ055+xeF5aS/s93Wa/lJVM1JzGsZk+vbqMwNlI12sX6wcaStIMkuAyKGrRdtafS8woEKBb41bTd7Y8Btb4k7gMDoMU1ekqZSNpT/fR5Ff1ob/Sgu8lwEChnFjWF22OjPle++npUyRNo/4aa6EC7+hBVitCiqA9EIPB+Dr8UJ5ZLgObpkLOmTKnlBa9HL6fpnu7EBhB/PomLSoHthZTjdql97MrPQ+XX7OFrMdUZdzO0=")
 				// Get the Identity challenge request
+
 				identityChallengeRequest, err = privacycaTpm2.GetIdentityChallengeRequest(ekCertBytes, cacert.PublicKey.(*rsa.PublicKey), identityChallengeRequest.IdentityRequest)
 				Expect(err).NotTo(HaveOccurred())
 				jsonData, _ := json.Marshal(identityChallengeRequest)
@@ -182,7 +184,7 @@ var _ = Describe("CertifyHostAiksController", func() {
 			It("Should get HTTP Status: 200", func() {
 				// mockEndorsement is having the ekcert
 				mockEndorsement := mocks.NewFakeTpmEndorsementStore()
-				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/", true)
+				certifyHostAiksController = controllers.NewCertifyHostAiksController(certStore, mockEndorsement, 2, "../domain/mocks/resources/aik-reqs-dir/", true, requireEKCertForHostProvision)
 				router.Handle("/privacyca/identity-challenge-request", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(certifyHostAiksController.IdentityRequestGetChallenge))).Methods(http.MethodPost)
 
 				// Mock TA Flow for generating data for identityChallengeRequest

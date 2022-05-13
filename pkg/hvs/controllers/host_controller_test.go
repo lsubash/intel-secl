@@ -48,10 +48,11 @@ var _ = Describe("HostController", func() {
 		dek, err := base64.StdEncoding.DecodeString(dekBase64)
 		Expect(err).NotTo(HaveOccurred())
 		hostControllerConfig = domain.HostControllerConfig{
-			HostConnectorProvider: hostConnectorProvider,
-			DataEncryptionKey:     dek,
-			Username:              "fakeuser",
-			Password:              "fakepassword",
+			HostConnectorProvider:          hostConnectorProvider,
+			DataEncryptionKey:              dek,
+			Username:                       "fakeuser",
+			Password:                       "fakepassword",
+			VerifyQuoteForHostRegistration: false,
 		}
 
 		hostController = &controllers.HostController{

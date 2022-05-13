@@ -9,8 +9,10 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"sort"
@@ -29,6 +31,10 @@ import (
 
 type VmwareConnector struct {
 	client vmware.VMWareClient
+}
+
+func (vc *VmwareConnector) GetTPMQuoteResponse(nonce string, pcrList []int) ([]byte, []byte, *x509.Certificate, *pem.Block, taModel.TpmQuoteResponse, error) {
+	return nil, nil, nil, nil, taModel.TpmQuoteResponse{}, errors.New("vmware_host_connector :GetTPMQuoteResponse() Operation not supported")
 }
 
 const (

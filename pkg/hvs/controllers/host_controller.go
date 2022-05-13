@@ -79,6 +79,38 @@ func (hc *HostController) Create(w http.ResponseWriter, r *http.Request) (interf
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to decode JSON request body"}
 	}
 
+	if hc.HCConfig.VerifyQuoteForHostRegistration {
+
+		connectionString, _, err := GenerateConnectionString(reqHost.ConnectionString, hc.HCConfig.Username,
+			hc.HCConfig.Password,
+			hc.HCStore)
+		if err != nil {
+			defaultLog.WithError(err).Error("controllers/host_controller:Create() Could not generate formatted connection string")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error generating connection string"}
+		}
+
+		hostConnector, err := hc.HCConfig.HostConnectorProvider.NewHostConnector(connectionString)
+		if err != nil {
+			defaultLog.WithError(err).Error("controllers/host_controller:Create() Failed " +
+				"to initialize HostConnector to the host")
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Target Host connection failed"}
+		}
+
+		nonce, err := hcUtil.GenerateNonce(20)
+		if err != nil {
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error generating nonce for TPM quote request"}
+		}
+
+		verificationNonceInBytes, tpmQuoteInBytes, aikCertificate, _, _, err := hostConnector.GetTPMQuoteResponse(nonce, nil)
+		if err != nil {
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error getting TPM Quote Response"}
+		}
+
+		_, _, err = hcUtil.VerifyQuoteAndGetPCRDetails(verificationNonceInBytes, tpmQuoteInBytes, aikCertificate)
+		if err != nil {
+			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "TPM Quote verification failed"}
+		}
+	}
 	createdHost, status, err := hc.CreateHost(reqHost)
 	if err != nil {
 		return nil, status, err

@@ -48,10 +48,11 @@ var _ = Describe("ESXiClusterController", func() {
 		dek, _ := base64.StdEncoding.DecodeString(dekBase64)
 
 		hostControllerConfig := domain.HostControllerConfig{
-			HostConnectorProvider: hostConnectorProvider,
-			DataEncryptionKey:     dek,
-			Username:              "fakeuser",
-			Password:              "fakepassword",
+			HostConnectorProvider:          hostConnectorProvider,
+			DataEncryptionKey:              dek,
+			Username:                       "fakeuser",
+			Password:                       "fakepassword",
+			VerifyQuoteForHostRegistration: false,
 		}
 		hostController = &controllers.HostController{
 			HStore:    hostStore,
