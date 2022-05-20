@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package attestationPlugin
 
 import (
+	"net/url"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/fds"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	fdsModel "github.com/intel-secl/intel-secl/v5/pkg/model/fds"
-	"net/url"
 
 	"github.com/pkg/errors"
 )

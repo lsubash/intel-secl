@@ -1,11 +1,13 @@
 /*
- *  Copyright (C) 2020 Intel Corporation
+ *  Copyright (C) 2022 Intel Corporation
  *  SPDX-License-Identifier: BSD-3-Clause
  */
 package router
 
 import (
 	"fmt"
+	"net/http"
+
 	consts "github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/auth"
 	comctx "github.com/intel-secl/intel-secl/v5/pkg/lib/common/context"
@@ -13,16 +15,15 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/pkg/errors"
-	"net/http"
 
 	"github.com/jinzhu/gorm"
 
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 )
 
-func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
-	defaultLog.Trace("router/handlers:permissionsHandler() Entering")
-	defer defaultLog.Trace("router/handlers:permissionsHandler() Leaving")
+func PermissionsHandler(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
+	defaultLog.Trace("router/handlers:PermissionsHandler() Entering")
+	defer defaultLog.Trace("router/handlers:PermissionsHandler() Leaving")
 
 	return func(w http.ResponseWriter, r *http.Request) error {
 		privileges, err := comctx.GetUserPermissions(r)
@@ -34,8 +35,8 @@ func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string)
 			if writeErr != nil {
 				defaultLog.WithError(writeErr).Error("Failed to write response")
 			}
-			secLog.Errorf("router/handlers:permissionsHandler() %s Permission: %v | Context: %v", commLogMsg.AuthenticationFailed, permissionNames, r.Context())
-			return errors.Wrap(err, "router/handlers:permissionsHandler() Could not get user permissions from http context")
+			secLog.Errorf("router/handlers:PermissionsHandler() %s Permission: %v | Context: %v", commLogMsg.AuthenticationFailed, permissionNames, r.Context())
+			return errors.Wrap(err, "router/handlers:PermissionsHandler() Could not get user permissions from http context")
 		}
 		reqPermissions := ct.PermissionInfo{Service: consts.ServiceName, Rules: permissionNames}
 
@@ -43,10 +44,10 @@ func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string)
 			true)
 		if !foundMatchingPermission {
 			w.WriteHeader(http.StatusUnauthorized)
-			secLog.Errorf("router/handlers:permissionsHandler() %s Insufficient privileges to access %s", commLogMsg.UnauthorizedAccess, r.RequestURI)
+			secLog.Errorf("router/handlers:PermissionsHandler() %s Insufficient privileges to access %s", commLogMsg.UnauthorizedAccess, r.RequestURI)
 			return &commErr.PrivilegeError{Message: "Insufficient privileges to access " + r.RequestURI, StatusCode: http.StatusUnauthorized}
 		}
-		secLog.Infof("router/handlers:permissionsHandler() %s - %s", commLogMsg.AuthorizedAccess, r.RequestURI)
+		secLog.Infof("router/handlers:PermissionsHandler() %s - %s", commLogMsg.AuthorizedAccess, r.RequestURI)
 		return eh(w, r)
 	}
 }
@@ -111,6 +112,8 @@ func errorFormatter(err error, status int) error {
 	case *commErr.ResourceError:
 		err = &commErr.HandledError{StatusCode: status, Message: t.Message}
 	case *commErr.PrivilegeError:
+		err = &commErr.HandledError{StatusCode: status, Message: t.Message}
+	case *commErr.BadRequestError:
 		err = &commErr.HandledError{StatusCode: status, Message: t.Message}
 	}
 	return err

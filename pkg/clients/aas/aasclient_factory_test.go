@@ -5,13 +5,14 @@
 package aas
 
 import (
-	consts "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	consts "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

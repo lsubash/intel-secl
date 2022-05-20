@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package aas
@@ -7,22 +7,47 @@ package aas
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+
 	aasTypes "github.com/intel-secl/intel-secl/v5/pkg/authservice/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	types "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
+type AASClient interface {
+	PrepReqHeader(req *http.Request)
+	CreateUser(u types.UserCreate) (*types.UserCreateResponse, error)
+	GetUsers(name string) ([]types.UserCreateResponse, error)
+	CreateRole(r types.RoleCreate) (*types.RoleCreateResponse, error)
+	GetRoles(service, name, context, contextContains string, allContexts bool) (aasTypes.Roles, error)
+	DeleteRole(roleId string) error
+	GetPermissionsForUser(userID string) ([]types.PermissionInfo, error)
+	GetRolesForUser(userID string) ([]types.RoleInfo, error)
+	UpdateUser(userID string, user types.UserCreate) error
+	AddRoleToUser(userID string, r types.RoleIDs) error
+	GetCredentials(createCredentailsReq types.CreateCredentialsReq) ([]byte, error)
+	GetCustomClaimsToken(customClaimsTokenReq types.CustomClaims) ([]byte, error)
+	GetJwtSigningCertificate() ([]byte, error)
+}
+
+func NewAASClient(aasURL string, token []byte, client HttpClient) AASClient {
+	return &Client{
+		BaseURL:    aasURL,
+		JWTToken:   token,
+		HTTPClient: client,
+	}
+}
+
 type Client struct {
 	BaseURL    string
 	JWTToken   []byte
-	HTTPClient *http.Client
+	HTTPClient HttpClient
 }
 
 var (
@@ -55,7 +80,7 @@ var (
 	}
 )
 
-func (c *Client) prepReqHeader(req *http.Request) {
+func (c *Client) PrepReqHeader(req *http.Request) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+string(c.JWTToken))
@@ -69,11 +94,12 @@ func (c *Client) CreateUser(u types.UserCreate) (*types.UserCreateResponse, erro
 	if err != nil {
 		return nil, err
 	}
+
 	req, err := http.NewRequest(http.MethodPost, userURL, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return nil, errors.New("aasClient.CreateUser: HTTPClient should not be null")
@@ -111,7 +137,7 @@ func (c *Client) GetUsers(name string) ([]types.UserCreateResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return nil, errors.New("aasClient.GetUsers: HTTPClient should not be null")
@@ -144,7 +170,7 @@ func (c *Client) CreateRole(r types.RoleCreate) (*types.RoleCreateResponse, erro
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return nil, errors.New("aasClient.CreateRole: HTTPClient should not be null")
@@ -200,7 +226,7 @@ func (c *Client) GetRoles(service, name, context, contextContains string, allCon
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return nil, errors.New("aasClient.GetRoles: HTTPClient should not be null")
@@ -228,7 +254,7 @@ func (c *Client) DeleteRole(roleId string) error {
 	if err != nil {
 		return err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return errors.New("aasClient.DeleteRole: HTTPClient should not be null")
@@ -252,7 +278,7 @@ func (c *Client) GetPermissionsForUser(userID string) ([]types.PermissionInfo, e
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return nil, errors.New("aasClient.GetPermissionsForUser: HTTPClient should not be null")
@@ -282,7 +308,7 @@ func (c *Client) GetRolesForUser(userID string) ([]types.RoleInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return nil, errors.New("aasClient.GetRolesForUser: HTTPClient should not be null")
@@ -316,7 +342,7 @@ func (c *Client) UpdateUser(userID string, user types.UserCreate) error {
 	if err != nil {
 		return err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return errors.New("aaClient.UpdateUser: HTTPClient should not be null")
@@ -344,7 +370,7 @@ func (c *Client) AddRoleToUser(userID string, r types.RoleIDs) error {
 	if err != nil {
 		return err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 
 	if c.HTTPClient == nil {
 		return errors.New("aaClient.AddRoleToUser: HTTPClient should not be null")
@@ -371,7 +397,7 @@ func (c *Client) GetCredentials(createCredentailsReq types.CreateCredentialsReq)
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 	req.Header.Set("Accept", "text/plain")
 
 	if c.HTTPClient == nil {
@@ -405,7 +431,7 @@ func (c *Client) GetCustomClaimsToken(customClaimsTokenReq types.CustomClaims) (
 	if err != nil {
 		return nil, err
 	}
-	c.prepReqHeader(req)
+	c.PrepReqHeader(req)
 	req.Header.Set("Accept", "text/plain")
 
 	if c.HTTPClient == nil {

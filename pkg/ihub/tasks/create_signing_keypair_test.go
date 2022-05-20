@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package tasks
@@ -129,7 +129,7 @@ func TestCreateSigningKeyValidate(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "create-signingkey-validate valid test 2",
+			name: "create-signingkey-validate negative test 1",
 
 			ek: CreateSigningKey{
 				KeyAlgorithmLength: 3072,
@@ -139,11 +139,21 @@ func TestCreateSigningKeyValidate(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "create-signingkey-validate negative test",
+			name: "create-signingkey-validate negative test 2",
 
 			ek: CreateSigningKey{
 				KeyAlgorithmLength: 3072,
 				PrivateKeyLocation: "privateKey.pem",
+				PublicKeyLocation:  "",
+			},
+			wantErr: true,
+		},
+		{
+			name: "create-signingkey-validate negative test 3",
+
+			ek: CreateSigningKey{
+				KeyAlgorithmLength: 3072,
+				PrivateKeyLocation: "",
 				PublicKeyLocation:  "",
 			},
 			wantErr: true,

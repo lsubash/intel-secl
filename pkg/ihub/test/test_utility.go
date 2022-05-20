@@ -53,7 +53,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		}
 	}).Methods(http.MethodPost)
 
-	r.HandleFunc("/mtwilson/v2/invalid/reports", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/hvs/v2/invalid/reports", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		_, err := w.Write(nil)
@@ -62,7 +62,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		}
 	}).Methods(http.MethodGet)
 
-	r.HandleFunc("/mtwilson/v2/reports", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/hvs/v2/reports", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		samlReport, err := ioutil.ReadFile(SampleSamlReportPath)
@@ -75,7 +75,7 @@ func MockServer(t *testing.T) *httptest.Server {
 		}
 	}).Methods(http.MethodGet)
 
-	r.HandleFunc("/mtwilson/v2/ca-certificates", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/hvs/v2/ca-certificates", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		samlCertificate, err := ioutil.ReadFile(SampleSamlCertPath)
@@ -199,7 +199,7 @@ func SetupMockK8sConfiguration(t *testing.T, serverUrl string) *config.Configura
 	c.AASBaseUrl = serverUrl + "/aas/v1/"
 	c.IHUB.Username = "admin@hub"
 	c.IHUB.Password = "hubAdminPass"
-	c.AttestationService.HVSBaseURL = serverUrl + "/mtwilson/v2/"
+	c.AttestationService.HVSBaseURL = serverUrl + "/hvs/v2/"
 	c.AttestationService.FDSBaseURL = serverUrl + "/fds/v1/"
 	c.Endpoint.Type = "KUBERNETES"
 	c.Endpoint.URL = serverUrl + "/"

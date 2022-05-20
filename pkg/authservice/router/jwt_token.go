@@ -1,17 +1,18 @@
 /*
- *  Copyright (C) 2020 Intel Corporation
+ *  Copyright (C) 2022 Intel Corporation
  *  SPDX-License-Identifier: BSD-3-Clause
  */
 
 package router
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/domain"
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
-	"net/http"
 )
 
 func SetJwtTokenRoutes(r *mux.Router, db domain.AASDatabase, tokFactory *jwtauth.JwtFactory) *mux.Router {
@@ -34,7 +35,7 @@ func SetAuthJwtTokenRoutes(r *mux.Router, db domain.AASDatabase, tokFactory *jwt
 		Database:     db,
 		TokenFactory: tokFactory,
 	}
-	r.Handle("/custom-claims-token", ErrorHandler(permissionsHandler(ResponseHandler(controller.CreateCustomClaimsJwtToken,
+	r.Handle("/custom-claims-token", ErrorHandler(PermissionsHandler(ResponseHandler(controller.CreateCustomClaimsJwtToken,
 		"application/jwt"), []string{consts.CustomClaimsCreate}))).Methods(http.MethodPost)
 
 	return r

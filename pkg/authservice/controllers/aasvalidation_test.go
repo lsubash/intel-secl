@@ -1,7 +1,8 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 package controllers
 
 import (
@@ -9,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -127,4 +127,37 @@ func TestValidatePasswordString(t *testing.T) {
 	// no restriction on characters...
 	err = validation.ValidatePasswordString("`~!@#$%^&*()_+1234567890-={}[]\\|:;'\",./<>?abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	assert.NoError(t, err)
+}
+
+func TestValidatePermissions(t *testing.T) {
+	type args struct {
+		permissions []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate permission with valid length",
+			args: args{
+				permissions: []string{"ValidPermission"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate permission with invalid length",
+			args: args{
+				permissions: []string{"SW50ZWyuIFNlY3VyaXR5IExpYnJhcmllcyBmb3IgRGF0YSBDZW50ZXIgKEludGVsriBTZWNMLURDKSBlbmFibGVzIHNlY3VyaXR5IHVzZSBjYXNlcyBmb3IgZGF0YSBjZW50ZXIgdXNpbmcgSW50ZWyuIGhhcmR3YXJlIHNlY3VyaXR5IHRlY2hub2xvZ2llcy4KCkhhcmR3YXJlLWJhc2VkIGNsb3VkIHNlY3VyaXR5IHNvbHV0aW9ucyBwcm92aWRlIGEgaGlnaGVyIGxldmVsIG9mIHByb3RlY3Rpb24gYXMgY29tcGFyZWQgdG8gc29mdHdhcmUtb25seSBzZWN1cml0eSBtZWFzdXJlcy4gVGhlcmUgYXJlIG1hbnkgSW50ZWwgcGxhdGZvcm0gc2VjdXJpdHkgdGVjaG5vbG9naWVzLCB3aGljaCBjYW4gYmUgdXNlZCB0byBzZWN1cmUgY3VzdG9tZXJzJyBkYXRhLiBDdXN0b21lcnMgaGF2ZSBmb3VuZCBhZG9wdGluZyBhbmQgZGVwbG95aW5nIHRoZXNlIHRlY2hub2xvZ2llcyBhdCBhIGJyb2FkIHNjYWxlIGNoYWxsZW5naW5nLCBkdWUgdG8gdGhlIGxhY2sgb2Ygc29sdXRpb24gaW50ZWdyYXRpb24gYW5kIGRlcGxveW1lbnQgdG9vbHMuIEludGVsriBTZWN1cml0eSBMaWJyYXJpZXMgZm9yIERhdGEgQ2VudGVycyAoSW50ZWyuIFNlY0wgLSBEQykgd2FzIGJ1aWx0IHRvIGFpZCBvdXIgY3VzdG9tZXJzIGluIGFkb3B0aW5nIGFuZCBkZXBsb3lpbmcgSW50ZWwgU2VjdXJpdHkgZmVhdHVyZXMsIHJvb3RlZCBpbiBzaWxpY29uLCBhdCBzY2FsZS4="},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidatePermissions(tt.args.permissions); (err != nil) != tt.wantErr {
+				t.Errorf("ValidatePermissions() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

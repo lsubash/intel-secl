@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2021 Intel Corporation
+ *  Copyright (C) 2022 Intel Corporation
  *  SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -8,11 +8,12 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/authservice/config"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/authservice/config"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
@@ -28,6 +29,7 @@ import (
 
 type CredentialsController struct {
 	UserCredentialValidity time.Duration
+	AccountSeedFile        string
 }
 
 func (controller CredentialsController) CreateCredentials(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
@@ -90,17 +92,17 @@ func (controller CredentialsController) CreateCredentials(w http.ResponseWriter,
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error fetching user seed"}
 	}
 
-	accountSeedBytes, err := ioutil.ReadFile(constants.AccountSeedFile)
+	accountSeedBytes, err := ioutil.ReadFile(controller.AccountSeedFile)
 	if err != nil {
 		log.WithError(err).Error("controllers/credentials_controller:CreateCredentials() Error reading account " +
 			"seed from file")
-		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error reading account seed from file"}
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Error reading account seed from file"}
 	}
 
 	accountKeyPair, err := nkeys.FromSeed(accountSeedBytes)
 	if err != nil {
 		log.WithError(err).Error("controllers/credentials_controller:CreateCredentials() Error creating account key pair")
-		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error creating account key pair"}
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Error creating account key pair"}
 	}
 
 	userToken, err := common.CreateJWTToken(userKeyPair, accountKeyPair,

@@ -1,21 +1,22 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package controllers
 
 import (
-	consts "github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
-	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	"io/ioutil"
 	"net/http"
 	"regexp"
+
+	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 )
 
 type JwtCertificateController struct {
+	TokenSignCertFile string
 }
 
 var (
@@ -27,7 +28,7 @@ func (controller JwtCertificateController) GetJwtCertificate(w http.ResponseWrit
 	defaultLog.Trace("call to getJwtCertificate")
 	defer defaultLog.Trace("getJwtCertificate return")
 
-	tokenCertificate, err := ioutil.ReadFile(consts.TokenSignCertFile)
+	tokenCertificate, err := ioutil.ReadFile(controller.TokenSignCertFile)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

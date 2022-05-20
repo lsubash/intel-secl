@@ -6,16 +6,18 @@ package controllers
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/domain"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	aasModel "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
-	"time"
+
+	"net/http"
 
 	authcommon "github.com/intel-secl/intel-secl/v5/pkg/authservice/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/types"
-	"net/http"
 
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 )
@@ -102,7 +104,7 @@ func (controller JwtTokenController) CreateCustomClaimsJwtToken(w http.ResponseW
 
 	validationErr := validation.ValidateUserNameString(cc.Subject)
 	if validationErr != nil {
-		return nil, http.StatusUnauthorized, &commErr.ResourceError{Message: "Invalid subject provided"}
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid subject provided"}
 	}
 
 	jwt, err := controller.TokenFactory.Create(&cc.Claims, cc.Subject, time.Duration(cc.ValiditySecs)*time.Second)

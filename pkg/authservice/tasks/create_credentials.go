@@ -7,6 +7,10 @@ package tasks
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
@@ -14,15 +18,15 @@ import (
 	"github.com/nats-io/nkeys"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"io/ioutil"
-	"os"
 )
 
 type CreateCredentials struct {
-	CreateCredentials bool
-	NatsConfig        config.NatsConfig
-	ConsoleWriter     io.Writer
+	CreateCredentials        bool
+	NatsConfig               config.NatsConfig
+	ConsoleWriter            io.Writer
+	OperatorSeedFile         string
+	AccountSeedFile          string
+	AccountConfigurationFile string
 }
 
 const createCredentialsHelpPrompt = "Following environment variables are optional for create-credentials setup:"
@@ -62,7 +66,7 @@ func (cc *CreateCredentials) Run() error {
 	}
 	log.Debug("Operator token is : ", operatorToken)
 
-	err = ioutil.WriteFile(constants.OperatorSeedFile, operatorSeed, 0600)
+	err = ioutil.WriteFile(cc.OperatorSeedFile, operatorSeed, 0600)
 	if err != nil {
 		return errors.Wrap(err, "Error writing operator seed and private key to file")
 	}
@@ -90,7 +94,7 @@ func (cc *CreateCredentials) Run() error {
 	}
 	log.Debug("Account token is : ", accountToken)
 
-	err = ioutil.WriteFile(constants.AccountSeedFile, accountSeed, 0600)
+	err = ioutil.WriteFile(cc.AccountSeedFile, accountSeed, 0600)
 	if err != nil {
 		return errors.Wrap(err, "Error writing private key and seed of account to file")
 	}
@@ -100,7 +104,7 @@ func (cc *CreateCredentials) Run() error {
 		" // Account %s\n %s: %s\n}", cc.NatsConfig.Operator.Name, operatorToken, cc.NatsConfig.Account.Name,
 		accountPublicKey, accountToken)
 
-	err = ioutil.WriteFile(constants.AccountConfigurationFile, []byte(formattedConf), 0600)
+	err = ioutil.WriteFile(cc.AccountConfigurationFile, []byte(formattedConf), 0600)
 	if err != nil {
 		return errors.Wrap(err, "Error writing server configuration to file")
 	}
@@ -118,15 +122,15 @@ func (cc *CreateCredentials) Validate() error {
 	if !cc.CreateCredentials {
 		return nil
 	}
-	_, err := os.Stat(constants.OperatorSeedFile)
+	_, err := os.Stat(cc.OperatorSeedFile)
 	if err != nil {
 		return err
 	}
-	_, err = os.Stat(constants.AccountSeedFile)
+	_, err = os.Stat(cc.AccountSeedFile)
 	if err != nil {
 		return err
 	}
-	_, err = os.Stat(constants.AccountConfigurationFile)
+	_, err = os.Stat(cc.AccountConfigurationFile)
 	if err != nil {
 		return err
 	}

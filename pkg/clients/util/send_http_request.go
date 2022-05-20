@@ -1,17 +1,18 @@
 /*
- *  Copyright (C) 2020 Intel Corporation
+ *  Copyright (C) 2022 Intel Corporation
  *  SPDX-License-Identifier: BSD-3-Clause
  */
 package util
 
 import (
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients"
-	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"sync"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
 
@@ -121,7 +122,7 @@ func GetHTTPResponse(req *http.Request, trustedCaCerts []x509.Certificate, addTo
 	defer log.Trace("clients/send_http_request:GetHTTPResponse() Leaving")
 
 	var err error
-	var client *http.Client
+	var client aas.HttpClient
 	//This has to be done for dynamic loading or unloading of certificates
 	if len(trustedCaCerts) == 0 {
 		if httpClient == nil {

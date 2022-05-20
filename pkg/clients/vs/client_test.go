@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -7,7 +7,6 @@ package vs
 
 import (
 	"crypto/x509"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -32,7 +31,7 @@ func mockServer(t *testing.T) *httptest.Server {
 		w.Write([]byte(AASToken))
 	}).Methods(http.MethodPost)
 
-	router.HandleFunc("/mtwilson/v2/reports", func(w http.ResponseWriter, router *http.Request) {
+	router.HandleFunc("/hvs/v2/reports", func(w http.ResponseWriter, router *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 		samlReport, err := ioutil.ReadFile(SampleSamlReportPath)
@@ -50,7 +49,7 @@ func TestClient_GetCaCerts(t *testing.T) {
 	server := mockServer(t)
 	defer server.Close()
 	aasUrl, _ := url.Parse(server.URL + "/aas")
-	baseURL, _ := url.Parse(server.URL + "/mtwilson/v2")
+	baseURL, _ := url.Parse(server.URL + "/hvs/v2")
 
 	client1 := Client{
 		AASURL:    aasUrl,
@@ -70,8 +69,16 @@ func TestClient_GetCaCerts(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "Test 1 Negative Case",
+			name:    "Validate GetCaCerts with invalid client, should fail to get CA Certs",
 			c:       client1,
+			wantErr: true,
+		},
+		{
+			name: "Validate GetCaCerts with invalid domain name, should fail to get CA Certs",
+			c:    client1,
+			args: args{
+				domain: "\test",
+			},
 			wantErr: true,
 		},
 	}
@@ -92,7 +99,7 @@ func TestClient_GetSamlReports(t *testing.T) {
 	defer server.Close()
 
 	aasUrl, _ := url.Parse(server.URL + "/aas")
-	baseURL, _ := url.Parse(server.URL + "/mtwilson/v2")
+	baseURL, _ := url.Parse(server.URL + "/hvs/v2")
 
 	client1 := Client{
 		AASURL:    aasUrl,
@@ -101,7 +108,6 @@ func TestClient_GetSamlReports(t *testing.T) {
 		UserName:  "hubadminpass",
 		CertArray: []x509.Certificate{},
 	}
-	fmt.Println(client1)
 	type args struct {
 		url string
 	}
@@ -112,11 +118,19 @@ func TestClient_GetSamlReports(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "Test 1 Positive Case",
+			name:    "Validate GetSamlReports with valid input, should get saml report",
 			c:       client1,
 			wantErr: false,
 			args: args{
-				url: server.URL + "/mtwilson/v2/reports",
+				url: server.URL + "/hvs/v2/reports",
+			},
+		},
+		{
+			name:    "Validate GetSamlReports with invalid URL, should not get saml report",
+			c:       client1,
+			wantErr: true,
+			args: args{
+				url: server.URL + "/hvs/v2/reports/test",
 			},
 		},
 	}

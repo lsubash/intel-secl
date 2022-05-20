@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package k8s
@@ -33,7 +33,7 @@ type Client struct {
 	BaseURL    *url.URL
 	Token      string
 	CertPath   string
-	HTTPClient *http.Client
+	HTTPClient HttpClient
 }
 
 //RequestParams request params for K8sclient response
@@ -141,7 +141,7 @@ func (k8sClient *Client) SendRequest(reqParams *RequestParams) (*http.Response, 
 }
 
 //getK8sHTTPClient get the K8s client
-func (k8sClient *Client) getK8sHTTPClient() (*http.Client, error) {
+func (k8sClient *Client) getK8sHTTPClient() (HttpClient, error) {
 	log.Trace("K8s/client:getK8sHTTPClient() Entering")
 	defer log.Trace("K8s/client:getK8sHTTPClient() Leaving")
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package tasks
@@ -7,9 +7,10 @@ package tasks
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"io"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	log "github.com/sirupsen/logrus"
-	"io"
 
 	"os"
 

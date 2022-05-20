@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package tasks
 
 import (
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/vs"
 	vsPlugin "github.com/intel-secl/intel-secl/v5/pkg/ihub/attestationPlugin"
@@ -45,19 +46,35 @@ func TestDownloadSamlCertValidate(t *testing.T) {
 		{
 			name: "download-saml-cert-validate valid test",
 			d: DownloadSamlCert{
-				AttestationConfig: &c1.AttestationService,
-				SamlCertPath:      temp.Name(),
-				ConsoleWriter:     os.Stdout,
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: c1.AttestationService.HVSBaseURL + "/e",
+				},
+				SamlCertPath:  temp.Name(),
+				ConsoleWriter: os.Stdout,
 			},
 			wantErr: false,
-		}, {
-			name: "download-saml-cert-validate negative test",
+		},
+		{
+			name: "download-saml-cert-validate negative test 1",
 			d: DownloadSamlCert{
-				AttestationConfig: &c1.AttestationService,
-				SamlCertPath:      "",
-				ConsoleWriter:     os.Stdout,
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: c1.AttestationService.HVSBaseURL + "/e",
+				},
+				SamlCertPath:  "",
+				ConsoleWriter: os.Stdout,
 			},
 			wantErr: true,
+		},
+		{
+			name: "download-saml-cert-validate negative test 2",
+			d: DownloadSamlCert{
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: "",
+				},
+				SamlCertPath:  temp.Name(),
+				ConsoleWriter: os.Stdout,
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -108,7 +125,7 @@ func TestDownloadSamlCertRun(t *testing.T) {
 
 	conf, _ := config.LoadConfiguration()
 
-	conf.AttestationService.HVSBaseURL = server.URL + "/mtwilson/v2/"
+	conf.AttestationService.HVSBaseURL = server.URL + "/hvs/v2/"
 
 	tests := []struct {
 		name    string
@@ -118,19 +135,59 @@ func TestDownloadSamlCertRun(t *testing.T) {
 		{
 			name: "download-saml-cert-run valid test",
 			d: DownloadSamlCert{
-				AttestationConfig: &conf.AttestationService,
-				SamlCertPath:      tempSamlFile.Name(),
-				ConsoleWriter:     os.Stdout,
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: server.URL + "/hvs/v2/",
+				},
+				SamlCertPath:  tempSamlFile.Name(),
+				ConsoleWriter: os.Stdout,
 			},
 			wantErr: false,
 		},
 
 		{
-			name: "download-saml-cert-run negative test",
+			name: "download-saml-cert-run negative test1",
 			d: DownloadSamlCert{
-				AttestationConfig: &conf.AttestationService,
-				SamlCertPath:      "",
-				ConsoleWriter:     os.Stdout,
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: server.URL + "/hvs/v2/",
+				},
+				SamlCertPath:  "",
+				ConsoleWriter: os.Stdout,
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "download-saml-cert-run negative test2",
+			d: DownloadSamlCert{
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: "",
+				},
+				SamlCertPath:  "",
+				ConsoleWriter: os.Stdout,
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "download-saml-cert-run negative test3",
+			d: DownloadSamlCert{
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: server.URL + "hvs/v2",
+				},
+				SamlCertPath:  "",
+				ConsoleWriter: os.Stdout,
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "download-saml-cert-run negative test 3",
+			d: DownloadSamlCert{
+				AttestationConfig: &config.AttestationConfig{
+					HVSBaseURL: server.URL + "/hvs/v1/",
+				},
+				SamlCertPath:  tempSamlFile.Name(),
+				ConsoleWriter: os.Stdout,
 			},
 			wantErr: true,
 		},

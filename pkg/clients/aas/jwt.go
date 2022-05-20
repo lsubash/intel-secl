@@ -44,7 +44,7 @@ var (
 
 type JwtClient struct {
 	BaseURL    string
-	HTTPClient *http.Client
+	HTTPClient HttpClient
 
 	users  map[string]*types.UserCred
 	tokens map[string][]byte

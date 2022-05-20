@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -148,9 +148,29 @@ func TestSendRequest(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Send Request Test 3 - failure scenario",
+			k: &Client{
+				BaseURL:    parsedK8sUrl,
+				Token:      k8sToken,
+				CertPath:   k8scertFilePath,
+				HTTPClient: &ClientMock{},
+			},
+			args: args{
+				reqParams: &RequestParams{
+					Method: http.MethodGet,
+					URL:    parsedUrl,
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.name == "Send Request Test 3 - failure scenario" {
+				mock := NewClientMock()
+				tt.k.HTTPClient = mock
+			}
 			_, err := tt.k.SendRequest(tt.args.reqParams)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("k8s/client_test:TestSendRequest(): error = %v, wantErr %v", err, tt.wantErr)

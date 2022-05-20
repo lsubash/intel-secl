@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -7,10 +7,11 @@ package attestationPlugin
 
 import (
 	"encoding/xml"
-	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	"io/ioutil"
 	"reflect"
 	"testing"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/vs"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
@@ -59,11 +60,34 @@ func TestGetHostReports(t *testing.T) {
 				c: &config.Configuration{
 					AASBaseUrl: server.URL + "/aas",
 					AttestationService: config.AttestationConfig{
-						HVSBaseURL: "mtwilson/v2"},
+						HVSBaseURL: "hvs/v2"},
 					Endpoint: config.Endpoint{
 						Type: constants.K8sTenant,
 					},
 				},
+			},
+
+			want: nil,
+		},
+		{
+			name: "TestGetHostReports Test 3",
+			args: args{
+				c: &config.Configuration{
+					AASBaseUrl: server.URL + "/aas",
+					AttestationService: config.AttestationConfig{
+						HVSBaseURL: "hvs/v2"},
+					Endpoint: config.Endpoint{
+						Type: "",
+					},
+				},
+			},
+
+			want: nil,
+		},
+		{
+			name: "TestGetHostReports Test 4",
+			args: args{
+				c: &config.Configuration{},
 			},
 
 			want: nil,
@@ -76,7 +100,6 @@ func TestGetHostReports(t *testing.T) {
 			// TODO need to create a mock saml report verifier since we already have the saml report verifier test
 			// or we need to move all resources like saml cert, saml report to common folder
 			got, _ := GetHostReports(tArgs.h, tArgs.c, sampleRootCertDirPath, sampleSamlCertPath)
-
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("attestationPlugin/vs_plugin_test:TestGetHostReports()  got = %v, want: %v", got != nil, tt.want != nil)
 			}
@@ -110,8 +133,8 @@ func TestGetCaCerts(t *testing.T) {
 				configuration: &config.Configuration{
 					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
-						Username: "admin@hub",
-						Password: "hubAdminPass",
+						Username: "test@user",
+						Password: "test@password",
 					},
 					AttestationService: config.AttestationConfig{
 						HVSBaseURL: "",
@@ -128,11 +151,11 @@ func TestGetCaCerts(t *testing.T) {
 				configuration: &config.Configuration{
 					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
-						Username: "admin@hub",
-						Password: "hubAdminPass",
+						Username: "test@user",
+						Password: "test@password",
 					},
 					AttestationService: config.AttestationConfig{
-						HVSBaseURL: server.URL + "/mtwilson/v2/",
+						HVSBaseURL: server.URL + "/hvs/v2/",
 					},
 				},
 			},
@@ -201,23 +224,56 @@ func Test_initializeClient(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-
 		{
-			name: "Test_initializeClient Test 1",
+			name: "ValidTest_initializeClient Test 1",
 			args: args{
 				certDirectory: "",
 				con: &config.Configuration{
 					AASBaseUrl: server.URL + "/aas/v1",
 					IHUB: commConfig.ServiceConfig{
-						Username: "admin@hub",
-						Password: "hubAdminPass",
+						Username: "test@user",
+						Password: "test@password",
 					},
 					AttestationService: config.AttestationConfig{
-						HVSBaseURL: server.URL + "/mtwilson/v2",
+						HVSBaseURL: server.URL + "/hvs/v2",
 					},
 				},
 			},
 			wantErr: false,
+		},
+		{
+			name: "InvalidTest_initializeClient Test 1",
+			args: args{
+				certDirectory: "",
+				con: &config.Configuration{
+					AASBaseUrl: server.URL + "/aas\v1",
+					IHUB: commConfig.ServiceConfig{
+						Username: "test@user",
+						Password: "test@password",
+					},
+					AttestationService: config.AttestationConfig{
+						HVSBaseURL: server.URL + "/hvs/v2",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidTest_initializeClient Test 2",
+			args: args{
+				certDirectory: "",
+				con: &config.Configuration{
+					AASBaseUrl: server.URL + "/aas/v1",
+					IHUB: commConfig.ServiceConfig{
+						Username: "test@user",
+						Password: "test@password",
+					},
+					AttestationService: config.AttestationConfig{
+						HVSBaseURL: server.URL + "/hvs\v2",
+					},
+				},
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

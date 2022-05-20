@@ -5,17 +5,21 @@
 package wpm
 
 import (
+	"flag"
 	"fmt"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	commLogInt "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/setup"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/imageflavor"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/ocicrypt-keyprovider"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"strings"
 )
 
 var errInvalidCmd = errors.New("Invalid input after command")
@@ -100,6 +104,60 @@ func (a *App) configureLogs(isStdOut, isFileOut bool) error {
 	return nil
 }
 
+func (a *App) createImageFlavor(args []string) error {
+	flavorLabel := flag.String("l", "", "flavor label")
+	flag.StringVar(flavorLabel, "label", "", "flavor label")
+	inputImageFilename := flag.String("i", "", "input image file name")
+	flag.StringVar(inputImageFilename, "in", "", "input image file name")
+	outputFlavorFilename := flag.String("o", "", "output flavor file name")
+	flag.StringVar(outputFlavorFilename, "out", "", "output flavor file name")
+	outputEncImageFilename := flag.String("e", "", "output encrypted image file name")
+	flag.StringVar(outputEncImageFilename, "encout", "", "output encrypted image file name")
+	keyID := flag.String("k", "", "existing key ID")
+	flag.StringVar(keyID, "key", "", "existing key ID")
+	flag.Usage = func() { a.printImageFlavorUsage() }
+	err := flag.CommandLine.Parse(args[2:])
+	if err != nil {
+		a.printImageFlavorUsage()
+		return errors.Wrap(err, "Error parsing arguments")
+	}
+
+	if len(strings.TrimSpace(*flavorLabel)) <= 0 || len(strings.TrimSpace(*inputImageFilename)) <= 0 {
+		log.Errorf("app:createImageFlavor() %s : Error creating VM image flavor: Missing arguments Flavor label and image file path\n", message.InvalidInputBadParam)
+		a.printImageFlavorUsage()
+		return errors.New("Error creating VM image flavor: Missing arguments Flavor label and image file path")
+	}
+
+	// validate input strings
+	inputArr := []string{*flavorLabel, *outputFlavorFilename, *inputImageFilename, *outputEncImageFilename}
+	if validationErr := validation.ValidateStrings(inputArr); validationErr != nil {
+		log.WithError(validationErr).Errorf("app:createImageFlavor() %s : Error creating VM image flavor. Parse error for input args: [ %s ] - %s\n", message.InvalidInputBadParam, inputArr, validationErr.Error())
+		a.printImageFlavorUsage()
+		return errors.Wrap(validationErr, "Error creating VM image flavor: Invalid input arguments format")
+	}
+
+	//If the key ID is specified, make sure it's a valid UUID
+	if len(strings.TrimSpace(*keyID)) > 0 {
+		if validatekeyIDErr := validation.ValidateUUIDv4(*keyID); validatekeyIDErr != nil {
+			log.WithError(validatekeyIDErr).Errorf("app:createImageFlavor() %s : Error creating VM image flavor: Invalid UUID - %s\n", message.InvalidInputBadParam, *keyID)
+			a.printImageFlavorUsage()
+			return errors.Wrap(validatekeyIDErr, "Error creating VM image flavor: Invalid key UUID")
+		}
+	}
+
+	imageFlavor, err := imageflavor.CreateImageFlavor(*flavorLabel, *outputFlavorFilename, *inputImageFilename,
+		*outputEncImageFilename, *keyID, false)
+	if err != nil {
+		log.WithError(err).Errorf("app:createImageFlavor() %s - Error creating VM image flavor: %s\n", message.AppRuntimeErr, err.Error())
+		a.printImageFlavorUsage()
+		return errors.Wrap(err, "Error creating VM image flavor")
+	}
+	if len(imageFlavor) > 0 {
+		fmt.Println(imageFlavor)
+	}
+	return nil
+}
+
 func (a *App) Run(args []string) error {
 
 	if len(args) < 2 {
@@ -139,6 +197,13 @@ func (a *App) Run(args []string) error {
 			}
 			return err
 		}
+
+	case "create-image-flavor":
+		configuration := a.configuration()
+		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
+			return err
+		}
+		return a.createImageFlavor(os.Args[:])
 	case "get-ocicrypt-wrappedkey":
 		configuration := a.configuration()
 		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {

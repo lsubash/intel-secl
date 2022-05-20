@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package controllers
@@ -7,14 +7,15 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	consts "github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/types"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	aasModel "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
-	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 
@@ -29,6 +30,10 @@ func (controller RolesController) CreateRole(w http.ResponseWriter, r *http.Requ
 
 	defaultLog.Trace("call to createRole")
 	defer defaultLog.Trace("createRole return")
+
+	if r.ContentLength == 0 {
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
+	}
 
 	// authorize rest api endpoint based on token
 	ctxMap, err := authorizeEndpoint(r, []string{consts.RoleCreate}, true)
@@ -59,10 +64,6 @@ func (controller RolesController) CreateRole(w http.ResponseWriter, r *http.Requ
 	}
 
 	// at this point, we should have privilege to create the requested role. So, lets proceed
-
-	if r.ContentLength == 0 {
-		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "The request body was not provided"}
-	}
 
 	validationErr := ValidateRoleString(rl.Name)
 	if validationErr != nil {
@@ -157,7 +158,7 @@ func (controller RolesController) GetRole(w http.ResponseWriter, r *http.Request
 
 	if err != nil {
 		defaultLog.WithError(err).WithField("id", id).Info("failed to retrieve role")
-		return nil, http.StatusNoContent, nil
+		return nil, http.StatusNotFound, nil
 	}
 
 	// we have obtained the role from db now. If ctxMap is not nil, we need to make sure that user has access to
@@ -201,7 +202,7 @@ func (controller RolesController) DeleteRole(w http.ResponseWriter, r *http.Requ
 	delRl, err := controller.Database.RoleStore().Retrieve(&types.RoleSearch{AllContexts: true, IDFilter: []string{id}})
 	if delRl == nil || err != nil {
 		defaultLog.WithError(err).WithField("id", id).Info("Attempt to delete invalid role")
-		return nil, http.StatusNoContent, nil
+		return nil, http.StatusNotFound, nil
 	}
 
 	if delRl.Service == consts.ServiceName && contains(consts.DefaultRoles, delRl.Name) {

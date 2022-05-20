@@ -19,6 +19,9 @@ func init() {
 	viper.SetDefault("log-max-length", constants.DefaultLogMaxlength)
 	viper.SetDefault("log-enable-stdout", false)
 	viper.SetDefault("log-level", constants.DefaultLogLevel)
+	viper.SetDefault("flavor-signing-cert-file", constants.FlavorSigningCertFile)
+	viper.SetDefault("flavor-signing-key-file", constants.FlavorSigningKeyFile)
+	viper.SetDefault("flavor-signing-common-name", constants.DefaultWpmFlavorSigningCn)
 	viper.SetDefault("ocicrypt-keyprovider-name", constants.OcicryptKeyProviderName)
 
 }
@@ -39,6 +42,11 @@ func defaultConfig() *config.Configuration {
 			MaxLength:    viper.GetInt("log-max-length"),
 			Level:        viper.GetString("log-level"),
 			EnableStdout: viper.GetBool("log-enable-stdout"),
+		},
+		FlavorSigning: commConfig.SigningCertConfig{
+			CertFile:   viper.GetString("flavor-signing-cert-file"),
+			KeyFile:    viper.GetString("flavor-signing-key-file"),
+			CommonName: viper.GetString("flavor-signing-common-name"),
 		},
 	}
 }

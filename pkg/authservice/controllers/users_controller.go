@@ -7,6 +7,10 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
 	authcommon "github.com/intel-secl/intel-secl/v5/pkg/authservice/common"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/domain"
@@ -17,9 +21,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	aasModel "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/gorilla/mux"
 
@@ -97,7 +98,7 @@ func (controller UsersController) GetUser(w http.ResponseWriter, r *http.Request
 	u, err := controller.Database.UserStore().Retrieve(types.User{ID: id})
 	if err != nil {
 		defaultLog.WithError(err).WithField("id", id).Info("Failed to retrieve user")
-		return nil, http.StatusNoContent, nil
+		return nil, http.StatusNotFound, nil
 	}
 	userBytes, err := json.Marshal(u)
 	secLog.WithField("user", u).Infof("%s: Return get user request to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
@@ -121,7 +122,7 @@ func (controller UsersController) UpdateUser(w http.ResponseWriter, r *http.Requ
 	u, err := controller.Database.UserStore().Retrieve(types.User{ID: id})
 	if err != nil {
 		defaultLog.WithError(err).WithField("id", id).Info("failed to retrieve user")
-		return nil, http.StatusNoContent, nil
+		return nil, http.StatusNotFound, nil
 	}
 
 	if r.ContentLength == 0 {
@@ -199,7 +200,7 @@ func (controller UsersController) DeleteUser(w http.ResponseWriter, r *http.Requ
 	delUsr, err := controller.Database.UserStore().Retrieve(types.User{ID: id})
 	if delUsr == nil || err != nil {
 		defaultLog.WithError(err).WithField("id", id).Info("attempt to delete invalid user")
-		return nil, http.StatusNoContent, nil
+		return nil, http.StatusNotFound, nil
 	}
 
 	if err := controller.Database.UserStore().Delete(*delUsr); err != nil {

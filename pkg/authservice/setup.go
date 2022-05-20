@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package authservice
@@ -7,6 +7,8 @@ package authservice
 import (
 	"crypto/x509/pkix"
 	"fmt"
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/domain"
@@ -18,7 +20,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"strings"
 )
 
 // input string slice should start with setup
@@ -211,7 +212,10 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 				CredentialValidity: viper.GetDuration("nats-account-credential-validity"),
 			},
 		},
-		ConsoleWriter: a.consoleWriter(),
+		ConsoleWriter:            a.consoleWriter(),
+		OperatorSeedFile:         constants.OperatorSeedFile,
+		AccountSeedFile:          constants.AccountSeedFile,
+		AccountConfigurationFile: constants.AccountConfigurationFile,
 	})
 
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
