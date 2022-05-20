@@ -8,14 +8,15 @@ import (
 	"crypto"
 	"encoding/pem"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/pkg/errors"
@@ -30,6 +31,8 @@ type DownloadCMSCert struct {
 	ConsoleWriter io.Writer
 
 	commandName string
+
+	Client HttpClient
 }
 
 const downloadCMSCertEnvHelpPrompt = "Following environment variables are required for "
@@ -41,7 +44,7 @@ var downloadCMSCertEnvHelp = map[string]string{
 
 func (cc *DownloadCMSCert) Run() error {
 	printToWriter(cc.ConsoleWriter, cc.commandName, "Start downloading CMS CA certificate")
-	err := downloadRootCaCertificate(cc.CmsBaseURL, cc.CaCertDirPath, cc.TlsCertDigest)
+	err := downloadRootCaCertificate(cc.CmsBaseURL, cc.CaCertDirPath, cc.TlsCertDigest, cc.Client)
 	if err != nil {
 		printToWriter(cc.ConsoleWriter, cc.commandName, "CMS CA certificate download setup failed")
 		return err
@@ -89,7 +92,8 @@ func isDirEmpty(name string) (bool, error) {
 	return false, err
 }
 
-func downloadRootCaCertificate(cmsBaseUrl string, dirPath string, trustedTlsCertDigest string) (err error) {
+// Client should be passed as nil here.
+func downloadRootCaCertificate(cmsBaseUrl string, dirPath string, trustedTlsCertDigest string, client HttpClient) (err error) {
 	if !strings.HasSuffix(cmsBaseUrl, "/") {
 		cmsBaseUrl = cmsBaseUrl + "/"
 	}
@@ -105,7 +109,9 @@ func downloadRootCaCertificate(cmsBaseUrl string, dirPath string, trustedTlsCert
 	}
 	req.Header.Set("Accept", "application/x-pem-file")
 	//InsecureSkipVerify is set to true as connection is validated manually
-	client := clients.HTTPClientTLSNoVerify()
+	if client == nil {
+		client = clients.HTTPClientTLSNoVerify()
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "Failed to perform HTTP request to CMS")

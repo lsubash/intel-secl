@@ -337,6 +337,7 @@ func (pfutil PlatformFlavorUtil) GetPcrDetails(pcrManifest hvs.PcrManifest, pcrL
 			pcrCollection = append(pcrCollection, currPcrEx)
 		}
 	}
+
 	// return map for flavor to use
 	return pcrCollection
 }

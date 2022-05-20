@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package hostinfo
@@ -144,4 +144,77 @@ type mockShellExecutor struct {
 func (mockShellExecutor mockShellExecutor) Execute(command []string) (string, int, error) {
 	args := mockShellExecutor.Called(command)
 	return args.String(0), args.Int(1), args.Error(2)
+}
+
+func Test_shellInfoParser_Parse(t *testing.T) {
+	type fields struct {
+		shellExecutor shellExecutor
+	}
+	type args struct {
+		hostInfo *model.HostInfo
+	}
+
+	mockShellExecutor := new(mockShellExecutor)
+	mockShellExecutor.On("Execute", dockerVersionCommand).Return("19.03.7", 0, nil)
+	mockShellExecutor.On("Execute", virshVersionCommand).Return("", constErrorCodeNotFound, nil)
+
+	mockShellExecutor.On("Execute", dockerVersionCommand).Return("", constErrorCodeNotFound, nil)
+	mockShellExecutor.On("Execute", virshVersionCommand).Return("4.5.0\n", 0, nil)
+
+	mockShellExecutor.On("Execute", tbootCommand).Return("some help string", 0, nil)
+
+	mockShellExecutor.On("Execute", tagentCommand).Return("tagent version x.y.z", 0, nil)
+
+	mockShellExecutor.On("Execute", tagentCommand).Return("tagent version x.y.z", 0, nil)
+	mockShellExecutor.On("Execute", wlagentCommand).Return("wlagent version x.y.z", 0, nil)
+
+	mockShellExecutor.On("Execute", wlagentCommand).Return("wlagent version x.y.z", 0, nil)
+	mockShellExecutor.On("Execute", wlagentCommand).Return("", constErrorCodeNotFound, nil)
+
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate shellInfoParser with valid data",
+			fields: fields{
+				shellExecutor: &shellImpl{},
+			},
+			args: args{
+				hostInfo: &model.HostInfo{},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			shellInfoParser := &shellInfoParser{
+				shellExecutor: tt.fields.shellExecutor,
+			}
+			if err := shellInfoParser.Parse(tt.args.hostInfo); (err != nil) != tt.wantErr {
+				t.Errorf("shellInfoParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_newShellExecutor(t *testing.T) {
+	tests := []struct {
+		name string
+		want shellExecutor
+	}{
+		{
+			name: "Validate newShellExecutor with valid data",
+			want: &shellImpl{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := newShellExecutor(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newShellExecutor() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

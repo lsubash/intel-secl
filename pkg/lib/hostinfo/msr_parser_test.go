@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package hostinfo
@@ -82,4 +82,34 @@ type mockMsrReader struct {
 func (mockMsrReader mockMsrReader) ReadAt(offset int64) (uint64, error) {
 	args := mockMsrReader.Called(offset)
 	return uint64(args.Int(0)), args.Error(1)
+}
+
+func Test_msrInfoParser_Init(t *testing.T) {
+	type fields struct {
+		msrReader msrReader
+	}
+	msrFile = "test_data/efi"
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "Validate msrInfoParser with valid data",
+			fields: fields{
+				msrReader: &msrReaderImpl{},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msrInfoParser := &msrInfoParser{
+				msrReader: tt.fields.msrReader,
+			}
+			if err := msrInfoParser.Init(); (err != nil) != tt.wantErr {
+				t.Errorf("msrInfoParser.Init() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

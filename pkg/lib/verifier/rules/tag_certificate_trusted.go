@@ -19,7 +19,7 @@ func NewTagCertificateTrusted(assetTagCACertificates *x509.CertPool, attributeCe
 		return nil, errors.New("The tag certificates cannot be nil")
 	}
 
-	rule := tagCertificateTrusted{
+	rule := TagCertificateTrusted{
 		assetTagCACertificates: assetTagCACertificates,
 		attributeCertificate:   attributeCertificate,
 	}
@@ -27,7 +27,7 @@ func NewTagCertificateTrusted(assetTagCACertificates *x509.CertPool, attributeCe
 	return &rule, nil
 }
 
-type tagCertificateTrusted struct {
+type TagCertificateTrusted struct {
 	assetTagCACertificates *x509.CertPool
 	attributeCertificate   *hvs.X509AttributeCertificate
 }
@@ -38,7 +38,7 @@ type tagCertificateTrusted struct {
 //   raise a TagCertificateNotYetValid fault.
 // - If the attributeCertificate is valid but has a 'NotAfter' value after 'today,
 //   raise a TagCertificateNotYetExpired fault.
-func (rule *tagCertificateTrusted) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
+func (rule *TagCertificateTrusted) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleResult, error) {
 
 	var fault *hvs.Fault
 	result := hvs.RuleResult{}

@@ -10,12 +10,14 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"fmt"
+	"io/ioutil"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/ta"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/govmomi/vim25/mo"
-	"io/ioutil"
 )
 
 type MockIntelConnector struct {
@@ -36,9 +38,18 @@ func (ihc *MockIntelConnector) GetHostDetails() (taModel.HostInfo, error) {
 func (ihc *MockIntelConnector) GetHostManifest([]int) (hvs.HostManifest, error) {
 	args := ihc.Called()
 	var hostManifest hvs.HostManifest
+
+	var manifestJSON []byte
 	// this is required for any test case that requires a good HostManifest
-	manifestJSON, _ := ioutil.ReadFile("../../../lib/verifier/test_data/intel20/host_manifest.json")
-	err := json.Unmarshal(manifestJSON, &hostManifest)
+	manifestJSON, err := ioutil.ReadFile("../../lib/verifier/test_data/intel20/host_manifest.json")
+	if err != nil {
+		manifestJSON, err = ioutil.ReadFile("../../../lib/verifier/test_data/intel20/host_manifest.json")
+		if err != nil {
+			fmt.Println(err)
+			return args.Get(0).(hvs.HostManifest), args.Error(1)
+		}
+	}
+	err = json.Unmarshal(manifestJSON, &hostManifest)
 	// handle any tests that do not consider the quality of the HostManifest
 	if err != nil {
 		return args.Get(0).(hvs.HostManifest), args.Error(1)

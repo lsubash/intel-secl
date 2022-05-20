@@ -9,14 +9,15 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/clients"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
@@ -32,6 +33,7 @@ type DownloadCert struct {
 	SanList       string
 	CertType      string
 	CaCertDirPath string
+	Client        HttpClient
 
 	CmsBaseURL  string
 	BearerToken string
@@ -86,7 +88,7 @@ func (dc *DownloadCert) Run() error {
 		}
 	}
 	printToWriter(dc.ConsoleWriter, dc.commandName, "Start downloading certificate")
-	key, cert, err := getCertificateFromCMS(dc.CertType, dc.KeyAlgorithm, dc.KeyLength, dc.CmsBaseURL, dc.Subject, dc.SanList, dc.CaCertDirPath, dc.BearerToken)
+	key, cert, err := getCertificateFromCMS(dc.CertType, dc.KeyAlgorithm, dc.KeyLength, dc.CmsBaseURL, dc.Subject, dc.SanList, dc.CaCertDirPath, dc.BearerToken, dc.Client)
 	if err != nil {
 		printToWriter(dc.ConsoleWriter, dc.commandName, "Failed to download certificate")
 		return err
@@ -148,7 +150,7 @@ func (t *DownloadCert) SetName(n, e string) {
 	t.envPrefix = PrefixUnderscroll(e)
 }
 
-func getCertificateFromCMS(certType string, keyAlg string, keyLen int, cmsBaseUrl string, subject pkix.Name, hosts string, CaCertDirPath string, bearerToken string) (key []byte, cert []byte, err error) {
+func getCertificateFromCMS(certType string, keyAlg string, keyLen int, cmsBaseUrl string, subject pkix.Name, hosts string, CaCertDirPath string, bearerToken string, client HttpClient) (key []byte, cert []byte, err error) {
 	//TODO: use CertType for TLS or Signing cert
 	csrData, key, err := crypt.CreateKeyPairAndCertificateRequest(subject, hosts, keyAlg, keyLen)
 	if err != nil {
@@ -177,9 +179,11 @@ func getCertificateFromCMS(certType string, keyAlg string, keyLen int, cmsBaseUr
 		return nil, nil, errors.Wrap(err, "Failed to read CA Certs")
 	}
 
-	client, err := clients.HTTPClientWithCA(caCerts)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "Failed create http client")
+	if client == nil {
+		client, err = clients.HTTPClientWithCA(caCerts)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "Failed create http client")
+		}
 	}
 	resp, err := client.Do(req)
 	if err != nil {

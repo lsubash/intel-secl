@@ -314,22 +314,6 @@ func (table *smbiosTable) getBYTE(off int) (byte, error) {
 	return table.Data[off], nil
 }
 
-func (table *smbiosTable) getWORD(off int) (uint16, error) {
-	if len(table.Data) < off+2 {
-		return 0, errors.Errorf("Could not get WORD, the offset '%x' exceeded the length of the SMBIOS data", off)
-	}
-
-	return binary.LittleEndian.Uint16(table.Data[off : off+2]), nil
-}
-
-func (table *smbiosTable) getDWORD(off int) (uint32, error) {
-	if len(table.Data) < off+4 {
-		return 0, errors.Errorf("Could not get DWORD, the offset '%x' exceeded the length of the SMBIOS data", off)
-	}
-
-	return binary.LittleEndian.Uint32(table.Data[off : off+4]), nil
-}
-
 func (table *smbiosTable) getQWORD(off int) (uint64, error) {
 	if len(table.Data) < off+8 {
 		return 0, errors.Errorf("Could not get QWORD, the offset '%x' exceeded the length of the SMBIOS data", off)

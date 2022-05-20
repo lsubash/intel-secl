@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package hostinfo
@@ -70,4 +70,26 @@ func TestSecureBootZeroFile(t *testing.T) {
 
 	testSecureBootParser(t, &expectedResults)
 
+}
+
+func Test_secureBootParser_Init(t *testing.T) {
+	tests := []struct {
+		name             string
+		secureBootParser *secureBootParser
+		wantErr          bool
+	}{
+		{
+			name:             "Validate secureBootParser with valid data",
+			secureBootParser: &secureBootParser{},
+			wantErr:          false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			secureBootParser := &secureBootParser{}
+			if err := secureBootParser.Init(); (err != nil) != tt.wantErr {
+				t.Errorf("secureBootParser.Init() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

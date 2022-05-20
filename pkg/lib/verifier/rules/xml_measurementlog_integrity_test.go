@@ -8,11 +8,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/xml"
-	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"testing"
 
 	"github.com/google/uuid"
 	constants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	ta "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/stretchr/testify/assert"
 )

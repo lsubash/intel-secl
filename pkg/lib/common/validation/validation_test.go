@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package validation
@@ -78,56 +78,6 @@ func TestValidateURL(t *testing.T) {
 		err := ValidateURL(badStr, protocols, "/tds/")
 		a.Contains(badResult, err)
 	}
-}
-
-func TestValidateAccount(t *testing.T) {
-	// a := assert.New(t)
-
-	// good_uname_1 := "uname.has-symbol"
-	// good_uname_2 := "abcd1234"
-	// good_uname_3 := "a1a2_3d4f5g6_7j8k9l1_2s3d45g6h7"
-
-	// good_pwd_1 := "easy_guess123"
-	// good_pwd_2 := "hardone_A-Za-z0-9#?!@$%^&*-"
-	// good_pwd_3 := "tooshort"
-
-	// good_uname_tests := []string{good_uname_1, good_uname_2, good_uname_3}
-	// good_pwd_tests := []string{good_pwd_1, good_pwd_2, good_pwd_3}
-
-	// for _, uname := range good_uname_tests {
-
-	// 	for _, pwd := range good_pwd_tests {
-	// 		// fmt.Println(uname + " " + pwd)
-	// 		err := ValidateAccount(uname, pwd)
-	// 		a.Equal(nil, err)
-	// 	}
-	// }
-
-	// bad_uname_1 := "fishy_symbols \" ` '"
-	// bad_uname_2 := "\" \" \" UNION SELECT * FROM"
-	// bad_uname_3 := "))) OR TRUE"
-	// bad_uname_4 := "12_number_start_with"
-
-	// bad_pwd_1 := "fishy_symbols \" ` '"
-	// bad_pwd_2 := "\" \" \" UNION SELECT * FROM"
-	// bad_pwd_3 := "))) OR TRUE"
-	// bad_pwd_4 := "tooshrt"
-	// bad_pwd_5 := ""
-
-	// bad_ret := errors.New("Invalid input for username or password")
-
-	// bad_uname_tests := []string{bad_uname_1, bad_uname_2, bad_uname_3, bad_uname_4}
-	// bad_pwd_tests := []string{bad_pwd_1, bad_pwd_2, bad_pwd_3, bad_pwd_4, bad_pwd_5}
-
-	// for _, bad_uname := range bad_uname_tests {
-	// 	fmt.Println(bad_uname + " " + good_pwd_1)
-	// 	err := ValidateAccount(bad_uname, good_pwd_1)
-	// 	a.Equal(bad_ret, err)
-	// }
-	// for _, bad_pwd := range bad_pwd_tests {
-	// 	err := ValidateAccount(good_uname_1, bad_pwd)
-	// 	a.Equal(bad_ret, err)
-	// }
 }
 
 func TestValidateStrings(t *testing.T) {
@@ -549,4 +499,469 @@ func TestValidateK8sJWT(t *testing.T) {
 	err = ValidateJWT(badJwt2)
 	assert.Error(t, err)
 
+}
+
+func TestValidateAccount(t *testing.T) {
+	type args struct {
+		uname string
+		pwd   string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Valid username and password",
+			args: args{
+				uname: "username",
+				pwd:   "P@ssw0rd",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Invalid username and password",
+			args: args{
+				uname: "username(_)",
+				pwd:   "",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateAccount(tt.args.uname, tt.args.pwd); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateAccount() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateNameString(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate name string for valid username",
+			args: args{
+				name: "username",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate name string for invalid username",
+			args: args{
+				name: "username()",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateNameString(tt.args.name); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateNameString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateUserNameString(t *testing.T) {
+	type args struct {
+		uname string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "ValidateUserNameString with valid username",
+			args: args{
+				uname: "username",
+			},
+			wantErr: false,
+		},
+		{
+			name: "ValidateUserNameString with invalid username",
+			args: args{
+				uname: "username()",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateUserNameString(tt.args.uname); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateUserNameString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateEmailString(t *testing.T) {
+	type args struct {
+		email string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "ValidateEmailString with valid email",
+			args: args{
+				email: "username@mail.com",
+			},
+			wantErr: false,
+		},
+		{
+			name: "ValidateEmailString with invalid email",
+			args: args{
+				email: "username()@mail.com",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateEmailString(tt.args.email); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateEmailString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidatePasswordString(t *testing.T) {
+	type args struct {
+		pwd string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate PasswordString with valid password",
+			args: args{
+				pwd: "P@ssw0rd",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate PasswordString with invalid password",
+			args: args{
+				pwd: "",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidatePasswordString(tt.args.pwd); (err != nil) != tt.wantErr {
+				t.Errorf("ValidatePasswordString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateTextString(t *testing.T) {
+	type args struct {
+		text string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate TextString with valid text",
+			args: args{
+				text: "Text",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate TextString with invalid text",
+			args: args{
+				text: "",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateTextString(tt.args.text); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateTextString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateHostname(t *testing.T) {
+	type args struct {
+		hostname string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate Hostname with valid hostname",
+			args: args{
+				hostname: "Hostname",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate Hostname with invalid hostname",
+			args: args{
+				hostname: "Hostname()",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateHostname(tt.args.hostname); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateHostname() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidatePort(t *testing.T) {
+	type args struct {
+		port string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate valid Port",
+			args: args{
+				port: "9443",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate invalid port",
+			args: args{
+				port: "@!%",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidatePort(tt.args.port); (err != nil) != tt.wantErr {
+				t.Errorf("ValidatePort() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateIdentifier(t *testing.T) {
+	type args struct {
+		idf string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate indentifier with valid user id",
+			args: args{
+				idf: "userid",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate indentifier with invalid user id",
+			args: args{
+				idf: "%$#",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateIdentifier(tt.args.idf); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateIdentifier() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateIssuer(t *testing.T) {
+	type args struct {
+		isf string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate issuer with valid issuer",
+			args: args{
+				isf: "Intel",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate issuer with invalid issuer",
+			args: args{
+				isf: "%$#",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateIssuer(tt.args.isf); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateIssuer() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateSha256HexString(t *testing.T) {
+	type args struct {
+		value string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate sha256 hex string with valid sha256",
+			args: args{
+				value: "9707b390c263356173cdd4a812c926ed85e1fd611671096f19230ffbbc4629dc",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate sha256 hex string with invalid sha256",
+			args: args{
+				value: "%$#",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateSha256HexString(tt.args.value); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateSha256HexString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateSha384HexString(t *testing.T) {
+	type args struct {
+		value string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate sha384 hex string with valid sha384",
+			args: args{
+				value: "e8e4d9727695438c7f5c91347e50e3d68eaab5fe3f856685de5a80fbaafb3c1700776dea0eb7db09c940466ba270a4e4",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate sha384 hex string with invalid sha384",
+			args: args{
+				value: "%$#",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateSha384HexString(tt.args.value); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateSha384HexString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateHardwareUUID(t *testing.T) {
+	type args struct {
+		uuid string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate uuid with valid uuid",
+			args: args{
+				uuid: "68f460ea-36e3-4f21-9e38-b11ad454b8a5",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate uuid with invalid uuid",
+			args: args{
+				uuid: "%$#",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateHardwareUUID(tt.args.uuid); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateHardwareUUID() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateConnectionString(t *testing.T) {
+	type args struct {
+		cs string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Validate connection string with valid connection string",
+			args: args{
+				cs: "https://127.0.0.1:9443/v1/hvs",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Validate connection string with invalid connection string",
+			args: args{
+				cs: "%$#",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ValidateConnectionString(tt.args.cs); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateConnectionString() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

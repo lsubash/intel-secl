@@ -6,7 +6,6 @@ package hostinfo
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -148,14 +147,6 @@ type shellExecutor interface {
 	// will be emtpy and the integer value will be -1.  Otherwise, the string will be populated from
 	// the shell's results and the integer will be the exit code from the shell.
 	Execute(command []string) (string, int, error)
-}
-
-type exitError struct {
-	errorCode int
-}
-
-func (e *exitError) Error() string {
-	return fmt.Sprintf("Command return %d", e.errorCode)
 }
 
 func newShellExecutor() shellExecutor {
