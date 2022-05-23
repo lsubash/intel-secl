@@ -6,13 +6,15 @@ package postgres
 
 import (
 	"fmt"
+	"strings"
+	"sync"
+
 	"github.com/google/uuid"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
-	"strings"
-	"sync"
 )
 
 type FlavorGroupStore struct {
@@ -20,7 +22,7 @@ type FlavorGroupStore struct {
 	flavorPartsCache sync.Map
 }
 
-func NewFlavorGroupStore(store *DataStore) *FlavorGroupStore {
+func NewFlavorGroupStore(store *DataStore) domain.FlavorGroupStore {
 	return &FlavorGroupStore{
 		Store:            store,
 		flavorPartsCache: sync.Map{},

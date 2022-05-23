@@ -2,14 +2,15 @@
  * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package hosttrust_test
+package hosttrust
 
 import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/json"
+	"io/ioutil"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
@@ -17,12 +18,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 )
 
 var _ = Describe("SamlReport", func() {
 	testIc := getIssuer()
-	reportGen := hosttrust.NewSamlReportGenerator(testIc)
+	reportGen := NewSamlReportGenerator(testIc)
 
 	verifierCertificates := createVerifierCertificates(
 		"../../../lib/verifier/test_data/intel20/PrivacyCA.pem",

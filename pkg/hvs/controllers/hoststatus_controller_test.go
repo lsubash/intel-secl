@@ -6,6 +6,10 @@ package controllers_test
 
 import (
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"time"
+
 	"github.com/gorilla/mux"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
@@ -15,9 +19,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"net/http"
-	"net/http/httptest"
-	"time"
 )
 
 var _ = Describe("HostStatusController", func() {
@@ -408,7 +409,7 @@ var _ = Describe("HostStatusController", func() {
 			})
 		})
 
-		Context("When searching with filter latestPerHost=false", func() {
+		Context("When searching with filter latestPerHost=true", func() {
 			It("Should return list of Host Status records from HostStatus Audit Table", func() {
 				router.Handle("/host-status", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostStatusController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/host-status?latestPerHost=true", nil)
@@ -422,6 +423,17 @@ var _ = Describe("HostStatusController", func() {
 				err = json.Unmarshal(w.Body.Bytes(), &hsCollection)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(hsCollection.HostStatuses).ToNot(BeNil())
+			})
+		})
+		Context("When searching with filter invalid latestPerHost", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/host-status", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostStatusController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/host-status?latestPerHost=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -464,6 +476,17 @@ var _ = Describe("HostStatusController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Try to retrieve HostStatus when data store error is thrown", func() {
+			It("Should fail to retrieve HostStatus", func() {
+				router.Handle("/host-status/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostStatusController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/host-status/84755fda-c910-46be-821f-e8ddeab189e9", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
 			})
 		})
 	})

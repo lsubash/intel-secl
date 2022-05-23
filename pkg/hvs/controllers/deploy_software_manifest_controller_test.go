@@ -8,7 +8,9 @@ package controllers_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
+	"testing"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
@@ -86,6 +88,45 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+	})
+
+	Describe("Deploy software manifest to host - Negative cases", func() {
+		Context("Provide a invalid Content-Type", func() {
+			It("Should not deploy software manifest - should return 415", func() {
+				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
+				deployManifestRequestJson := `{
+												"flavor_id":"7f0683c1-a038-4ed4-8b29-286410f2e753",
+												"host_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"
+											  }`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/rpc/deploy-software-manifest",
+					strings.NewReader(deployManifestRequestJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJwt)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
+		Context("Provide a empty body content in request", func() {
+			It("Should not deploy software manifest - should return 400", func() {
+				router.Handle("/rpc/deploy-software-manifest", hvsRoutes.ErrorHandler(hvsRoutes.
+					JsonResponseHandler(deploySoftwareManifestController.DeployManifest))).Methods(http.MethodPost)
+				req, err := http.NewRequest(http.MethodPost, "/rpc/deploy-software-manifest", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -261,3 +302,34 @@ var _ = Describe("DeploySoftwareManifestController", func() {
 		})
 	})
 })
+
+func TestNewDeploySoftwareManifestController(t *testing.T) {
+	type args struct {
+		fs domain.FlavorStore
+		hc controllers.HostController
+	}
+	tests := []struct {
+		name string
+		args args
+		want *controllers.DeploySoftwareManifestController
+	}{
+		{
+			name: "Initialize new deploy software manifest controller",
+			args: args{
+				fs: mocks.NewMockFlavorStore(),
+				hc: controllers.HostController{},
+			},
+			want: &controllers.DeploySoftwareManifestController{
+				FlavorStore: mocks.NewMockFlavorStore(),
+				HController: controllers.HostController{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := controllers.NewDeploySoftwareManifestController(tt.args.fs, tt.args.hc); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewDeploySoftwareManifestController() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

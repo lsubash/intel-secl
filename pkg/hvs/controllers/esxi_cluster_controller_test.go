@@ -8,6 +8,12 @@ package controllers_test
 import (
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
+	"strings"
+	"testing"
+
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
@@ -19,9 +25,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"net/http"
-	"net/http/httptest"
-	"strings"
 )
 
 var _ = Describe("ESXiClusterController", func() {
@@ -39,7 +42,8 @@ var _ = Describe("ESXiClusterController", func() {
 
 	BeforeEach(func() {
 		router = mux.NewRouter()
-		esxiClusterStore = mocks.NewFakeESXiClusterStore()
+
+		esxiClusterStore = mocks.NewValidFakeESXiClusterStore()
 		hostStore = mocks.NewMockHostStore()
 		hostStatusStore = mocks.NewMockHostStatusStore()
 		flavorGroupStore = mocks.NewFakeFlavorgroupStore()
@@ -76,6 +80,7 @@ var _ = Describe("ESXiClusterController", func() {
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
+
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
 
@@ -86,6 +91,54 @@ var _ = Describe("ESXiClusterController", func() {
 			})
 		})
 
+	})
+
+})
+
+var _ = Describe("ESXiClusterController", func() {
+	var router *mux.Router
+	var w *httptest.ResponseRecorder
+	var esxiClusterStore *mocks.MockESXiClusterStore
+	var esxiClusterController *controllers.ESXiClusterController
+	var hostStore *mocks.MockHostStore
+	var hostStatusStore *mocks.MockHostStatusStore
+	var flavorGroupStore *mocks.MockFlavorgroupStore
+	var hostCredentialStore *mocks.MockHostCredentialStore
+	var hostController *controllers.HostController
+	var hostTrustManager *smocks.MockHostTrustManager
+	var hostConnectorProvider mocks2.MockHostConnectorFactory
+
+	BeforeEach(func() {
+		router = mux.NewRouter()
+
+		esxiClusterStore = mocks.NewFakeESXiClusterStore()
+		hostStore = mocks.NewMockHostStore()
+		hostStatusStore = mocks.NewMockHostStatusStore()
+		flavorGroupStore = mocks.NewFakeFlavorgroupStore()
+		hostCredentialStore = mocks.NewMockHostCredentialStore()
+		dekBase64 := "gcXqH8YwuJZ3Rx4qVzA/zhVvkTw2TL+iRAC9T3E6lII="
+		dek, _ := base64.StdEncoding.DecodeString(dekBase64)
+
+		hostControllerConfig := domain.HostControllerConfig{
+			HostConnectorProvider: hostConnectorProvider,
+			DataEncryptionKey:     dek,
+			Username:              "fakeuser",
+			Password:              "fakepassword",
+		}
+		hostController = &controllers.HostController{
+			HStore:    hostStore,
+			HSStore:   hostStatusStore,
+			FGStore:   flavorGroupStore,
+			HCStore:   hostCredentialStore,
+			HTManager: hostTrustManager,
+			HCConfig:  hostControllerConfig,
+		}
+		esxiClusterController = &controllers.ESXiClusterController{ECStore: esxiClusterStore,
+			HController: *hostController}
+	})
+
+	// Specs for HTTP Get to "/esxi-cluster"
+	Describe("Search ESXi cluster", func() {
 		Context("Search esxi cluster records when filtered by ESXi cluster id", func() {
 			It("Should get a single ESXi cluster entry", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
@@ -141,6 +194,19 @@ var _ = Describe("ESXiClusterController", func() {
 			})
 		})
 
+		Context("Search esxi cluster records when filtered by invalid ESXi cluster name", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?clusterName=<inputdata>", nil)
+				Expect(err).NotTo(HaveOccurred())
+				w = httptest.NewRecorder()
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
 		Context("Search esxi cluster records when filtered by ESXi cluster name", func() {
 			It("Should not get any ESXi cluster entry", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
@@ -191,6 +257,19 @@ var _ = Describe("ESXiClusterController", func() {
 				Expect(ecCollection).To(BeNil())
 			})
 		})
+
+		Context("Try to retrieve ESXi cluster by existent ID from data store", func() {
+			It("Should fail to retrieve ESXi cluster - search error", func() {
+				router.Handle("/esxi-cluster/{id}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster/b3c6a763-51cd-436c-a828-c2ce6964c823", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
+			})
+		})
 	})
 
 	Describe("Create ESXi cluster entry", func() {
@@ -211,6 +290,108 @@ var _ = Describe("ESXiClusterController", func() {
 				Expect(w.Code).To(Equal(http.StatusCreated))
 			})
 		})
+		Context("Provide a existing ESXi cluster data", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				esxiClusterRequestJson := `{
+					"connection_string": "https://ip3.com:443/sdk;u=username;p=password",
+					"cluster_name": "Cluster 1"
+				}`
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a empty ESXi cluster data", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				esxiClusterRequestJson := `{
+					"connection_string": "https://ip3.com:443/sdk;u=username;p=password",
+					"cluster_name": ""
+				}`
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid ESXi cluster data", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				esxiClusterRequestJson := `{
+					"connection_string": "https://ip3.com:443/sdk;u=username;p=password",
+					"cluster_name": "<input data"
+				}`
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a empty connection string", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				esxiClusterRequestJson := `{
+					"connection_string": "",
+					"cluster_name": "Cluster 1"
+				}`
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a connection string which is not vmware", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				esxiClusterRequestJson := `{
+					"connection_string": "intel:https://ip3.com:443/sdk;u=username;p=password",
+					"cluster_name": "Cluster 1"
+				}`
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid connection string", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				esxiClusterRequestJson := `{
+					"connection_string": "https://ta.ip.com:1443;u=admin;h=hostname()",
+					"cluster_name": "Cluster 1"
+				}`
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Context("Provide an invalid request body to create a new ESXi cluster record", func() {
 			It("Should have HTTP bad request status", func() {
 				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
@@ -228,6 +409,39 @@ var _ = Describe("ESXiClusterController", func() {
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
+
+		Context("Provide an invalid Content-Type request body", func() {
+			It("Should have HTTP 415 status", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				esxiClusterRequestJson := `{
+						"connection_string": "https://ip3.com:443/sdk;u=username;p=password",
+						"cluster_name": "New Cluster"
+					}`
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", strings.NewReader(esxiClusterRequestJson))
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJwt)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
+		Context("Provide an empty request body", func() {
+			It("Should have HTTP bad request status", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Create))).Methods(http.MethodPost)
+				req, err := http.NewRequest(http.MethodPost, "/esxi-cluster", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
 	})
 
 	Describe("Delete ESXi cluster entry", func() {
@@ -254,5 +468,50 @@ var _ = Describe("ESXiClusterController", func() {
 				Expect(w.Code).To(Equal(http.StatusNotFound))
 			})
 		})
+
+		Describe("Delete ESXi cluster entry", func() {
+			Context("Delete ESXi cluster by valid ID from data store with error in searching hosts", func() {
+				It("Should return internal server error - no associated hosts for ESXI cluster", func() {
+					router.Handle("/esxi-cluster/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(
+						esxiClusterController.Delete))).Methods(http.MethodDelete)
+					req, err := http.NewRequest(http.MethodDelete, "/esxi-cluster/a3c6a763-51cd-436c-a828-c2ce6964c823", nil)
+					Expect(err).NotTo(HaveOccurred())
+					w = httptest.NewRecorder()
+					router.ServeHTTP(w, req)
+					Expect(w.Code).To(Equal(http.StatusInternalServerError))
+				})
+			})
+		})
 	})
 })
+
+func TestNewESXiClusterController(t *testing.T) {
+	type args struct {
+		ec domain.ESXiClusterStore
+		hc controllers.HostController
+	}
+	tests := []struct {
+		name string
+		args args
+		want *controllers.ESXiClusterController
+	}{
+		{
+			name: "Valid test case",
+			args: args{
+				ec: mocks.NewFakeESXiClusterStore(),
+				hc: controllers.HostController{},
+			},
+			want: &controllers.ESXiClusterController{
+				ECStore:     mocks.NewFakeESXiClusterStore(),
+				HController: controllers.HostController{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := controllers.NewESXiClusterController(tt.args.ec, tt.args.hc); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewESXiClusterController() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

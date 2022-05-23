@@ -22,8 +22,8 @@ func SetCertifyHostKeysRoutes(router *mux.Router, certStore *crypt.CertificatesS
 	if certifyHostKeysController == nil {
 		defaultLog.Error("router/certify_host_keys:SetCertifyHostKeys() Could not instantiate CertifyHostKeysController")
 	}
-	router.HandleFunc("/rpc/certify-host-signing-key", ErrorHandler(permissionsHandler(JsonResponseHandler(certifyHostKeysController.CertifySigningKey), []string{consts.CertifyHostSigningKey}))).Methods(http.MethodPost)
-	router.HandleFunc("/rpc/certify-host-binding-key", ErrorHandler(permissionsHandler(JsonResponseHandler(certifyHostKeysController.CertifyBindingKey), []string{consts.CertifyHostSigningKey}))).Methods(http.MethodPost)
+	router.HandleFunc("/rpc/certify-host-signing-key", ErrorHandler(PermissionsHandler(JsonResponseHandler(certifyHostKeysController.CertifySigningKey), []string{consts.CertifyHostSigningKey}))).Methods(http.MethodPost)
+	router.HandleFunc("/rpc/certify-host-binding-key", ErrorHandler(PermissionsHandler(JsonResponseHandler(certifyHostKeysController.CertifyBindingKey), []string{consts.CertifyHostSigningKey}))).Methods(http.MethodPost)
 	return router
 }
 
@@ -34,9 +34,9 @@ func SetCertifyAiksRoutes(router *mux.Router, store *postgres.DataStore, certSto
 	tpmEndorsementStore := postgres.NewTpmEndorsementStore(store)
 	certifyHostAiksController := controllers.NewCertifyHostAiksController(certStore, tpmEndorsementStore, aikCertValidity, consts.AikRequestsDir, enableEkCertRevokeChecks, requireEKCertForHostProvision)
 	if certifyHostAiksController != nil {
-		router.Handle("/privacyca/identity-challenge-request", ErrorHandler(permissionsHandler(JsonResponseHandler(certifyHostAiksController.IdentityRequestGetChallenge),
+		router.Handle("/privacyca/identity-challenge-request", ErrorHandler(PermissionsHandler(JsonResponseHandler(certifyHostAiksController.IdentityRequestGetChallenge),
 			[]string{consts.CertifyAik}))).Methods(http.MethodPost)
-		router.Handle("/privacyca/identity-challenge-response", ErrorHandler(permissionsHandler(JsonResponseHandler(certifyHostAiksController.IdentityRequestSubmitChallengeResponse),
+		router.Handle("/privacyca/identity-challenge-response", ErrorHandler(PermissionsHandler(JsonResponseHandler(certifyHostAiksController.IdentityRequestSubmitChallengeResponse),
 			[]string{consts.CertifyAik}))).Methods(http.MethodPost)
 	}
 	return router

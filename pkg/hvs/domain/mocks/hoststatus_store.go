@@ -107,6 +107,10 @@ func (store *MockHostStatusStore) Retrieve(id uuid.UUID) (*hvs.HostStatus, error
 			AddRow("afed7372-18c3-42af-bd9a-70b7f44c11ad", hs1.HostID.String(), hsi1, hsm1, hs1.Created))
 
 	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(id = \$1\)`).
+		WithArgs("84755fda-c910-46be-821f-e8ddeab189e9").
+		WillReturnError(errors.New("Error in retrieving host status"))
+
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(id = \$1\)`).
 		WithArgs("73755fda-c910-46be-821f-e8ddeab189e9").
 		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}))
 

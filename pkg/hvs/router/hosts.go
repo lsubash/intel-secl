@@ -36,24 +36,24 @@ func SetHostRoutes(router *mux.Router, store *postgres.DataStore, hostTrustManag
 	flavorgroupExpr := fmt.Sprintf("%s/flavorgroups", hostIdExpr)
 	flavorgroupIdExpr := fmt.Sprintf("%s/{fgId:%s}", flavorgroupExpr, validation.UUIDReg)
 
-	router.Handle(hostExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Create),
+	router.Handle(hostExpr, ErrorHandler(PermissionsHandler(JsonResponseHandler(hostController.Create),
 		[]string{constants.HostCreate}))).Methods(http.MethodPost)
-	router.Handle(hostIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Retrieve),
+	router.Handle(hostIdExpr, ErrorHandler(PermissionsHandler(JsonResponseHandler(hostController.Retrieve),
 		[]string{constants.HostRetrieve}))).Methods(http.MethodGet)
-	router.Handle(hostIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Update),
+	router.Handle(hostIdExpr, ErrorHandler(PermissionsHandler(JsonResponseHandler(hostController.Update),
 		[]string{constants.HostUpdate}))).Methods(http.MethodPut)
-	router.Handle(hostIdExpr, ErrorHandler(permissionsHandler(ResponseHandler(hostController.Delete),
+	router.Handle(hostIdExpr, ErrorHandler(PermissionsHandler(ResponseHandler(hostController.Delete),
 		[]string{constants.HostDelete}))).Methods(http.MethodDelete)
-	router.Handle(hostExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.Search),
+	router.Handle(hostExpr, ErrorHandler(PermissionsHandler(JsonResponseHandler(hostController.Search),
 		[]string{constants.HostSearch}))).Methods(http.MethodGet)
 
-	router.Handle(flavorgroupExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.AddFlavorgroup),
+	router.Handle(flavorgroupExpr, ErrorHandler(PermissionsHandler(JsonResponseHandler(hostController.AddFlavorgroup),
 		[]string{constants.HostCreate}))).Methods(http.MethodPost)
-	router.Handle(flavorgroupIdExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.RetrieveFlavorgroup),
+	router.Handle(flavorgroupIdExpr, ErrorHandler(PermissionsHandler(JsonResponseHandler(hostController.RetrieveFlavorgroup),
 		[]string{constants.HostRetrieve}))).Methods(http.MethodGet)
-	router.Handle(flavorgroupIdExpr, ErrorHandler(permissionsHandler(ResponseHandler(hostController.RemoveFlavorgroup),
+	router.Handle(flavorgroupIdExpr, ErrorHandler(PermissionsHandler(ResponseHandler(hostController.RemoveFlavorgroup),
 		[]string{constants.HostDelete}))).Methods(http.MethodDelete)
-	router.Handle(flavorgroupExpr, ErrorHandler(permissionsHandler(JsonResponseHandler(hostController.SearchFlavorgroups),
+	router.Handle(flavorgroupExpr, ErrorHandler(PermissionsHandler(JsonResponseHandler(hostController.SearchFlavorgroups),
 		[]string{constants.HostSearch}))).Methods(http.MethodGet)
 
 	return router

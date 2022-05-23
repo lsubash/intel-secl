@@ -5,6 +5,12 @@
 package mocks
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"fmt"
+	"os"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
@@ -45,6 +51,14 @@ func NewFakeCertificatesPathStore() *crypt.CertificatesPathStore {
 
 func NewFakeCertificatesStore() *crypt.CertificatesStore {
 
+	privatekey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		fmt.Printf("Cannot generate RSA key\n")
+		os.Exit(1)
+	}
+
+	cert := []x509.Certificate{}
+
 	// Mock path to create new certificate
 	rootCaPath := "../domain/mocks/resources/"
 	//Path for any certificate containing file, so instead of creating new use existing one
@@ -60,8 +74,9 @@ func NewFakeCertificatesStore() *crypt.CertificatesStore {
 			Certificates: nil,
 		},
 		models.CaCertTypesPrivacyCa.String(): &crypt.CertificateStore{
+			Key:          privatekey,
 			CertPath:     caCertPath,
-			Certificates: nil,
+			Certificates: cert,
 		},
 		models.CaCertTypesTagCa.String(): &crypt.CertificateStore{
 			CertPath:     caCertPath,
@@ -76,7 +91,7 @@ func NewFakeCertificatesStore() *crypt.CertificatesStore {
 			Certificates: nil,
 		},
 		models.CertTypesFlavorSigning.String(): &crypt.CertificateStore{
-			Key:          nil,
+			Key:          privatekey,
 			CertPath:     caCertPath,
 			Certificates: nil,
 		},

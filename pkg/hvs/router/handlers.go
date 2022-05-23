@@ -124,9 +124,9 @@ func xmlResponseWriter(w http.ResponseWriter, status int, data interface{}) {
 	}
 }
 
-func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
-	defaultLog.Trace("router/handlers:permissionsHandler() Entering")
-	defer defaultLog.Trace("router/handlers:permissionsHandler() Leaving")
+func PermissionsHandler(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
+	defaultLog.Trace("router/handlers:PermissionsHandler() Entering")
+	defer defaultLog.Trace("router/handlers:PermissionsHandler() Leaving")
 
 	return func(w http.ResponseWriter, r *http.Request) error {
 		privileges, err := comctx.GetUserPermissions(r)
@@ -136,8 +136,8 @@ func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string)
 			if writeErr != nil {
 				defaultLog.WithError(writeErr).Errorf("Error writing to response")
 			}
-			secLog.Errorf("router/handlers:permissionsHandler() %s Permission: %v | Context: %v", commLogMsg.AuthenticationFailed, permissionNames, r.Context())
-			return errors.Wrap(err, "router/handlers:permissionsHandler() Could not get user permissions from http context")
+			secLog.Errorf("router/handlers:PermissionsHandler() %s Permission: %v | Context: %v", commLogMsg.AuthenticationFailed, permissionNames, r.Context())
+			return errors.Wrap(err, "router/handlers:PermissionsHandler() Could not get user permissions from http context")
 		}
 		reqPermissions := ct.PermissionInfo{Service: consts.ServiceName, Rules: permissionNames}
 
@@ -145,10 +145,10 @@ func permissionsHandler(eh middleware.EndpointHandler, permissionNames []string)
 			true)
 		if !foundMatchingPermission {
 			w.WriteHeader(http.StatusUnauthorized)
-			secLog.Errorf("router/handlers:permissionsHandler() %s Insufficient privileges to access %s", commLogMsg.UnauthorizedAccess, r.RequestURI)
+			secLog.Errorf("router/handlers:PermissionsHandler() %s Insufficient privileges to access %s", commLogMsg.UnauthorizedAccess, r.RequestURI)
 			return &commErr.PrivilegeError{Message: "Insufficient privileges to access " + r.RequestURI, StatusCode: http.StatusUnauthorized}
 		}
-		secLog.Infof("router/handlers:permissionsHandler() %s - %s", commLogMsg.AuthorizedAccess, r.RequestURI)
+		secLog.Infof("router/handlers:PermissionsHandler() %s - %s", commLogMsg.AuthorizedAccess, r.RequestURI)
 		return eh(w, r)
 	}
 }

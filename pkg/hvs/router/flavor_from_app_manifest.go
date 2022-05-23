@@ -6,17 +6,18 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
-	"net/http"
 )
 
 //SetFlavorFromAppManifestRoute registers routes for APIs that return software flavor from manifest
-func SetFlavorFromAppManifestRoute(router *mux.Router, store *postgres.DataStore, flavorGroupStore *postgres.FlavorGroupStore, certStore *crypt.CertificatesStore,
+func SetFlavorFromAppManifestRoute(router *mux.Router, store *postgres.DataStore, flavorGroupStore domain.FlavorGroupStore, certStore *crypt.CertificatesStore,
 	hostTrustManager domain.HostTrustManager, hcConfig domain.HostControllerConfig) *mux.Router {
 	defaultLog.Trace("router/flavor-from-app-manifest:SetFlavorFromAppManifestRoute() Entering")
 	defer defaultLog.Trace("router/flavor-from-app-manifest:SetFlavorFromAppManifestRoute() Leaving")
@@ -29,7 +30,7 @@ func SetFlavorFromAppManifestRoute(router *mux.Router, store *postgres.DataStore
 	flavorFromAppManifestController := controllers.NewFlavorFromAppManifestController(*flavorController)
 
 	router.Handle("/flavor-from-app-manifest",
-		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorFromAppManifestController.CreateSoftwareFlavor),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(flavorFromAppManifestController.CreateSoftwareFlavor),
 			[]string{constants.SoftwareFlavorCreate}))).Methods(http.MethodPost)
 
 	return router

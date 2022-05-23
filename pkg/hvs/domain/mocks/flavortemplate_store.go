@@ -12,6 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+	"github.com/pkg/errors"
 )
 
 // MockFlavorTemplateStore provides a mocked implementation of interface hvs.FlavorTemplate
@@ -24,10 +25,7 @@ var flavorTemplate = `{
 	"id": "426912bd-39b0-4daa-ad21-0c6933230b50",
 	"label": "default-uefi",
 	"condition": [
-		"//host_info/vendor='Linux'",
-		"//host_info/tpm_version='2.0'",
-		"//host_info/uefi_enabled='true'",
-		"//host_info/suefi_enabled='true'"
+		"//host_info/os_name='RedHatEnterprise'"
 	],
 	"flavor_parts": {
 		"PLATFORM": {
@@ -101,12 +99,14 @@ func (store *MockFlavorTemplateStore) Search(criteria *models.FlavorTemplateFilt
 	if criteria.IncludeDeleted {
 		rec = append(rec, store.DeletedTemplates...)
 	}
+
+	var templates []hvs.FlavorTemplate
 	for _, template := range rec {
 		//ID
 		if criteria.Ids != nil {
 			for _, id := range criteria.Ids {
 				if template.ID == id {
-					rec = append(rec, template)
+					templates = append(templates, template)
 					break
 				}
 			}
@@ -115,7 +115,7 @@ func (store *MockFlavorTemplateStore) Search(criteria *models.FlavorTemplateFilt
 		//Label
 		if criteria.Label != "" {
 			if template.Label == criteria.Label {
-				rec = append(rec, template)
+				templates = append(templates, template)
 			}
 		}
 
@@ -123,7 +123,7 @@ func (store *MockFlavorTemplateStore) Search(criteria *models.FlavorTemplateFilt
 		if criteria.ConditionContains != "" {
 			for _, condition := range template.Condition {
 				if condition == criteria.ConditionContains {
-					rec = append(rec, template)
+					templates = append(templates, template)
 				}
 			}
 		}
@@ -131,17 +131,21 @@ func (store *MockFlavorTemplateStore) Search(criteria *models.FlavorTemplateFilt
 		//FlavorPart
 		if criteria.FlavorPartContains != "" {
 			if template.FlavorParts.Platform != nil && criteria.FlavorPartContains == "PLATFORM" {
-				rec = append(rec, template)
+				templates = append(templates, template)
 			}
 			if template.FlavorParts.OS != nil && criteria.FlavorPartContains == "OS" {
-				rec = append(rec, template)
+				templates = append(templates, template)
 			}
 			if template.FlavorParts.HostUnique != nil && criteria.FlavorPartContains == "HOST_UNIQUE" {
-				rec = append(rec, template)
+				templates = append(templates, template)
 			}
 		}
+
+		if criteria.Ids == nil && criteria.Label == "" && criteria.ConditionContains == "" && criteria.FlavorPartContains == "" {
+			return rec, nil
+		}
 	}
-	return rec, nil
+	return templates, nil
 }
 
 // Detele a Flavortemplate
@@ -180,13 +184,35 @@ func NewFakeFlavorTemplateStore() *MockFlavorTemplateStore {
 func (store *MockFlavorTemplateStore) AddFlavorgroups(uuid.UUID, []uuid.UUID) error {
 	return nil
 }
-func (store *MockFlavorTemplateStore) RetrieveFlavorgroup(uuid.UUID, uuid.UUID) (*hvs.FlavorTemplateFlavorgroup, error) {
+func (store *MockFlavorTemplateStore) RetrieveFlavorgroup(ftID uuid.UUID, fgID uuid.UUID) (*hvs.FlavorTemplateFlavorgroup, error) {
+	if fgID == uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e2") {
+		return &hvs.FlavorTemplateFlavorgroup{}, nil
+	} else if fgID == uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0d") {
+		return nil, errors.New("no rows in result set")
+	} else if fgID == uuid.MustParse("426912bd-39b0-4daa-ad21-0c6933230b53") {
+		return nil, errors.New("Error in retrieving flavor")
+	} else if fgID == uuid.MustParse("426912bd-39b0-4daa-ad21-0c6933230b54") {
+		return &hvs.FlavorTemplateFlavorgroup{}, nil
+	}
 	return nil, nil
 }
-func (store *MockFlavorTemplateStore) RemoveFlavorgroups(uuid.UUID, []uuid.UUID) error {
+
+func (store *MockFlavorTemplateStore) RemoveFlavorgroups(ftID uuid.UUID, fgId []uuid.UUID) error {
+	if ftID == uuid.MustParse("426912bd-39b0-4daa-ad21-0c6933230b51") {
+		return nil
+	} else if ftID == uuid.MustParse("426912bd-39b0-4daa-ad21-0c6933230b54") {
+		return errors.New("Error in deleting flavor group")
+	}
 	return nil
 }
 
-func (store *MockFlavorTemplateStore) SearchFlavorgroups(uuid.UUID) ([]uuid.UUID, error) {
+func (store *MockFlavorTemplateStore) SearchFlavorgroups(ftID uuid.UUID) ([]uuid.UUID, error) {
+	if ftID == uuid.MustParse("426912bd-39b0-4daa-ad21-0c6933230b51") {
+		return []uuid.UUID{uuid.MustParse("426912bd-39b0-4daa-ad21-0c6933230b51")}, nil
+	} else if ftID == uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0d") {
+		return nil, errors.New("no rows in result set")
+	} else if ftID == uuid.MustParse("426912bd-39b0-4daa-ad21-0c6933230b53") {
+		return nil, errors.New("Error in retrieving flavor")
+	}
 	return nil, nil
 }

@@ -7,6 +7,9 @@ package controllers_test
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+
 	"github.com/gorilla/mux"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
@@ -19,8 +22,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"net/http/httptest"
 )
 
 var _ = Describe("CaCertificatesController", func() {
@@ -61,6 +62,29 @@ var _ = Describe("CaCertificatesController", func() {
 				var caCert *hvs.CaCertificate
 				err = json.Unmarshal(w.Body.Bytes(), &caCert)
 				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+		Context("Create root CA certificates with invalid content type", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/ca-certificates", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(caCertificatesController.Create))).Methods(http.MethodPost)
+				cert, _, _ := crypt.CreateKeyPairAndCertificate("root-test", "", consts.DefaultKeyAlgorithm, consts.DefaultKeyLength)
+				certificate := hvs.CaCertificate{
+					Name:        "root-test",
+					Type:        models.CaCertTypesRootCa.String(),
+					Certificate: cert,
+				}
+				payload, _ := json.Marshal(certificate)
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/ca-certificates",
+					bytes.NewBuffer(payload),
+				)
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", constants.HTTPMediaTypeJwt)
+				Expect(err).ToNot(HaveOccurred())
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
 			})
 		})
 		Context("Create root CA certificates with invalid certificate type", func() {
@@ -136,6 +160,17 @@ var _ = Describe("CaCertificatesController", func() {
 				err = json.Unmarshal(w.Body.Bytes(), &caCertCollection)
 				Expect(err).NotTo(HaveOccurred())
 				log.Info(len(caCertCollection.CaCerts))
+			})
+		})
+		Context("Get all Endorsement CA certificates with search endorsement with invalid query parameter", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/ca-certificates", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(caCertificatesController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/ca-certificates?test=endorsement", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Get all Endorsement CA certificates", func() {
@@ -299,6 +334,42 @@ var _ = Describe("CaCertificatesController", func() {
 				var caCert *hvs.CaCertificate
 				err = json.Unmarshal(w.Body.Bytes(), &caCert)
 				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+	})
+
+	Describe("Get pem certificates", func() {
+		Context("Get pem certificates", func() {
+			It("Should get pem certificates", func() {
+				router.Handle("/ca-certificates", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(caCertificatesController.SearchPem))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/ca-certificates?domain=endorsement", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+		Context("Get pem certificates with invalid query parameters", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/ca-certificates", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(caCertificatesController.SearchPem))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/ca-certificates?test=endorsement", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Get pem certificates with invalid domain type", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/ca-certificates", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(caCertificatesController.SearchPem))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/ca-certificates?domain=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})

@@ -7,6 +7,13 @@ package controllers_test
 import (
 	"crypto"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
@@ -18,18 +25,12 @@ import (
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
+	host_connector "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"strings"
-	"testing"
-	"time"
 )
 
 const (
@@ -156,6 +157,27 @@ var _ = Describe("TagCertificateController", func() {
 			})
 		})
 
+		Context("When a Invalid Content-Type given in Create Request", func() {
+			It("A HTTP Status: 415 response is received", func() {
+				router.Handle(hvsRoutes.TagCertificateEndpointPath, hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tagCertController.Create))).Methods(http.MethodPost)
+
+				// Create Request body
+				createTcReq := ``
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					hvsRoutes.TagCertificateEndpointPath,
+					strings.NewReader(createTcReq),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", constants.HTTPMediaTypeJwt)
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
 		Context("When a VALID TagCertificate Create Request is passed", func() {
 			It("A new TagCertificate record is created and HTTP Status: 201 response is received", func() {
 				router.Handle(hvsRoutes.TagCertificateEndpointPath, hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tagCertController.Create))).Methods(http.MethodPost)
@@ -235,7 +257,7 @@ var _ = Describe("TagCertificateController", func() {
 				var tcCollection *hvs.TagCertificateCollection
 				err = json.Unmarshal(w.Body.Bytes(), &tcCollection)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(tcCollection.TagCertificates)).To(Equal(7))
+				Expect(len(tcCollection.TagCertificates)).To(Equal(8))
 			})
 		})
 

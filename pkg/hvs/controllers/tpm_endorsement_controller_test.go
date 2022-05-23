@@ -7,14 +7,15 @@ package controllers_test
 
 import (
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
-	"net/http"
-	"net/http/httptest"
-	"strings"
 
 	"github.com/gorilla/mux"
 	. "github.com/onsi/ginkgo"
@@ -129,6 +130,17 @@ var _ = Describe("TpmEndorsementController", func() {
 				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(teCollection.TpmEndorsement)).To(Equal(1))
+			})
+		})
+		Context("Search TpmEndorsements from data store with invalid revoke filter criteria", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?revokedEqualTo=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Search TpmEndorsements from data store based on commentContains as filter criteria with special characters", func() {
@@ -252,6 +264,30 @@ var _ = Describe("TpmEndorsementController", func() {
 				Expect(w.Code).To(Equal(http.StatusCreated))
 			})
 		})
+
+		Context("Provide a invalid Content-Type in request", func() {
+			It("Should not create a new TpmEndorsement and get HTTP Status: 415", func() {
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods(http.MethodPost)
+				tpmEndorsementJson := `{ 
+                                        "hardware_uuid": "eb829e60-c8ef-46ab-ba33-6e62df3062a7",
+                                        "issuer": "C = DE, O = Infineon Technologies AG, OU = OPTIGA(TM) TPM2.0, CN = Infineon OPTIGA(TM) RSA Manufacturing CA 007",
+							            "certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVuRENDQTRTZ0F3SUJBZ0lFS3FrTU1UQU5CZ2txaGtpRzl3MEJBUXNGQURDQmd6RUxNQWtHQTFVRUJoTUMKUkVVeElUQWZCZ05WQkFvTUdFbHVabWx1Wlc5dUlGUmxZMmh1YjJ4dloybGxjeUJCUnpFYU1CZ0dBMVVFQ3d3UgpUMUJVU1VkQktGUk5LU0JVVUUweUxqQXhOVEF6QmdOVkJBTU1MRWx1Wm1sdVpXOXVJRTlRVkVsSFFTaFVUU2tnClVsTkJJRTFoYm5WbVlXTjBkWEpwYm1jZ1EwRWdNREEzTUI0WERURTFNVEl5TWpFek1EWTBORm9YRFRNd01USXkKTWpFek1EWTBORm93QURDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSkdldG8xRQozN2hLQ0ZHY0RZN0tWNm8zZVlLR2RwUkd0Q0NRdXRJM1hkZU9ST2ZJM0lWQUM2NDdhcEk3Yjc1KzdxOFhyQnFWCjlvSFlMS0hjTS94S3c0bTQ4L2M4VzNxUndRbHJtWEtmeGdtZXVLRWJHY2VWcUkydnJNSGlvNEdoRFJiK3BwZUkKRE44bkRPRU44dzdUZCtpT1NMNVFCTnNlTEN0UzhFMmZLU3ZpSDNZTE5lWlpHL0pTRllwQjRSN2lWL0ZhRy9LWAoyRklSL3FDaGc3RXNyK0JMKys1MkJ5RDg1Z212WTRmNmZmV0V0U2lycVlBbmhuQzRibFUzYndsMWRuYnRGVFdJCkZGVWdSUUIvUkFsWjEzVGNhcHF2UjZQTmxOS2ZYdlBLOGltSU5GYVVjSEczYUVNd1dFUFY2KzAxWk0zaDVRc0wKY2c3UDc1Z3VybVQ1UzA4Q0F3RUFBYU9DQVpnd2dnR1VNRnNHQ0NzR0FRVUZCd0VCQkU4d1RUQkxCZ2dyQmdFRgpCUWN3QW9ZL2FIUjBjRG92TDNCcmFTNXBibVpwYm1WdmJpNWpiMjB2VDNCMGFXZGhVbk5oVFdaeVEwRXdNRGN2ClQzQjBhV2RoVW5OaFRXWnlRMEV3TURjdVkzSjBNQTRHQTFVZER3RUIvd1FFQXdJQUlEQllCZ05WSFJFQkFmOEUKVGpCTXBFb3dTREVXTUJRR0JXZUJCUUlCREF0cFpEbzBPVFEyTlRnd01ERWFNQmdHQldlQkJRSUNEQTlUVEVJZwpPVFkzTUNCVVVFMHlMakF4RWpBUUJnVm5nUVVDQXd3SGFXUTZNRGN5T0RBTUJnTlZIUk1CQWY4RUFqQUFNRkFHCkExVWRId1JKTUVjd1JhQkRvRUdHUDJoMGRIQTZMeTl3YTJrdWFXNW1hVzVsYjI0dVkyOXRMMDl3ZEdsbllWSnoKWVUxbWNrTkJNREEzTDA5d2RHbG5ZVkp6WVUxbWNrTkJNREEzTG1OeWJEQVZCZ05WSFNBRURqQU1NQW9HQ0NxQwpGQUJFQVJRQk1COEdBMVVkSXdRWU1CYUFGSng5OWFrY1BVbTc1emVOU3JvUy80NTRvdGRjTUJBR0ExVWRKUVFKCk1BY0dCV2VCQlFnQk1DRUdBMVVkQ1FRYU1CZ3dGZ1lGWjRFRkFoQXhEVEFMREFNeUxqQUNBUUFDQVhRd0RRWUoKS29aSWh2Y05BUUVMQlFBRGdnRUJBQVRhSUk2VzRnOVkxMG53Z2FINzZOeE9SSWc5RWRPOU56b0RwalcrOUYvOApkdUZNKzZOMFF1Ly95QjZxcFI3WnlLWUJPZEY1ZUpMc1dGWXBqMmFrUlpoS3VpeEg2eGpSM1hHYXB2aW1XNXBUClEwNTUreGVGNWFTL3M5M1dhL2xKVk0xSnpHc1prK3ZicU13TmxJMTJzWDZ3Y2FTdElNa3VBeUtHclJkdGFmUzgKd29FS0JiNDFiVGQ3WThCdGI0azdnTURvTVUxZWtxWlNOcFQvZlI1RmYxb2IvU2d1OGx3RUNobkZqV0YyMk9qUApsZSsrbnBVeVJOby80YWE2RUM3K2hCVml0Q2lxQTlFSVBCK0RyOFVKNVpMZ09icGtMT21US25sQmE5SEw2ZnBuCnU3RUJoQi9Qb21MU29IdGhaVGpkcWw5N01yUFErWFg3T0ZyTWRVWmR6TzA9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"  
+                                       }`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/tpm-endorsements",
+					strings.NewReader(tpmEndorsementJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJwt)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
 		Context("Provide a TpmEndorsement data that contains duplicate hardware_uuid", func() {
 			It("Should get HTTP Status: 400", func() {
 				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Create))).Methods(http.MethodPost)

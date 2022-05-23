@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package tasks
@@ -11,6 +11,7 @@ import (
 )
 
 func TestDekGenerate(t *testing.T) {
+	// Dek generate
 	dek := "hello"
 	task := CreateDek{
 		DekStore: &dek,
@@ -25,6 +26,17 @@ func TestDekGenerate(t *testing.T) {
 	t.Log(dek)
 	if err := task.Validate(); err != nil {
 		t.Error("second validation should pass:", err.Error())
+	}
+
+	// dek store nil
+	task = CreateDek{
+		DekStore: nil,
+	}
+	if err := task.Run(); err == nil {
+		t.Error("Key store can not be nil should be thrown")
+	}
+	if err := task.Validate(); err == nil {
+		t.Error("Key store can not be nil should be thrown")
 	}
 }
 

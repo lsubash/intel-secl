@@ -21,6 +21,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	stdlog "log"
+
 	"github.com/gorilla/handlers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
@@ -33,11 +35,9 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hrrs"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 	hostconnector "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/saml"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
-	stdlog "log"
 
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
@@ -109,8 +109,7 @@ func (a *App) startServer() error {
 	if err != nil {
 		return errors.Wrap(err, "An error occurred while initializing routes")
 	}
-	loggerMiddleware := middleware.LogWriterMiddleware{a.logWriter()}
-	routes.Use(loggerMiddleware.WriteDurationLog())
+
 	defaultLog.Info("Starting server")
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS12,
@@ -196,7 +195,7 @@ func getDecodedDek(cfg *config.Configuration) []byte {
 	return dek
 }
 
-func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataStore, fgs *postgres.FlavorGroupStore, certStore *crypt.CertificatesStore, alw domain.AuditLogWriter) domain.HostTrustManager {
+func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataStore, fgs domain.FlavorGroupStore, certStore *crypt.CertificatesStore, alw domain.AuditLogWriter) domain.HostTrustManager {
 	defaultLog.Trace("server:InitHostTrustManager() Entering")
 	defer defaultLog.Trace("server:InitHostTrustManager() Leaving")
 

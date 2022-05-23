@@ -7,9 +7,10 @@ package auditlog
 
 import (
 	"crypto/rand"
-	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
@@ -79,7 +80,11 @@ func TestAuditLogService(t *testing.T) {
 		t:    t,
 		data: make(map[string]*models.AuditLogEntry),
 	}
-	w, err := NewAuditLogDBWriter(store, 100)
+	w, err := NewAuditLogDBWriter(nil, 100)
+	if err == nil {
+		t.Error("Error not returned for nil store audit log service")
+	}
+	w, err = NewAuditLogDBWriter(store, 100)
 	if err != nil {
 		t.Error("can not configure audit log service")
 		t.Error(err)

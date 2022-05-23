@@ -6,17 +6,18 @@ package router
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
-	"net/http"
 )
 
 // SetFlavorGroupRoutes registers routes for flavorgroups
-func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorgroupStore *postgres.FlavorGroupStore, hostTrustManager domain.HostTrustManager) *mux.Router {
+func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorgroupStore domain.FlavorGroupStore, hostTrustManager domain.HostTrustManager) *mux.Router {
 	defaultLog.Trace("router/flavorgroups:SetFlavorGroupRoutes() Entering")
 	defer defaultLog.Trace("router/flavorgroups:SetFlavorGroupRoutes() Leaving")
 
@@ -33,19 +34,19 @@ func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorg
 
 	flavorGroupIdExpr := fmt.Sprintf("%s%s", "/flavorgroups/", validation.IdReg)
 	router.Handle("/flavorgroups",
-		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.Create),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(flavorgroupController.Create),
 			[]string{constants.FlavorGroupCreate}))).Methods(http.MethodPost)
 
 	router.Handle("/flavorgroups",
-		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.Search),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(flavorgroupController.Search),
 			[]string{constants.FlavorGroupSearch}))).Methods(http.MethodGet)
 
 	router.Handle(flavorGroupIdExpr,
-		ErrorHandler(permissionsHandler(ResponseHandler(flavorgroupController.Delete),
+		ErrorHandler(PermissionsHandler(ResponseHandler(flavorgroupController.Delete),
 			[]string{constants.FlavorGroupDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(flavorGroupIdExpr,
-		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.Retrieve),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(flavorgroupController.Retrieve),
 			[]string{constants.FlavorGroupRetrieve}))).Methods(http.MethodGet)
 
 	// routes for FlavorGroupFlavorLink APIs
@@ -53,19 +54,19 @@ func SetFlavorGroupRoutes(router *mux.Router, store *postgres.DataStore, flavorg
 	fgFlavorLinkRetrieveDeleteExpr := fmt.Sprintf("/flavorgroups/{fgID:%s}/flavors/{fID:%s}", validation.UUIDReg, validation.UUIDReg)
 
 	router.Handle(fgFlavorLinkCreateSearchExpr,
-		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.AddFlavor),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(flavorgroupController.AddFlavor),
 			[]string{constants.FlavorGroupCreate}))).Methods(http.MethodPost)
 
 	router.Handle(fgFlavorLinkRetrieveDeleteExpr,
-		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.RetrieveFlavor),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(flavorgroupController.RetrieveFlavor),
 			[]string{constants.FlavorGroupRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle(fgFlavorLinkRetrieveDeleteExpr,
-		ErrorHandler(permissionsHandler(ResponseHandler(flavorgroupController.RemoveFlavor),
+		ErrorHandler(PermissionsHandler(ResponseHandler(flavorgroupController.RemoveFlavor),
 			[]string{constants.FlavorGroupDelete}))).Methods(http.MethodDelete)
 
 	router.Handle(fgFlavorLinkCreateSearchExpr,
-		ErrorHandler(permissionsHandler(JsonResponseHandler(flavorgroupController.SearchFlavors),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(flavorgroupController.SearchFlavors),
 			[]string{constants.FlavorGroupSearch}))).Methods(http.MethodGet)
 
 	return router

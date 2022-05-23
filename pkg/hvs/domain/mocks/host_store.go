@@ -5,13 +5,14 @@
 package mocks
 
 import (
+	"reflect"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
-	"reflect"
-	"strings"
 )
 
 // MockHostStore provides a mocked implementation of interface domain.HostStore
@@ -87,6 +88,9 @@ func (store *MockHostStore) Search(criteria *models.HostFilterCriteria, hostInfo
 			}
 		}
 	} else if criteria.NameEqualTo != "" {
+		if criteria.NameEqualTo == "Search_Error" {
+			return nil, errors.New("Error in searching host")
+		}
 		for _, h := range store.hostStore {
 			if h.HostName == criteria.NameEqualTo {
 				hosts = append(hosts, h)

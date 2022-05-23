@@ -7,15 +7,17 @@ package tasks
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"strings"
+
+	"github.com/google/uuid"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
@@ -26,8 +28,8 @@ type CreateDefaultFlavorTemplate struct {
 	DBConf commConfig.DBConfig
 
 	commandName   string
-	TemplateStore *postgres.FlavorTemplateStore
-	FGStore       *postgres.FlavorGroupStore
+	TemplateStore domain.FlavorTemplateStore
+	FGStore       domain.FlavorGroupStore
 	Directory     string
 }
 
@@ -152,9 +154,7 @@ func (t *CreateDefaultFlavorTemplate) InitializeStores() error {
 		t.TemplateStore = postgres.NewFlavorTemplateStore(dataStore)
 		t.FGStore = postgres.NewFlavorGroupStore(dataStore)
 	}
-	if t.TemplateStore.Store == nil {
-		return errors.New("Failed to create InitializeStores")
-	}
+
 	return nil
 }
 

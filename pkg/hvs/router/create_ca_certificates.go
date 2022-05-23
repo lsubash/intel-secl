@@ -20,7 +20,7 @@ func SetCreateCaCertificatesRoutes(router *mux.Router, certStore *crypt.Certific
 	caCertController := controllers.CaCertificatesController{CertStore: certStore}
 
 	router.Handle("/ca-certificates",
-		ErrorHandler(permissionsHandler(JsonResponseHandler(caCertController.Create),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(caCertController.Create),
 			[]string{constants.CaCertificatesCreate}))).Methods(http.MethodPost)
 	return router
 }

@@ -8,6 +8,12 @@ package controllers_test
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
+	"strings"
+	"testing"
+
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
@@ -18,9 +24,6 @@ import (
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/mocks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"net/http"
-	"net/http/httptest"
-	"strings"
 )
 
 var _ = Describe("FlavorFromAppManifestController", func() {
@@ -91,6 +94,48 @@ var _ = Describe("FlavorFromAppManifestController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusCreated))
+			})
+		})
+	})
+
+	Describe("Create a new software flavor Negative case", func() {
+		Context("Provide a invalid Content-Type", func() {
+			It("Should not create a new software flavor - Should return 415", func() {
+				router.Handle("/flavor-from-app-manifest", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorFromAppManifestController.
+					CreateSoftwareFlavor))).Methods(http.MethodPost)
+				manifestRequestXml := `<ManifestRequest xmlns="lib:wml:manifests-req:1.0">
+    								<connectionString>intel:https://ta-ip:1443</connectionString>
+   									<Manifest xmlns="lib:wml:manifests:1.0" DigestAlg="SHA384" Label="Label1">
+        								<Dir Include=".*" Exclude="" Path="/opt/trustagent/bin"/>
+        								<File Path="/opt/trustagent/bin/module_analysis_da.sh"/>
+    								</Manifest>
+									</ManifestRequest>`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/flavor-from-app-manifest",
+					strings.NewReader(manifestRequestXml),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
+		Context("Provide a empty manifest request data", func() {
+			It("Should not create a new software flavor - Should return 400", func() {
+				router.Handle("/flavor-from-app-manifest", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorFromAppManifestController.
+					CreateSoftwareFlavor))).Methods(http.MethodPost)
+				req, err := http.NewRequest(http.MethodPost, "/flavor-from-app-manifest", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeXml)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})
@@ -263,3 +308,29 @@ var _ = Describe("FlavorFromAppManifestController", func() {
 	})
 
 })
+
+func TestNewFlavorFromAppManifestController(t *testing.T) {
+	type args struct {
+		fc controllers.FlavorController
+	}
+	tests := []struct {
+		name string
+		args args
+		want *controllers.FlavorFromAppManifestController
+	}{
+		{
+			name: "Initialize the controller",
+			args: args{
+				fc: controllers.FlavorController{},
+			},
+			want: &controllers.FlavorFromAppManifestController{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := controllers.NewFlavorFromAppManifestController(tt.args.fc); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewFlavorFromAppManifestController() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

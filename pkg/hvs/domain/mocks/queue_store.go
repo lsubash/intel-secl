@@ -7,10 +7,11 @@ package mocks
 
 import (
 	"errors"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	"time"
 )
 
 type qStore struct {
@@ -24,6 +25,9 @@ func NewQueueStore() domain.QueueStore {
 
 func (qs *qStore) Search(criteria *models.QueueFilterCriteria) ([]*models.Queue, error) {
 	if criteria == nil || criteria.Id == uuid.Nil {
+		if criteria != nil && criteria.ParamValue == "7060b9da-08c6-4cbc-9ac1-446b8df6f125" {
+			return nil, errors.New("Error in searching hosts")
+		}
 		rslt := make([]*models.Queue, 0, len(qs.m))
 		for _, v := range qs.m {
 			rslt = append(rslt, &v)

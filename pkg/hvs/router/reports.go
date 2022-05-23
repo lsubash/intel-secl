@@ -30,23 +30,23 @@ func SetReportRoutes(router *mux.Router, store *postgres.DataStore, hostTrustMan
 	reportIdExpr := fmt.Sprintf("%s%s", "/reports/", validation.IdReg)
 
 	router.Handle("/reports",
-		ErrorHandler(permissionsHandler(ResponseHandler(reportController.CreateSaml),
+		ErrorHandler(PermissionsHandler(ResponseHandler(reportController.CreateSaml),
 			[]string{constants.ReportCreate}))).Methods(http.MethodPost).Headers("Accept", consts.HTTPMediaTypeSaml)
 
 	router.Handle("/reports",
-		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Create),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(reportController.Create),
 			[]string{constants.ReportCreate}))).Methods(http.MethodPost)
 
 	router.Handle("/reports",
-		ErrorHandler(permissionsHandler(ResponseHandler(reportController.SearchSaml),
+		ErrorHandler(PermissionsHandler(ResponseHandler(reportController.SearchSaml),
 			[]string{constants.ReportSearch}))).Methods(http.MethodGet).Headers("Accept", consts.HTTPMediaTypeSaml)
 
 	router.Handle(reportIdExpr,
-		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Retrieve),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(reportController.Retrieve),
 			[]string{constants.ReportRetrieve}))).Methods(http.MethodGet)
 
 	router.Handle("/reports",
-		ErrorHandler(permissionsHandler(JsonResponseHandler(reportController.Search),
+		ErrorHandler(PermissionsHandler(JsonResponseHandler(reportController.Search),
 			[]string{constants.ReportSearch}))).Methods(http.MethodGet)
 
 	return router

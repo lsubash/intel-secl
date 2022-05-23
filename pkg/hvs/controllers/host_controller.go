@@ -7,6 +7,11 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
@@ -21,10 +26,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	model "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
-	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
 )
 
 type HostController struct {
@@ -131,7 +132,7 @@ func (hc *HostController) Retrieve(w http.ResponseWriter, r *http.Request) (inte
 
 	// check for query parameters
 	defaultLog.WithField("query", r.URL.Query()).Debug("query hosts")
-	criteria, err := populateHostInfoFetchCriteria(r.URL.Query())
+	criteria, err := PopulateHostInfoFetchCriteria(r.URL.Query())
 	if err != nil {
 		secLog.WithError(err).Errorf("controllers/host_controller:Search() %s Invalid host info fetch criteria",
 			commLogMsg.InvalidInputBadParam)
@@ -238,7 +239,7 @@ func (hc *HostController) Search(w http.ResponseWriter, r *http.Request) (interf
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid host filter criteria"}
 	}
 
-	hostInfoFetchCriteria, err := populateHostInfoFetchCriteria(r.URL.Query())
+	hostInfoFetchCriteria, err := PopulateHostInfoFetchCriteria(r.URL.Query())
 	if err != nil {
 		secLog.WithError(err).Errorf("controllers/host_controller:Search() %s Invalid host info fetch criteria",
 			commLogMsg.InvalidInputBadParam)
@@ -772,9 +773,9 @@ func populateHostFilterCriteria(params url.Values) (*models.HostFilterCriteria, 
 	return &criteria, nil
 }
 
-func populateHostInfoFetchCriteria(params url.Values) (*models.HostInfoFetchCriteria, error) {
-	defaultLog.Trace("controllers/host_controller:populateHostInfoFetchCriteria() Entering")
-	defer defaultLog.Trace("controllers/host_controller:populateHostInfoFetchCriteria() Leaving")
+func PopulateHostInfoFetchCriteria(params url.Values) (*models.HostInfoFetchCriteria, error) {
+	defaultLog.Trace("controllers/host_controller:PopulateHostInfoFetchCriteria() Entering")
+	defer defaultLog.Trace("controllers/host_controller:PopulateHostInfoFetchCriteria() Leaving")
 
 	var criteria models.HostInfoFetchCriteria
 

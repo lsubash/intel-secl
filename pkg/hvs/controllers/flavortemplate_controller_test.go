@@ -7,18 +7,20 @@ package controllers_test
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
-	"strings"
+
+	"net/http"
+	"net/http/httptest"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"net/http"
-	"net/http/httptest"
 )
 
 var _ = Describe("FlavorTemplateController", func() {
@@ -817,4 +819,192 @@ var _ = Describe("FlavorTemplateController", func() {
 		})
 
 	})
+
+	Describe("Search,retrieve,add and delete flavorgroups", func() {
+		Context("When flavor template id and flavor group id are present", func() {
+			It("Should give HTTP Status: 200", func() {
+				router.Handle("/flavor-templates/{ftId}/flavorgroups/{fgId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.RetrieveFlavorgroup))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51/flavorgroups/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var fc hvs.FlavorTemplateFlavorgroupCollection
+				err = json.Unmarshal(w.Body.Bytes(), &fc)
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		Context("When flavor group id is not present", func() {
+			It("Should give HTTP Status: 500", func() {
+				router.Handle("/flavor-templates/{ftId}/flavorgroups/{fgId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.RetrieveFlavorgroup))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51/flavorgroups/e57e5ea0-d465-461e-882d-1600090caa0d", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusNotFound))
+			})
+		})
+
+		Context("When error is thrown while retrieving flavor group", func() {
+			It("Should give HTTP Status: 500", func() {
+				router.Handle("/flavor-templates/{ftId}/flavorgroups/{fgId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.RetrieveFlavorgroup))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51/flavorgroups/426912bd-39b0-4daa-ad21-0c6933230b53", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
+			})
+		})
+
+		Context("Search flavor group When flavor template id is present", func() {
+			It("Should give HTTP Status: 200", func() {
+				router.Handle("/flavor-templates/{ftId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.SearchFlavorgroups))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+
+		Context("Search flavor group When error is thrown.", func() {
+			It("Should give HTTP Status: 500", func() {
+				router.Handle("/flavor-templates/{ftId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.SearchFlavorgroups))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b53", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
+			})
+		})
+
+		Context("Delete flavor group When flavor template id and flavor group id are present", func() {
+			It("Should give HTTP Status: 204", func() {
+				router.Handle("/flavor-templates/{ftId}/flavorgroups/{fgId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.RemoveFlavorgroup))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51/flavorgroups/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusNoContent))
+			})
+		})
+
+		Context("Delete - When flavor group id is not present", func() {
+			It("Should give HTTP Status: 500", func() {
+				router.Handle("/flavor-templates/{ftId}/flavorgroups/{fgId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.RemoveFlavorgroup))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51/flavorgroups/e57e5ea0-d465-461e-882d-1600090caa0d", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusNotFound))
+			})
+		})
+
+		Context("Delete When error is thrown while retrieving flavor group", func() {
+			It("Should give HTTP Status: 500", func() {
+				router.Handle("/flavor-templates/{ftId}/flavorgroups/{fgId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.RemoveFlavorgroup))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51/flavorgroups/426912bd-39b0-4daa-ad21-0c6933230b53", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
+			})
+		})
+
+		Context("Delete When error is thrown while deleting flavor group", func() {
+			It("Should give HTTP Status: 500", func() {
+				router.Handle("/flavor-templates/{ftId}/flavorgroups/{fgId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.RemoveFlavorgroup))).Methods(http.MethodDelete)
+				req, err := http.NewRequest(http.MethodDelete, "/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b54/flavorgroups/426912bd-39b0-4daa-ad21-0c6933230b54", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
+			})
+		})
+
+		Context("Provide a valid FlavorTemplate data with id and flavor group", func() {
+			It("Should throw error as Flavorgroup link with flavor template already exists", func() {
+				router.Handle("/flavor-templates/{ftId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.AddFlavorgroup))).Methods(http.MethodPost)
+				flavorGroupJson := `{"flavorgroup_id":"ee37c360-7eae-4250-a677-6ee12adce8e2"}`
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b50",
+					strings.NewReader(flavorGroupJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Provide a valid FlavorTemplate data with id and flavor group that is not linked yet", func() {
+			It("Should create a Flavorgroup link with flavor template", func() {
+				router.Handle("/flavor-templates/{ftId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.AddFlavorgroup))).Methods(http.MethodPost)
+				flavorGroupJson := `{"flavorgroup_id":"e57e5ea0-d465-461e-882d-1600090caa0d"}`
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b50",
+					strings.NewReader(flavorGroupJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusCreated))
+			})
+		})
+
+		Context("Provide a invalid json body for flavor group", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/flavor-templates/{ftId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.AddFlavorgroup))).Methods(http.MethodPost)
+				flavorGroupJson := `{flavorgroup_id:"e57e5ea0-d465-461e-882d-1600090caa0d"}`
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b50",
+					strings.NewReader(flavorGroupJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Provide a invalid FlavorTemplate data with id and flavor group that is not linked yet", func() {
+			It("Should return error as flavor template does not exist", func() {
+				router.Handle("/flavor-templates/{ftId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.AddFlavorgroup))).Methods(http.MethodPost)
+				flavorGroupJson := `{"flavorgroup_id":"e57e5ea0-d465-461e-882d-1600090caa0d"}`
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/flavor-templates/426912bd-39b0-4daa-ad21-0c6933230b51",
+					strings.NewReader(flavorGroupJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusNotFound))
+			})
+		})
+
+	})
+
 })

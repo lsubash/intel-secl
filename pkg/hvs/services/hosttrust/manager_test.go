@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-package hosttrust_test
+package hosttrust
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"testing"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,13 +19,11 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	hostfetcher "github.com/intel-secl/intel-secl/v5/pkg/hvs/services/host-fetcher"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust"
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/mocks"
 	libVerifier "github.com/intel-secl/intel-secl/v5/pkg/lib/verifier"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-
-	"testing"
 )
 
 var (
@@ -38,7 +38,7 @@ var (
 	hcs            domain.HostCredentialStore
 	v              domain.HostTrustVerifier
 	fIds           []uuid.UUID
-	service        *hosttrust.Service
+	service        *Service
 	hwUuid, hostId uuid.UUID
 	hostManifest   hvs.HostManifest
 )
@@ -127,9 +127,9 @@ func SetupManagerTests() {
 		SkipFlavorSignatureVerification: true,
 		HostTrustCache:                  htvTrustCache,
 	}
-	v = hosttrust.NewVerifier(htv)
+	v = NewVerifier(htv)
 
-	service, ht, _ = hosttrust.NewService(domain.HostTrustMgrConfig{
+	service, ht, _ = NewService(domain.HostTrustMgrConfig{
 		PersistStore:      qs,
 		HostStore:         hs,
 		HostStatusStore:   hss,
@@ -225,6 +225,37 @@ func TestManager_VerifyHostAsync(t *testing.T) {
 	SetupManagerTests()
 	assert.NoError(t, service.VerifyHostsAsync([]uuid.UUID{hostId}, true, false),
 		"VerifyHostAsync should not return an error")
+	strRec := &models.Queue{Action: "flavor-verify",
+		Params: map[string]interface{}{"host_id": "7060b9da-08c6-4cbc-9ac1-446b8df6f123", "fetch_host_data": false, "prefer_hash_match": true},
+		State:  models.QueueStatePending,
+	}
+	strRec, err := service.prstStor.Create(strRec)
+	if err != nil {
+		log.Error("Error in creating hosts in persistent store")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	service.hosts.Store(uuid.MustParse("7060b9da-08c6-4cbc-9ac1-446b8df6f123"), &verifyTrustJob{ctx, cancel, nil, strRec.Id,
+		false, true})
+	assert.NoError(t, service.VerifyHostsAsync([]uuid.UUID{uuid.MustParse("7060b9da-08c6-4cbc-9ac1-446b8df6f123")}, true, false),
+		"VerifyHostAsync should not return an error")
+	service.hosts.Store(uuid.MustParse("7060b9da-08c6-4cbc-9ac1-446b8df6f123"), &verifyTrustJob{ctx, cancel, nil, uuid.Nil,
+		false, true})
+	assert.Error(t, service.VerifyHostsAsync([]uuid.UUID{uuid.MustParse("7060b9da-08c6-4cbc-9ac1-446b8df6f123")}, true, false),
+		"VerifyHostAsync should not return an error")
+
+	//Delete dangling entries
+	strRec = &models.Queue{Action: "flavor-verify",
+		Params: map[string]interface{}{"host_id": "7060b9da-08c6-4cbc-9ac1-446b8df6f124", "fetch_host_data": false, "prefer_hash_match": true},
+		State:  models.QueueStatePending,
+	}
+	strRec, err = service.prstStor.Create(strRec)
+	if err != nil {
+		log.Error("Error in creating hosts in persistent store")
+	}
+	// Deletes dangling entry
+	service.deleteEntry(uuid.MustParse("7060b9da-08c6-4cbc-9ac1-446b8df6f124"))
+	// Deletes non existent dangling entry
+	service.deleteEntry(uuid.MustParse("7060b9da-08c6-4cbc-9ac1-446b8df6f125"))
 }
 
 func TestManager_VerifyQueueLogic(t *testing.T) {
@@ -234,6 +265,10 @@ func TestManager_VerifyQueueLogic(t *testing.T) {
 		go assert.NoError(t, service.VerifyHostsAsync([]uuid.UUID{hostId}, true, false),
 			"VerifyHostAsync should not return an error")
 		go assert.NoError(t, service.VerifyHostsAsync([]uuid.UUID{hostId}, false, false),
+			"VerifyHostAsync should not return an error")
+		assert.NoError(t, service.VerifyHostsAsync([]uuid.UUID{hostId}, true, true),
+			"VerifyHostAsync should not return an error")
+		assert.NoError(t, service.VerifyHostsAsync([]uuid.UUID{hostId}, false, true),
 			"VerifyHostAsync should not return an error")
 	}
 
@@ -271,4 +306,40 @@ func TestManager_VerifyNonExistentHost(t *testing.T) {
 	newId, err = uuid.NewRandom()
 	assert.NoError(t, err)
 	assert.NoError(t, service.VerifyHostsAsync([]uuid.UUID{newId}, false, false), "VerifyHostsAsync should error out when the Host does not exist")
+}
+
+func Test_shouldCancelPrevJob(t *testing.T) {
+	type args struct {
+		newJobNeedFreshHostData bool
+		prevJobNeededFreshData  bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: " Previous job needs fresh data and new job doesn't need fresh data",
+			args: args{
+				newJobNeedFreshHostData: false,
+				prevJobNeededFreshData:  true,
+			},
+			want: false,
+		},
+		{
+			name: " Previous job does not need fresh data and new job doesn't need fresh data",
+			args: args{
+				newJobNeedFreshHostData: false,
+				prevJobNeededFreshData:  false,
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldCancelPrevJob(tt.args.newJobNeedFreshHostData, tt.args.prevJobNeededFreshData); got != tt.want {
+				t.Errorf("shouldCancelPrevJob() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

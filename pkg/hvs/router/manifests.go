@@ -22,7 +22,7 @@ func SetManifestsRoute(router *mux.Router, store *postgres.DataStore) *mux.Route
 	manifestsController := controllers.NewManifestsController(flavorStore)
 
 	router.Handle("/manifests",
-		ErrorHandler(permissionsHandler(XMLResponseHandler(manifestsController.GetManifest),
+		ErrorHandler(PermissionsHandler(XMLResponseHandler(manifestsController.GetManifest),
 			[]string{constants.FlavorSearch}))).Methods(http.MethodGet)
 
 	return router

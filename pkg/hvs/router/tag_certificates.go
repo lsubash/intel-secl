@@ -6,8 +6,9 @@ package router
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	"net/http"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
@@ -27,7 +28,7 @@ const (
 )
 
 // SetTagCertificateRoutes registers routes for tag-certificates API
-func SetTagCertificateRoutes(router *mux.Router, cfg *config.Configuration, flavorGroupStore *postgres.FlavorGroupStore, certStore *crypt.CertificatesStore, hostTrustManager domain.HostTrustManager, store *postgres.DataStore) *mux.Router {
+func SetTagCertificateRoutes(router *mux.Router, cfg *config.Configuration, flavorGroupStore domain.FlavorGroupStore, certStore *crypt.CertificatesStore, hostTrustManager domain.HostTrustManager, store *postgres.DataStore) *mux.Router {
 	defaultLog.Trace("router/tag_certificates:SetTagCertificateRoutes() Entering")
 	defer defaultLog.Trace("router/tag_certificates:SetTagCertificateRoutes() Leaving")
 
@@ -57,19 +58,19 @@ func SetTagCertificateRoutes(router *mux.Router, cfg *config.Configuration, flav
 	if tagCertificateController != nil {
 		tagCertificateIdExpr := fmt.Sprintf("%s%s", TagCertificateEndpointPath+"/", validation.IdReg)
 		router.Handle(TagCertificateEndpointPath,
-			ErrorHandler(permissionsHandler(JsonResponseHandler(tagCertificateController.Create),
+			ErrorHandler(PermissionsHandler(JsonResponseHandler(tagCertificateController.Create),
 				[]string{constants.TagCertificateCreate}))).Methods(http.MethodPost)
 
 		router.Handle(TagCertificateEndpointPath,
-			ErrorHandler(permissionsHandler(JsonResponseHandler(tagCertificateController.Search),
+			ErrorHandler(PermissionsHandler(JsonResponseHandler(tagCertificateController.Search),
 				[]string{constants.TagCertificateSearch}))).Methods(http.MethodGet)
 
 		router.Handle(tagCertificateIdExpr,
-			ErrorHandler(permissionsHandler(ResponseHandler(tagCertificateController.Delete),
+			ErrorHandler(PermissionsHandler(ResponseHandler(tagCertificateController.Delete),
 				[]string{constants.TagCertificateDelete}))).Methods(http.MethodDelete)
 
 		router.Handle(TagCertificateDeployEndpointPath,
-			ErrorHandler(permissionsHandler(JsonResponseHandler(tagCertificateController.Deploy),
+			ErrorHandler(PermissionsHandler(JsonResponseHandler(tagCertificateController.Deploy),
 				[]string{constants.TagCertificateDeploy}))).Methods(http.MethodPost)
 	}
 	return router

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
@@ -19,8 +20,6 @@ import (
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
-
-	"github.com/gorilla/mux"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -49,6 +48,16 @@ var _ = Describe("FlavorgroupController", func() {
 				uuid.MustParse("c36b5412-8c02-4e08-8a74-8bfa40425cf3"),
 			})
 		Expect(err).NotTo(HaveOccurred())
+		_, err = flavorgroupStore.AddFlavors(uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0e"),
+			[]uuid.UUID{
+				uuid.MustParse("c36b5412-8c02-4e08-8a74-8bfa40425cf3"),
+			})
+		Expect(err).NotTo(HaveOccurred())
+		_, err = flavorgroupStore.AddFlavors(uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e3"),
+			[]uuid.UUID{
+				uuid.MustParse("c36b5412-8c02-4e08-8a74-8bfa40425cf3"),
+			})
+		Expect(err).NotTo(HaveOccurred())
 		flavorgroupController = &controllers.FlavorgroupController{
 			FlavorGroupStore: flavorgroupStore,
 			FlavorStore:      flavorStore,
@@ -72,13 +81,13 @@ var _ = Describe("FlavorgroupController", func() {
 				var fgCollection *hvs.FlavorgroupCollection
 				err = json.Unmarshal(w.Body.Bytes(), &fgCollection)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(fgCollection.Flavorgroups)).To(Equal(2))
+				Expect(len(fgCollection.Flavorgroups)).To(Equal(4))
 			})
 		})
 		Context("Search FlavorGroups from data store", func() {
 			It("Should get filtered list of FlavorGroups", func() {
 				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Search))).Methods(http.MethodGet)
-				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?nameEqualTo=hvs_flavorgroup_test2", nil)
+				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?nameEqualTo=automatic", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
@@ -94,7 +103,7 @@ var _ = Describe("FlavorgroupController", func() {
 		Context("Search FlavorGroups from data store", func() {
 			It("Should get filtered list of FlavorGroups", func() {
 				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Search))).Methods(http.MethodGet)
-				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?nameContains=hvs_flavorgroup", nil)
+				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?nameContains=software", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()
@@ -120,7 +129,7 @@ var _ = Describe("FlavorgroupController", func() {
 				var fgCollection *hvs.FlavorgroupCollection
 				err = json.Unmarshal(w.Body.Bytes(), &fgCollection)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(fgCollection.Flavorgroups)).To(Equal(2))
+				Expect(len(fgCollection.Flavorgroups)).To(Equal(4))
 			})
 		})
 		Context("Search FlavorGroups with invalid parameter", func() {
@@ -203,7 +212,7 @@ var _ = Describe("FlavorgroupController", func() {
 				var fgCollection *hvs.FlavorgroupCollection
 				err = json.Unmarshal(w.Body.Bytes(), &fgCollection)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(fgCollection.Flavorgroups)).To(Equal(2))
+				Expect(len(fgCollection.Flavorgroups)).To(Equal(4))
 			})
 		})
 	})
@@ -239,7 +248,7 @@ var _ = Describe("FlavorgroupController", func() {
 		Context("Delete FlavorGroup by ID from data store", func() {
 			It("Should delete FlavorGroup", func() {
 				router.Handle("/flavorgroups/{id}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(flavorgroupController.Delete))).Methods(http.MethodDelete)
-				req, err := http.NewRequest(http.MethodDelete, "/flavorgroups/ee37c360-7eae-4250-a677-6ee12adce8e2", nil)
+				req, err := http.NewRequest(http.MethodDelete, "/flavorgroups/ee37c360-7eae-4250-a677-6ee12adce8e3", nil)
 				Expect(err).NotTo(HaveOccurred())
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -318,11 +327,27 @@ var _ = Describe("FlavorgroupController", func() {
 			})
 		})
 
+		// Specs for HTTP Post to "/flavorgroups"
+		Describe("Post a new Flavorgroup", func() {
+			Context("Provide a Invalid Content-Type in request", func() {
+				It("Should not create a new Flavorgroup and get HTTP Status: 415", func() {
+					router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Create))).Methods(http.MethodPost)
+					req, err := http.NewRequest(http.MethodPost, "/flavorgroups", nil)
+					Expect(err).NotTo(HaveOccurred())
+					req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+					req.Header.Set("Content-Type", consts.HTTPMediaTypeJwt)
+					w = httptest.NewRecorder()
+					router.ServeHTTP(w, req)
+					Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+				})
+			})
+		})
+
 		Context("Provide a Flavorgroup data that contains duplicate flavorgroup name", func() {
 			It("Should get HTTP Status: 400", func() {
 				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Create))).Methods(http.MethodPost)
 				flavorgroupJson := `{
-								"name": "hvs_flavorgroup_test1",
+								"name": "automatic",
 								"flavor_match_policy_collection": {
 									"flavor_match_policies": [
 										{
@@ -752,6 +777,22 @@ var _ = Describe("FlavorgroupController", func() {
 				Expect(w.Code).To(Equal(http.StatusNotFound))
 			})
 		})
+
+		Context("Delete FlavorGroup-Flavor link with valid FlavorGroup and Flavor ID with errors", func() {
+			It("Should return 500 response code", func() {
+				router.Handle("/flavorgroups/{fgID:"+validation.UUIDReg+"}/flavors/{fID:"+validation.UUIDReg+"}", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(flavorgroupController.RemoveFlavor))).Methods(http.MethodDelete)
+
+				req, err := http.NewRequest(
+					http.MethodDelete,
+					"/flavorgroups/ee37c360-7eae-4250-a677-6ee12adce8e2/flavors/5633146e-9a18-4f27-9db4-fcdf4d1f0e88",
+					nil,
+				)
+				Expect(err).NotTo(HaveOccurred())
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
+			})
+		})
 	})
 
 	// FlavorGroupFlavor Search links API tests
@@ -842,6 +883,23 @@ var _ = Describe("FlavorgroupController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusNotFound))
+			})
+		})
+
+		Context("Retrieve FlavorGroup-Flavor link with valid FlavorGroup and  Flavor ID which returns database error", func() {
+			It("Should return 404 response code", func() {
+				router.Handle("/flavorgroups/{fgID:"+validation.UUIDReg+"}/flavors/{fID:"+validation.UUIDReg+"}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.RetrieveFlavor))).Methods(http.MethodGet)
+
+				req, err := http.NewRequest(
+					http.MethodGet,
+					"/flavorgroups/ee37c360-7eae-4250-a677-6ee12adce8e2/flavors/5633146e-9a18-4f27-9db4-fcdf4d1f0e88",
+					nil,
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusInternalServerError))
 			})
 		})
 	})

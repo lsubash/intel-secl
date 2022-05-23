@@ -8,9 +8,12 @@ package controllers_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"reflect"
+	"testing"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
@@ -91,3 +94,29 @@ var _ = Describe("ManifestsController", func() {
 		})
 	})
 })
+
+func TestNewManifestsController(t *testing.T) {
+	type args struct {
+		fs domain.FlavorStore
+	}
+	tests := []struct {
+		name string
+		args args
+		want *controllers.ManifestsController
+	}{
+		{
+			name: "Initializing controllers",
+			args: args{
+				fs: nil,
+			},
+			want: &controllers.ManifestsController{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := controllers.NewManifestsController(tt.args.fs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewManifestsController() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

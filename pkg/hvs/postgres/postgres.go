@@ -83,7 +83,7 @@ func New(cfg *Config) (*DataStore, error) {
 	var db *gorm.DB
 	var dbErr error
 	numAttempts := cfg.ConnRetryAttempts
-	if numAttempts < 0 || numAttempts > 100 {
+	if numAttempts <= 0 || numAttempts > 100 {
 		numAttempts = constants.DefaultDbConnRetryAttempts
 	}
 	for i := 0; i < numAttempts; i = i + 1 {

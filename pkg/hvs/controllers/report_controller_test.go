@@ -7,6 +7,10 @@ package controllers_test
 import (
 	"encoding/json"
 	"encoding/xml"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
@@ -16,9 +20,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"net/http"
-	"net/http/httptest"
-	"strings"
 )
 
 var _ = Describe("ReportController", func() {
@@ -60,6 +61,61 @@ var _ = Describe("ReportController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusCreated))
+			})
+		})
+
+		Context("Provide a invalid Content-Type in Create request", func() {
+			It("Should not create a new Report - Should return 415", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Create))).Methods(http.MethodPost)
+				body := `{
+							"host_name": "localhost1"
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/reports",
+					strings.NewReader(body),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", constants.HTTPMediaTypeJwt)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
+		Context("Provide a invalid body content in Create request", func() {
+			It("Should not create a new Report - Should return 400", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Create))).Methods(http.MethodPost)
+				body := `{
+							"host_name: "localhost1"
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/reports",
+					strings.NewReader(body),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Provide a invalid body content in Create request", func() {
+			It("Should not create a new Report", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Create))).Methods(http.MethodPost)
+				req, err := http.NewRequest(http.MethodPost, "/reports", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -266,6 +322,60 @@ var _ = Describe("ReportController", func() {
 			})
 		})
 
+		Context("Get reports with latestPerHost set to true", func() {
+			It("Should get list of all the filtered Reports", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?latestPerHost=true", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var reportCollection hvs.ReportCollection
+				err = json.Unmarshal(w.Body.Bytes(), &reportCollection)
+				Expect(err).NotTo(HaveOccurred())
+				// Verifying mocked data of reports
+				Expect(len(reportCollection.Reports)).To(Equal(2))
+			})
+		})
+
+		Context("Get reports with latestPerHost set to false", func() {
+			It("Should get list of all the filtered Reports", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?latestPerHost=false", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+
+		Context("Get reports with latestPerHost set to invalid data", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?latestPerHost=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Get reports with invalid query parameter", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?testQuery=testValue", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
 		Context("Search Report for given invalid report id", func() {
 			It("Should respond with bad request", func() {
 				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
@@ -344,6 +454,57 @@ var _ = Describe("ReportController", func() {
 				//TODO search should return actually 2
 				Expect(len(samlCollection)).To(Equal(1))
 				Expect(w.Header().Get("Content-Type")).To(Equal(constants.HTTPMediaTypeSaml))
+			})
+		})
+		Context("Get all the Reports  with latestPerHost set to true", func() {
+			It("Should get list of all Saml Reports", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(reportController.SearchSaml))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?latestPerHost=true", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeSaml)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var samlCollection []string
+				err = xml.NewDecoder(w.Body).Decode(&samlCollection)
+				Expect(err).NotTo(HaveOccurred())
+				//TODO search should return actually 2
+				Expect(len(samlCollection)).To(Equal(1))
+				Expect(w.Header().Get("Content-Type")).To(Equal(constants.HTTPMediaTypeSaml))
+			})
+		})
+		Context("Get all the Reports with invalid accept type", func() {
+			It("Should return unsupported media error", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(reportController.SearchSaml))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?latestPerHost=true", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+		Context("Set invalid query parameter", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(reportController.SearchSaml))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?Invalid=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeSaml)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Get all the Reports with invalid latestPerHost", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.ResponseHandler(reportController.SearchSaml))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?latestPerHost=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeSaml)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})

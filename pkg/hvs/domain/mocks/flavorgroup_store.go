@@ -5,15 +5,17 @@
 package mocks
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 // MockFlavorgroupStore provides a mocked implementation of interface hvs.FlavorGroupStore
+
 type MockFlavorgroupStore struct {
 	FlavorgroupStore       map[uuid.UUID]*hvs.FlavorGroup
 	HostFlavorgroupStore   []*hvs.HostFlavorgroup
@@ -147,6 +149,10 @@ func (store *MockFlavorgroupStore) SearchFlavors(fgId uuid.UUID) ([]uuid.UUID, e
 }
 
 func (store *MockFlavorgroupStore) RetrieveFlavor(fgId uuid.UUID, fId uuid.UUID) (*hvs.FlavorgroupFlavorLink, error) {
+
+	if fId == uuid.MustParse("5633146e-9a18-4f27-9db4-fcdf4d1f0e88") {
+		return nil, errors.New("Error in retrieving flavor")
+	}
 	// if fgID map does not exist error out
 	if _, ok := store.FlavorgroupFlavorStore[fgId]; !ok {
 		return nil, errors.New(commErr.RowsNotFound)
@@ -157,6 +163,7 @@ func (store *MockFlavorgroupStore) RetrieveFlavor(fgId uuid.UUID, fId uuid.UUID)
 			return &hvs.FlavorgroupFlavorLink{FlavorGroupID: fgId, FlavorID: fId}, nil
 		}
 	}
+
 	return nil, errors.New(commErr.RowsNotFound)
 
 }
@@ -186,6 +193,7 @@ func (store *MockFlavorgroupStore) AddFlavorTemplates(fgId uuid.UUID, ftIds []uu
 
 // NewFakeFlavorgroupStore provides two dummy data for Flavorgroups
 func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
+
 	store := &MockFlavorgroupStore{
 		FlavorgroupStore:       make(map[uuid.UUID]*hvs.FlavorGroup),
 		FlavorgroupFlavorStore: make(map[uuid.UUID][]uuid.UUID),
@@ -193,7 +201,38 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 
 	_, err := store.Create(&hvs.FlavorGroup{
 		ID:   uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e2"),
-		Name: "hvs_flavorgroup_test1",
+		Name: "automatic",
+		MatchPolicies: []hvs.FlavorMatchPolicy{
+			{
+				FlavorPart: hvs.FlavorPartOs,
+				MatchPolicy: hvs.MatchPolicy{
+					MatchType: hvs.MatchTypeAnyOf,
+					Required:  hvs.FlavorRequired,
+				},
+			},
+			{
+				FlavorPart: hvs.FlavorPartPlatform,
+				MatchPolicy: hvs.MatchPolicy{
+					MatchType: hvs.MatchTypeAnyOf,
+					Required:  hvs.FlavorRequired,
+				},
+			},
+			{
+				FlavorPart: hvs.FlavorPartSoftware,
+				MatchPolicy: hvs.MatchPolicy{
+					MatchType: hvs.MatchTypeAllOf,
+					Required:  hvs.FlavorRequiredIfDefined,
+				},
+			},
+		},
+	})
+	if err != nil {
+		defaultLog.WithError(err).Error("Error creating Flavorgroup")
+	}
+
+	_, err = store.Create(&hvs.FlavorGroup{
+		ID:   uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e3"),
+		Name: "test",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
 				FlavorPart: hvs.FlavorPartOs,
@@ -223,10 +262,30 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 	}
 	_, err = store.Create(&hvs.FlavorGroup{
 		ID:   uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0d"),
-		Name: "hvs_flavorgroup_test2",
+		Name: "platform_software",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
-				FlavorPart: hvs.FlavorPartHostUnique,
+				FlavorPart: hvs.FlavorPartSoftware,
+				MatchPolicy: hvs.MatchPolicy{
+					MatchType: hvs.MatchTypeAllOf,
+					Required:  hvs.FlavorRequired,
+				},
+			},
+		},
+	})
+	if err != nil {
+		defaultLog.WithError(err).Error("Error creating Flavorgroup")
+	}
+
+	if err != nil {
+		defaultLog.WithError(err).Error("Error creating Flavorgroup")
+	}
+	_, err = store.Create(&hvs.FlavorGroup{
+		ID:   uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0e"),
+		Name: "workload_software",
+		MatchPolicies: []hvs.FlavorMatchPolicy{
+			{
+				FlavorPart: hvs.FlavorPartSoftware,
 				MatchPolicy: hvs.MatchPolicy{
 					MatchType: hvs.MatchTypeAllOf,
 					Required:  hvs.FlavorRequired,

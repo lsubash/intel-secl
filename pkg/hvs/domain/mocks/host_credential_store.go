@@ -76,6 +76,12 @@ func (store *MockHostCredentialStore) FindByHostName(hostName string) (*models.H
 
 // NewMockHostCredentialStore provides empty data for HostCredentials
 func NewMockHostCredentialStore() *MockHostCredentialStore {
-	store := &MockHostCredentialStore{}
+	store := &MockHostCredentialStore{
+		hostCredentialStore: []*models.HostCredential{&models.HostCredential{
+			HostName:   "fakehost",
+			Credential: "u=fakeuser;p=fakepass",
+		},
+		},
+	}
 	return store
 }

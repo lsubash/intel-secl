@@ -7,19 +7,23 @@ package controllers_test
 import (
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
 	smocks "github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust/mocks"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/mocks"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-
-	"github.com/gorilla/mux"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -239,6 +243,44 @@ var _ = Describe("HostController", func() {
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
+
+		Context("Provide a invalid Content-Type in Create request", func() {
+			It("Should not create a new Host - Should return 415", func() {
+				router.Handle("/hosts", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Create))).Methods(http.MethodPost)
+				hostJson := `{
+								"host_name": "localhost3",
+								"connection_string": "intel:https://another.ta.ip.com:1443",
+								"description": "Another Intel Host"
+							}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/hosts",
+					strings.NewReader(hostJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJwt)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
+		Context("Provide a empty body content in Create request", func() {
+			It("Should not create a new Host - Should return 400", func() {
+				router.Handle("/hosts", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Create))).Methods(http.MethodPost)
+
+				req, err := http.NewRequest(http.MethodPost, "/hosts", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
 	})
 
 	// Specs for HTTP Get to "/hosts/{hId}"
@@ -252,6 +294,50 @@ var _ = Describe("HostController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+		Context("Retrieve Host by ID with invalid query parameters", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/hosts/{hId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2?testQuery=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Retrieve Host by ID with invalid query value for getReport", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/hosts/{hId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2?getReport=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Retrieve Host by ID with invalid query value for getTrustStatus", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/hosts/{hId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2?getTrustStatus=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Retrieve Host by ID with invalid query value for getHostStatus", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/hosts/{hId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Retrieve))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2?getHostStatus=test", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Retrieve Host by non-existent ID", func() {
@@ -288,6 +374,64 @@ var _ = Describe("HostController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+		Context("Provide a invalid accept type", func() {
+			It("Should throw unsupported media type error", func() {
+				router.Handle("/hosts/{hId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Update))).Methods(http.MethodPut)
+				hostJson := `{
+								"host_name": "127.0.0.1",
+								"connection_string": "intel:https://127.0.0.1:1443"
+							}`
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2",
+					strings.NewReader(hostJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJwt)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+		Context("Provide a empty body in request", func() {
+			It("Should throw bad request error", func() {
+				router.Handle("/hosts/{hId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Update))).Methods(http.MethodPut)
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2",
+					nil,
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid body", func() {
+			It("Should throw error in decoding the request", func() {
+				router.Handle("/hosts/{hId}", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Update))).Methods(http.MethodPut)
+				hostJson := `{
+								host_name: "127.0.0.1",
+								"connection_string": "intel:https://127.0.0.1:1443"
+							}`
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2",
+					strings.NewReader(hostJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Provide a Host data that contains malformed connection string", func() {
@@ -551,6 +695,62 @@ var _ = Describe("HostController", func() {
 				Expect(w.Code).To(Equal(http.StatusCreated))
 			})
 		})
+		Context("Provide a invalid content type", func() {
+			It("Should return unsupported media error", func() {
+				router.Handle("/hosts/{hId}/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.AddFlavorgroup))).Methods(http.MethodPost)
+				hostJson := `{
+								"flavorgroup_id": "ee37c360-7eae-4250-a677-6ee12adce8e2"
+							}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2/flavorgroups",
+					strings.NewReader(hostJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJwt)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+		Context("Provide a empty body in request", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/hosts/{hId}/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.AddFlavorgroup))).Methods(http.MethodPost)
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2/flavorgroups",
+					nil,
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid uuid in request", func() {
+			It("Should return bad request error", func() {
+				router.Handle("/hosts/{hId}/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.AddFlavorgroup))).Methods(http.MethodPost)
+				hostJson := `{
+								"flavorgroup_id": "00000000-0000-0000-0000-000000000000"
+							}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/hosts/ee37c360-7eae-4250-a677-6ee12adce8e2/flavorgroups",
+					strings.NewReader(hostJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Context("Provide a linked Flavorgroup Id", func() {
 			It("Should fail to create new Host Flavorgroup link", func() {
 				router.Handle("/hosts/{hId}/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.AddFlavorgroup))).Methods(http.MethodPost)
@@ -725,3 +925,194 @@ var _ = Describe("HostController", func() {
 		})
 	})
 })
+
+func TestGenerateConnectionString(t *testing.T) {
+	type args struct {
+		cs       string
+		username string
+		password string
+		hc       domain.HostCredentialStore
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "Valid connection string - linux host",
+			args: args{
+				cs:       "intel:https://fakehost",
+				username: "fakeuser",
+				password: "fakepass",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "intel:https://fakehost;u=fakeuser;p=fakepass",
+			wantErr: false,
+		},
+		{
+			name: "Valid connection string - vmware host",
+			args: args{
+				cs:       "vmware:https://vCenterServer.com:443/sdk;h=trustagent.server.com;u=vCenterUsername;p=vCenterPassword",
+				username: "fakeuser",
+				password: "fakepass",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "vmware:https://vCenterServer.com:443/sdk;h=trustagent.server.com;u=vCenterUsername;p=vCenterPassword",
+			wantErr: false,
+		},
+		{
+			name: "Invalid connection string - invalid hostname provided - vmware host",
+			args: args{
+				cs:       "vmware:https://vCenterServer.com:443/sdk;h=trustagent.server.com;",
+				username: "fakeuser",
+				password: "fakepass",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "Valid connection string - Valid hostname provided - vmware host",
+			args: args{
+				cs:       "vmware:https://vCenterServer.com:443/sdk;h=fakehost;",
+				username: "fakeuser",
+				password: "fakepass",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "vmware:https://vCenterServer.com:443/sdk;h=fakehost;;u=fakeuser;p=fakepass",
+			wantErr: false,
+		},
+		{
+			name: "Invalid connection string -  empty hostname provided - vmware host",
+			args: args{
+				cs:       "vmware:https://vCenterServer.com:443/sdk;h=;",
+				username: "fakeuser",
+				password: "fakepass",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "Invalid connection string - hostname not provided - vmware host",
+			args: args{
+				cs:       "vmware:https://vCenterServer.com:443/sdk;",
+				username: "fakeuser",
+				password: "fakepass",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "Error case - user name not provided",
+			args: args{
+				cs:       "intel:https://fakehost",
+				username: "",
+				password: "fakepass",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "Error case - password not provided",
+			args: args{
+				cs:       "intel:https://fakehost",
+				username: "fakeuser",
+				password: "",
+				hc:       mocks.NewMockHostCredentialStore(),
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, _, err := controllers.GenerateConnectionString(tt.args.cs, tt.args.username, tt.args.password, tt.args.hc)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GenerateConnectionString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GenerateConnectionString() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_PopulateHostInfoFetchCriteria(t *testing.T) {
+	type args struct {
+		params url.Values
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *models.HostInfoFetchCriteria
+		wantErr bool
+	}{
+		{
+			name: "Fetch using all host info criteria",
+			args: args{
+				params: url.Values{"getReport": []string{"true"}, "getTrustStatus": []string{"true"}, "getHostStatus": []string{"true"}},
+			},
+			want: &models.HostInfoFetchCriteria{
+				GetReport:      true,
+				GetTrustStatus: true,
+				GetHostStatus:  true,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := controllers.PopulateHostInfoFetchCriteria(tt.args.params)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PopulateHostInfoFetchCriteria() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PopulateHostInfoFetchCriteria() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewHostController(t *testing.T) {
+	type args struct {
+		hs  domain.HostStore
+		hss domain.HostStatusStore
+		fs  domain.FlavorStore
+		fgs domain.FlavorGroupStore
+		hcs domain.HostCredentialStore
+		htm domain.HostTrustManager
+		hcc domain.HostControllerConfig
+	}
+	tests := []struct {
+		name string
+		args args
+		want *controllers.HostController
+	}{
+		{
+			name: "Initializing controllers",
+			args: args{
+				hs:  nil,
+				hss: nil,
+				fs:  nil,
+				fgs: nil,
+				hcs: nil,
+				htm: nil,
+				hcc: domain.HostControllerConfig{},
+			},
+			want: &controllers.HostController{HCConfig: domain.HostControllerConfig{}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := controllers.NewHostController(tt.args.hs, tt.args.hss, tt.args.fs, tt.args.fgs, tt.args.hcs, tt.args.htm, tt.args.hcc); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewHostController() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

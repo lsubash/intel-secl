@@ -6,10 +6,12 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
-	log "github.com/sirupsen/logrus"
 	"io"
 
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/postgres"
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
@@ -22,7 +24,7 @@ type CreateDefaultFlavor struct {
 	commConfig.DBConfig
 
 	commandName      string
-	flvGroupStorePtr *postgres.FlavorGroupStore
+	flvGroupStorePtr domain.FlavorGroupStore
 }
 
 func (t *CreateDefaultFlavor) Run() error {
@@ -30,6 +32,7 @@ func (t *CreateDefaultFlavor) Run() error {
 	if err != nil {
 		return err
 	}
+
 	for _, fg := range defaultFlavorGroups() {
 		// check if the default flavorgroup is already created
 		existingFG, err := fgStore.Search(&models.FlavorGroupFilterCriteria{
@@ -76,7 +79,7 @@ func (t *CreateDefaultFlavor) SetName(n, e string) {
 	t.commandName = n
 }
 
-func (t *CreateDefaultFlavor) flvGroupStore() (*postgres.FlavorGroupStore, error) {
+func (t *CreateDefaultFlavor) flvGroupStore() (domain.FlavorGroupStore, error) {
 	if t.flvGroupStorePtr == nil {
 		dataStore, err := postgres.NewDataStore(postgres.NewDatabaseConfig(constants.DBTypePostgres, &t.DBConfig))
 		if err != nil {

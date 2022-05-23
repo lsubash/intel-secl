@@ -7,12 +7,13 @@ package mocks
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	commErr "github.com/intel-secl/intel-secl/v5/pkg/lib/common/err"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 var (
@@ -20,6 +21,10 @@ var (
 				"connection_string" :" https://ip1.com:443/sdk;u=username;p=password", "cluster_name" : "Cluster 1"}`
 	esxiCluster2 = `{"id":"f3c6a763-51cd-436c-a828-c2ce6964c823", 
 				"connection_string" :" https://ip2.com:443/sdk;u=username;p=password", "cluster_name" : "Cluster 2"}`
+	esxiCluster3 = `{"id":"a3c6a763-51cd-436c-a828-c2ce6964c823", 
+				"connection_string" :" https://ip2.com:443/sdk;u=username;p=password", "cluster_name" : "Cluster 3"}`
+	esxiCluster4 = `{"id":"b3c6a763-51cd-436c-a828-c2ce6964c823", 
+				"connection_string" :" https://ip2.com:443/sdk;u=username;p=password", "cluster_name" : "Cluster 4"}`
 )
 
 type MockESXiClusterStore struct {
@@ -83,7 +88,12 @@ func (store *MockESXiClusterStore) AddHosts(esxiClusterId uuid.UUID, hostName []
 
 func (store *MockESXiClusterStore) SearchHosts(clusterId uuid.UUID) ([]string, error) {
 	//TODO Implement mock for SearchHosts
-	return nil, nil
+	if clusterId == uuid.MustParse("a3c6a763-51cd-436c-a828-c2ce6964c823") {
+		return []string{"Search_Error"}, nil
+	} else if clusterId == uuid.MustParse("b3c6a763-51cd-436c-a828-c2ce6964c823") {
+		return nil, errors.New("Error in retrieving hosts")
+	}
+	return []string{"localhost1"}, nil
 }
 
 // NewFakeESXiClusterStore loads dummy data into MockESXiClusterStore
@@ -91,12 +101,20 @@ func NewFakeESXiClusterStore() *MockESXiClusterStore {
 	store := &MockESXiClusterStore{}
 
 	// unmarshal the fixed ESXi cluster
-	var ec1, ec2 hvs.ESXiCluster
+	var ec1, ec2, ec3, ec4 hvs.ESXiCluster
 	err := json.Unmarshal([]byte(esxiCluster1), &ec1)
 	if err != nil {
 		defaultLog.WithError(err).Errorf("Error creating Flavor")
 	}
 	err = json.Unmarshal([]byte(esxiCluster2), &ec2)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating Flavor")
+	}
+	err = json.Unmarshal([]byte(esxiCluster3), &ec3)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating Flavor")
+	}
+	err = json.Unmarshal([]byte(esxiCluster4), &ec4)
 	if err != nil {
 		defaultLog.WithError(err).Errorf("Error creating Flavor")
 	}
@@ -109,5 +127,41 @@ func NewFakeESXiClusterStore() *MockESXiClusterStore {
 	if err != nil {
 		defaultLog.WithError(err).Errorf("Error creating ESXI cluster")
 	}
+	_, err = store.Create(&ec3)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating ESXI cluster")
+	}
+	_, err = store.Create(&ec4)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating ESXI cluster")
+	}
+	return store
+}
+
+// NewFakeESXiClusterStore loads dummy data into MockESXiClusterStore
+func NewValidFakeESXiClusterStore() *MockESXiClusterStore {
+	store := &MockESXiClusterStore{}
+
+	// unmarshal the fixed ESXi cluster
+	var ec1, ec2 hvs.ESXiCluster
+	err := json.Unmarshal([]byte(esxiCluster1), &ec1)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating Flavor")
+	}
+	err = json.Unmarshal([]byte(esxiCluster2), &ec2)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating Flavor")
+	}
+
+	// add to store
+	_, err = store.Create(&ec1)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating ESXI cluster")
+	}
+	_, err = store.Create(&ec2)
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating ESXI cluster")
+	}
+
 	return store
 }
