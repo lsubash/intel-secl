@@ -5,7 +5,7 @@
 package common
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -94,7 +94,7 @@ func getNonce(tpmQuoteRequest *taModel.TpmQuoteRequest, assetTag string) ([]byte
 	log.Debugf("common/quote:getNonce() Received HVS nonce '%s', raw[%s]", base64.StdEncoding.EncodeToString(tpmQuoteRequest.Nonce), hex.EncodeToString(tpmQuoteRequest.Nonce))
 
 	// similar to HVS' SHA1.digestOf(hvsNonce).extend(ipBytes)
-	hash := sha1.New()
+	hash := sha256.New()
 	_, err := hash.Write(tpmQuoteRequest.Nonce)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func getNonce(tpmQuoteRequest *taModel.TpmQuoteRequest, assetTag string) ([]byte
 		}
 
 		// similar to HVS' SHA1.digestOf(taNonce).extend(tagBytes)
-		hash = sha1.New()
+		hash = sha256.New()
 		_, err = hash.Write(taNonce)
 		if err != nil {
 			return nil, err

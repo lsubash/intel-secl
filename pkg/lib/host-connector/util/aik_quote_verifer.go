@@ -9,7 +9,6 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
@@ -257,7 +256,7 @@ func VerifyQuoteAndGetPCRDetails(verificationNonce []byte, tpmQuoteInBytes []byt
 func GetVerificationNonce(nonce []byte, quoteResponse taModel.TpmQuoteResponse) (string, error) {
 	log.Trace("util/aik_quote_verifier:GetVerificationNonce() Entering")
 	defer log.Trace("util/aik_quote_verifier:GetVerificationNonce() Leaving")
-	hash := sha1.New()
+	hash := sha256.New()
 	_, err := hash.Write(nonce)
 	if err != nil {
 		return "", err
@@ -274,7 +273,7 @@ func GetVerificationNonce(nonce []byte, quoteResponse taModel.TpmQuoteResponse) 
 			return "", err
 		}
 
-		hash = sha1.New()
+		hash = sha256.New()
 		_, err = hash.Write(taNonce)
 		if err != nil {
 			return "", err

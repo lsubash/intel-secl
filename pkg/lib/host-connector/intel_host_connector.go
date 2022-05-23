@@ -35,7 +35,7 @@ func (ic *IntelConnector) GetHostManifest(pcrList []int) (hvs.HostManifest, erro
 	log.Trace("intel_host_connector:GetHostManifest() Entering")
 	defer log.Trace("intel_host_connector:GetHostManifest() Leaving")
 
-	nonce, err := util.GenerateNonce(20)
+	nonce, err := util.GenerateNonce(32)
 	if err != nil {
 		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifest() Error generating "+
 			"nonce for TPM quote request")

@@ -7,7 +7,7 @@ package k8splugin
 import (
 	"bytes"
 	"crypto"
-	"crypto/sha1"
+	"crypto/sha512"
 	"encoding/json"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/util"
 	"regexp"
@@ -173,12 +173,12 @@ func GetSignedTrustReport(hostList model.Host, k8sDetails *KubernetesDetails, at
 	log.Trace("k8splugin/k8s_plugin:GetSignedTrustReport() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:GetSignedTrustReport() Leaving")
 
-	hash := sha1.New()
+	hash := sha512.New384()
 	_, err := hash.Write(k8sDetails.PublicKeyBytes)
 	if err != nil {
 		return "", errors.Wrap(err, "k8splugin/k8s_plugin:GetSignedTrustReport() : Error in getting digest of Public key")
 	}
-	sha1Hash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+	sha384 := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
 	var token *jwt.Token
 	if attestationType == "HVS" {
@@ -201,7 +201,7 @@ func GetSignedTrustReport(hostList model.Host, k8sDetails *KubernetesDetails, at
 		return "", errors.Errorf("k8splugin/k8s_plugin:GetSignedTrustReport() : AttestationType \"%s\" not supported", attestationType)
 	}
 
-	token.Header["kid"] = sha1Hash
+	token.Header["kid"] = sha384
 
 	// Create the JWT string
 	tokenString, err := token.SignedString(k8sDetails.PrivateKey)

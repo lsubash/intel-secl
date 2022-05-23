@@ -33,7 +33,7 @@ func TestVerifyQuoteAndGetPCRManifest(t *testing.T) {
 	aikCertificate, err := x509.ParseCertificate(aikPem.Bytes)
 	assert.NoError(t, err)
 
-	nonceInBytes, err := base64.StdEncoding.DecodeString("ZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZiA=")
+	nonceInBytes, err := base64.StdEncoding.DecodeString("EsJ0GRgwSvwn9u3ir9NhidLSKVX5oVn2UJKsH4heHuQ=")
 	assert.NoError(t, err)
 	verificationNonce, err := GetVerificationNonce(nonceInBytes, tpmQuoteResponse)
 	assert.NoError(t, err)

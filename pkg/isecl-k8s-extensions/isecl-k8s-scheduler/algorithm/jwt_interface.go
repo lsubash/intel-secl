@@ -8,7 +8,6 @@ package algorithm
 import (
 	"crypto"
 	"crypto/rsa"
-	"crypto/sha1"
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
@@ -63,7 +62,12 @@ func ValidateAnnotationByPublicKey(cipherText string, iHubPubKey []byte) error {
 		return errors.New("Failed to decode PEM block containing public key")
 	}
 
-	keyIdBytes := sha1.Sum(block.Bytes)
+	h := sha512.New384()
+	_, err = h.Write(block.Bytes)
+	if err != nil {
+		return errors.Wrap(err, "Error while calculating the sha384 for ihub public key")
+	}
+	keyIdBytes := h.Sum(nil)
 	keyIdStr := base64.StdEncoding.EncodeToString(keyIdBytes[:])
 
 	var key *rsa.PublicKey
@@ -81,7 +85,7 @@ func ValidateAnnotationByPublicKey(cipherText string, iHubPubKey []byte) error {
 		return errors.Wrap(err, "Error while base64 decoding of signature")
 	}
 
-	h := sha512.New384()
+	h = sha512.New384()
 	_, err = h.Write([]byte(parts[0] + "." + parts[1]))
 	if err != nil {
 		return errors.Wrap(err, "Error while writing data")
