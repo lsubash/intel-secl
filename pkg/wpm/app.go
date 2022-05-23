@@ -6,16 +6,19 @@ package wpm
 
 import (
 	"fmt"
+	"io"
+	"os"
+
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	commLogInt "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/setup"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
-	"github.com/intel-secl/intel-secl/v5/pkg/wpm/ocicrypt-keyprovider"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
+	ocicrypt_keyprovider "github.com/intel-secl/intel-secl/v5/pkg/wpm/ocicrypt-keyprovider"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io"
-	"os"
 )
 
 var errInvalidCmd = errors.New("Invalid input after command")
@@ -144,7 +147,13 @@ func (a *App) Run(args []string) error {
 		if err := a.configureLogs(configuration.Log.EnableStdout, true); err != nil {
 			return err
 		}
-		return ocicrypt_keyprovider.GetKey(os.Stdin)
+		kbsClient, err := util.NewKBSClient(configuration, constants.TrustedCaCertsDir)
+		if err != nil {
+			return err
+		}
+		keyProvider := ocicrypt_keyprovider.NewKeyProvider(os.Stdin, configuration.OcicryptKeyProviderName,
+			configuration.KBSApiUrl, constants.EnvelopePublickeyLocation, constants.EnvelopePrivatekeyLocation, kbsClient)
+		return keyProvider.GetKey()
 	}
 	return nil
 }

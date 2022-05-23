@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package util
@@ -10,9 +10,10 @@ import (
 	"crypto/sha512"
 	"crypto/x509"
 	"encoding/pem"
+	"io/ioutil"
+
 	cLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/pkg/errors"
-	"io/ioutil"
 )
 
 var log = cLog.GetDefaultLogger()

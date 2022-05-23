@@ -6,19 +6,41 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"github.com/containers/ocicrypt/keywrap/keyprovider"
-	cLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
-	ocicrypt_keyprovider "github.com/intel-secl/intel-secl/v5/pkg/model/ocicrypt"
-	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
-	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
-	"github.com/intel-secl/intel-secl/v5/pkg/wpm/util"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/containers/ocicrypt/keywrap/keyprovider"
+	kbsc "github.com/intel-secl/intel-secl/v5/pkg/clients/kbs"
+	cLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
+	ocicrypt_keyprovider "github.com/intel-secl/intel-secl/v5/pkg/model/ocicrypt"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/wpm/util"
+	"github.com/pkg/errors"
 )
 
 var log = cLog.GetDefaultLogger()
+
+type KeyProvider struct {
+	StdInput                   *os.File
+	OcicryptKeyProviderName    string
+	KBSApiUrl                  string
+	EnvelopePublickeyLocation  string
+	EnvelopePrivatekeyLocation string
+	KBSClient                  kbsc.KBSClient
+}
+
+func NewKeyProvider(stdInput *os.File, ocicryptKeyProviderName string, KBSApiURL string,
+	envelopePublickeyLocation string, envelopePrivatekeyLocation string, kbsClient kbsc.KBSClient) *KeyProvider {
+	return &KeyProvider{
+		StdInput:                   stdInput,
+		OcicryptKeyProviderName:    ocicryptKeyProviderName,
+		KBSApiUrl:                  KBSApiURL,
+		EnvelopePublickeyLocation:  envelopePublickeyLocation,
+		EnvelopePrivatekeyLocation: envelopePrivatekeyLocation,
+		KBSClient:                  kbsClient,
+	}
+}
 
 // AES_GCM Helper Functions
 func aesEncrypt(kek []byte, symKey []byte) ([]byte, error) {
@@ -54,33 +76,33 @@ func aesEncrypt(kek []byte, symKey []byte) ([]byte, error) {
 	return json.Marshal(aesp)
 }
 
-func GetKey(stdInput *os.File) error {
+func (keyProvider *KeyProvider) GetKey() error {
 	log.Trace("pkg/wpm/ocicrypt-keyprovider/keyprovider.go:GetKey() Entering")
 	defer log.Trace("pkg/wpm/ocicrypt-keyprovider/keyprovider.go:GetKey() Leaving")
 
+	if keyProvider.KBSClient == nil {
+		return errors.New("Error loading KBSClient")
+	}
+
 	var input keyprovider.KeyProviderKeyWrapProtocolInput
 
-	err := json.NewDecoder(stdInput).Decode(&input)
+	err := json.NewDecoder(keyProvider.StdInput).Decode(&input)
 	if err != nil {
 		return errors.Wrap(err, "Error while decoding KeyProviderKeyWrapProtocolInput")
-	}
-	cfg, err := config.LoadConfiguration()
-	if err != nil {
-		return errors.Wrap(err, "Error loading WPM configuration")
 	}
 	var symKey, wrappedKey []byte
 	var keyUrlString string
 
 	if input.Operation == keyprovider.OpKeyWrap {
 		ecParames := input.KeyWrapParams.Ec.Parameters
-		if _, ok := ecParames[cfg.OcicryptKeyProviderName]; !ok {
+		if _, ok := ecParames[keyProvider.OcicryptKeyProviderName]; !ok {
 			return errors.New("Unsupported protocol")
 		}
 
 		//For default encryption request  skopeo copy --encryption-key provider:isecl  oci:ruby oci:ruby:enc ep["isecl"] = [[]]
 		//For encryption request wjth asset tags  skopeo copy --encryption-key provider:isecl:asset-tag:country:<country-value>  oci:ruby oci:ruby:enc ep["isecl"] = [["assetTag:key:value"]]
 		//For encryption request with existing key id skopeo copy --encryption-key provider:isecl:key-id:<key-id-value>  oci:ruby oci:ruby:enc ep["isecl"] = [["keyId:id"]]
-		params := string(ecParames[cfg.OcicryptKeyProviderName][0])
+		params := string(ecParames[keyProvider.OcicryptKeyProviderName][0])
 		idx := strings.Index(params, ":")
 		if idx > 0 {
 
@@ -91,42 +113,42 @@ func GetKey(stdInput *os.File) error {
 
 			switch encCriteria {
 			case constants.OcicryptKeyProviderAssetTag:
-				wrappedKey, keyUrlString, err = util.FetchKey("", values)
+				wrappedKey, keyUrlString, err = util.FetchKey("", values, keyProvider.KBSApiUrl, keyProvider.EnvelopePublickeyLocation, keyProvider.KBSClient)
 				if err != nil {
 					return errors.Wrap(err, "Error while creating key")
 				}
-				symKey, err = util.UnwrapKey(wrappedKey, constants.EnvelopePrivatekeyLocation)
+				symKey, err = util.UnwrapKey(wrappedKey, keyProvider.EnvelopePrivatekeyLocation)
 				if err != nil {
 					return errors.Wrap(err, "Error while unwrapping the key")
 				}
 			case constants.OcicryptKeyProviderKeyId:
 				keyId := values
-				wrappedKey, keyUrlString, err = util.FetchKey(keyId, "")
+				wrappedKey, keyUrlString, err = util.FetchKey(keyId, "", keyProvider.KBSApiUrl, keyProvider.EnvelopePublickeyLocation, keyProvider.KBSClient)
 				if err != nil {
 					return errors.Wrap(err, "Error while fetching key")
 				}
-				symKey, err = util.UnwrapKey(wrappedKey, constants.EnvelopePrivatekeyLocation)
+				symKey, err = util.UnwrapKey(wrappedKey, keyProvider.EnvelopePrivatekeyLocation)
 				if err != nil {
 					return errors.Wrap(err, "Error while unwrapping the key")
 				}
 			default:
 				log.Info("Encryption criteria not provided, falling back to default criteria with creating new key for every layer")
-				wrappedKey, keyUrlString, err = util.FetchKey("", "")
+				wrappedKey, keyUrlString, err = util.FetchKey("", "", keyProvider.KBSApiUrl, keyProvider.EnvelopePublickeyLocation, keyProvider.KBSClient)
 				if err != nil {
 					return errors.Wrap(err, "Error while creating key")
 				}
-				symKey, err = util.UnwrapKey(wrappedKey, constants.EnvelopePrivatekeyLocation)
+				symKey, err = util.UnwrapKey(wrappedKey, keyProvider.EnvelopePrivatekeyLocation)
 				if err != nil {
 					return errors.Wrap(err, "Error while unwrapping the key")
 				}
 			}
 		} else {
 			log.Info("Encryption criteria not provided, falling back to default criteria with creating new key for every layer")
-			wrappedKey, keyUrlString, err = util.FetchKey("", "")
+			wrappedKey, keyUrlString, err = util.FetchKey("", "", keyProvider.KBSApiUrl, keyProvider.EnvelopePublickeyLocation, keyProvider.KBSClient)
 			if err != nil {
 				return errors.Wrap(err, "Error while creating key")
 			}
-			symKey, err = util.UnwrapKey(wrappedKey, constants.EnvelopePrivatekeyLocation)
+			symKey, err = util.UnwrapKey(wrappedKey, keyProvider.EnvelopePrivatekeyLocation)
 			if err != nil {
 				return errors.Wrap(err, "Error while unwrapping the key")
 			}

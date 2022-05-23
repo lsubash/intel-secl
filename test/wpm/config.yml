@@ -1,0 +1,16 @@
+aas-base-url: https://127.0.0.1:8444/aas/v1
+cms-base-url: https://127.0.0.1:8445/cms/v1/
+cms-tls-cert-sha384: 93cd2be32eb12asdadasdasxcasfasfadwqjasxkdsfvxcasdb9ab9dcee17561975695cee21648e819c0f8
+kbs-base-url: https://127.0.0.1:9443/kbs/v1/
+wpm:
+    service-username: bUTwFTJ1r8
+    service-password: 7WSstCfRuL
+log:
+    max-length: 1500
+    enable-stdout: false
+    level: info
+flavor-signing:
+    cert-file: test-signing.pem
+    key-file: test-signing.key
+    common-name: WPM TEST Certificate
+ocicrypt-keyprovider-name: isecl

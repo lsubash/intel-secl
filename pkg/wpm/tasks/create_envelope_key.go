@@ -10,10 +10,11 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
+
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type CreateEnvelopeKey struct {
@@ -112,6 +113,10 @@ func (ek CreateEnvelopeKey) Run() error {
 	return nil
 }
 
-func (ek CreateEnvelopeKey) PrintHelp(w io.Writer) {}
+func (ek CreateEnvelopeKey) PrintHelp(w io.Writer) {
+	return
+}
 
-func (ek CreateEnvelopeKey) SetName(n, e string) {}
+func (ek CreateEnvelopeKey) SetName(n, e string) {
+	return
+}
