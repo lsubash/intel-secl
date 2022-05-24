@@ -25,7 +25,7 @@ const (
 	ServerReadTimeout       = "server.read-timeout"
 	ServerReadHeaderTimeout = "server.read-header-timeout"
 	ServerWriteTimeout      = "server.write-timeout"
-	ServerIdleTimeout       = "server.idle.timeout"
+	ServerIdleTimeout       = "server.idle-timeout"
 	ServerMaxHeaderBytes    = "server.max-header-bytes"
 
 	DbVendor            = "db.vendor"

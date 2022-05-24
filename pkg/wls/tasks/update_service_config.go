@@ -67,9 +67,9 @@ func (uc UpdateServiceConfig) Run() error {
 	(*uc.AppConfig).AASApiUrl = uc.AASApiUrl
 	(*uc.AppConfig).HVSApiUrl = uc.HVSApiUrl
 	(*uc.AppConfig).Log = commConfig.LogConfig{
-		MaxLength:    viper.GetInt("log-max-length"),
-		EnableStdout: viper.GetBool("log-enable-stdout"),
-		Level:        viper.GetString("log-level"),
+		MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+		EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
+		Level:        viper.GetString(commConfig.LogLevel),
 	}
 
 	if uc.ServerConfig.Port < 1024 ||

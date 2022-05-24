@@ -15,53 +15,55 @@ import (
 
 // This func sets the default values for viper keys
 func init() {
-	viper.SetDefault("poll-interval-minutes", constants.PollingIntervalMinutes)
+	viper.SetDefault(config.PollIntervalMinutes, constants.PollingIntervalMinutes)
 
 	//Set default values for TLS
-	viper.SetDefault("tls-cert-file", constants.ConfigDir+constants.DefaultTLSCertFile)
-	viper.SetDefault("tls-key-file", constants.ConfigDir+constants.DefaultTLSKeyFile)
-	viper.SetDefault("tls-common-name", constants.DefaultIHUBTlsCn)
-	viper.SetDefault("tls-san-list", constants.DefaultTLSSan)
+	viper.SetDefault(commConfig.TlsCertFile, constants.ConfigDir+constants.DefaultTLSCertFile)
+	viper.SetDefault(commConfig.TlsKeyFile, constants.ConfigDir+constants.DefaultTLSKeyFile)
+	viper.SetDefault(commConfig.TlsCommonName, constants.DefaultIHUBTlsCn)
+	viper.SetDefault(commConfig.TlsSanList, constants.DefaultTLSSan)
 
 	//Set default values for log
-	viper.SetDefault("log-max-length", constants.DefaultLogEntryMaxlength)
-	viper.SetDefault("log-enable-stdout", true)
-	viper.SetDefault("log-level", "info")
+	viper.SetDefault(commConfig.LogMaxLength, constants.DefaultLogEntryMaxlength)
+	viper.SetDefault(commConfig.LogEnableStdout, true)
+	viper.SetDefault(commConfig.LogLevel, constants.DefaultLogLevel)
 }
 
 func defaultConfig() *config.Configuration {
 	loadAlias()
 	return &config.Configuration{
-		AASBaseUrl:          viper.GetString("aas-base-url"),
-		CMSBaseURL:          viper.GetString("cms-base-url"),
-		CmsTlsCertDigest:    viper.GetString("cms-tls-cert-sha384"),
-		PollIntervalMinutes: viper.GetInt("poll-interval-minutes"),
+		AASBaseUrl:          viper.GetString(commConfig.AasBaseUrl),
+		CMSBaseURL:          viper.GetString(commConfig.CmsBaseUrl),
+		CmsTlsCertDigest:    viper.GetString(commConfig.CmsTlsCertSha384),
+		PollIntervalMinutes: viper.GetInt(config.PollIntervalMinutes),
 		IHUB: commConfig.ServiceConfig{
-			Username: viper.GetString("ihub-service-username"),
-			Password: viper.GetString("ihub-service-password"),
+			Username: viper.GetString(config.IhubServiceUsername),
+			Password: viper.GetString(config.IhubServicePassword),
 		},
 		TLS: commConfig.TLSCertConfig{
-			CertFile:   viper.GetString("tls-cert-file"),
-			KeyFile:    viper.GetString("tls-key-file"),
-			CommonName: viper.GetString("tls-common-name"),
-			SANList:    viper.GetString("tls-san-list"),
+			CertFile:   viper.GetString(commConfig.TlsCertFile),
+			KeyFile:    viper.GetString(commConfig.TlsKeyFile),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
+			SANList:    viper.GetString(commConfig.TlsSanList),
 		},
 		AttestationService: config.AttestationConfig{
-			HVSBaseURL: viper.GetString("hvs-base-url"),
-			FDSBaseURL: viper.GetString("fds-base-url"),
+			HVSBaseURL: viper.GetString(config.HvsBaseUrl),
+			FDSBaseURL: viper.GetString(config.FdsBaseUrl),
 		},
 		Log: commConfig.LogConfig{
-			MaxLength:    viper.GetInt("log-max-length"),
-			Level:        viper.GetString("log-level"),
-			EnableStdout: viper.GetBool("log-enable-stdout"),
+			MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+			Level:        viper.GetString(commConfig.LogLevel),
+			EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
 		},
 	}
 }
 
 func loadAlias() {
 	alias := map[string]string{
-		"tls-san-list": "SAN_LIST",
-		"aas-base-url": "AAS_API_URL",
+		commConfig.TlsSanList: "SAN_LIST",
+		commConfig.AasBaseUrl: "AAS_API_URL",
+		config.HvsBaseUrl:     "HVS_BASE_URL",
+		config.FdsBaseUrl:     "FDS_BASE_URL",
 	}
 	for k, v := range alias {
 		if env := os.Getenv(v); env != "" {

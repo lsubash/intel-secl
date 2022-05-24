@@ -7,12 +7,13 @@ package wls
 import (
 	"crypto/x509/pkix"
 	"fmt"
-	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"os"
 	"strings"
 
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
+	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/wls/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/tasks"
 	"github.com/pkg/errors"
@@ -106,7 +107,7 @@ func (a *App) setup(args []string) error {
 func (a *App) setupTaskRunner() (*setup.Runner, error) {
 
 	loadAlias()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	if a.configuration() == nil {
@@ -120,45 +121,45 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
 		CaCertDirPath: constants.TrustedCaCertsDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		TlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 	})
 	runner.AddTask("download-cert-tls", "tls", &setup.DownloadCert{
-		KeyFile:      viper.GetString("tls-key-file"),
-		CertFile:     viper.GetString("tls-cert-file"),
+		KeyFile:      viper.GetString(commConfig.TlsKeyFile),
+		CertFile:     viper.GetString(commConfig.TlsCertFile),
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
-			CommonName: viper.GetString("tls-common-name"),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
 		},
-		SanList:       viper.GetString("tls-san-list"),
+		SanList:       viper.GetString(commConfig.TlsSanList),
 		CertType:      "tls",
 		CaCertDirPath: constants.TrustedCaCertsDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		BearerToken:   viper.GetString(commConfig.BearerToken),
 	})
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ServiceConfig: commConfig.ServiceConfig{
-			Username: viper.GetString("wls-service-username"),
-			Password: viper.GetString("wls-service-password"),
+			Username: viper.GetString(config.WlsServiceUsername),
+			Password: viper.GetString(config.WlsServicePassword),
 		},
-		AASApiUrl: viper.GetString("aas-base-url"),
-		HVSApiUrl: viper.GetString("hvs-base-url"),
+		AASApiUrl: viper.GetString(commConfig.AasBaseUrl),
+		HVSApiUrl: viper.GetString(config.HvsBaseUrl),
 		ServerConfig: commConfig.ServerConfig{
-			Port:              viper.GetInt("server-port"),
-			ReadTimeout:       viper.GetDuration("server-read-timeout"),
-			ReadHeaderTimeout: viper.GetDuration("server-read-header-timeout"),
-			WriteTimeout:      viper.GetDuration("server-write-timeout"),
-			IdleTimeout:       viper.GetDuration("server-idle-timeout"),
-			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
+			Port:              viper.GetInt(commConfig.ServerPort),
+			ReadTimeout:       viper.GetDuration(commConfig.ServerReadTimeout),
+			ReadHeaderTimeout: viper.GetDuration(commConfig.ServerReadHeaderTimeout),
+			WriteTimeout:      viper.GetDuration(commConfig.ServerWriteTimeout),
+			IdleTimeout:       viper.GetDuration(commConfig.ServerIdleTimeout),
+			MaxHeaderBytes:    viper.GetInt(commConfig.ServerMaxHeaderBytes),
 		},
 		DefaultPort:   constants.DefaultWLSListenerPort,
 		AppConfig:     &a.Config,
 		ConsoleWriter: a.consoleWriter(),
 	})
 	runner.AddTask("download-saml-ca-cert", "", &tasks.DownloadSamlCaCert{
-		HvsApiUrl:         viper.GetString("hvs-base-url"),
+		HvsApiUrl:         viper.GetString(config.HvsBaseUrl),
 		ConsoleWriter:     a.consoleWriter(),
 		SamlCertPath:      constants.SamlCaCertFilePath,
 		TrustedCaCertsDir: constants.TrustedCaCertsDir,

@@ -109,7 +109,7 @@ func (a *App) setup(args []string) error {
 func (a *App) setupTaskRunner() (*setup.Runner, error) {
 
 	loadAlias()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	if a.configuration() == nil {
@@ -126,46 +126,46 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
 		CaCertDirPath: constants.TrustedCAsStoreDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		TlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 	})
 	runner.AddTask("download-cert-tls", "tls", &setup.DownloadCert{
-		KeyFile:      viper.GetString("tls-key-file"),
-		CertFile:     viper.GetString("tls-cert-file"),
+		KeyFile:      viper.GetString(commConfig.TlsKeyFile),
+		CertFile:     viper.GetString(commConfig.TlsCertFile),
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
-			CommonName: viper.GetString("tls-common-name"),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
 		},
-		SanList:       viper.GetString("tls-san-list"),
+		SanList:       viper.GetString(commConfig.TlsSanList),
 		CertType:      "tls",
 		CaCertDirPath: constants.TrustedCAsStoreDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		BearerToken:   viper.GetString(commConfig.BearerToken),
 	})
 	dbConf := commConfig.DBConfig{
-		Vendor:   viper.GetString("db-vendor"),
-		Host:     viper.GetString("db-host"),
-		Port:     viper.GetInt("db-port"),
-		DBName:   viper.GetString("db-name"),
-		Username: viper.GetString("db-username"),
-		Password: viper.GetString("db-password"),
-		SSLMode:  viper.GetString("db-ssl-mode"),
-		SSLCert:  viper.GetString("db-ssl-cert"),
+		Vendor:   viper.GetString(commConfig.DbVendor),
+		Host:     viper.GetString(commConfig.DbHost),
+		Port:     viper.GetInt(commConfig.DbPort),
+		DBName:   viper.GetString(commConfig.DbName),
+		Username: viper.GetString(commConfig.DbUsername),
+		Password: viper.GetString(commConfig.DbPassword),
+		SSLMode:  viper.GetString(commConfig.DbSslMode),
+		SSLCert:  viper.GetString(commConfig.DbSslCert),
 
-		ConnectionRetryAttempts: viper.GetInt("db-conn-retry-attempts"),
-		ConnectionRetryTime:     viper.GetInt("db-conn-retry-time"),
+		ConnectionRetryAttempts: viper.GetInt(commConfig.DbConnRetryAttempts),
+		ConnectionRetryTime:     viper.GetInt(commConfig.DbConnRetryTime),
 	}
 	runner.AddTask("database", "", &tasks.Database{
 		DBConfigPtr:   &a.Config.DB,
 		DBConfig:      dbConf,
-		SSLCertSource: viper.GetString("db-ssl-cert-source"),
+		SSLCertSource: viper.GetString(commConfig.DbSslCertSource),
 		ConsoleWriter: a.consoleWriter(),
 	})
 	serviceConfig := config.AASConfig{
-		Username: viper.GetString("aas-service-username"),
-		Password: viper.GetString("aas-service-password"),
+		Username: viper.GetString(config.AasServiceUsername),
+		Password: viper.GetString(config.AasServicePassword),
 	}
 	runner.AddTask("admin", "", tasks.Admin{
 		ServiceConfigPtr: &a.Config.AAS,
@@ -191,25 +191,25 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
-			CommonName: viper.GetString("jwt-cert-common-name"),
+			CommonName: viper.GetString(config.JwtCertCommonName),
 		},
 		CertType:      "JWT-Signing",
 		CaCertDirPath: constants.TrustedCAsStoreDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		BearerToken:   viper.GetString(commConfig.BearerToken),
 	})
 
 	runner.AddTask("create-credentials", "", &tasks.CreateCredentials{
-		CreateCredentials: viper.GetBool("create-credentials"),
+		CreateCredentials: viper.GetBool(config.CreateCredentials),
 		NatsConfig: config.NatsConfig{
 			Operator: config.NatsEntityInfo{
-				Name:               viper.GetString("nats-operator-name"),
-				CredentialValidity: viper.GetDuration("nats-operator-credential-validity"),
+				Name:               viper.GetString(config.NatsOperatorName),
+				CredentialValidity: viper.GetDuration(config.NatsOperatorCredentialValidity),
 			},
 			Account: config.NatsEntityInfo{
-				Name:               viper.GetString("nats-account-name"),
-				CredentialValidity: viper.GetDuration("nats-account-credential-validity"),
+				Name:               viper.GetString(config.NatsAccountName),
+				CredentialValidity: viper.GetDuration(config.NatsAccountCredentialValidity),
 			},
 		},
 		ConsoleWriter:            a.consoleWriter(),
@@ -221,12 +221,12 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: a.consoleWriter(),
 		ServerConfig: commConfig.ServerConfig{
-			Port:              viper.GetInt("server-port"),
-			ReadTimeout:       viper.GetDuration("server-read-timeout"),
-			ReadHeaderTimeout: viper.GetDuration("server-read-header-timeout"),
-			WriteTimeout:      viper.GetDuration("server-write-timeout"),
-			IdleTimeout:       viper.GetDuration("server-idle-timeout"),
-			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
+			Port:              viper.GetInt(commConfig.ServerPort),
+			ReadTimeout:       viper.GetDuration(commConfig.ServerReadTimeout),
+			ReadHeaderTimeout: viper.GetDuration(commConfig.ServerReadHeaderTimeout),
+			WriteTimeout:      viper.GetDuration(commConfig.ServerWriteTimeout),
+			IdleTimeout:       viper.GetDuration(commConfig.ServerIdleTimeout),
+			MaxHeaderBytes:    viper.GetInt(commConfig.ServerMaxHeaderBytes),
 		},
 		DefaultPort: constants.DefaultPort,
 		AppConfig:   &a.Config,

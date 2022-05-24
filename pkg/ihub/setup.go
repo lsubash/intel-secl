@@ -7,14 +7,15 @@ package ihub
 import (
 	"crypto/x509/pkix"
 	"fmt"
-	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
-	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/utils"
 	"strings"
 
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/tasks"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
+	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -106,7 +107,7 @@ func (app *App) setup(args []string) error {
 // a helper function for setting up the task runner
 func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	loadAlias()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	if app.configuration() == nil {
@@ -120,8 +121,8 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
 		CaCertDirPath: app.configDir() + constants.TrustedCAsStoreDir,
 		ConsoleWriter: app.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		TlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 	})
 
 	runner.AddTask("download-cert-tls", "tls", &setup.DownloadCert{
@@ -130,14 +131,14 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
-			CommonName: viper.GetString("tls-common-name"),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
 		},
-		SanList:       viper.GetString("tls-san-list"),
+		SanList:       viper.GetString(commConfig.TlsSanList),
 		CertType:      "tls",
 		CaCertDirPath: app.configDir() + constants.TrustedCAsStoreDir,
 		ConsoleWriter: app.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		BearerToken:   viper.GetString(commConfig.BearerToken),
 	})
 
 	runner.AddTask("attestation-service-connection", "", &tasks.AttestationServiceConnection{
@@ -166,10 +167,10 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: app.consoleWriter(),
 		ServiceConfig: commConfig.ServiceConfig{
-			Username: viper.GetString("ihub-service-username"),
-			Password: viper.GetString("ihub-service-password"),
+			Username: viper.GetString(config.IhubServiceUsername),
+			Password: viper.GetString(config.IhubServicePassword),
 		},
-		AASApiUrl: viper.GetString("aas-base-url"),
+		AASApiUrl: viper.GetString(commConfig.AasBaseUrl),
 		AppConfig: &app.Config,
 	})
 

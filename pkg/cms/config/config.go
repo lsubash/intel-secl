@@ -14,15 +14,32 @@ import (
 	"os"
 )
 
+// Constants for viper variable names. Will be used to set
+// default values as well as to get each value
+const (
+	CACertValidity     = "cms-ca.cert-validity"
+	CACertOrganization = "cms-ca.organization"
+	CACertLocality     = "cms-ca.locality"
+	CACertProvince     = "cms-ca.province"
+	CACertCountry      = "cms-ca.country"
+
+	TlsSanList        = "san-list"
+	TokenDurationMins = "token-duration-mins"
+
+	AasJwtCn  = "aas-jwt-cn"
+	AasTlsCn  = "aas-tls-cn"
+	AasTlsSan = "aas-tls-san"
+)
+
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
 type Configuration struct {
-	Log               commConfig.LogConfig    `yaml:"log" mapstructure:"log"`
+	Log               commConfig.LogConfig    `yaml:"log"`
 	AASApiUrl         string                  `yaml:"aas-base-url" mapstructure:"aas-base-url"`
-	CACert            CACertConfig            `yaml:"cms-ca" mapstructure:"cms-ca"`
+	CACert            CACertConfig            `yaml:"cms-ca"`
 	TlsCertDigest     string                  `yaml:"tls-cert-digest" mapstructure:"tls-cert-digest"`
 	TlsSanList        string                  `yaml:"san-list" mapstructure:"san-list"`
 	TokenDurationMins int                     `yaml:"token-duration-mins" mapstructure:"token-duration-mins"`
-	Server            commConfig.ServerConfig `yaml:"server" mapstructure:"server"`
+	Server            commConfig.ServerConfig `yaml:"server"`
 	AasJwtCn          string                  `yaml:"aas-jwt-cn" mapstructure:"aas-jwt-cn"`
 	AasTlsCn          string                  `yaml:"aas-tls-cn" mapstructure:"aas-tls-cn"`
 	AasTlsSan         string                  `yaml:"aas-tls-san" mapstructure:"aas-tls-san"`

@@ -37,11 +37,6 @@ var envHelp = map[string]string{
 func (uc UpdateServiceConfig) Run() error {
 	log.Trace("tasks/update_config:Run() Entering")
 	defer log.Trace("tasks/update_config:Run() Leaving")
-	(*uc.AppConfig).Log = commConfig.LogConfig{
-		MaxLength:    viper.GetInt("log-max-length"),
-		EnableStdout: viper.GetBool("log-enable-stdout"),
-		Level:        viper.GetString("log-level"),
-	}
 	if uc.ServiceConfig.Username == "" {
 		return errors.New("IHUB configuration not provided: IHUB_SERVICE_USERNAME is not set")
 	}
@@ -55,11 +50,10 @@ func (uc UpdateServiceConfig) Run() error {
 	(*uc.AppConfig).IHUB = uc.ServiceConfig
 	(*uc.AppConfig).AASBaseUrl = uc.AASApiUrl
 	(*uc.AppConfig).Log = commConfig.LogConfig{
-		MaxLength:    viper.GetInt("log-max-length"),
-		EnableStdout: viper.GetBool("log-enable-stdout"),
-		Level:        viper.GetString("log-level"),
+		MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+		EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
+		Level:        viper.GetString(commConfig.LogLevel),
 	}
-
 	return nil
 }
 

@@ -44,14 +44,14 @@ func (uc UpdateServiceConfig) Run() error {
 	defer log.Trace("tasks/update_config:Run() Leaving")
 
 	(*uc.AppConfig).Log = commConfig.LogConfig{
-		MaxLength:    viper.GetInt("log-max-length"),
-		EnableStdout: viper.GetBool("log-enable-stdout"),
-		Level:        viper.GetString("log-level"),
+		MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+		EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
+		Level:        viper.GetString(commConfig.LogLevel),
 	}
 
-	(*uc.AppConfig).AASApiUrl = viper.GetString("aas-base-url")
+	(*uc.AppConfig).AASApiUrl = viper.GetString(commConfig.AasBaseUrl)
 
-	(*uc.AppConfig).TokenDurationMins = viper.GetInt("token-duration-mins")
+	(*uc.AppConfig).TokenDurationMins = viper.GetInt(config.TokenDurationMins)
 	if uc.ServerConfig.Port < 1024 ||
 		uc.ServerConfig.Port > 65535 {
 		uc.ServerConfig.Port = uc.DefaultPort

@@ -40,6 +40,7 @@ const (
 	DefaultK8SCertFile          = "apiserver.crt"
 	RegexNonStandardChar        = "[^a-zA-Z0-9]"
 	DefaultLogEntryMaxlength    = 1500
+	DefaultLogLevel             = "info"
 	MaxArguments                = 5
 )
 

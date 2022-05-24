@@ -24,6 +24,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	CertFile      = ".cert-file"
+	KeyFile       = ".key-file"
+	CommonName    = ".common-name"
+	Issuer        = ".issuer"
+	ValidityYears = ".validity-years"
+	SanList       = ".san-list"
+)
+
 // input string slice should start with setup
 func (a *App) setup(args []string) error {
 	if len(args) < 2 {
@@ -112,7 +121,7 @@ func (a *App) setup(args []string) error {
 func (a *App) setupTaskRunner() (*setup.Runner, error) {
 
 	loadAlias()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	if a.configuration() == nil {
@@ -125,23 +134,23 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.ErrorWriter = a.errorWriter()
 
 	dbConf := commConfig.DBConfig{
-		Vendor:   viper.GetString("db-vendor"),
-		Host:     viper.GetString("db-host"),
-		Port:     viper.GetInt("db-port"),
-		DBName:   viper.GetString("db-name"),
-		Username: viper.GetString("db-username"),
-		Password: viper.GetString("db-password"),
-		SSLMode:  viper.GetString("db-ssl-mode"),
-		SSLCert:  viper.GetString("db-ssl-cert"),
+		Vendor:   viper.GetString(commConfig.DbVendor),
+		Host:     viper.GetString(commConfig.DbHost),
+		Port:     viper.GetInt(commConfig.DbPort),
+		DBName:   viper.GetString(commConfig.DbName),
+		Username: viper.GetString(commConfig.DbUsername),
+		Password: viper.GetString(commConfig.DbPassword),
+		SSLMode:  viper.GetString(commConfig.DbSslMode),
+		SSLCert:  viper.GetString(commConfig.DbSslCert),
 
-		ConnectionRetryAttempts: viper.GetInt("db-conn-retry-attempts"),
-		ConnectionRetryTime:     viper.GetInt("db-conn-retry-time"),
+		ConnectionRetryAttempts: viper.GetInt(commConfig.DbConnRetryAttempts),
+		ConnectionRetryTime:     viper.GetInt(commConfig.DbConnRetryTime),
 	}
 
 	runner.AddTask("database", "", &tasks.DBSetup{
 		DBConfigPtr:   &a.Config.DB,
 		DBConfig:      dbConf,
-		SSLCertSource: viper.GetString("db-ssl-cert-source"),
+		SSLCertSource: viper.GetString(commConfig.DbSslCertSource),
 		ConsoleWriter: a.consoleWriter(),
 	})
 	if reflect.DeepEqual(a.Config.DB, commConfig.DBConfig{}) {
@@ -156,41 +165,41 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
 		CaCertDirPath: constants.TrustedRootCACertsDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		TlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 	})
 	runner.AddTask("download-cert-tls", "tls", &setup.DownloadCert{
-		KeyFile:      viper.GetString("tls-key-file"),
-		CertFile:     viper.GetString("tls-cert-file"),
+		KeyFile:      viper.GetString(commConfig.TlsKeyFile),
+		CertFile:     viper.GetString(commConfig.TlsCertFile),
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
-			CommonName: viper.GetString("tls-common-name"),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
 		},
-		SanList:       viper.GetString("tls-san-list"),
+		SanList:       viper.GetString(commConfig.TlsSanList),
 		CertType:      "tls",
 		CaCertDirPath: constants.TrustedRootCACertsDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		BearerToken:   viper.GetString(commConfig.BearerToken),
 	})
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ServiceConfig: commConfig.ServiceConfig{
-			Username: viper.GetString("hvs-service-username"),
-			Password: viper.GetString("hvs-service-password"),
+			Username: viper.GetString(config.HvsServiceUsername),
+			Password: viper.GetString(config.HvsServicePassword),
 		},
-		AASApiUrl: viper.GetString("aas-base-url"),
+		AASApiUrl: viper.GetString(commConfig.AasBaseUrl),
 		ServerConfig: commConfig.ServerConfig{
-			Port:              viper.GetInt("server-port"),
-			ReadTimeout:       viper.GetDuration("server-read-timeout"),
-			ReadHeaderTimeout: viper.GetDuration("server-read-header-timeout"),
-			WriteTimeout:      viper.GetDuration("server-write-timeout"),
-			IdleTimeout:       viper.GetDuration("server-idle-timeout"),
-			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
+			Port:              viper.GetInt(commConfig.ServerPort),
+			ReadTimeout:       viper.GetDuration(commConfig.ServerReadTimeout),
+			ReadHeaderTimeout: viper.GetDuration(commConfig.ServerReadHeaderTimeout),
+			WriteTimeout:      viper.GetDuration(commConfig.ServerWriteTimeout),
+			IdleTimeout:       viper.GetDuration(commConfig.ServerIdleTimeout),
+			MaxHeaderBytes:    viper.GetInt(commConfig.ServerMaxHeaderBytes),
 		},
 		DefaultPort:   constants.DefaultHVSListenerPort,
 		AppConfig:     &a.Config,
-		NatServers:    viper.GetString("nats-servers"),
+		NatServers:    viper.GetString(config.NatsServers),
 		ConsoleWriter: a.consoleWriter(),
 	})
 	runner.AddTask("download-cert-saml", "saml", a.downloadCertTask("saml"))
@@ -204,10 +213,10 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		Directory: constants.DefaultFlavorTemplatesDirectory,
 	})
 
-	if strings.TrimSpace(viper.GetString("nats-servers")) != "" || len(a.Config.NATS.Servers) != 0 {
+	if strings.TrimSpace(viper.GetString(config.NatsServers)) != "" || len(a.Config.NATS.Servers) != 0 {
 		runner.AddTask("download-credential", "", &setup.DownloadCredential{
-			AasBaseUrL:         viper.GetString("aas-base-url"),
-			BearerToken:        viper.GetString("bearer-token"),
+			AasBaseUrL:         viper.GetString(commConfig.AasBaseUrl),
+			BearerToken:        viper.GetString(commConfig.BearerToken),
 			CaCertDirPath:      constants.TrustedRootCACertsDir,
 			CredentialFilePath: constants.NatsCredentials,
 			CreateCredentialReq: types.CreateCredentialsReq{
@@ -222,37 +231,44 @@ func (a *App) downloadCertTask(certType string) setup.Task {
 	certTypeReq := certType
 	var updateConfig *commConfig.SigningCertConfig
 	var updateSAMLConfig *config.SAMLConfig
+	var keyFile, certFile, commonName string
 	switch certType {
 	case "saml":
 		updateConfig = &a.configuration().SAML.CommonConfig
 		updateSAMLConfig = &a.configuration().SAML
 		certTypeReq = "signing"
+		keyFile = viper.GetString(certType + ".common" + KeyFile)
+		certFile = viper.GetString(certType + ".common" + CertFile)
+		commonName = viper.GetString(certType + ".common" + CommonName)
 	case "flavor-signing":
 		updateConfig = &a.configuration().FlavorSigning
+		keyFile = viper.GetString(certType + KeyFile)
+		certFile = viper.GetString(certType + CertFile)
+		commonName = viper.GetString(certType + CommonName)
 	}
 	if updateConfig != nil {
-		updateConfig.KeyFile = viper.GetString(certType + "-key-file")
-		updateConfig.CertFile = viper.GetString(certType + "-cert-file")
-		updateConfig.CommonName = viper.GetString(certType + "-common-name")
+		updateConfig.KeyFile = keyFile
+		updateConfig.CertFile = certFile
+		updateConfig.CommonName = commonName
 	}
 	if updateSAMLConfig != nil && updateConfig != nil {
 		updateSAMLConfig.CommonConfig = *updateConfig
-		updateSAMLConfig.ValiditySeconds = viper.GetInt("saml-validity-seconds")
-		updateSAMLConfig.Issuer = viper.GetString("saml-issuer-name")
+		updateSAMLConfig.ValiditySeconds = viper.GetInt(config.SamlValiditySeconds)
+		updateSAMLConfig.Issuer = viper.GetString(config.SamlIssuer)
 	}
 	return &setup.DownloadCert{
-		KeyFile:      viper.GetString(certType + "-key-file"),
-		CertFile:     viper.GetString(certType + "-cert-file"),
+		KeyFile:      keyFile,
+		CertFile:     certFile,
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
-			CommonName: viper.GetString(certType + "-common-name"),
+			CommonName: commonName,
 		},
 		CertType:      certTypeReq,
 		CaCertDirPath: constants.TrustedRootCACertsDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		BearerToken:   viper.GetString("bearer-token"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		BearerToken:   viper.GetString(commConfig.BearerToken),
 	}
 }
 
@@ -267,19 +283,19 @@ func (a *App) selfSignTask(name string) setup.Task {
 		updateConfig = &a.configuration().TagCA
 	}
 	if updateConfig != nil {
-		updateConfig.KeyFile = viper.GetString(name + "-key-file")
-		updateConfig.CertFile = viper.GetString(name + "-cert-file")
-		updateConfig.CommonName = viper.GetString(name + "-common-name")
-		updateConfig.Issuer = viper.GetString(name + "-issuer")
-		updateConfig.ValidityDays = viper.GetInt(name + "-validity-years")
+		updateConfig.KeyFile = viper.GetString(name + KeyFile)
+		updateConfig.CertFile = viper.GetString(name + CertFile)
+		updateConfig.CommonName = viper.GetString(name + CommonName)
+		updateConfig.Issuer = viper.GetString(name + Issuer)
+		updateConfig.ValidityDays = viper.GetInt(name + ValidityYears)
 	}
 	return &setup.SelfSignedCert{
-		CertFile:     viper.GetString(name + "-cert-file"),
-		KeyFile:      viper.GetString(name + "-key-file"),
-		CommonName:   viper.GetString(name + "-common-name"),
-		Issuer:       viper.GetString(name + "-issuer"),
-		SANList:      viper.GetString(name + "-san-list"),
-		ValidityDays: viper.GetInt(name + "-validity-years"),
+		CertFile:     viper.GetString(name + CertFile),
+		KeyFile:      viper.GetString(name + KeyFile),
+		CommonName:   viper.GetString(name + CommonName),
+		Issuer:       viper.GetString(name + Issuer),
+		SANList:      viper.GetString(name + SanList),
+		ValidityDays: viper.GetInt(name + ValidityYears),
 
 		ConsoleWriter: a.consoleWriter(),
 	}

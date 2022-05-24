@@ -14,14 +14,22 @@ import (
 	"os"
 )
 
+const (
+	OciCryptKeyProviderName = "ocicrypt-keyprovider-name"
+	KbsBaseUrl              = "kbs-base-url"
+
+	WpmServiceUsername = "wpm.service-username"
+	WpmServicePassword = "wpm.service-password"
+)
+
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
 type Configuration struct {
 	AASApiUrl               string                   `yaml:"aas-base-url" mapstructure:"aas-base-url"`
 	CMSBaseURL              string                   `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	CmsTlsCertDigest        string                   `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 	KBSApiUrl               string                   `yaml:"kbs-base-url" mapstructure:"kbs-base-url"`
-	WPM                     commConfig.ServiceConfig `yaml:"wpm" mapstructure:"wpm"`
-	Log                     commConfig.LogConfig     `yaml:"log" mapstructure:"log"`
+	WPM                     commConfig.ServiceConfig `yaml:"wpm"`
+	Log                     commConfig.LogConfig     `yaml:"log"`
 	OcicryptKeyProviderName string                   `yaml:"ocicrypt-keyprovider-name" mapstructure:"ocicrypt-keyprovider-name"`
 }
 

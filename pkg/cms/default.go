@@ -16,70 +16,59 @@ import (
 // this func sets the default values for viper keys
 func init() {
 	// set default values for tls
-	viper.SetDefault("tls-cert-file", constants.TLSCertPath)
-	viper.SetDefault("tls-key-file", constants.TLSKeyPath)
-	viper.SetDefault("san-list", constants.DefaultTlsSan)
+	viper.SetDefault(config.TlsSanList, constants.DefaultTlsSan)
 
 	// set default values for log
-	viper.SetDefault("log-max-length", constants.DefaultLogEntryMaxlength)
-	viper.SetDefault("log-enable-stdout", true)
-	viper.SetDefault("log-level", "info")
+	viper.SetDefault(commConfig.LogMaxLength, constants.DefaultLogEntryMaxlength)
+	viper.SetDefault(commConfig.LogEnableStdout, true)
+	viper.SetDefault(commConfig.LogLevel, "info")
 
 	// set default values for server
-	viper.SetDefault("server-port", constants.DefaultPort)
-	viper.SetDefault("server-read-timeout", constants.DefaultReadTimeout)
-	viper.SetDefault("server-read-header-timeout", constants.DefaultReadHeaderTimeout)
-	viper.SetDefault("server-write-timeout", constants.DefaultWriteTimeout)
-	viper.SetDefault("server-idle-timeout", constants.DefaultIdleTimeout)
-	viper.SetDefault("server-max-header-bytes", constants.DefaultMaxHeaderBytes)
+	viper.SetDefault(commConfig.ServerPort, constants.DefaultPort)
+	viper.SetDefault(commConfig.ServerReadTimeout, constants.DefaultReadTimeout)
+	viper.SetDefault(commConfig.ServerReadHeaderTimeout, constants.DefaultReadHeaderTimeout)
+	viper.SetDefault(commConfig.ServerWriteTimeout, constants.DefaultWriteTimeout)
+	viper.SetDefault(commConfig.ServerIdleTimeout, constants.DefaultIdleTimeout)
+	viper.SetDefault(commConfig.ServerMaxHeaderBytes, constants.DefaultMaxHeaderBytes)
 
-	viper.SetDefault("cms-ca-cert-validity", constants.DefaultCACertValidity)
-	viper.SetDefault("cms-ca-organization", constants.DefaultOrganization)
-	viper.SetDefault("cms-ca-locality", constants.DefaultLocality)
-	viper.SetDefault("cms-ca-province", constants.DefaultProvince)
-	viper.SetDefault("cms-ca-country", constants.DefaultCountry)
+	viper.SetDefault(config.CACertValidity, constants.DefaultCACertValidity)
+	viper.SetDefault(config.CACertOrganization, constants.DefaultOrganization)
+	viper.SetDefault(config.CACertLocality, constants.DefaultLocality)
+	viper.SetDefault(config.CACertProvince, constants.DefaultProvince)
+	viper.SetDefault(config.CACertCountry, constants.DefaultCountry)
 
-	viper.SetDefault("aas-tls-cn", constants.DefaultAasTlsCn)
-	viper.SetDefault("aas-jwt-cn", constants.DefaultAasJwtCn)
-	viper.SetDefault("aas-tls-san", constants.DefaultTlsSan)
+	viper.SetDefault(config.AasTlsCn, constants.DefaultAasTlsCn)
+	viper.SetDefault(config.AasJwtCn, constants.DefaultAasJwtCn)
+	viper.SetDefault(config.AasTlsSan, constants.DefaultTlsSan)
 
-	viper.SetDefault("token-duration-mins", constants.DefaultTokenDurationMins)
+	viper.SetDefault(config.TokenDurationMins, constants.DefaultTokenDurationMins)
 }
 
 func defaultConfig() *config.Configuration {
 	loadAlias()
 	return &config.Configuration{
-		AASApiUrl: viper.GetString("aas-base-url"),
 		Log: commConfig.LogConfig{
-			MaxLength:    viper.GetInt("log-max-length"),
-			EnableStdout: viper.GetBool("log-enable-stdout"),
-			Level:        viper.GetString("log-level"),
+			MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+			EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
+			Level:        viper.GetString(commConfig.LogLevel),
 		},
-		CACert: config.CACertConfig{
-			Validity:     viper.GetInt("cms-ca-cert-validity"),
-			Organization: viper.GetString("cms-ca-organization"),
-			Locality:     viper.GetString("cms-ca-locality"),
-			Province:     viper.GetString("cms-ca-province"),
-			Country:      viper.GetString("cms-ca-country"),
-		},
-		AasJwtCn:          viper.GetString("aas-jwt-cn"),
-		AasTlsCn:          viper.GetString("aas-tls-cn"),
-		AasTlsSan:         viper.GetString("aas-tls-san"),
-		TlsSanList:        viper.GetString("san-list"),
-		TokenDurationMins: viper.GetInt("token-duration-mins"),
+		AasJwtCn:   viper.GetString(config.AasJwtCn),
+		AasTlsCn:   viper.GetString(config.AasTlsCn),
+		AasTlsSan:  viper.GetString(config.AasTlsSan),
+		TlsSanList: viper.GetString(config.TlsSanList),
 	}
 }
 
 func loadAlias() {
 	alias := map[string]string{
-		"server-port":                "CMS_PORT",
-		"server-read-timeout":        "CMS_SERVER_READ_TIMEOUT",
-		"server-read-header-timeout": "CMS_SERVER_READ_HEADER_TIMEOUT",
-		"server-write-timeout":       "CMS_SERVER_WRITE_TIMEOUT",
-		"server-idle-timeout":        "CMS_SERVER_IDLE_TIMEOUT",
-		"server-max-header-bytes":    "CMS_SERVER_MAX_HEADER_BYTES",
-		"log-enable-stdout":          "CMS_ENABLE_CONSOLE_LOG",
-		"aas-base-url":               "AAS_API_URL",
+		commConfig.ServerPort:              "CMS_PORT",
+		commConfig.ServerReadTimeout:       "CMS_SERVER_READ_TIMEOUT",
+		commConfig.ServerReadHeaderTimeout: "CMS_SERVER_READ_HEADER_TIMEOUT",
+		commConfig.ServerWriteTimeout:      "CMS_SERVER_WRITE_TIMEOUT",
+		commConfig.ServerIdleTimeout:       "CMS_SERVER_IDLE_TIMEOUT",
+		commConfig.ServerMaxHeaderBytes:    "CMS_SERVER_MAX_HEADER_BYTES",
+		commConfig.LogEnableStdout:         "CMS_ENABLE_CONSOLE_LOG",
+		commConfig.AasBaseUrl:              "AAS_API_URL",
 	}
 	for k, v := range alias {
 		if env := os.Getenv(v); env != "" {

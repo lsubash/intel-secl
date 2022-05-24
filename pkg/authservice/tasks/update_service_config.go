@@ -51,33 +51,33 @@ func (uc UpdateServiceConfig) Run() error {
 	defaultLog.Trace("tasks/update_service_config:Run() Entering")
 	defer defaultLog.Trace("tasks/update_service_config:Run() Leaving")
 	(*uc.AppConfig).Log = commConfig.LogConfig{
-		MaxLength:    viper.GetInt("log-max-length"),
-		EnableStdout: viper.GetBool("log-enable-stdout"),
-		Level:        viper.GetString("log-level"),
+		MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+		EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
+		Level:        viper.GetString(commConfig.LogLevel),
 	}
 
 	(*uc.AppConfig).JWT = config.JWT{
-		IncludeKid:        viper.GetBool("jwt-include-kid"),
-		TokenDurationMins: viper.GetInt("jwt-token-duration-mins"),
-		CertCommonName:    viper.GetString("jwt-cert-common-name"),
+		IncludeKid:        viper.GetBool(config.JwtIncludeKid),
+		TokenDurationMins: viper.GetInt(config.JwtTokenDurationMins),
+		CertCommonName:    viper.GetString(config.JwtCertCommonName),
 	}
 
 	(*uc.AppConfig).AuthDefender = config.AuthDefender{
-		MaxAttempts:         viper.GetInt("auth-defender-max-attempts"),
-		IntervalMins:        viper.GetInt("auth-defender-interval-mins"),
-		LockoutDurationMins: viper.GetInt("auth-defender-lockout-duration-mins"),
+		MaxAttempts:         viper.GetInt(config.AuthDefenderMaxAttempts),
+		IntervalMins:        viper.GetInt(config.AuthDefenderIntervalMins),
+		LockoutDurationMins: viper.GetInt(config.AuthDefenderLockoutDurationMins),
 	}
 
 	(*uc.AppConfig).Nats = config.NatsConfig{
 		Operator: config.NatsEntityInfo{
-			Name:               viper.GetString("nats-operator-name"),
-			CredentialValidity: viper.GetDuration("nats-operator-credential-validity"),
+			Name:               viper.GetString(config.NatsOperatorName),
+			CredentialValidity: viper.GetDuration(config.NatsOperatorCredentialValidity),
 		},
 		Account: config.NatsEntityInfo{
-			Name:               viper.GetString("nats-account-name"),
-			CredentialValidity: viper.GetDuration("nats-account-credential-validity"),
+			Name:               viper.GetString(config.NatsAccountName),
+			CredentialValidity: viper.GetDuration(config.NatsAccountCredentialValidity),
 		},
-		UserCredentialValidity: viper.GetDuration("nats-user-credential-validity"),
+		UserCredentialValidity: viper.GetDuration(config.NatsUserCredentialValidity),
 	}
 
 	if uc.ServerConfig.Port < 1024 ||

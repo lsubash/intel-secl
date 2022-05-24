@@ -17,21 +17,65 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	HvsServiceUsername = "hvs.service-username"
+	HvsServicePassword = "hvs.service-password"
+
+	SamlCertFile        = "saml.common.cert-file"
+	SamlKeyFile         = "saml.common.key-file"
+	SamlCommonName      = "saml.common.common-name"
+	SamlIssuer          = "saml.issuer"
+	SamlValiditySeconds = "saml.validity-seconds"
+
+	FlavorSigningCertFile   = "flavor-signing.cert-file"
+	FlavorSigningKeyFile    = "flavor-signing.key-file"
+	FlavorSigningCommonName = "flavor-signing.common-name"
+
+	PrivacyCaCertFile      = "privacy-ca.cert-file"
+	PrivacyCaKeyFile       = "privacy-ca.key-file"
+	PrivacyCaCommonName    = "privacy-ca.common-name"
+	PrivacyCaIssuer        = "privacy-ca.issuer"
+	PrivacyCaValidityYears = "privacy-ca.validity-years"
+
+	EndorsementCaCertFile      = "endorsement-ca.cert-file"
+	EndorsementCaKeyFile       = "endorsement-ca.key-file"
+	EndorsementCaCommonName    = "endorsement-ca.common-name"
+	EndorsementCaIssuer        = "endorsement-ca.issuer"
+	EndorsementCaValidityYears = "endorsement-ca.validity-years"
+
+	TagCaCertFile      = "tag-ca.cert-file"
+	TagCaKeyFile       = "tag-ca.key-file"
+	TagCaCommonName    = "tag-ca.common-name"
+	TagCaIssuer        = "tag-ca.issuer"
+	TagCaValidityYears = "tag-ca.validity-years"
+
+	AuditLogMaxRowCount = "audit-log.max-row-count"
+	AuditLogNumRotated  = "audit-log.number-rotated"
+	AuditLogBufferSize  = "audit-log.buffer-size"
+
+	AikCertValidity   = "aik-certificate-validity-years"
+	DataEncryptionKey = "data-encryption-key"
+	NatsServers       = "nats.servers"
+
+	RequireEKCertForHostProvision  = "require-ek-cert-for-host-provision"
+	VerifyQuoteForHostRegistration = "verify-quote-for-host-registration"
+)
+
 type Configuration struct {
 	AASApiUrl        string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
 	CMSBaseURL       string `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	CmsTlsCertDigest string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 
-	HVS      commConfig.ServiceConfig `yaml:"hvs" mapstructure:"hvs"`
-	AuditLog AuditLogConfig           `yaml:"audit-log" mapstructure:"audit-log"`
+	HVS      commConfig.ServiceConfig `yaml:"hvs"`
+	AuditLog AuditLogConfig           `yaml:"audit-log"`
 
-	TLS           commConfig.TLSCertConfig     `yaml:"tls" mapstructure:"tls"`
-	SAML          SAMLConfig                   `yaml:"saml" mapstructure:"saml"`
-	FlavorSigning commConfig.SigningCertConfig `yaml:"flavor-signing" mapstructure:"flavor-signing"`
+	TLS           commConfig.TLSCertConfig     `yaml:"tls"`
+	SAML          SAMLConfig                   `yaml:"saml"`
+	FlavorSigning commConfig.SigningCertConfig `yaml:"flavor-signing"`
 
-	PrivacyCA     commConfig.SelfSignedCertConfig `yaml:"privacy-ca" mapstructure:"privacy-ca"`
-	EndorsementCA commConfig.SelfSignedCertConfig `yaml:"endorsement-ca" mapstructure:"endorsement-ca"`
-	TagCA         commConfig.SelfSignedCertConfig `yaml:"tag-ca" mapstructure:"tag-ca"`
+	PrivacyCA     commConfig.SelfSignedCertConfig `yaml:"privacy-ca"`
+	EndorsementCA commConfig.SelfSignedCertConfig `yaml:"endorsement-ca"`
+	TagCA         commConfig.SelfSignedCertConfig `yaml:"tag-ca"`
 
 	Dek             string `yaml:"data-encryption-key" mapstructure:"data-encryption-key"`
 	AikCertValidity int    `yaml:"aik-certificate-validity-years" mapstructure:"aik-certificate-validity-years"`
@@ -39,13 +83,13 @@ type Configuration struct {
 	RequireEKCertForHostProvision  bool `yaml:"require-ek-cert-for-host-provision" mapstructure:"require-ek-cert-for-host-provision"`
 	VerifyQuoteForHostRegistration bool `yaml:"verify-quote-for-host-registration" mapstructure:"verify-quote-for-host-registration"`
 
-	Server                   commConfig.ServerConfig `yaml:"server" mapstructure:"server"`
-	Log                      commConfig.LogConfig    `yaml:"log" mapstructure:"log"`
-	DB                       commConfig.DBConfig     `yaml:"db" mapstructure:"db"`
-	HRRS                     hrrs.HRRSConfig         `yaml:"hrrs" mapstructure:"hrrs"`
-	FVS                      FVSConfig               `yaml:"fvs" mapstructure:"fvs"`
-	VCSS                     VCSSConfig              `yaml:"vcss" mapstructure:"vcss"`
-	NATS                     NatsConfig              `yaml:"nats" mapstructure:"nats"`
+	Server                   commConfig.ServerConfig `yaml:"server"`
+	Log                      commConfig.LogConfig    `yaml:"log"`
+	DB                       commConfig.DBConfig     `yaml:"db"`
+	HRRS                     hrrs.HRRSConfig         `yaml:"hrrs"`
+	FVS                      FVSConfig               `yaml:"fvs"`
+	VCSS                     VCSSConfig              `yaml:"vcss"`
+	NATS                     NatsConfig              `yaml:"nats"`
 	EnableEkCertRevokeChecks bool                    `yaml:"enable-ekcert-revoke-check" mapstructure:"enable-ekcert-revoke-check"`
 }
 

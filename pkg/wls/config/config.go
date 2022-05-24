@@ -14,16 +14,22 @@ import (
 	"os"
 )
 
+const (
+	HvsBaseUrl         = "hvs-base-url"
+	WlsServiceUsername = "wls.service-username"
+	WlsServicePassword = "wls.service-password"
+)
+
 type Configuration struct {
 	AASApiUrl        string                   `yaml:"aas-base-url" mapstructure:"aas-base-url"`
 	CMSBaseURL       string                   `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	CmsTlsCertDigest string                   `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 	HVSApiUrl        string                   `yaml:"hvs-base-url" mapstructure:"hvs-base-url"`
-	WLS              commConfig.ServiceConfig `yaml:"wls" mapstructure:"wls"`
-	TLS              commConfig.TLSCertConfig `yaml:"tls" mapstructure:"tls"`
+	WLS              commConfig.ServiceConfig `yaml:"wls"`
+	TLS              commConfig.TLSCertConfig `yaml:"tls"`
 	KeyCacheSeconds  int                      `yaml:"key-cache-seconds" mapstructure:"key-cache-seconds"`
-	Server           commConfig.ServerConfig  `yaml:"server" mapstructure:"server"`
-	Log              commConfig.LogConfig     `yaml:"log" mapstructure:"log"`
+	Server           commConfig.ServerConfig  `yaml:"server"`
+	Log              commConfig.LogConfig     `yaml:"log"`
 }
 
 // this function sets the configure file name and type

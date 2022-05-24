@@ -6,6 +6,7 @@ package wpm
 
 import (
 	"fmt"
+	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/tasks"
@@ -94,7 +95,7 @@ func (a *App) setup(args []string) error {
 func (a *App) setupTaskRunner() (*setup.Runner, error) {
 
 	loadAlias()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	if a.configuration() == nil {
@@ -107,8 +108,8 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("download-ca-cert", "", &setup.DownloadCMSCert{
 		CaCertDirPath: constants.TrustedCaCertsDir,
 		ConsoleWriter: a.consoleWriter(),
-		CmsBaseURL:    viper.GetString("cms-base-url"),
-		TlsCertDigest: viper.GetString("cms-tls-cert-sha384"),
+		CmsBaseURL:    viper.GetString(commConfig.CmsBaseUrl),
+		TlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 	})
 	runner.AddTask("create-envelope-key", "", &tasks.CreateEnvelopeKey{
 		EnvelopePrivatekeyLocation: constants.EnvelopePrivatekeyLocation,

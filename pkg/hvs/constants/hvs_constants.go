@@ -198,4 +198,3 @@ const (
 
 // EnableEKCertRevokeCheck
 const EnableEKCertRevokeCheck = "enable-ekcert-revoke-check"
-const RequireEKCertForHostProvision = "require-ek-cert-for-host-provision"

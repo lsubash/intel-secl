@@ -15,6 +15,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	PollIntervalMinutes = "poll-interval-minutes"
+	IhubServiceUsername = "ihub.service-username"
+	IhubServicePassword = "ihub.service-password"
+	HvsBaseUrl          = "attestation-service.hvs-base-url"
+	FdsBaseUrl          = "attestation-service.fds-base-url"
+)
+
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
 type Configuration struct {
 	AASBaseUrl          string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
@@ -22,11 +30,11 @@ type Configuration struct {
 	CmsTlsCertDigest    string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 	PollIntervalMinutes int    `yaml:"poll-interval-minutes" mapstructure:"poll-interval-minutes"`
 
-	Log                commConfig.LogConfig     `yaml:"log" mapstructure:"log"`
-	IHUB               commConfig.ServiceConfig `yaml:"ihub" mapstructure:"ihub"`
-	AttestationService AttestationConfig        `yaml:"attestation-service" mapstructure:"attestation-service"`
-	Endpoint           Endpoint                 `yaml:"end-point" mapstructure:"end-point"`
-	TLS                commConfig.TLSCertConfig `yaml:"tls" mapstructure:"tls"`
+	Log                commConfig.LogConfig     `yaml:"log"`
+	IHUB               commConfig.ServiceConfig `yaml:"ihub"`
+	AttestationService AttestationConfig        `yaml:"attestation-service"`
+	Endpoint           Endpoint                 `yaml:"end-point"`
+	TLS                commConfig.TLSCertConfig `yaml:"tls"`
 }
 
 type AttestationConfig struct {

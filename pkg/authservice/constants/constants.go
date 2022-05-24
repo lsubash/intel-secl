@@ -49,6 +49,7 @@ const (
 	DefaultAasJwtDurationMins      = 120
 	DefaultJwtValidateCacheKeyMins = 60
 	DefaultLogEntryMaxLength       = 1500
+	DefaultLogLevel                = "info"
 )
 
 const (

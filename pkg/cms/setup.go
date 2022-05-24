@@ -107,7 +107,7 @@ func (a *App) setup(args []string) error {
 func (a *App) setupTaskRunner() (*setup.Runner, error) {
 
 	loadAlias()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	if a.configuration() == nil {
@@ -123,11 +123,11 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		ConsoleWriter:   a.consoleWriter(),
 		CACertConfigPtr: &a.Config.CACert,
 		CACertConfig: config.CACertConfig{
-			Validity:     viper.GetInt("cms-ca-cert-validity"),
-			Organization: viper.GetString("cms-ca-organization"),
-			Locality:     viper.GetString("cms-ca-locality"),
-			Province:     viper.GetString("cms-ca-province"),
-			Country:      viper.GetString("cms-ca-country"),
+			Validity:     viper.GetInt(config.CACertValidity),
+			Organization: viper.GetString(config.CACertOrganization),
+			Locality:     viper.GetString(config.CACertLocality),
+			Province:     viper.GetString(config.CACertProvince),
+			Country:      viper.GetString(config.CACertCountry),
 		},
 		SerialNumberPath: constants.SerialNumberPath,
 		CaAttribs:        constants.CertStoreMap,
@@ -159,15 +159,15 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: a.consoleWriter(),
 		ServerConfig: commConfig.ServerConfig{
-			Port:              viper.GetInt("server-port"),
-			ReadTimeout:       viper.GetDuration("server-read-timeout"),
-			ReadHeaderTimeout: viper.GetDuration("server-read-header-timeout"),
-			WriteTimeout:      viper.GetDuration("server-write-timeout"),
-			IdleTimeout:       viper.GetDuration("server-idle-timeout"),
-			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
+			Port:              viper.GetInt(commConfig.ServerPort),
+			ReadTimeout:       viper.GetDuration(commConfig.ServerReadTimeout),
+			ReadHeaderTimeout: viper.GetDuration(commConfig.ServerReadHeaderTimeout),
+			WriteTimeout:      viper.GetDuration(commConfig.ServerWriteTimeout),
+			IdleTimeout:       viper.GetDuration(commConfig.ServerIdleTimeout),
+			MaxHeaderBytes:    viper.GetInt(commConfig.ServerMaxHeaderBytes),
 		},
 		DefaultPort: constants.DefaultPort,
-		AASApiUrl:   viper.GetString("aas-base-url"),
+		AASApiUrl:   viper.GetString(commConfig.AasBaseUrl),
 		AppConfig:   &a.Config,
 	})
 

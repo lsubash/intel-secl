@@ -17,80 +17,76 @@ import (
 // this func sets the default values for viper keys
 func init() {
 	// set default values for tls
-	viper.SetDefault("tls-cert-file", constants.DefaultTLSCertFile)
-	viper.SetDefault("tls-key-file", constants.DefaultTLSKeyFile)
-	viper.SetDefault("tls-common-name", constants.DefaultHvsTlsCn)
-	viper.SetDefault("tls-san-list", constants.DefaultHvsTlsSan)
+	viper.SetDefault(commConfig.TlsCertFile, constants.DefaultTLSCertFile)
+	viper.SetDefault(commConfig.TlsKeyFile, constants.DefaultTLSKeyFile)
+	viper.SetDefault(commConfig.TlsCommonName, constants.DefaultHvsTlsCn)
+	viper.SetDefault(commConfig.TlsSanList, constants.DefaultHvsTlsSan)
 
 	// set default values for all other certs
-	viper.SetDefault("saml-cert-file", constants.SAMLCertFile)
-	viper.SetDefault("saml-key-file", constants.SAMLKeyFile)
-	viper.SetDefault("saml-common-name", constants.DefaultSAMLCN)
-	viper.SetDefault("saml-issuer-name", constants.DefaultSAMLCertIssuer)
-	viper.SetDefault("saml-validity-seconds", constants.DefaultSAMLCertValidity)
+	viper.SetDefault(config.SamlCertFile, constants.SAMLCertFile)
+	viper.SetDefault(config.SamlKeyFile, constants.SAMLKeyFile)
+	viper.SetDefault(config.SamlCommonName, constants.DefaultSAMLCN)
+	viper.SetDefault(config.SamlIssuer, constants.DefaultSAMLCertIssuer)
+	viper.SetDefault(config.SamlValiditySeconds, constants.DefaultSAMLCertValidity)
 
-	viper.SetDefault("flavor-signing-cert-file", constants.FlavorSigningCertFile)
-	viper.SetDefault("flavor-signing-key-file", constants.FlavorSigningKeyFile)
-	viper.SetDefault("flavor-signing-common-name", constants.DefaultFlavorSigningCN)
+	viper.SetDefault(config.FlavorSigningCertFile, constants.FlavorSigningCertFile)
+	viper.SetDefault(config.FlavorSigningKeyFile, constants.FlavorSigningKeyFile)
+	viper.SetDefault(config.FlavorSigningCommonName, constants.DefaultFlavorSigningCN)
 
-	viper.SetDefault("privacy-ca-cert-file", constants.PrivacyCACertFile)
-	viper.SetDefault("privacy-ca-key-file", constants.PrivacyCAKeyFile)
-	viper.SetDefault("privacy-ca-common-name", constants.DefaultPrivacyCACN)
-	viper.SetDefault("privacy-ca-issuer", constants.DefaultSelfSignedCertIssuer)
-	viper.SetDefault("privacy-ca-validity-years", constants.DefaultSelfSignedCertValidityYears)
+	viper.SetDefault(config.PrivacyCaCertFile, constants.PrivacyCACertFile)
+	viper.SetDefault(config.PrivacyCaKeyFile, constants.PrivacyCAKeyFile)
+	viper.SetDefault(config.PrivacyCaCommonName, constants.DefaultPrivacyCACN)
+	viper.SetDefault(config.PrivacyCaIssuer, constants.DefaultSelfSignedCertIssuer)
+	viper.SetDefault(config.PrivacyCaValidityYears, constants.DefaultSelfSignedCertValidityYears)
 
-	viper.SetDefault("endorsement-ca-cert-file", constants.SelfEndorsementCACertFile)
-	viper.SetDefault("endorsement-ca-key-file", constants.EndorsementCAKeyFile)
-	viper.SetDefault("endorsement-ca-common-name", constants.DefaultEndorsementCACN)
-	viper.SetDefault("endorsement-ca-issuer", constants.DefaultSelfSignedCertIssuer)
-	viper.SetDefault("endorsement-ca-validity-years", constants.DefaultSelfSignedCertValidityYears)
+	viper.SetDefault(config.EndorsementCaCertFile, constants.SelfEndorsementCACertFile)
+	viper.SetDefault(config.EndorsementCaKeyFile, constants.EndorsementCAKeyFile)
+	viper.SetDefault(config.EndorsementCaCommonName, constants.DefaultEndorsementCACN)
+	viper.SetDefault(config.EndorsementCaIssuer, constants.DefaultSelfSignedCertIssuer)
+	viper.SetDefault(config.EndorsementCaValidityYears, constants.DefaultSelfSignedCertValidityYears)
 
-	viper.SetDefault("tag-ca-cert-file", constants.TagCACertFile)
-	viper.SetDefault("tag-ca-key-file", constants.TagCAKeyFile)
-	viper.SetDefault("tag-ca-common-name", constants.DefaultTagCACN)
-	viper.SetDefault("tag-ca-issuer", constants.DefaultSelfSignedCertIssuer)
-	viper.SetDefault("tag-ca-validity-years", constants.DefaultSelfSignedCertValidityYears)
+	viper.SetDefault(config.TagCaCertFile, constants.TagCACertFile)
+	viper.SetDefault(config.TagCaKeyFile, constants.TagCAKeyFile)
+	viper.SetDefault(config.TagCaCommonName, constants.DefaultTagCACN)
+	viper.SetDefault(config.TagCaIssuer, constants.DefaultSelfSignedCertIssuer)
+	viper.SetDefault(config.TagCaValidityYears, constants.DefaultSelfSignedCertValidityYears)
 
 	// set default values for log
-	viper.SetDefault("log-max-length", constants.DefaultLogEntryMaxlength)
-	viper.SetDefault("log-enable-stdout", true)
-	viper.SetDefault("log-level", "info")
+	viper.SetDefault(commConfig.LogMaxLength, constants.DefaultLogEntryMaxlength)
+	viper.SetDefault(commConfig.LogEnableStdout, true)
+	viper.SetDefault(commConfig.LogLevel, "info")
 
 	// set default for audit log
-	viper.SetDefault("audit-log-max-row-count", constants.DefaultMaxRowCount)
-	viper.SetDefault("audit-log-number-rotated", constants.DefaultNumRotated)
-	viper.SetDefault("audit-log-buffer-size", constants.DefaultChannelBufferSize)
-
-	// set default values for privacy ca
-	viper.SetDefault("privacy-ca-cert-validity", constants.DefaultPrivacyCACertValidity)
-	viper.SetDefault("privacy-ca-id-issuer", constants.DefaultPrivacyCaIdentityIssuer)
+	viper.SetDefault(config.AuditLogMaxRowCount, constants.DefaultMaxRowCount)
+	viper.SetDefault(config.AuditLogNumRotated, constants.DefaultNumRotated)
+	viper.SetDefault(config.AuditLogBufferSize, constants.DefaultChannelBufferSize)
 
 	// set default value for aik
-	viper.SetDefault("aik-certificate-validity-years", constants.DefaultAikCertificateValidity)
+	viper.SetDefault(config.AikCertValidity, constants.DefaultAikCertificateValidity)
 
 	//set default value for Aik Provisioning On EKCert Check
-	viper.SetDefault("require-ek-cert-for-host-provision", false)
+	viper.SetDefault(config.RequireEKCertForHostProvision, false)
 
 	//set default value for Quote Verify For Registration
-	viper.SetDefault("verify-quote-for-host-registration", false)
+	viper.SetDefault(config.VerifyQuoteForHostRegistration, false)
 
 	// set default values for server
-	viper.SetDefault("server-port", constants.DefaultHVSListenerPort)
-	viper.SetDefault("server-read-timeout", constants.DefaultReadTimeout)
-	viper.SetDefault("server-read-header-timeout", constants.DefaultReadHeaderTimeout)
-	viper.SetDefault("server-write-timeout", constants.DefaultWriteTimeout)
-	viper.SetDefault("server-idle-timeout", constants.DefaultIdleTimeout)
-	viper.SetDefault("server-max-header-bytes", constants.DefaultMaxHeaderBytes)
+	viper.SetDefault(commConfig.ServerPort, constants.DefaultHVSListenerPort)
+	viper.SetDefault(commConfig.ServerReadTimeout, constants.DefaultReadTimeout)
+	viper.SetDefault(commConfig.ServerReadHeaderTimeout, constants.DefaultReadHeaderTimeout)
+	viper.SetDefault(commConfig.ServerWriteTimeout, constants.DefaultWriteTimeout)
+	viper.SetDefault(commConfig.ServerIdleTimeout, constants.DefaultIdleTimeout)
+	viper.SetDefault(commConfig.ServerMaxHeaderBytes, constants.DefaultMaxHeaderBytes)
 
 	// set default for database ssl certificate
-	viper.SetDefault("db-vendor", "postgres")
-	viper.SetDefault("db-host", "localhost")
-	viper.SetDefault("db-port", "5432")
-	viper.SetDefault("db-name", "hvs_db")
-	viper.SetDefault("db-ssl-mode", constants.SslModeVerifyFull)
-	viper.SetDefault("db-ssl-cert", constants.ConfigDir+"hvsdbsslcert.pem")
-	viper.SetDefault("db-conn-retry-attempts", constants.DefaultDbConnRetryAttempts)
-	viper.SetDefault("db-conn-retry-time", constants.DefaultDbConnRetryTime)
+	viper.SetDefault(commConfig.DbVendor, "postgres")
+	viper.SetDefault(commConfig.DbHost, "localhost")
+	viper.SetDefault(commConfig.DbPort, "5432")
+	viper.SetDefault(commConfig.DbName, "hvs_db")
+	viper.SetDefault(commConfig.DbSslMode, constants.SslModeVerifyFull)
+	viper.SetDefault(commConfig.DbSslCert, constants.ConfigDir+"hvsdbsslcert.pem")
+	viper.SetDefault(commConfig.DbConnRetryAttempts, constants.DefaultDbConnRetryAttempts)
+	viper.SetDefault(commConfig.DbConnRetryTime, constants.DefaultDbConnRetryTime)
 
 	// set default for fvs
 	viper.SetDefault(constants.FvsNumberOfVerifiers, constants.DefaultFvsNumberOfVerifiers)
@@ -107,67 +103,67 @@ func defaultConfig() *config.Configuration {
 	// support old hvs env
 	loadAlias()
 	return &config.Configuration{
-		AASApiUrl:                      viper.GetString("aas-base-url"),
-		CMSBaseURL:                     viper.GetString("cms-base-url"),
-		CmsTlsCertDigest:               viper.GetString("cms-tls-cert-sha384"),
-		Dek:                            viper.GetString("data-encryption-key"),
-		AikCertValidity:                viper.GetInt("aik-certificate-validity-years"),
-		RequireEKCertForHostProvision:  viper.GetBool("require-ek-cert-for-host-provision"),
-		VerifyQuoteForHostRegistration: viper.GetBool("verify-quote-for-host-registration"),
+		AASApiUrl:                      viper.GetString(commConfig.AasBaseUrl),
+		CMSBaseURL:                     viper.GetString(commConfig.CmsBaseUrl),
+		CmsTlsCertDigest:               viper.GetString(commConfig.CmsTlsCertSha384),
+		Dek:                            viper.GetString(config.DataEncryptionKey),
+		AikCertValidity:                viper.GetInt(config.AikCertValidity),
+		RequireEKCertForHostProvision:  viper.GetBool(config.RequireEKCertForHostProvision),
+		VerifyQuoteForHostRegistration: viper.GetBool(config.VerifyQuoteForHostRegistration),
 		AuditLog: config.AuditLogConfig{
-			MaxRowCount: viper.GetInt("audit-log-max-row-count"),
-			NumRotated:  viper.GetInt("audit-log-number-rotated"),
-			BufferSize:  viper.GetInt("audit-log-buffer-size"),
+			MaxRowCount: viper.GetInt(config.AuditLogMaxRowCount),
+			NumRotated:  viper.GetInt(config.AuditLogNumRotated),
+			BufferSize:  viper.GetInt(config.AuditLogBufferSize),
 		},
 		HVS: commConfig.ServiceConfig{
-			Username: viper.GetString("hvs-service-username"),
-			Password: viper.GetString("hvs-service-password"),
+			Username: viper.GetString(config.HvsServiceUsername),
+			Password: viper.GetString(config.HvsServicePassword),
 		},
 		TLS: commConfig.TLSCertConfig{
-			CertFile:   viper.GetString("tls-cert-file"),
-			KeyFile:    viper.GetString("tls-key-file"),
-			CommonName: viper.GetString("tls-common-name"),
-			SANList:    viper.GetString("tls-san-list"),
+			CertFile:   viper.GetString(commConfig.TlsCertFile),
+			KeyFile:    viper.GetString(commConfig.TlsKeyFile),
+			CommonName: viper.GetString(commConfig.TlsCommonName),
+			SANList:    viper.GetString(commConfig.TlsSanList),
 		},
 		SAML: config.SAMLConfig{
 			CommonConfig: commConfig.SigningCertConfig{
-				CertFile:   viper.GetString("saml-cert-file"),
-				KeyFile:    viper.GetString("saml-key-file"),
-				CommonName: viper.GetString("saml-common-name"),
+				CertFile:   viper.GetString(config.SamlCertFile),
+				KeyFile:    viper.GetString(config.SamlKeyFile),
+				CommonName: viper.GetString(config.SamlCommonName),
 			},
-			Issuer:          viper.GetString("saml-issuer-name"),
-			ValiditySeconds: viper.GetInt("saml-validity-seconds"),
+			Issuer:          viper.GetString(config.SamlIssuer),
+			ValiditySeconds: viper.GetInt(config.SamlValiditySeconds),
 		},
 		FlavorSigning: commConfig.SigningCertConfig{
-			CertFile:   viper.GetString("flavor-signing-cert-file"),
-			KeyFile:    viper.GetString("flavor-signing-key-file"),
-			CommonName: viper.GetString("flavor-signing-common-name"),
+			CertFile:   viper.GetString(config.FlavorSigningCertFile),
+			KeyFile:    viper.GetString(config.FlavorSigningKeyFile),
+			CommonName: viper.GetString(config.FlavorSigningCommonName),
 		},
 		PrivacyCA: commConfig.SelfSignedCertConfig{
-			CertFile:     viper.GetString("privacy-ca-cert-file"),
-			KeyFile:      viper.GetString("privacy-ca-key-file"),
-			CommonName:   viper.GetString("privacy-ca-common-name"),
-			Issuer:       viper.GetString("privacy-ca-issuer"),
-			ValidityDays: viper.GetInt("privacy-ca-validity-years"),
+			CertFile:     viper.GetString(config.PrivacyCaCertFile),
+			KeyFile:      viper.GetString(config.PrivacyCaKeyFile),
+			CommonName:   viper.GetString(config.PrivacyCaCommonName),
+			Issuer:       viper.GetString(config.PrivacyCaIssuer),
+			ValidityDays: viper.GetInt(config.PrivacyCaValidityYears),
 		},
 		EndorsementCA: commConfig.SelfSignedCertConfig{
-			CertFile:     viper.GetString("endorsement-ca-cert-file"),
-			KeyFile:      viper.GetString("endorsement-ca-key-file"),
-			CommonName:   viper.GetString("endorsement-ca-common-name"),
-			Issuer:       viper.GetString("endorsement-ca-issuer"),
-			ValidityDays: viper.GetInt("endorsement-ca-validity-years"),
+			CertFile:     viper.GetString(config.EndorsementCaCertFile),
+			KeyFile:      viper.GetString(config.EndorsementCaKeyFile),
+			CommonName:   viper.GetString(config.EndorsementCaCommonName),
+			Issuer:       viper.GetString(config.EndorsementCaIssuer),
+			ValidityDays: viper.GetInt(config.EndorsementCaValidityYears),
 		},
 		TagCA: commConfig.SelfSignedCertConfig{
-			CertFile:     viper.GetString("tag-ca-cert-file"),
-			KeyFile:      viper.GetString("tag-ca-key-file"),
-			CommonName:   viper.GetString("tag-ca-common-name"),
-			Issuer:       viper.GetString("tag-ca-issuer"),
-			ValidityDays: viper.GetInt("tag-ca-validity-years"),
+			CertFile:     viper.GetString(config.TagCaCertFile),
+			KeyFile:      viper.GetString(config.TagCaKeyFile),
+			CommonName:   viper.GetString(config.TagCaCommonName),
+			Issuer:       viper.GetString(config.TagCaIssuer),
+			ValidityDays: viper.GetInt(config.TagCaValidityYears),
 		},
 		Log: commConfig.LogConfig{
-			MaxLength:    viper.GetInt("log-max-length"),
-			EnableStdout: viper.GetBool("log-enable-stdout"),
-			Level:        viper.GetString("log-level"),
+			MaxLength:    viper.GetInt(commConfig.LogMaxLength),
+			EnableStdout: viper.GetBool(commConfig.LogEnableStdout),
+			Level:        viper.GetString(commConfig.LogLevel),
 		},
 		HRRS: hrrs.HRRSConfig{
 			RefreshPeriod: viper.GetDuration(constants.HrrsRefreshPeriod),
@@ -187,22 +183,26 @@ func defaultConfig() *config.Configuration {
 
 func loadAlias() {
 	alias := map[string]string{
-		"db-host":                    "HVS_DB_HOSTNAME",
-		"db-vendor":                  "HVS_DB_VENDOR",
-		"db-port":                    "HVS_DB_PORT",
-		"db-name":                    "HVS_DB_NAME",
-		"db-username":                "HVS_DB_USERNAME",
-		"db-password":                "HVS_DB_PASSWORD",
-		"db-ssl-cert":                "HVS_DB_SSLCERT",
-		"db-ssl-cert-source":         "HVS_DB_SSLCERTSRC",
-		"db-ssl-mode":                "HVS_DB_SSL_MODE",
-		"tls-san-list":               "SAN_LIST",
-		"aas-base-url":               "AAS_API_URL",
-		"server-read-timeout":        "HVS_SERVER_READ_TIMEOUT",
-		"server-read-header-timeout": "HVS_SERVER_READ_HEADER_TIMEOUT",
-		"server-write-timeout":       "HVS_SERVER_WRITE_TIMEOUT",
-		"server-idle-timeout":        "HVS_SERVER_IDLE_TIMEOUT",
-		"server-max-header-bytes":    "HVS_SERVER_MAX_HEADER_BYTES",
+		commConfig.DbHost:                  "HVS_DB_HOSTNAME",
+		commConfig.DbVendor:                "HVS_DB_VENDOR",
+		commConfig.DbPort:                  "HVS_DB_PORT",
+		commConfig.DbName:                  "HVS_DB_NAME",
+		commConfig.DbUsername:              "HVS_DB_USERNAME",
+		commConfig.DbPassword:              "HVS_DB_PASSWORD",
+		commConfig.DbSslCert:               "HVS_DB_SSLCERT",
+		commConfig.DbSslCertSource:         "HVS_DB_SSLCERTSRC",
+		commConfig.DbSslMode:               "HVS_DB_SSL_MODE",
+		commConfig.TlsSanList:              "SAN_LIST",
+		commConfig.AasBaseUrl:              "AAS_API_URL",
+		commConfig.ServerReadTimeout:       "HVS_SERVER_READ_TIMEOUT",
+		commConfig.ServerReadHeaderTimeout: "HVS_SERVER_READ_HEADER_TIMEOUT",
+		commConfig.ServerWriteTimeout:      "HVS_SERVER_WRITE_TIMEOUT",
+		commConfig.ServerIdleTimeout:       "HVS_SERVER_IDLE_TIMEOUT",
+		commConfig.ServerMaxHeaderBytes:    "HVS_SERVER_MAX_HEADER_BYTES",
+		config.SamlCertFile:                "SAML_CERT_FILE",
+		config.SamlKeyFile:                 "SAML_KEY_FILE",
+		config.SamlCommonName:              "SAML_COMMON_NAME",
+		config.SamlIssuer:                  "SAML_ISSUER_NAME",
 	}
 	for k, v := range alias {
 		if env := os.Getenv(v); env != "" {

@@ -15,19 +15,42 @@ import (
 	"time"
 )
 
+// Constants for viper variable names. Will be used to set
+// default values as well as to get each value
+const (
+	AasServiceUsername = "aas.service-username"
+	AasServicePassword = "aas.service-password"
+
+	JwtIncludeKid        = "jwt.include-kid"
+	JwtCertCommonName    = "jwt.cert-common-name"
+	JwtTokenDurationMins = "jwt.token-duration-mins"
+
+	AuthDefenderMaxAttempts         = "auth-defender.max-attempts"
+	AuthDefenderIntervalMins        = "auth-defender.interval-mins"
+	AuthDefenderLockoutDurationMins = "auth-defender.lockout-duration-mins"
+
+	CreateCredentials = "create-credentials"
+
+	NatsOperatorName               = "nats.operator.name"
+	NatsOperatorCredentialValidity = "nats.operator.credential-validity"
+	NatsAccountName                = "nats.account.name"
+	NatsAccountCredentialValidity  = "nats.account.credential-validity"
+	NatsUserCredentialValidity     = "nats.user-credential-validity"
+)
+
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
 // Probably should embed a config generic struct
 type Configuration struct {
 	CMSBaseURL       string                   `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	CmsTlsCertDigest string                   `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
-	AAS              AASConfig                `yaml:"aas" mapstructure:"aas"`
-	DB               commConfig.DBConfig      `yaml:"db" mapstructure:"db"`
-	Log              commConfig.LogConfig     `yaml:"log" mapstructure:"log"`
-	AuthDefender     AuthDefender             `yaml:"auth-defender" mapstructure:"auth-defender"`
-	JWT              JWT                      `yaml:"jwt" mapstructure:"jwt"`
-	TLS              commConfig.TLSCertConfig `yaml:"tls" mapstructure:"tls"`
-	Server           commConfig.ServerConfig  `yaml:"server" mapstructure:"server"`
-	Nats             NatsConfig               `yaml:"nats" mapstructure:"nats"`
+	AAS              AASConfig                `yaml:"aas"`
+	DB               commConfig.DBConfig      `yaml:"db"`
+	Log              commConfig.LogConfig     `yaml:"log"`
+	AuthDefender     AuthDefender             `yaml:"auth-defender"`
+	JWT              JWT                      `yaml:"jwt"`
+	TLS              commConfig.TLSCertConfig `yaml:"tls"`
+	Server           commConfig.ServerConfig  `yaml:"server"`
+	Nats             NatsConfig               `yaml:"nats"`
 }
 
 type AASConfig struct {
