@@ -17,13 +17,13 @@ var log = commLog.GetDefaultLogger()
 var secLog = commLog.GetSecurityLogger()
 
 type RequestHandler interface {
-	GetTpmQuote(quoteRequest *taModel.TpmQuoteRequest) (*taModel.TpmQuoteResponse, error)
-	GetHostInfo() (*taModel.HostInfo, error)
-	GetAikDerBytes() ([]byte, error)
+	GetTpmQuote(quoteRequest *taModel.TpmQuoteRequest, aikCertPath string, measureLogFilePath string, ramfsDir string) (*taModel.TpmQuoteResponse, error)
+	GetHostInfo(platformInfoFilePath string) (*taModel.HostInfo, error)
+	GetAikDerBytes(aikCertPath string) ([]byte, error)
 	DeployAssetTag(*taModel.TagWriteRequest) error
-	GetBindingCertificateDerBytes() ([]byte, error)
-	DeploySoftwareManifest(*taModel.Manifest) error
-	GetApplicationMeasurement(*taModel.Manifest) (*taModel.Measurement, error)
+	GetBindingCertificateDerBytes(bindingKeyCertificatePath string) ([]byte, error)
+	DeploySoftwareManifest(manifest *taModel.Manifest, varDir string) error
+	GetApplicationMeasurement(manifest *taModel.Manifest, tBootXmMeasurePath string, logDirPath string) (*taModel.Measurement, error)
 }
 
 func NewRequestHandler(cfg *config.TrustAgentConfiguration) RequestHandler {

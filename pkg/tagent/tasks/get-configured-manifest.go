@@ -36,6 +36,7 @@ type GetConfiguredManifest struct {
 	savedManifestFiles []string // internal task variable that tracks saved manifests (used in Validate())
 	envPrefix          string
 	commandName        string
+	VarDir             string
 }
 
 func (task *GetConfiguredManifest) PrintHelp(w io.Writer) {
@@ -64,10 +65,10 @@ func (task GetConfiguredManifest) saveManifest(manifestXml []byte) error {
 		return nil
 	}
 
-	manifestFile := fmt.Sprintf("%s/manifest_%s.xml", constants.VarDir, manifest.UUID)
+	manifestFile := fmt.Sprintf("%s/manifest_%s.xml", task.VarDir, manifest.UUID)
 	err = ioutil.WriteFile(manifestFile, manifestXml, 0600)
 	if err != nil {
-		return errors.Wrapf(err, "Error while writing %s/manifest_%s.xml file", constants.VarDir, manifest.UUID)
+		return errors.Wrapf(err, "Error while writing %s/manifest_%s.xml file", task.VarDir, manifest.UUID)
 	}
 
 	// keep track of which manifests were saved, so they can be validated in 'Validate()'

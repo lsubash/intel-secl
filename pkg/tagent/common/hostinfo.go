@@ -14,10 +14,10 @@ import (
 // GetHostInfo Assuming that the /opt/trustagent/var/system-info/platform-info file has been created
 // during startup, this function reads the contents of the json file and returns the corresponding
 // HostInfo structure.
-func (handler *requestHandlerImpl) GetHostInfo() (*taModel.HostInfo, error) {
+func (handler *requestHandlerImpl) GetHostInfo(platformInfoFilePath string) (*taModel.HostInfo, error) {
 	var hostInfo *taModel.HostInfo
 
-	hostInfo, err := util.ReadHostInfo()
+	hostInfo, err := util.ReadHostInfo(platformInfoFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error reading host-info file %s", constants.PlatformInfoFilePath)
 	}

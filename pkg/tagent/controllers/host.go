@@ -6,6 +6,7 @@ package controllers
 
 import (
 	"bytes"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/middleware"
 
 	"encoding/json"
@@ -17,7 +18,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 )
 
-func GetPlatformInfo(requestHandler common.RequestHandler) middleware.EndpointHandler {
+func GetPlatformInfo(requestHandler common.RequestHandler, platformInfoFilePath string) middleware.EndpointHandler {
 	return func(httpWriter http.ResponseWriter, httpRequest *http.Request) error {
 		log.Trace("controllers/host:GetPlatformInfo() Entering")
 		defer log.Trace("controllers/host:GetPlatformInfo() Leaving")
@@ -31,7 +32,7 @@ func GetPlatformInfo(requestHandler common.RequestHandler) middleware.EndpointHa
 			return &common.EndpointError{Message: "Invalid content-type", StatusCode: http.StatusBadRequest}
 		}
 
-		hostInfo, err := requestHandler.GetHostInfo()
+		hostInfo, err := requestHandler.GetHostInfo(platformInfoFilePath)
 		if err != nil {
 			log.WithError(err).Errorf("controllers/host:GetPlatformInfo() %s - There was an error reading %s", message.AppRuntimeErr, constants.PlatformInfoFilePath)
 			return &common.EndpointError{Message: "Error processing request", StatusCode: http.StatusInternalServerError}

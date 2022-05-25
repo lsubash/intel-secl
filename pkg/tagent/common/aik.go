@@ -6,16 +6,13 @@ package common
 
 import (
 	"encoding/pem"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
-
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
-
-	"github.com/pkg/errors"
 )
 
-func (handler *requestHandlerImpl) GetAikDerBytes() ([]byte, error) {
-	aikBytes, err := GetAikPem()
+func (handler *requestHandlerImpl) GetAikDerBytes(aikCertPath string) ([]byte, error) {
+	aikBytes, err := GetAikPem(aikCertPath)
 	if err != nil {
 		return nil, err
 	}
@@ -28,12 +25,12 @@ func (handler *requestHandlerImpl) GetAikDerBytes() ([]byte, error) {
 	return aikDer.Bytes, nil
 }
 
-func GetAikPem() ([]byte, error) {
-	if _, err := os.Stat(constants.AikCert); os.IsNotExist(err) {
-		return nil, errors.Wrapf(err, "AIK %s does not exist", constants.AikCert)
+func GetAikPem(aikCertPath string) ([]byte, error) {
+	if _, err := os.Stat(aikCertPath); os.IsNotExist(err) {
+		return nil, errors.Wrapf(err, "AIK %s does not exist", aikCertPath)
 	}
 
-	aikPem, err := ioutil.ReadFile(constants.AikCert)
+	aikPem, err := ioutil.ReadFile(aikCertPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error reading aik")
 	}

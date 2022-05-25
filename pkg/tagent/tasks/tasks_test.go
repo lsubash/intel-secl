@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package tasks
@@ -45,6 +45,18 @@ func runTakeOwnership(t *testing.T, mockedTpmFactory tpmprovider.MockedTpmFactor
 	return nil
 }
 
+func runTakeOwnershipValidate(t *testing.T, mockedTpmFactory tpmprovider.MockedTpmFactory, ownerSecret string) error {
+
+	takeOwnership := TakeOwnership{TpmF: mockedTpmFactory, OwnerSecretKey: ownerSecret}
+
+	err := takeOwnership.Validate()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func runProvisionPrimaryKey(t *testing.T, mockedTpmFactory tpmprovider.MockedTpmFactory, ownerSecret string) error {
 	provisionPrimaryKeyTask := ProvisionPrimaryKey{
 		TpmF:           mockedTpmFactory,
@@ -72,6 +84,22 @@ func TestTakeOwnershipEmptySecretClearTPM(t *testing.T) {
 	mockedTpmFactory := tpmprovider.MockedTpmFactory{TpmProvider: mockedTpmProvider}
 
 	err := runTakeOwnership(t, mockedTpmFactory, "")
+	if err != nil {
+		t.Fatal(err) // unexpected
+	}
+}
+
+func TestTakeOwnershipValidate(t *testing.T) {
+
+	// mock "clear" TPM
+	mockedTpmProvider := new(tpmprovider.MockedTpmProvider)
+	mockedTpmProvider.On("Close").Return(nil)
+	mockedTpmProvider.On("Version", mock.Anything).Return(tpmprovider.V20)
+	mockedTpmProvider.On("TakeOwnership", mock.Anything).Return(nil)
+	mockedTpmProvider.On("IsOwnedWithAuth", "").Return(true, nil)
+	mockedTpmFactory := tpmprovider.MockedTpmFactory{TpmProvider: mockedTpmProvider}
+
+	err := runTakeOwnershipValidate(t, mockedTpmFactory, "")
 	if err != nil {
 		t.Fatal(err) // unexpected
 	}

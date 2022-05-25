@@ -62,7 +62,7 @@ func NewTrustAgentService(parameters *ServiceParameters) (TrustAgentService, err
 	} else if parameters.Mode == "" || strings.ToLower(parameters.Mode) == constants.CommunicationModeHttp {
 
 		// create and start webservice
-		service, err = newWebService(&parameters.Web, parameters.RequestHandler)
+		service, err = newWebService(&parameters.Web, parameters.RequestHandler, constants.HttpLogFile)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Error while creating trustagent service")
 		}

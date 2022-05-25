@@ -390,5 +390,46 @@ var _ = Describe("SamlCertController", func() {
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
+
+		Context("Provide a request with unsupported type", func() {
+			It("Should not import a new SamlCertificate", func() {
+				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Import))).Methods(http.MethodPost)
+
+				// Import Request body
+				importCertReq := string(validSamlCert)
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/saml-certificates",
+					strings.NewReader(importCertReq),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
+
+		Context("Provide a request with no content", func() {
+			It("Should not import a new SamlCertificate", func() {
+				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Import))).Methods(http.MethodPost)
+
+				// Import Request body
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/saml-certificates",
+					strings.NewReader(""),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Content-Type", consts.HTTPMediaTypePemFile)
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 	})
 })

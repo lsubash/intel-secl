@@ -11,15 +11,13 @@ import (
 	"path"
 	"strings"
 
-	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
-
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/validation"
 	flavorConsts "github.com/intel-secl/intel-secl/v5/pkg/lib/flavor/constants"
+	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 )
 
-func (handler *requestHandlerImpl) DeploySoftwareManifest(manifest *taModel.Manifest) error {
+func (handler *requestHandlerImpl) DeploySoftwareManifest(manifest *taModel.Manifest, varDir string) error {
 
 	manifestXml, err := xml.Marshal(manifest)
 	if err != nil {
@@ -53,7 +51,7 @@ func (handler *requestHandlerImpl) DeploySoftwareManifest(manifest *taModel.Mani
 	}
 
 	// establish the name of the manifest file and write the file
-	manifestFile := path.Join(constants.VarDir, "manifest_"+manifest.Uuid+".xml")
+	manifestFile := path.Join(varDir, "manifest_"+manifest.Uuid+".xml")
 	err = ioutil.WriteFile(manifestFile, manifestXml, 0600)
 	if err != nil {
 		log.Errorf("common/deploy_manifest:DeploySoftwareManifest() Could not write manifest: %s", err)

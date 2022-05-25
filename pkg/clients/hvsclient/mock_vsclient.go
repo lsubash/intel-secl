@@ -6,6 +6,7 @@ package hvsclient
 
 import (
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
+	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -88,7 +89,7 @@ type MockedFlavorsClient struct {
 
 func (mock MockedFlavorsClient) CreateFlavor(flavorCreateRequest *hvs.FlavorCreateRequest) (hvs.FlavorCollection, error) {
 	args := mock.Called(flavorCreateRequest)
-	return args.Get(0).(hvs.FlavorCollection), args.Error(0)
+	return args.Get(0).(hvs.FlavorCollection), args.Error(1)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -106,4 +107,30 @@ func (mock MockedManifestsClient) GetManifestXmlById(manifestUUID string) ([]byt
 func (mock MockedManifestsClient) GetManifestXmlByLabel(manifestLabel string) ([]byte, error) {
 	args := mock.Called(manifestLabel)
 	return args.Get(0).([]byte), args.Error(1)
+}
+
+//-------------------------------------------------------------------------------------------------
+// Mocked Privacy ca interface
+//-------------------------------------------------------------------------------------------------
+type MockedPrivacyCAClient struct {
+	mock.Mock
+}
+
+// Can be mocked in unit tests similar to...
+// mockedHostsClient := new(hvsclient.MockedHostsClient)
+// mockedHostsClient.On("SearchHosts", mock.Anything).Return(&hvsclient.HostCollection {Hosts: []hvsclient.Host{}}, nil)
+
+func (mock MockedPrivacyCAClient) DownloadPrivacyCa() ([]byte, error) {
+	args := mock.Called()
+	return args.Get(0).([]byte), args.Error(1)
+}
+
+func (mock MockedPrivacyCAClient) GetIdentityProofRequest(identityChallengeRequest *taModel.IdentityChallengePayload) (*taModel.IdentityProofRequest, error) {
+	args := mock.Called(identityChallengeRequest)
+	return args.Get(0).(*taModel.IdentityProofRequest), args.Error(1)
+}
+
+func (mock MockedPrivacyCAClient) GetIdentityProofResponse(identityChallengeResponse *taModel.IdentityChallengePayload) (*taModel.IdentityProofRequest, error) {
+	args := mock.Called(identityChallengeResponse)
+	return args.Get(0).(*taModel.IdentityProofRequest), args.Error(1)
 }

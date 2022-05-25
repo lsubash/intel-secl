@@ -7,6 +7,13 @@ package constants
 import "time"
 
 const (
+	PrivacyCA       = ConfigDir + "privacy-ca.cer"
+	NatsCredentials = ConfigDir + "credentials/trust-agent.creds"
+	VarDir          = InstallationDir + "var/"
+	AikCert         = ConfigDir + "aik.pem"
+)
+
+const (
 	TlsKey                          = "tls"
 	InstallationDir                 = "/opt/trustagent/"
 	ConfigDir                       = "/etc/trustagent/"
@@ -19,14 +26,11 @@ const (
 	SecurityLogFilePath             = LogDir + "trustagent-security.log"
 	TLSCertFilePath                 = ConfigDir + "tls-cert.pem"
 	TLSKeyFilePath                  = ConfigDir + "tls-key.pem"
-	AikCert                         = ConfigDir + "aik.pem"
-	PrivacyCA                       = ConfigDir + "privacy-ca.cer"
-	NatsCredentials                 = ConfigDir + "credentials/trust-agent.creds"
-	VarDir                          = InstallationDir + "var/"
-	RamfsDir                        = VarDir + "ramfs/"
-	SystemInfoDir                   = VarDir + "system-info/"
+	ConstVarDir                     = InstallationDir + "var/"
+	RamfsDir                        = ConstVarDir + "ramfs/"
+	SystemInfoDir                   = ConstVarDir + "system-info/"
 	PlatformInfoFilePath            = SystemInfoDir + "platform-info"
-	MeasureLogFilePath              = VarDir + "measure-log.json"
+	MeasureLogFilePath              = ConstVarDir + "measure-log.json"
 	BindingKeyCertificatePath       = "/etc/workload-agent/bindingkey.pem"
 	TBootXmMeasurePath              = "/opt/tbootxm/bin/measure"
 	DevMemFilePath                  = "/dev/mem"

@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 )
@@ -31,7 +32,7 @@ func GetBindingKeyCertificate(requestHandler common.RequestHandler) middleware.E
 			return &common.EndpointError{Message: "Invalid content-type", StatusCode: http.StatusBadRequest}
 		}
 
-		bindingKeyBytes, err := requestHandler.GetBindingCertificateDerBytes()
+		bindingKeyBytes, err := requestHandler.GetBindingCertificateDerBytes(constants.BindingKeyCertificatePath)
 		if err != nil {
 			log.WithError(err).Errorf("controllers/binding_key_certificate:GetBindingKeyCertificate() %s - Error while getting binding key", message.AppRuntimeErr)
 			return err

@@ -9,7 +9,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/tpmprovider"
 	"io"
 	"net/http"
 	"os"
@@ -21,8 +20,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/tpmprovider"
+
 	"crypto/x509"
 	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/hvsclient"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
@@ -496,7 +498,13 @@ func (a *App) Run(args []string) error {
 func fetchEndorsementCert(assetTagSecret string) error {
 	log.Trace("main:fetchEndorsementCert() Entering")
 	defer log.Trace("main:fetchEndorsementCert() Leaving")
-	ekCertBytes, err := util.GetEndorsementKeyCertificateBytes(assetTagSecret)
+	tpmFactory, err := tpmprovider.LinuxTpmFactoryProvider{}.NewTpmFactory()
+	if err != nil {
+		return errors.Wrap(err, "main:fetchEndorsementCert() Could not create tpm factory")
+	}
+
+	ekCertBytes, err := util.GetEndorsementKeyCertificateBytes(assetTagSecret, tpmFactory)
+
 	if err != nil {
 		log.WithError(err).Error("main:fetchEndorsementCert() Error while getting endorsement certificate in bytes from tpm")
 		return errors.New("Error while getting endorsement certificate in bytes from tpm")
@@ -543,7 +551,7 @@ func sendAsyncReportRequest(cfg *config.TrustAgentConfiguration) error {
 		return nil
 	}
 
-	pInfo, err := util.ReadHostInfo()
+	pInfo, err := util.ReadHostInfo(constants.PlatformInfoFilePath)
 	if err != nil {
 		// TA is not returning an error, since a user has to intervene to fix the issue, TA retrying infinitely would not be ideal in this case
 		log.WithError(err).Errorf("Could not get host hardware uuid from %s file", constants.PlatformInfoFilePath)

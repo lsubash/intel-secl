@@ -126,6 +126,19 @@ func NewFakeKeyStore() *MockKeyStore {
 	}
 
 	_, err = store.Create(&models.KeyAttributes{
+		ID:               uuid.MustParse("ed37c360-7eae-4250-a677-6ee12adce8e3"),
+		Algorithm:        "AES",
+		KeyLength:        256,
+		KmipKeyID:        "1",
+		TransferPolicyId: uuid.MustParse("ed37c360-7eae-4250-a677-6ee12adce8e3"),
+		TransferLink:     "https://localhost:9443/kbs/v1/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
+		CreatedAt:        time.Now().UTC(),
+	})
+	if err != nil {
+		defaultLog.WithError(err).Errorf("Error creating key attributes")
+	}
+
+	_, err = store.Create(&models.KeyAttributes{
 		ID:               uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0d"),
 		Algorithm:        "EC",
 		CurveType:        "prime256v1",

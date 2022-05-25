@@ -23,7 +23,7 @@ import (
 	"strings"
 )
 
-func errorHandler(eh middleware.EndpointHandler) http.HandlerFunc {
+func ErrorHandler(eh middleware.EndpointHandler) http.HandlerFunc {
 	log.Trace("router/handlers:errorHandler() Entering")
 	defer log.Trace("router/handlers:errorHandler() Leaving")
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -107,8 +107,8 @@ func fnGetJwtCerts() error {
 	return nil
 }
 
-// requiresPermission checks the JWT in the request for the required access permissions
-func requiresPermission(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
+// RequiresPermission checks the JWT in the request for the required access permissions
+func RequiresPermission(eh middleware.EndpointHandler, permissionNames []string) middleware.EndpointHandler {
 	log.Trace("router/handlers:requiresPermission() Entering")
 	defer log.Trace("router/handlers:requiresPermission() Leaving")
 	return func(w http.ResponseWriter, r *http.Request) error {

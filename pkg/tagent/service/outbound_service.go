@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 	"github.com/pkg/errors"
 
 	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
@@ -36,9 +37,10 @@ func newOutboundService(natsParameters *NatsParameters, handler common.RequestHa
 }
 
 type trustAgentOutboundService struct {
-	natsConnection *nats.EncodedConn
-	handler        common.RequestHandler
-	natsParameters NatsParameters
+	natsConnection       *nats.EncodedConn
+	handler              common.RequestHandler
+	natsParameters       NatsParameters
+	platformInfoFilePath string
 }
 
 func (subscriber *trustAgentOutboundService) Start() error {
@@ -106,7 +108,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 		quoteRequest *taModel.TpmQuoteRequest) error {
 		defer recoverFunc()
 
-		quoteResponse, err := subscriber.handler.GetTpmQuote(quoteRequest)
+		quoteResponse, err := subscriber.handler.GetTpmQuote(quoteRequest, constants.AikCert, constants.MeasureLogFilePath, constants.RamfsDir)
 		if err != nil {
 			log.WithError(err).Error("Failed to handle quote-request")
 			return err
@@ -123,7 +125,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 	_, err = subscriber.natsConnection.Subscribe(hostInfoSubject, func(m *nats.Msg) error {
 		defer recoverFunc()
 
-		hostInfo, err := subscriber.handler.GetHostInfo()
+		hostInfo, err := subscriber.handler.GetHostInfo(subscriber.platformInfoFilePath)
 		if err != nil {
 			log.WithError(err).Error("Failed to handle host-info")
 			return err
@@ -140,7 +142,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 	_, err = subscriber.natsConnection.Subscribe(aikSubject, func(m *nats.Msg) error {
 		defer recoverFunc()
 
-		aik, err := subscriber.handler.GetAikDerBytes()
+		aik, err := subscriber.handler.GetAikDerBytes(constants.AikCert)
 		if err != nil {
 			log.WithError(err).Error("Failed to handle aik-request")
 			return err
@@ -174,7 +176,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 	_, err = subscriber.natsConnection.Subscribe(bkSubject, func(m *nats.Msg) error {
 		defer recoverFunc()
 
-		bk, err := subscriber.handler.GetBindingCertificateDerBytes()
+		bk, err := subscriber.handler.GetBindingCertificateDerBytes(constants.BindingKeyCertificatePath)
 		if err != nil {
 			log.WithError(err).Error("Failed to handle get-binding-certificate")
 			return err
@@ -191,7 +193,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 	_, err = subscriber.natsConnection.Subscribe(deployManifestSubject, func(subject string, reply string, manifest *taModel.Manifest) error {
 		defer recoverFunc()
 
-		err = subscriber.handler.DeploySoftwareManifest(manifest)
+		err = subscriber.handler.DeploySoftwareManifest(manifest, constants.VarDir)
 		if err != nil {
 			log.WithError(err).Error("Failed to handle deploy-manifest")
 			return err
@@ -208,7 +210,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 	_, err = subscriber.natsConnection.Subscribe(applicationMeasurementSubject, func(subject string, reply string, manifest *taModel.Manifest) error {
 		defer recoverFunc()
 
-		measurement, err := subscriber.handler.GetApplicationMeasurement(manifest)
+		measurement, err := subscriber.handler.GetApplicationMeasurement(manifest, constants.TBootXmMeasurePath, constants.LogDir)
 		if err != nil {
 			log.WithError(err).Error("Failed to handle application-measurement-request")
 			return err

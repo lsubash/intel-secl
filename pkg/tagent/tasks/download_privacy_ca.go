@@ -29,6 +29,7 @@ type DownloadPrivacyCA struct {
 	ClientFactory hvsclient.HVSClientFactory
 	envPrefix     string
 	commandName   string
+	PrivacyCA     string
 }
 
 func (task *DownloadPrivacyCA) PrintHelp(w io.Writer) {
@@ -59,9 +60,9 @@ func (task *DownloadPrivacyCA) Run() error {
 		return errors.Wrap(err, "Error while downloading privacyCA file")
 	}
 
-	err = ioutil.WriteFile(constants.PrivacyCA, ca, 0644)
+	err = ioutil.WriteFile(task.PrivacyCA, ca, 0644)
 	if err != nil {
-		return errors.Wrapf(err, "Error while writing privacy ca file '%s'", constants.PrivacyCA)
+		return errors.Wrapf(err, "Error while writing privacy ca file '%s'", task.PrivacyCA)
 	}
 
 	return nil
@@ -72,7 +73,7 @@ func (task *DownloadPrivacyCA) Validate() error {
 	defer log.Trace("tasks/download_privacy_ca:Validate() Leaving")
 	var err error
 
-	_, err = util.GetPrivacyCA()
+	_, err = util.GetPrivacyCA(task.PrivacyCA)
 	if err != nil {
 		return err
 	}

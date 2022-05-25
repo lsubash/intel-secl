@@ -12,7 +12,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/router"
 	"github.com/pkg/errors"
 	stdlog "log"
@@ -25,6 +24,7 @@ type trustAgentWebService struct {
 	webParameters WebParameters
 	router        *mux.Router
 	server        *http.Server
+	httpLogFile   string
 }
 
 func (service *trustAgentWebService) Start() error {
@@ -40,7 +40,7 @@ func (service *trustAgentWebService) Start() error {
 	}
 
 	httpWriter := os.Stderr
-	if httpLogFile, err := os.OpenFile(constants.HttpLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640); err != nil {
+	if httpLogFile, err := os.OpenFile(service.httpLogFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0640); err != nil {
 		secLog.WithError(err).Errorf("resource/service:Start() %s Failed to open http log file: %s\n", message.AppRuntimeErr, err.Error())
 		log.Tracef("resource/service:Start() %+v", err)
 	} else {
@@ -94,7 +94,7 @@ func (service *trustAgentWebService) Stop() error {
 	return nil
 }
 
-func newWebService(webParameters *WebParameters, requestHandler common.RequestHandler) (TrustAgentService, error) {
+func newWebService(webParameters *WebParameters, requestHandler common.RequestHandler, httpLogFile string) (TrustAgentService, error) {
 	log.Trace("service/web_service:newWebService() Entering")
 	defer log.Trace("service/web_service:newWebService() Leaving")
 
@@ -106,6 +106,7 @@ func newWebService(webParameters *WebParameters, requestHandler common.RequestHa
 		webParameters: *webParameters,
 		router:        router.InitRoutes(webParameters.TrustedJWTSigningCertsDir, webParameters.TrustedCaCertsDir, requestHandler),
 		server:        nil,
+		httpLogFile:   httpLogFile,
 	}
 
 	return &trustAgentService, nil

@@ -67,6 +67,8 @@ type ProvisionAttestationIdentityKey struct {
 	OwnerSecretKey string
 	envPrefix      string
 	commandName    string
+	PrivacyCA      string
+	AikCert        string
 }
 
 func (task *ProvisionAttestationIdentityKey) PrintHelp(w io.Writer) {
@@ -97,7 +99,7 @@ func (task *ProvisionAttestationIdentityKey) Run() error {
 	}
 
 	// read the EK certificate and fail if not present...
-	ekCertBytes, err := util.GetEndorsementKeyCertificateBytes(task.OwnerSecretKey)
+	ekCertBytes, err := util.GetEndorsementKeyCertificateBytes(task.OwnerSecretKey, task.TpmF)
 	if err != nil {
 		return errors.Wrap(err, "Failed to get the endorsement certificate from the TPM")
 	}
@@ -115,7 +117,7 @@ func (task *ProvisionAttestationIdentityKey) Run() error {
 		return errors.Wrap(err, "Failed to populate the identity request")
 	}
 
-	privacyCaCert, err := util.GetPrivacyCA()
+	privacyCaCert, err := util.GetPrivacyCA(task.PrivacyCA)
 	if err != nil {
 		return errors.Wrap(err, "Error while retrieving privacycaClient certificate")
 	}
@@ -178,9 +180,9 @@ func (task *ProvisionAttestationIdentityKey) Run() error {
 		return errors.Wrap(err, "The decrypted AIK is not a valid x509 certificate")
 	}
 
-	certOut, err := os.OpenFile(constants.AikCert, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640)
+	certOut, err := os.OpenFile(task.AikCert, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640)
 	if err != nil {
-		return errors.Wrapf(err, "Could not create file %s", constants.AikCert)
+		return errors.Wrapf(err, "Could not create file %s", task.AikCert)
 	}
 	defer func() {
 		err = certOut.Close()
@@ -197,7 +199,7 @@ func (task *ProvisionAttestationIdentityKey) Validate() error {
 	log.Trace("tasks/provision_aik:Validate() Entering")
 	defer log.Trace("tasks/provision_aik:Validate() Leaving")
 
-	if _, err := os.Stat(constants.AikCert); os.IsNotExist(err) {
+	if _, err := os.Stat(task.AikCert); os.IsNotExist(err) {
 		return errors.Wrap(err, "The aik certificate was not created")
 	}
 

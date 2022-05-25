@@ -14,12 +14,9 @@ import (
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 )
 
-var WmlLogFile = path.Join(constants.LogDir, "wml.log")
-
-func (handler *requestHandlerImpl) GetApplicationMeasurement(manifest *taModel.Manifest) (*taModel.Measurement, error) {
+func (handler *requestHandlerImpl) GetApplicationMeasurement(manifest *taModel.Manifest, tBootXmMeasurePath string, logDirPath string) (*taModel.Measurement, error) {
 
 	manifestXml, err := xml.Marshal(manifest)
 	if err != nil {
@@ -29,8 +26,8 @@ func (handler *requestHandlerImpl) GetApplicationMeasurement(manifest *taModel.M
 
 	// this should probably be done in wml --> if the wml log file is not yet created,
 	// 'measure' will fail.  for now, create the file before calling 'measure'.
-	if _, err = os.Stat(WmlLogFile); os.IsNotExist(err) {
-		_, err = os.OpenFile(WmlLogFile, os.O_RDONLY|os.O_CREATE, 0600)
+	if _, err = os.Stat(path.Join(logDirPath, "wml.log")); os.IsNotExist(err) {
+		_, err = os.OpenFile(path.Join(logDirPath, "wml.log"), os.O_RDONLY|os.O_CREATE, 0600)
 		if err != nil {
 			log.WithError(err).Errorf("common/measure:GetApplicationMeasurement() - Unable to open file")
 			return nil, &EndpointError{Message: "Error: Unable to open log file", StatusCode: http.StatusInternalServerError}
@@ -38,7 +35,7 @@ func (handler *requestHandlerImpl) GetApplicationMeasurement(manifest *taModel.M
 	}
 
 	// make sure 'measure' is not a symbolic link before executing it
-	measureExecutable, err := os.Lstat(constants.TBootXmMeasurePath)
+	measureExecutable, err := os.Lstat(tBootXmMeasurePath)
 	if err != nil {
 		log.WithError(err).Errorf("common/measure:GetApplicationMeasurement() - Unable to stat tboot path")
 		return nil, &EndpointError{Message: "Error: Unable to stat tboot path", StatusCode: http.StatusInternalServerError}
@@ -50,8 +47,8 @@ func (handler *requestHandlerImpl) GetApplicationMeasurement(manifest *taModel.M
 
 	// call /opt/tbootxml/bin/measure and return the xml from stdout
 	// 'measure <manifestxml> /'
-	cmd := exec.Command(constants.TBootXmMeasurePath, string(manifestXml), "/")
-	cmd.Env = append(os.Environ(), "WML_LOG_FILE="+WmlLogFile)
+	cmd := exec.Command(tBootXmMeasurePath, string(manifestXml), "/")
+	cmd.Env = append(os.Environ(), "WML_LOG_FILE="+path.Join(logDirPath, "wml.log"))
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -61,7 +58,7 @@ func (handler *requestHandlerImpl) GetApplicationMeasurement(manifest *taModel.M
 
 	err = cmd.Start()
 	if err != nil {
-		log.WithError(err).Errorf("common/measure:GetApplicationMeasurement() %s - Failed to run: %s", message.AppRuntimeErr, constants.TBootXmMeasurePath)
+		log.WithError(err).Errorf("common/measure:GetApplicationMeasurement() %s - Failed to run: %s", message.AppRuntimeErr, tBootXmMeasurePath)
 		return nil, &EndpointError{Message: "Error processing request", StatusCode: http.StatusInternalServerError}
 
 	}
@@ -69,7 +66,7 @@ func (handler *requestHandlerImpl) GetApplicationMeasurement(manifest *taModel.M
 	measureBytes, _ := ioutil.ReadAll(stdout)
 	err = cmd.Wait()
 	if err != nil {
-		log.WithError(err).Errorf("common/measure:GetApplicationMeasurement() %s - %s returned '%s'", message.AppRuntimeErr, constants.TBootXmMeasurePath, string(measureBytes))
+		log.WithError(err).Errorf("common/measure:GetApplicationMeasurement() %s - %s returned '%s'", message.AppRuntimeErr, tBootXmMeasurePath, string(measureBytes))
 		return nil, &EndpointError{Message: "Error processing request", StatusCode: http.StatusInternalServerError}
 	}
 

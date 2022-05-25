@@ -308,12 +308,15 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 
 	downloadPrivacyCaTask := &tasks.DownloadPrivacyCA{
 		ClientFactory: hvsClientFactory,
+		PrivacyCA:     constants.PrivacyCA,
 	}
 
 	provisionAttIdKeyTask := &tasks.ProvisionAttestationIdentityKey{
 		TpmF:           tpmFactory,
 		ClientFactory:  hvsClientFactory,
 		OwnerSecretKey: viper.GetString(constants.TpmOwnerSecretViperKey),
+		PrivacyCA:      constants.PrivacyCA,
+		AikCert:        constants.AikCert,
 	}
 
 	createHostCommandTask := &tasks.CreateHost{
@@ -330,6 +333,7 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 
 	getConfiguredManifestTask := &tasks.GetConfiguredManifest{
 		ClientFactory: hvsClientFactory,
+		VarDir:        constants.VarDir,
 	}
 
 	takeOwnershipTask := &tasks.TakeOwnership{
@@ -351,6 +355,7 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 	downloadCredentialTask := &tasks.DownloadCredential{
 		AasClientProvider: aasCP,
 		HostId:            viper.GetString(constants.NatsTaHostIdViperKey),
+		NatsCredentials:   constants.NatsCredentials,
 	}
 
 	downloadApiToken := &tasks.DownloadApiToken{

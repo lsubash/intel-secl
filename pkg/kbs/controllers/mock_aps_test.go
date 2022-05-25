@@ -1,0 +1,111 @@
+/*
+ * Copyright (C) 2022 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+package controllers
+
+import (
+	"crypto/rand"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
+	"io"
+	"net/url"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
+	modelaps "github.com/intel-secl/intel-secl/v5/pkg/model/aps"
+)
+
+var token = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ik9RZFFsME11UVdfUnBhWDZfZG1BVTIzdkI1cHNETVBsNlFoYUhhQURObmsifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tbnZtNmIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjdhNWFiNzIzLTA0NWUtNGFkOS04MmM4LTIzY2ExYzM2YTAzOSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.MV6ikR6OiYGdZ8lGuVlIzIQemxHrEX42ECewD5T-RCUgYD3iezElWQkRt_4kElIKex7vaxie3kReFbPp1uGctC5proRytLpHrNtoPR3yVqROGtfBNN1rO_fVh0uOUEk83Fj7LqhmTTT1pRFVqLc9IHcaPAwus4qRX8tbl7nWiWM896KqVMo2NJklfCTtsmkbaCpv6Q6333wJr7imUWegmNpC2uV9otgBOiaCJMUAH5A75dkRRup8fT8Jhzyk4aC-kWUjBVurRkxRkBHReh6ZA-cHMvs6-d3Z8q7c8id0X99bXvY76d3lO2uxcVOpOu1505cmcvD3HK6pTqhrOdV9LQ"
+
+var jwtsigncert = []byte(`-----BEGIN CERTIFICATE-----
+ MIID/jCCAuagAwIBAgIUH4Solwfy9/iP2Ax/JpXHHJ7Yxq8wDQYJKoZIhvcNAQEL
+ BQAwgZExCzAJBgNVBAYTAlVTMRUwEwYDVQQIEwxQZW5uc3lsdmFuaWExETAPBgNV
+ BAcTCFNjcmFudG9uMREwDwYDVQQKFAhURVNUX0lOQzEQMA4GA1UECxMHVEVTVElO
+ RzEZMBcGA1UEAxQQVEVTVF9DRVJUSUZJQ0FURTEYMBYGCSqGSIb3DQEJARYJVEVT
+ VF9DRVJUMB4XDTIyMDQwNzA5NDEwMFoXDTMyMDQwNzA5NDEwMFowgZExCzAJBgNV
+ BAYTAlVTMRUwEwYDVQQIEwxQZW5uc3lsdmFuaWExETAPBgNVBAcTCFNjcmFudG9u
+ MREwDwYDVQQKFAhURVNUX0lOQzEQMA4GA1UECxMHVEVTVElORzEZMBcGA1UEAxQQ
+ VEVTVF9DRVJUSUZJQ0FURTEYMBYGCSqGSIb3DQEJARYJVEVTVF9DRVJUMIIBIjAN
+ BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCkhYcR164s4kKU3+fTbrXTvwkfC
+ hgcw6pSmVJssTzRxshqIeMJ2B391sBB9O/g91OLX6VUEsp3QWa3vESk34ZM1NQ//
+ MIfS91+v5rsKhCZQHwDyf9dWfGW3UIB404JihX9vSaK3zNTCPSw8/2SGsg8IRori
+ imf1TqOZy6qKtFa5B6WVHw+xUTetGOmAYZCdaqAITlGF2Wyex5xQtgwO5Kw7szst
+ hvQ5tbeXPjJVWeItNP/PKvHx1mp84gS7cUMjO9tmr8XUNmCelxGqJ1fnxhkD/lrY
+ AP6mhBNqllEecWHv5nczfwqeS3xRI9Weh2KzOu9t3R9XAKq8T+qYt5/izQIDAQAB
+ o0wwSjAJBgNVHRMEAjAAMBEGCWCGSAGG+EIBAQQEAwIE8DALBgNVHQ8EBAMCBaAw
+ HQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMA0GCSqGSIb3DQEBCwUAA4IB
+ AQCi/Hj1lcW36EA59eYT8ELHKNwlnZfZD5hQaBSb7LcjzKajDtF3rzIDsGSAmldC
+ bw1CeVMTeIMoNxSBPxAPFHK1EFMP59VrXUoI8ZiZll6CaqDHHjsTPO/5T9Lz9Jjf
+ 3hu4ixOEJmfV1WEO8QzZrJwFcIkefUWLhpiJW1SNtlTR3D0GlmyMuO73mzr64yx7
+ ouAW4RSU11gVIZfobSs6g7hlIrbMz71wbiaCQQ6MN015DyEpPI7lrhOPvz3lOveW
+ 4fe8ARWwVlEd3AzN8ZlY3s6oaAqY2d4T/u/v6nK4S88a/uAYB1wwQDSYp6LslG1d
+ uKYodDFCQ0NYU4Xz2lbzn5KV
+ -----END CERTIFICATE-----
+ -----BEGIN CERTIFICATE-----
+ MIID/jCCAuagAwIBAgIUH4Solwfy9/iP2Ax/JpXHHJ7Yxq8wDQYJKoZIhvcNAQEL
+ BQAwgZExCzAJBgNVBAYTAlVTMRUwEwYDVQQIEwxQZW5uc3lsdmFuaWExETAPBgNV
+ BAcTCFNjcmFudG9uMREwDwYDVQQKFAhURVNUX0lOQzEQMA4GA1UECxMHVEVTVElO
+ RzEZMBcGA1UEAxQQVEVTVF9DRVJUSUZJQ0FURTEYMBYGCSqGSIb3DQEJARYJVEVT
+ VF9DRVJUMB4XDTIyMDQwNzA5NDEwMFoXDTMyMDQwNzA5NDEwMFowgZExCzAJBgNV
+ BAYTAlVTMRUwEwYDVQQIEwxQZW5uc3lsdmFuaWExETAPBgNVBAcTCFNjcmFudG9u
+ MREwDwYDVQQKFAhURVNUX0lOQzEQMA4GA1UECxMHVEVTVElORzEZMBcGA1UEAxQQ
+ VEVTVF9DRVJUSUZJQ0FURTEYMBYGCSqGSIb3DQEJARYJVEVTVF9DRVJUMIIBIjAN
+ BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCkhYcR164s4kKU3+fTbrXTvwkfC
+ hgcw6pSmVJssTzRxshqIeMJ2B391sBB9O/g91OLX6VUEsp3QWa3vESk34ZM1NQ//
+ MIfS91+v5rsKhCZQHwDyf9dWfGW3UIB404JihX9vSaK3zNTCPSw8/2SGsg8IRori
+ imf1TqOZy6qKtFa5B6WVHw+xUTetGOmAYZCdaqAITlGF2Wyex5xQtgwO5Kw7szst
+ hvQ5tbeXPjJVWeItNP/PKvHx1mp84gS7cUMjO9tmr8XUNmCelxGqJ1fnxhkD/lrY
+ AP6mhBNqllEecWHv5nczfwqeS3xRI9Weh2KzOu9t3R9XAKq8T+qYt5/izQIDAQAB
+ o0wwSjAJBgNVHRMEAjAAMBEGCWCGSAGG+EIBAQQEAwIE8DALBgNVHQ8EBAMCBaAw
+ HQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMA0GCSqGSIb3DQEBCwUAA4IB
+ AQCi/Hj1lcW36EA59eYT8ELHKNwlnZfZD5hQaBSb7LcjzKajDtF3rzIDsGSAmldC
+ bw1CeVMTeIMoNxSBPxAPFHK1EFMP59VrXUoI8ZiZll6CaqDHHjsTPO/5T9Lz9Jjf
+ 3hu4ixOEJmfV1WEO8QzZrJwFcIkefUWLhpiJW1SNtlTR3D0GlmyMuO73mzr64yx7
+ ouAW4RSU11gVIZfobSs6g7hlIrbMz71wbiaCQQ6MN015DyEpPI7lrhOPvz3lOveW
+ 4fe8ARWwVlEd3AzN8ZlY3s6oaAqY2d4T/u/v6nK4S88a/uAYB1wwQDSYp6LslG1d
+ uKYodDFCQ0NYU4Xz2lbzn5KV
+ -----END CERTIFICATE-----`)
+
+func NewMockApsClient(apsURL *url.URL, certs []x509.Certificate, token string) aps.APSClient {
+	return &mockApsClient{
+		BaseURL:  apsURL,
+		CaCerts:  certs,
+		JwtToken: token,
+	}
+}
+
+type mockApsClient struct {
+	BaseURL  *url.URL
+	CaCerts  []x509.Certificate
+	JwtToken string
+}
+
+func (a *mockApsClient) GetAttestationToken(nonce string, tokenRequest *modelaps.AttestationTokenRequest) ([]byte, int, error) {
+	return []byte(token), 0, nil
+}
+
+func (a *mockApsClient) GetNonce() (string, int, error) {
+	type signedNonce struct {
+		Message   string
+		Signature string
+	}
+
+	nonce := make([]byte, 64)
+	_, _ = io.ReadFull(rand.Reader, nonce)
+
+	nonceSigned := &signedNonce{
+		Message:   string(nonce),
+		Signature: "ownsign",
+	}
+	marshalledData, _ := json.Marshal(nonceSigned)
+
+	encodedNonce := base64.StdEncoding.EncodeToString(marshalledData)
+
+	return encodedNonce, 200, nil
+}
+
+func (a *mockApsClient) GetJwtSigningCertificate() ([]byte, error) {
+	return jwtsigncert, nil
+}

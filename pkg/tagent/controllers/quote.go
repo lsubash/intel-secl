@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
@@ -49,7 +50,7 @@ func GetTpmQuote(requestHandler common.RequestHandler) middleware.EndpointHandle
 
 		}
 
-		tpmQuoteResponse, err := requestHandler.GetTpmQuote(&tpmQuoteRequest)
+		tpmQuoteResponse, err := requestHandler.GetTpmQuote(&tpmQuoteRequest, constants.AikCert, constants.MeasureLogFilePath, constants.RamfsDir)
 		if err != nil {
 			log.WithError(err).Errorf("controllers/quote:GetTpmQuote() %s - There was an error collecting the tpm quote", message.AppRuntimeErr)
 			return &common.EndpointError{Message: "There was an error collecting the tpm quote", StatusCode: http.StatusInternalServerError}

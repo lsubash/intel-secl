@@ -116,5 +116,29 @@ func NewFakeKeyTransferPolicyStore() *MockKeyTransferPolicyStore {
 	if err != nil {
 		log.WithError(err).Errorf("Error creating key transfer policy")
 	}
+
+	var j uint8 = 0
+
+	_, err = store.Create(&kbs.KeyTransferPolicy{
+		ID:              uuid.MustParse("ed37c360-7eae-4250-a677-6ee12adce8e3"),
+		CreatedAt:       time.Now().UTC(),
+		AttestationType: []aps.AttestationType{aps.TDX},
+		TDX: &kbs.TdxPolicy{
+			Attributes: &kbs.TdxAttributes{
+				MrSignerSeam:       []string{"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+				MrSeam:             []string{"0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"},
+				SeamSvn:            &j,
+				MRTD:               []string{"cf656414fc0f49b23e2ae64b6f23b82901e2206aab36b671e360ebd414899dab51bbb60134bbe6ad8dcc70b995d9dc50"},
+				RTMR0:              "b90abd43736381b12fc9b038924c73e31c8371674905e7fcb7941d69fe59d30eda3adb9e41b878151e756fb05ad13d14",
+				RTMR1:              "a53c98b16f0de470338e7f072d9c5fcef6171327ec6c78b842e637251b1de6e37354c47fb68de27ef14bb67caf288d9b",
+				RTMR2:              "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+				RTMR3:              "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+				EnforceTCBUptoDate: nil,
+			},
+		},
+	})
+	if err != nil {
+		log.WithError(err).Errorf("Error creating key transfer policy")
+	}
 	return store
 }

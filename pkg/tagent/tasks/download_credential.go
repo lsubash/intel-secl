@@ -31,6 +31,7 @@ type DownloadCredential struct {
 	HostId            string
 	envPrefix         string
 	commandName       string
+	NatsCredentials   string
 }
 
 func (task *DownloadCredential) PrintHelp(w io.Writer) {
@@ -71,9 +72,9 @@ func (task *DownloadCredential) Run() error {
 		return errors.Wrap(err, "Error while retrieving credential file from aas")
 	}
 
-	err = ioutil.WriteFile(constants.NatsCredentials, credentialFileBytes, 0600)
+	err = ioutil.WriteFile(task.NatsCredentials, credentialFileBytes, 0600)
 	if err != nil {
-		return errors.Wrapf(err, "Error while saving %s", constants.NatsCredentials)
+		return errors.Wrapf(err, "Error while saving %s", task.NatsCredentials)
 	}
 
 	return nil
@@ -84,9 +85,9 @@ func (task *DownloadCredential) Validate() error {
 	log.Trace("tasks/download_credential:Validate() Entering")
 	defer log.Trace("tasks/download_credential:Validate() Leaving")
 
-	_, err := os.Stat(constants.NatsCredentials)
+	_, err := os.Stat(task.NatsCredentials)
 	if os.IsNotExist(err) {
-		return errors.Errorf("%s file does not exist", constants.NatsCredentials)
+		return errors.Errorf("%s file does not exist", task.NatsCredentials)
 	}
 
 	log.Debug("tasks/download_credential:Validate() download-credentials setup task was successful.")

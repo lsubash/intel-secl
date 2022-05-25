@@ -35,16 +35,70 @@ var _ = Describe("KeyTransferPolicyController", func() {
 	})
 
 	// Specs for HTTP Post to "/key-transfer-policies"
-	Describe("Create a new Key Transfer Policy", func() {
+	Describe("Create a new Key Transfer Policy for SGX", func() {
 		Context("Provide a valid Create request", func() {
 			It("Should create a new Key Transfer Policy", func() {
 				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
 				policyJson := `{
-							"attestation_type": ["SGX"],
-							"sgx": {
+					"attestation_type":[
+					   "SGX"
+					],
+					"sgx":{
+					   "attributes":{
+						  "mrsigner":[
+							 "cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"
+						  ],
+						  "isvprodid":[
+							 12
+						  ],
+						  "mrenclave":[
+							 "01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"
+						  ],
+						  "isvsvn":1,
+						  "client_permissions":[
+							 "nginx",
+							 "USA"
+						  ],
+						  "enforce_tcb_upto_date":false
+					   }
+					}
+				 }`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusCreated))
+			})
+		})
+		Context("Provide a valid Create request for TDX", func() {
+			It("Should create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"attestation_type": ["TDX"],
+							"tdx": {
 								"attributes": {
-									"mrsigner": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
-									"isvprodid": [0]
+									"mrsignerseam": [
+										"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+									],
+									"mrseam": [
+										"0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+									],
+									"seamsvn": 0,
+									"mrtd": [
+										"cf656414fc0f49b23e2ae64b6f23b82901e2206aab36b671e360ebd414899dab51bbb60134bbe6ad8dcc70b995d9dc50"
+									],
+									"rtmr0": "b90abd43736381b12fc9b038924c73e31c8371674905e7fcb7941d69fe59d30eda3adb9e41b878151e756fb05ad13d14",
+									"rtmr1": "a53c98b16f0de470338e7f072d9c5fcef6171327ec6c78b842e637251b1de6e37354c47fb68de27ef14bb67caf288d9b",
+									"rtmr2": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"rtmr3": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"enforce_tcb_upto_date": false
 								}
 							}
 						}`
@@ -60,6 +114,276 @@ var _ = Describe("KeyTransferPolicyController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusCreated))
+			})
+		})
+		Context("Provide a invalid Create request for TDX - invalid rtmr0", func() {
+			It("Should not create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"attestation_type": ["TDX"],
+							"tdx": {
+								"attributes": {
+									"mrsignerseam": [
+										"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+									],
+									"mrseam": [
+										"0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+									],
+									"seamsvn": 0,
+									"mrtd": [
+										"cf656414fc0f49b23e2ae64b6f23b82901e2206aab36b671e360ebd414899dab51bbb60134bbe6ad8dcc70b995d9dc50"
+									],
+									"rtmr0": "test123",
+									"rtmr1": "a53c98b16f0de470338e7f072d9c5fcef6171327ec6c78b842e637251b1de6e37354c47fb68de27ef14bb67caf288d9b",
+									"rtmr2": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"rtmr3": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"enforce_tcb_upto_date": false
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid Create request for TDX -invalid rtmr1", func() {
+			It("Should not create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"attestation_type": ["TDX"],
+							"tdx": {
+								"attributes": {
+									"mrsignerseam": [
+										"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+									],
+									"mrseam": [
+										"0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+									],
+									"seamsvn": 0,
+									"mrtd": [
+										"cf656414fc0f49b23e2ae64b6f23b82901e2206aab36b671e360ebd414899dab51bbb60134bbe6ad8dcc70b995d9dc50"
+									],
+									"rtmr0": "b90abd43736381b12fc9b038924c73e31c8371674905e7fcb7941d69fe59d30eda3adb9e41b878151e756fb05ad13d14",
+									"rtmr1": "test123",
+									"rtmr2": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"rtmr3": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"enforce_tcb_upto_date": false
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Provide a invalid Create request", func() {
+			It("Should not create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"attestation_type": ["SGX"],
+							"sgx": {
+								"attributes": {
+									"mrsigner": [
+                      "cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"
+                  ],
+                  "isvprodid": [
+                      12
+                  ],
+                  "mrenclave": 
+                      "01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953",
+                  "isvsvn": 1,
+                  "client_permissions": [
+                      "nginx",
+                      "USA"
+                  ],
+                  "enforce_tcb_upto_date": false
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid Create request without attestation type", func() {
+			It("Should not create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"sgx": {
+								"attributes": {
+									"mrsigner": [
+                      "cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"
+                  ],
+                  "isvprodid": [
+                      12
+                  ],
+                  "mrenclave": [
+                      "01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"
+                  ],
+                  "isvsvn": 1,
+                  "client_permissions": [
+                      "nginx",
+                      "USA"
+                  ],
+                  "enforce_tcb_upto_date": false
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid Create request with empty attestation type", func() {
+			It("Should not create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"attestation_type": [],
+							"sgx": {
+								"attributes": {
+									"mrsigner": [
+                      "cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"
+                  ],
+                  "isvprodid": [
+                      12
+                  ],
+                  "mrenclave": [
+                      "01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"
+                  ],
+                  "isvsvn": 1,
+                  "client_permissions": [
+                      "nginx",
+                      "USA"
+                  ],
+                  "enforce_tcb_upto_date": false
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid Create request with invalid attestation type", func() {
+			It("Should not create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"attestation_type": ["test"],
+							"sgx": {
+								"attributes": {
+									"mrsigner": [
+                      "cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"
+                  ],
+                  "isvprodid": [
+                      12
+                  ],
+                  "mrenclave": [
+                      "01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"
+                  ],
+                  "isvsvn": 1,
+                  "client_permissions": [
+                      "nginx",
+                      "USA"
+                  ],
+                  "enforce_tcb_upto_date": false
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid Create request for TDX", func() {
+			It("Should not create a new Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Create))).Methods(http.MethodPost)
+				policyJson := `{
+							"attestation_type": ["TDX"],
+							"tdx": {
+								"attributes": {
+									"mrsignerseam": [
+										"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+									],
+									"mrseam": [
+										"0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+									],
+									"seamsvn": 0,
+									"mrtd": "b90abd4373638",
+									"rtmr0": "b90abd43736381b12fc9b038924c73e31c8371674905e7fcb7941d69fe59d30eda3adb9e41b878151e756fb05ad13d14",
+									"rtmr1": "a53c98b16f0de470338e7f072d9c5fcef6171327ec6c78b842e637251b1de6e37354c47fb68de27ef14bb67caf288d9b",
+									"rtmr2": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"rtmr3": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+									"enforce_tcb_upto_date": false
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/key-transfer-policies",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Provide a Create request without mrsigner", func() {
@@ -194,6 +518,108 @@ var _ = Describe("KeyTransferPolicyController", func() {
 				Expect(w.Code).To(Equal(http.StatusNotFound))
 			})
 		})
+		Context("Provide a valid Update request - TDX", func() {
+			It("Should update an existing  Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Update))).Methods(http.MethodPut)
+				policyJson := `{
+							"attestation_type": ["TDX"],
+							"tdx": {
+								"attributes": {
+									"mrsignerseam": [
+										"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+									],
+									"mrseam": [
+										"0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+									],
+									"seamsvn": 0
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/key-transfer-policies/ed37c360-7eae-4250-a677-6ee12adce8e3",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+			})
+		})
+		Context("Provide a Update request with no content", func() {
+			It("Should update an existing  Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Update))).Methods(http.MethodPut)
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/key-transfer-policies/ee37c360-7eae-4250-a677-6ee12adce8e2",
+					strings.NewReader(""),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid Update request", func() {
+			It("Should update an existing  Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Update))).Methods(http.MethodPut)
+				policyJson := `{
+							"attestation_type": ["TDX"],
+							"tdx": {
+								"attributes": {
+									"mrseam": [
+										"0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+									],
+									"seamsvn": 0
+								}
+							}
+						}`
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/key-transfer-policies/ed37c360-7eae-4250-a677-6ee12adce8e3",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Provide a invalid Update request - invalid content type", func() {
+			It("Should update an existing  Key Transfer Policy", func() {
+				router.Handle("/key-transfer-policies/{id}", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(keyTransferPolicyController.Update))).Methods(http.MethodPut)
+				policyJson := `{
+					"attestation_type": ["SGX"],
+					"sgx": {
+						"attributes": {
+							"mrsigner": ["dd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
+							"isvprodid": [0]
+						}
+					}
+				}`
+
+				req, err := http.NewRequest(
+					http.MethodPut,
+					"/key-transfer-policies/ee37c360-7eae-4250-a677-6ee12adce8e2",
+					strings.NewReader(policyJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypePemFile)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
+			})
+		})
 	})
 
 	// Specs for HTTP Delete to "/key-transfer-policies/{id}"
@@ -245,7 +671,7 @@ var _ = Describe("KeyTransferPolicyController", func() {
 				var policies []kbs.KeyTransferPolicy
 				_ = json.Unmarshal(w.Body.Bytes(), &policies)
 				// Verifying mocked data of 2 key transfer policies
-				Expect(len(policies)).To(Equal(2))
+				Expect(len(policies)).To(Equal(3))
 			})
 		})
 	})

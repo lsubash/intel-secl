@@ -50,7 +50,7 @@ type KeyTransferController struct {
 	policyStore   domain.KeyTransferPolicyStore
 	keyConfig     domain.KeyTransferControllerConfig
 	apsClient     apsClient.APSClient
-	aasClient     *aasClient.Client
+	aasClient     aasClient.AASClient
 }
 
 var jwtVerifier jwtauth.Verifier
@@ -63,7 +63,7 @@ const (
 	wrapSize = 4
 )
 
-func NewKeyTransferController(rm *keymanager.RemoteManager, ps domain.KeyTransferPolicyStore, kc domain.KeyTransferControllerConfig, apsc apsClient.APSClient, aasc *aasClient.Client) *KeyTransferController {
+func NewKeyTransferController(rm *keymanager.RemoteManager, ps domain.KeyTransferPolicyStore, kc domain.KeyTransferControllerConfig, apsc apsClient.APSClient, aasc aasClient.AASClient) *KeyTransferController {
 	return &KeyTransferController{
 		remoteManager: rm,
 		policyStore:   ps,

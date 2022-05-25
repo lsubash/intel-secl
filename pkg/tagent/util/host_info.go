@@ -15,13 +15,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-func ReadHostInfo() (*taModel.HostInfo, error) {
+func ReadHostInfo(platformInfoFilePath string) (*taModel.HostInfo, error) {
 	var hostInfo taModel.HostInfo
-	if _, err := os.Stat(constants.PlatformInfoFilePath); os.IsNotExist(err) {
+	if _, err := os.Stat(platformInfoFilePath); os.IsNotExist(err) {
 		return nil, errors.Wrapf(err, "util/ReadHostInfo() %s - %s does not exist", message.AppRuntimeErr, constants.PlatformInfoFilePath)
 	}
 
-	jsonData, err := ioutil.ReadFile(constants.PlatformInfoFilePath)
+	jsonData, err := ioutil.ReadFile(platformInfoFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "util/ReadHostInfo() %s - There was an error reading %s", message.AppRuntimeErr, constants.PlatformInfoFilePath)
 	}

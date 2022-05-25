@@ -11,10 +11,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
-
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 )
 
 // Writes the manifest xml received to /opt/trustagent/var/manifest_{UUID}.xml.
@@ -46,7 +46,7 @@ func DeployManifest(requestHandler common.RequestHandler) middleware.EndpointHan
 			return &common.EndpointError{Message: "Error: Invalid xml format", StatusCode: http.StatusBadRequest}
 		}
 
-		err = requestHandler.DeploySoftwareManifest(&manifest)
+		err = requestHandler.DeploySoftwareManifest(&manifest, constants.VarDir)
 		if err != nil {
 			log.WithError(err).Errorf("controllers/deploy_manifest:DeployManifest() %s - Error while deploying manifest", message.AppRuntimeErr)
 			return err

@@ -92,6 +92,10 @@ func (kc *KeyController) Create(responseWriter http.ResponseWriter, request *htt
 	} else {
 		transferPolicy, err := kc.policyStore.Retrieve(requestKey.TransferPolicyID)
 		if err != nil {
+			if strings.Contains(err.Error(), commErr.RecordNotFound) {
+				defaultLog.WithError(err).Error("controllers/key_controller:Create() Key transfer policy was not found")
+				return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unknown key transfer policy requested"}
+			}
 			defaultLog.WithError(err).Error("controllers/key_controller:Create() Key transfer policy retrieve failed")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to retrieve key transfer policy"}
 		}

@@ -5,9 +5,10 @@
 package router
 
 import (
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/controllers"
 	"net/http"
 	"time"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/controllers"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
@@ -56,19 +57,19 @@ func defineSubRoutes(router *mux.Router, trustedJWTSigningCertsDir, trustedCaCer
 
 	subRouter = router.PathPrefix(serviceApi).Subrouter()
 	subRouter.Use(middleware.NewTokenAuth(trustedJWTSigningCertsDir, trustedCaCertsDir, fnGetJwtCerts, cacheTime))
-	subRouter.HandleFunc("/aik", errorHandler(requiresPermission(controllers.GetAik(requestHandler), []string{getAIKPerm}))).Methods(http.MethodGet)
-	subRouter.HandleFunc("/host", errorHandler(requiresPermission(controllers.GetPlatformInfo(requestHandler), []string{getHostInfoPerm}))).Methods(http.MethodGet)
-	subRouter.HandleFunc("/tpm/quote", errorHandler(requiresPermission(controllers.GetTpmQuote(requestHandler), []string{postQuotePerm}))).Methods(http.MethodPost)
-	subRouter.HandleFunc("/binding-key-certificate", errorHandler(requiresPermission(controllers.GetBindingKeyCertificate(requestHandler), []string{getBindingKeyPerm}))).Methods(http.MethodGet)
-	subRouter.HandleFunc("/tag", errorHandler(requiresPermission(controllers.SetAssetTag(requestHandler), []string{postDeployTagPerm}))).Methods(http.MethodPost)
-	subRouter.HandleFunc("/host/application-measurement", errorHandler(requiresPermission(controllers.GetApplicationMeasurement(requestHandler), []string{postAppMeasurementPerm}))).Methods(http.MethodPost)
-	subRouter.HandleFunc("/deploy/manifest", errorHandler(requiresPermission(controllers.DeployManifest(requestHandler), []string{postDeployManifestPerm}))).Methods(http.MethodPost)
+	subRouter.HandleFunc("/aik", ErrorHandler(RequiresPermission(controllers.GetAik(requestHandler), []string{getAIKPerm}))).Methods(http.MethodGet)
+	subRouter.HandleFunc("/host", ErrorHandler(RequiresPermission(controllers.GetPlatformInfo(requestHandler, constants.PlatformInfoFilePath), []string{getHostInfoPerm}))).Methods(http.MethodGet)
+	subRouter.HandleFunc("/tpm/quote", ErrorHandler(RequiresPermission(controllers.GetTpmQuote(requestHandler), []string{postQuotePerm}))).Methods(http.MethodPost)
+	subRouter.HandleFunc("/binding-key-certificate", ErrorHandler(RequiresPermission(controllers.GetBindingKeyCertificate(requestHandler), []string{getBindingKeyPerm}))).Methods(http.MethodGet)
+	subRouter.HandleFunc("/tag", ErrorHandler(RequiresPermission(controllers.SetAssetTag(requestHandler), []string{postDeployTagPerm}))).Methods(http.MethodPost)
+	subRouter.HandleFunc("/host/application-measurement", ErrorHandler(RequiresPermission(controllers.GetApplicationMeasurement(requestHandler), []string{postAppMeasurementPerm}))).Methods(http.MethodPost)
+	subRouter.HandleFunc("/deploy/manifest", ErrorHandler(RequiresPermission(controllers.DeployManifest(requestHandler), []string{postDeployManifestPerm}))).Methods(http.MethodPost)
 }
 
 func setVersionRoutes(router *mux.Router) *mux.Router {
 	log.Trace("router/router:setVersionRoutes() Entering")
 	defer log.Trace("router/router:setVersionRoutes() Leaving")
 
-	router.HandleFunc("/version", errorHandler(controllers.GetVersion())).Methods(http.MethodGet)
+	router.HandleFunc("/version", ErrorHandler(controllers.GetVersion())).Methods(http.MethodGet)
 	return router
 }

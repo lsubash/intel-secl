@@ -36,7 +36,7 @@ func GetAik(requestHandler common.RequestHandler) middleware.EndpointHandler {
 			return &common.EndpointError{Message: "Invalid content-type", StatusCode: http.StatusBadRequest}
 		}
 
-		aikDer, err := requestHandler.GetAikDerBytes()
+		aikDer, err := requestHandler.GetAikDerBytes(constants.AikCert)
 		if err != nil {
 			log.WithError(err).Errorf("controllers/aik:GetAik) %s - There was an error reading %s", message.AppRuntimeErr, constants.AikCert)
 			return &common.EndpointError{Message: "Unable to fetch AIK certificate", StatusCode: http.StatusInternalServerError}

@@ -25,7 +25,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (handler *requestHandlerImpl) GetTpmQuote(quoteRequest *taModel.TpmQuoteRequest) (*taModel.TpmQuoteResponse, error) {
+func (handler *requestHandlerImpl) GetTpmQuote(quoteRequest *taModel.TpmQuoteRequest,
+	aikCertPath string, measureLogFilePath string, ramfsDir string) (*taModel.TpmQuoteResponse, error) {
 
 	tpmFactory, err := tpmprovider.LinuxTpmFactoryProvider{}.NewTpmFactory()
 	if err != nil {
@@ -41,10 +42,11 @@ func (handler *requestHandlerImpl) GetTpmQuote(quoteRequest *taModel.TpmQuoteReq
 	if quoteRequest == nil {
 		return nil, errors.New("common/quote:getTpmQuote() - TPM quote request cannot be nil")
 	}
-	return CreateTpmQuoteResponse(handler.cfg, tpm, quoteRequest)
+	return CreateTpmQuoteResponse(handler.cfg, tpm, quoteRequest, aikCertPath, measureLogFilePath, ramfsDir)
 }
 
-func CreateTpmQuoteResponse(cfg *config.TrustAgentConfiguration, tpm tpmprovider.TpmProvider, tpmQuoteRequest *taModel.TpmQuoteRequest) (*taModel.TpmQuoteResponse, error) {
+func CreateTpmQuoteResponse(cfg *config.TrustAgentConfiguration, tpm tpmprovider.TpmProvider, tpmQuoteRequest *taModel.TpmQuoteRequest,
+	aikCertPath string, measureLogFilePath string, ramfsDir string) (*taModel.TpmQuoteResponse, error) {
 
 	var err error
 
@@ -72,7 +74,7 @@ func CreateTpmQuoteResponse(cfg *config.TrustAgentConfiguration, tpm tpmprovider
 		}
 	}
 
-	tpmQuoteResponse, err := createTpmQuote(cfg.Tpm.TagSecretKey, tpm, tpmQuoteRequest)
+	tpmQuoteResponse, err := createTpmQuote(cfg.Tpm.TagSecretKey, tpm, tpmQuoteRequest, aikCertPath, measureLogFilePath, ramfsDir)
 	if err != nil {
 		return nil, errors.Wrapf(err, "common/quote:CreateTpmQuoteResponse() %s - Error while creating the tpm quote", message.AppRuntimeErr)
 	}
@@ -126,34 +128,34 @@ func getNonce(tpmQuoteRequest *taModel.TpmQuoteRequest, assetTag string) ([]byte
 	return taNonce, nil
 }
 
-func readAikAsBase64() (string, error) {
+func readAikAsBase64(aikCertPath string) (string, error) {
 	log.Trace("common/quote:readAikAsBase64() Entering")
 	defer log.Trace("common/quote:readAikAsBase64() Leaving")
 
-	if _, err := os.Stat(constants.AikCert); os.IsNotExist(err) {
+	if _, err := os.Stat(aikCertPath); os.IsNotExist(err) {
 		return "", err
 	}
 
-	aikBytes, err := ioutil.ReadFile(constants.AikCert)
+	aikBytes, err := ioutil.ReadFile(aikCertPath)
 	if err != nil {
-		return "", errors.Wrapf(err, "common/quote:readAikAsBase64() Error reading file %s", constants.AikCert)
+		return "", errors.Wrapf(err, "common/quote:readAikAsBase64() Error reading file %s", aikCertPath)
 	}
 
 	return base64.StdEncoding.EncodeToString(aikBytes), nil
 }
 
-func readEventLog() (string, error) {
+func readEventLog(measureLogFilePath string) (string, error) {
 	log.Trace("common/quote:readEventLog() Entering")
 	defer log.Trace("common/quote:readEventLog() Leaving")
 
-	if _, err := os.Stat(constants.MeasureLogFilePath); os.IsNotExist(err) {
-		log.Debugf("esource/quote:readEventLog() Event log file '%s' was not present", constants.MeasureLogFilePath)
+	if _, err := os.Stat(measureLogFilePath); os.IsNotExist(err) {
+		log.Debugf("esource/quote:readEventLog() Event log file '%s' was not present", measureLogFilePath)
 		return "", nil // If the file does not exist, do not include in the quote
 	}
 
-	eventLogBytes, err := ioutil.ReadFile(constants.MeasureLogFilePath)
+	eventLogBytes, err := ioutil.ReadFile(measureLogFilePath)
 	if err != nil {
-		return "", errors.Wrapf(err, "common/quote:readEventLog() Error reading file: %s", constants.MeasureLogFilePath)
+		return "", errors.Wrapf(err, "common/quote:readEventLog() Error reading file: %s", measureLogFilePath)
 	}
 
 	// Make sure the bytes are valid json
@@ -178,21 +180,21 @@ func getQuote(tpm tpmprovider.TpmProvider, tpmQuoteRequest *taModel.TpmQuoteRequ
 
 // create an array of "tcbMeasurments", each from the  xml escaped string
 // of the files located in /opt/trustagent/var/ramfs
-func getTcbMeasurements() ([]string, error) {
+func getTcbMeasurements(ramfsDir string) ([]string, error) {
 	log.Trace("common/quote:getTcbMeasurements() Entering")
 	defer log.Trace("common/quote:getTcbMeasurements() Leaving")
 
 	measurements := []string{}
 
-	fileInfo, err := ioutil.ReadDir(constants.RamfsDir)
+	fileInfo, err := ioutil.ReadDir(ramfsDir)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, file := range fileInfo {
 		if filepath.Ext(file.Name()) == ".xml" {
-			log.Debugf("common/quote:getTcbMeasurements() Including measurement file '%s/%s'", constants.RamfsDir, file.Name())
-			xml, err := ioutil.ReadFile(path.Join(constants.RamfsDir, file.Name()))
+			log.Debugf("common/quote:getTcbMeasurements() Including measurement file '%s/%s'", ramfsDir, file.Name())
+			xml, err := ioutil.ReadFile(path.Join(ramfsDir, file.Name()))
 			if err != nil {
 				return nil, errors.Wrapf(err, "common/quote:getTcbMeasurements() Error reading manifest file %s", file.Name())
 			}
@@ -249,7 +251,8 @@ func getAssetTags(tagSecretKey string, tpm tpmprovider.TpmProvider) (string, err
 	return base64.StdEncoding.EncodeToString(indexBytes), nil // this data will be evaluated in 'getNonce'
 }
 
-func createTpmQuote(tagSecretKey string, tpm tpmprovider.TpmProvider, tpmQuoteRequest *taModel.TpmQuoteRequest) (*taModel.TpmQuoteResponse, error) {
+func createTpmQuote(tagSecretKey string, tpm tpmprovider.TpmProvider, tpmQuoteRequest *taModel.TpmQuoteRequest,
+	aikCertPath string, measureLogFilePath string, ramfsDir string) (*taModel.TpmQuoteResponse, error) {
 	log.Trace("common/quote:createTpmQuote() Entering")
 	defer log.Trace("common/quote:createTpmQuote() Leaving")
 
@@ -283,18 +286,18 @@ func createTpmQuote(tagSecretKey string, tpm tpmprovider.TpmProvider, tpmQuoteRe
 	}
 
 	// aik --> read from disk and convert to PEM string
-	tpmQuoteResponse.Aik, err = readAikAsBase64()
+	tpmQuoteResponse.Aik, err = readAikAsBase64(aikCertPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "common/quote:createTpmQuote() Error while reading Aik as Base64")
 	}
 
 	// eventlog: read /opt/trustagent/var/measure-log.json
-	tpmQuoteResponse.EventLog, err = readEventLog()
+	tpmQuoteResponse.EventLog, err = readEventLog(measureLogFilePath)
 	if err != nil {
 		return nil, errors.Wrap(err, "common/quote:createTpmQuote() Error while reading event log")
 	}
 
-	tpmQuoteResponse.TcbMeasurements.TcbMeasurements, err = getTcbMeasurements()
+	tpmQuoteResponse.TcbMeasurements.TcbMeasurements, err = getTcbMeasurements(ramfsDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "common/quote:createTpmQuote() Error while retrieving TCB measurements")
 	}

@@ -10,14 +10,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetEndorsementKeyCertificateBytes(ownerSecretKey string) ([]byte, error) {
+func GetEndorsementKeyCertificateBytes(ownerSecretKey string, tpmFactory tpmprovider.TpmFactory) ([]byte, error) {
 	log.Trace("util/endorsement_certificate:GetEndorsementKeyCertificateBytes() Entering")
 	defer log.Trace("util/endorsement_certificate:GetEndorsementKeyCertificateBytes() Leaving")
-
-	tpmFactory, err := tpmprovider.LinuxTpmFactoryProvider{}.NewTpmFactory()
-	if err != nil {
-		return nil, errors.Wrap(err, "util/endorsement_certificate:GetEndorsementKeyCertificateBytes() Could not create tpm factory")
-	}
 
 	//---------------------------------------------------------------------------------------------
 	// Get the endorsement key certificate from the tpm

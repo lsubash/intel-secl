@@ -13,6 +13,7 @@ import (
 	"net/http"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/common"
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
@@ -48,7 +49,7 @@ func GetApplicationMeasurement(requestHandler common.RequestHandler) middleware.
 			return &common.EndpointError{Message: "Error: Invalid XML format", StatusCode: http.StatusBadRequest}
 		}
 
-		measurement, err := requestHandler.GetApplicationMeasurement(&manifest)
+		measurement, err := requestHandler.GetApplicationMeasurement(&manifest, constants.TBootXmMeasurePath, constants.LogDir)
 		if err != nil {
 			log.WithError(err).Errorf("controllers/measure:GetApplicationMeasurement() %s - Error getting measurement", message.AppRuntimeErr)
 			return err
