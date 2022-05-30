@@ -16,7 +16,7 @@ K8S_EXTENSIONS_TARGETS = admission-controller isecl-k8s-controller isecl-k8s-sch
 K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls tagent wlagent $(K8S_EXTENSIONS_TARGETS)
 
 $(TARGETS):
-	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
+	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=https://proxy.golang.org,direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=https://proxy.golang.org,direct \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 tagent:
