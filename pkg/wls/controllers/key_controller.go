@@ -7,6 +7,12 @@ package controllers
 import (
 	"encoding/json"
 	"encoding/xml"
+	"net/http"
+	"net/url"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/hvsclient"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/kbs"
@@ -23,11 +29,6 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/wls/keycache"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"net/url"
-	"regexp"
-	"strings"
-	"time"
 )
 
 type KeyController struct {
@@ -67,7 +68,7 @@ func (kcon *KeyController) RetrieveKey(w http.ResponseWriter, r *http.Request) (
 	keyUrl := formBody.KeyUrl
 	// Check if flavor keyUrl is not empty
 	if len(keyUrl) > 0 {
-		key, err := transferKey(false, hwid, keyUrl, "", kcon.config, kcon.CertStore)
+		key, err := TransferKey(false, hwid, keyUrl, "", kcon.config, kcon.CertStore)
 		if err != nil {
 			cLog.WithError(err).Error("controller/key_controller:RetrieveKey() Error while retrieving key")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: err.Error()}
@@ -90,7 +91,7 @@ func (kcon *KeyController) RetrieveKey(w http.ResponseWriter, r *http.Request) (
 // Verifies host and retrieves key from KBS
 // getFlavor is true for the images API and false for the keys API
 // id is only required when using the images API
-func transferKey(getFlavor bool, hwid string, kUrl string, id string, cfg *config.Configuration, certStore *crypt.CertificatesStore) ([]byte, error) {
+func TransferKey(getFlavor bool, hwid string, kUrl string, id string, cfg *config.Configuration, certStore *crypt.CertificatesStore) ([]byte, error) {
 	var endpoint, funcName, retrievalErr string
 	if getFlavor {
 		endpoint = "resource/images"

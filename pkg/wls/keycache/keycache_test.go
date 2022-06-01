@@ -6,9 +6,10 @@
 package keycache
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var t1 = time.Now()
@@ -50,4 +51,71 @@ func TestOverwrite(t *testing.T) {
 	actual, exists := cache.Get("foobar")
 	assert.True(exists)
 	assert.Equal(key2, actual)
+}
+
+func TestGet(t *testing.T) {
+
+	testCache := Key{
+		ID:      "1000",
+		Bytes:   []byte("testkey"),
+		Created: time.Now(),
+		Expired: time.Now(),
+	}
+
+	global.keys = map[string]Key{"key1": testCache}
+
+	type args struct {
+		imageID string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "Should be successful",
+			args: args{
+				imageID: "key1",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			keyRetrieved, ok := Get(tt.args.imageID)
+			gKey := global.keys["key1"]
+			if !ok {
+				t.Errorf("wls/keycache:TestGet(): error = Key not found")
+				return
+			} else if ok && keyRetrieved.ID != gKey.ID {
+				t.Errorf("wls/keycache:TestGet(): error = Key ID is not matching")
+				return
+			}
+		})
+	}
+}
+
+func TestStore(t *testing.T) {
+	type args struct {
+		imageID string
+		key     Key
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "Should be successful",
+			args: args{
+				imageID: "1000",
+				key: Key{
+					ID:    "1000",
+					Bytes: []byte("testkey"),
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			Store(tt.args.imageID, tt.args.key)
+		})
+	}
 }

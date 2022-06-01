@@ -40,7 +40,9 @@ const (
 
 	//saml directory
 	SamlCaCertDir = ConfigDir + "certs/saml/"
+)
 
+var (
 	// saml key and cert
 	SamlCaCertFilePath = SamlCaCertDir + "SamlCaCert.pem"
 )
