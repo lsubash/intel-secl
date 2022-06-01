@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 )
 
@@ -102,6 +103,11 @@ func TestUpdateServiceConfig_Validate(t *testing.T) {
 			Username: "",
 			Password: "",
 		},
+		Log: commConfig.LogConfig{
+			MaxLength:    constants.DefaultLogEntryMaxlength,
+			Level:        constants.DefaultLogLevel,
+			EnableStdout: true,
+		},
 	}
 
 	case2 := &config.Configuration{
@@ -109,12 +115,34 @@ func TestUpdateServiceConfig_Validate(t *testing.T) {
 			Username: "ihubUser",
 			Password: "",
 		},
+		Log: commConfig.LogConfig{
+			MaxLength:    constants.DefaultLogEntryMaxlength,
+			Level:        constants.DefaultLogLevel,
+			EnableStdout: true,
+		},
 	}
 
 	case3 := &config.Configuration{
 		IHUB: commConfig.ServiceConfig{
 			Username: "ihubUser",
 			Password: "ihubPass",
+		},
+		Log: commConfig.LogConfig{
+			MaxLength:    constants.DefaultLogEntryMaxlength,
+			Level:        constants.DefaultLogLevel,
+			EnableStdout: true,
+		},
+	}
+
+	case4 := &config.Configuration{
+		IHUB: commConfig.ServiceConfig{
+			Username: "ihubUser",
+			Password: "ihubPass",
+		},
+		Log: commConfig.LogConfig{
+			MaxLength:    10,
+			Level:        constants.DefaultLogLevel,
+			EnableStdout: true,
 		},
 	}
 
@@ -149,6 +177,13 @@ func TestUpdateServiceConfig_Validate(t *testing.T) {
 				AppConfig: &case3,
 			},
 			wantErr: false,
+		},
+		{
+			name: "test-updateserviceconfig-validate case 4",
+			fields: fields{
+				AppConfig: &case4,
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

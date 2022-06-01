@@ -8,12 +8,14 @@ package tasks
 import (
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io"
+	"strconv"
 )
 
 type UpdateServiceConfig struct {
@@ -46,7 +48,6 @@ func (uc UpdateServiceConfig) Run() error {
 	if uc.AASApiUrl == "" {
 		return errors.New("IHUB configuration not provided: AAS_BASE_URL is not set")
 	}
-
 	(*uc.AppConfig).IHUB = uc.ServiceConfig
 	(*uc.AppConfig).AASBaseUrl = uc.AASApiUrl
 	(*uc.AppConfig).Log = commConfig.LogConfig{
@@ -63,6 +64,9 @@ func (uc UpdateServiceConfig) Validate() error {
 	}
 	if (*uc.AppConfig).IHUB.Password == "" {
 		return errors.New("IHUB password is not set in the configuration")
+	}
+	if (*uc.AppConfig).Log.MaxLength < constants.MinLogLengthLimit || (*uc.AppConfig).Log.MaxLength > constants.MaxLogLengthLimit {
+		return errors.New("tasks/update_service_config:Validate() Configured Log Length not valid. Please specify value within " + strconv.Itoa(constants.MinLogLengthLimit) + " and " + strconv.Itoa(constants.MaxLogLengthLimit))
 	}
 	return nil
 }

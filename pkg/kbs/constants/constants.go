@@ -57,6 +57,8 @@ const (
 	// log constants
 	DefaultLogLevel     = "info"
 	DefaultLogMaxlength = 1500
+	MaxLogLengthLimit   = 3000
+	MinLogLengthLimit   = 300
 
 	// server constants
 	DefaultReadTimeout       = 30 * time.Second

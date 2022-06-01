@@ -7,7 +7,9 @@ package tasks
 
 import (
 	"fmt"
+	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
@@ -103,6 +105,9 @@ func (uc UpdateServiceConfig) Validate() error {
 	if (*uc.AppConfig).Server.Port < 1024 ||
 		(*uc.AppConfig).Server.Port > 65535 {
 		return errors.New("Configured port is not valid")
+	}
+	if (*uc.AppConfig).Log.MaxLength < constants.MinLogLengthLimit || (*uc.AppConfig).Log.MaxLength > constants.MaxLogLengthLimit {
+		return errors.New("tasks/update_service_config:Validate() Configured Log Length not valid. Please specify value within " + strconv.Itoa(constants.MinLogLengthLimit) + " and " + strconv.Itoa(constants.MaxLogLengthLimit))
 	}
 	if _, validInput := allowedKeyManagers[strings.ToLower((*uc.AppConfig).KeyManager)]; !validInput {
 		return errors.New("Invalid value provided for KEY_MANAGER. Value should be kmip")
