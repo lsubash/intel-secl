@@ -11,8 +11,12 @@ const (
 
 const (
 	LogFilePath = "/var/log/isecl-k8s-scheduler/isecl-scheduler.log"
-	HttpLogFile = "/var/log/isecl-k8s-scheduler/isecl-k8s-scheduler-http.log"
+	InstallPath = "/opt/isecl-k8s-extensions/"
 	FilePerms   = 0664
+)
+
+var (
+	HttpLogFile = "/var/log/isecl-k8s-scheduler/isecl-k8s-scheduler-http.log"
 )
 
 const (

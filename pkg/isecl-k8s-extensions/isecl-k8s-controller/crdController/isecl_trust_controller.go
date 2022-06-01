@@ -8,16 +8,17 @@ package crdController
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/isecl-k8s-extensions/isecl-k8s-controller/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/isecl-k8s-extensions/isecl-k8s-controller/crdLabelAnnotate"
 	ha_schema "github.com/intel-secl/intel-secl/v5/pkg/isecl-k8s-extensions/isecl-k8s-controller/crdSchema/api/hostattribute/v1beta1"
 	ha_client "github.com/intel-secl/intel-secl/v5/pkg/isecl-k8s-extensions/isecl-k8s-controller/crdSchema/client/clientset/versioned/typed/hostattribute/v1beta1"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	runtime2 "k8s.io/apimachinery/pkg/runtime"
@@ -267,23 +268,23 @@ func AddHostAttributesTabObj(haobj *ha_schema.HostAttributesCrd, helper crdLabel
 			defaultLog.Fatalf("Error: %v", err)
 		}
 		mutex.Lock()
-		helper.AddLabelsAnnotations(node, lbl, ann, tagPrefix)
+		crdLabelAnnotate.AddLabelsAnnotations(node, lbl, ann, tagPrefix)
 		// NoExec Taints on nodes enforced optionally
 		if TaintUntrustedNodes {
 			if !ele.Trusted {
 				// Taint the node with no execute
-				if err = helper.AddTaint(node, "untrusted", "true", "NoExecute"); err != nil {
+				if err = crdLabelAnnotate.AddTaint(node, "untrusted", "true", "NoExecute"); err != nil {
 					defaultLog.Errorf("Unable to add NoExecute taints: %s", err.Error())
 				}
-				if err = helper.AddTaint(node, "untrusted", "true", "NoSchedule"); err != nil {
+				if err = crdLabelAnnotate.AddTaint(node, "untrusted", "true", "NoSchedule"); err != nil {
 					defaultLog.Errorf("Unable to add NoSchedule taints: %s", err.Error())
 				}
 			} else {
 				//Remove Taint from node with no execute
-				if err = helper.DeleteTaint(node, "untrusted", "true", "NoExecute"); err != nil {
+				if err = crdLabelAnnotate.DeleteTaint(node, "untrusted", "true", "NoExecute"); err != nil {
 					defaultLog.Errorf("Unable to delete NoExecute taints: %s", err.Error())
 				}
-				if err = helper.DeleteTaint(node, "untrusted", "true", "NoSchedule"); err != nil {
+				if err = crdLabelAnnotate.DeleteTaint(node, "untrusted", "true", "NoSchedule"); err != nil {
 					defaultLog.Errorf("Unable to delete NoSchedule taints: %s", err.Error())
 				}
 			}
@@ -421,12 +422,12 @@ func TaintNode(Mutex *sync.Mutex, nodeHelper crdLabelAnnotate.APIHelpers, name s
 			}
 		}
 
-		err = nodeHelper.AddTaint(node, "untrusted", "true", "NoSchedule")
+		err = crdLabelAnnotate.AddTaint(node, "untrusted", "true", "NoSchedule")
 		if err != nil {
 			defaultLog.Errorf("crdController/isecl_trust_controller:TaintNode() Failed to add NoSchedule taint: %v", err.Error())
 		}
 
-		err = nodeHelper.AddTaint(node, "untrusted", "true", "NoExecute")
+		err = crdLabelAnnotate.AddTaint(node, "untrusted", "true", "NoExecute")
 		if err != nil {
 			defaultLog.Errorf("crdController/isecl_trust_controller:TaintNode() Failed to add NoExecute taint: %v", err.Error())
 		}
