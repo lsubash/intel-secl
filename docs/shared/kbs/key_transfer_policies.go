@@ -202,6 +202,185 @@ type KeyTransferPolicyCollection struct {
 
 // ---
 
+// swagger:operation PUT /key-transfer-policies/<policy-id> KeyTransferPolicies UpdateKeyTransferPolicy
+// ---
+//
+// description: |
+//   Update a key transfer policy. Transfer-Policy with only one attestation-type i.e; SGX or TDX can be Updated at a time.
+//
+//   The serialized KeyTransferPolicy Go struct object represents the content of the request body.
+//
+//    | Attribute                                    | Description |
+//    |----------------------------------------------|-------------|
+//    | attestation_type                             | Array of Attestation Type identifiers that client must support to get the key. Expect client to advertise these with the key request e.g. "SGX", "TDX" (note that if key server needs to restrict technologies, then it should list only the ones that can receive the key). |
+//    | mrsigner                                     | Array of measurements of SGX enclave’s code signing certificate. This is mandatory. The same issuer must be added as a trusted certificate in key server configuration settings. |
+//    | isvprodid                                    | Array of (16-bit value) (ISVPRODID). This is mandatory. This is like a qualifier for the issuer so same issuer (code signing) key can sign separate products. |
+//    | mrenclave                                    | Array of enclave measurements that are allowed to retrieve the key (MRENCLAVE). Expect client to have one of these measurements in the SGX quote (this supports use case of providing key only to an SGX enclave that will enforce the key usage policy locally). |
+//    | isvsvn                                       | Minimum security version number required for Enclave. |
+//    | client_permissions                           | Array of permission to expect in client api key. Expect client api key to have all of these names. |
+//    | mrsignerseam                                 | Array of measurements of seam module issuer. This is mandatory. |
+//    | mrseam                                       | Array of measurements of seam module. This is mandatory. |
+//    | mrtd                                         | Array of TD measurements. |
+//    | rtmr0                                        | Measurement extended to RTMR0. |
+//    | rtmr1                                        | Measurement extended to RTMR1. |
+//    | rtmr2                                        | Measurement extended to RTMR2. |
+//    | rtmr3                                        | Measurement extended to RTMR3. |
+//    | seamsvn                                      | Minimum security version number of seam module. |
+//    | enforce_tcb_upto_date                        | Boolean value to enforce Up-To-Date TCB. |
+//    | policy_ids                                   | Array of TD/Enclave Attestation Policy Ids. |
+//
+// x-permissions: keys-transfer-policies:update
+// security:
+//  - bearerAuth: []
+// produces:
+// - application/json
+// consumes:
+// - application/json
+// parameters:
+// - name: request body
+//   required: true
+//   in: body
+//   schema:
+//    "$ref": "#/definitions/KeyTransferPolicy"
+// - name: Content-Type
+//   description: Content-Type header
+//   in: header
+//   type: string
+//   required: true
+//   enum:
+//     - application/json
+// - name: Accept
+//   description: Accept header
+//   in: header
+//   type: string
+//   required: true
+//   enum:
+//     - application/json
+// responses:
+//   '200':
+//     description: Successfully updated the key transfer policy.
+//     content:
+//       application/json
+//     schema:
+//       $ref: "#/definitions/KeyTransferPolicy"
+//   '400':
+//     description: Invalid request body provided
+//   '415':
+//     description: Invalid Accept Header in Request
+//   '500':
+//     description: Internal server error
+//
+// x-sample-call-endpoint: https://kbs.com:9443/kbs/v1/key-transfer-policies/d0c3f191-80f9-408f-a690-0dde00ba65ac
+// x-sgx-sample-call-input: |
+//    {
+//      "attestation_type": ["SGX"],
+//      "sgx": {
+//          "attributes": {
+//              "mrsigner": ["cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"],
+//              "isvprodid": [12],
+//              "mrenclave": ["01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"],
+//              "isvsvn": 1,
+//              "client_permissions":["nginx","USA"],
+//              "enforce_tcb_upto_date": false
+//          },
+//          "policy_ids": ["37965f5f-ccaf-4cdc-a356-a8ed5268a5bf", "9846bf40-e380-4842-ae15-1b60996d1190"]
+//      }
+//    }
+// x-sgx-sample-call-output: |
+//    {
+//      "id": "d0c3f191-80f9-408f-a690-0dde00ba65ac",
+//      "created_at": "2021-08-20T06:30:35.085644391Z",
+//      "updated_at": "2021-09-20T06:30:35.085644391Z"
+//      "attestation_type": [
+//          "SGX"
+//      ],
+//      "sgx": {
+//        "attributes": {
+//            "mrsigner": [
+//                "cd171c56941c6ce49690b455f691d9c8a04c2e43e0a4d30f752fa5285c7ee57f"
+//            ],
+//            "isvprodid": [
+//                12
+//            ],
+//            "mrenclave": [
+//                "01c60b9617b2f96e53cb75ef01e0dccea3afc7b7992697eabb8f714b2ccd1953"
+//            ],
+//            "isvsvn": 1,
+//            "client_permissions": [
+//                "nginx",
+//                "USA"
+//            ],
+//            "enforce_tcb_upto_date": false
+//        },
+//        "policy_ids": [
+//            "37965f5f-ccaf-4cdc-a356-a8ed5268a5bf",
+//            "9846bf40-e380-4842-ae15-1b60996d1190"
+//        ]
+//      }
+//    }
+// x-tdx-sample-call-input: |
+//    {
+//      "attestation_type": [
+//          "TDX"
+//      ],
+//      "tdx": {
+//        "attributes": {
+//            "mrsignerseam": [
+//                "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+//            ],
+//            "mrseam": [
+//                "0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+//            ],
+//            "mrtd": [
+//                "cf656414fc0f49b23e2ae64b6f23b82901e2206aab36b671e360ebd414899dab51bbb60134bbe6ad8dcc70b995d9dc50"
+//            ],
+//            "rtmr0": "b90abd43736381b12fc9b038924c73e31c8371674905e7fcb7941d69fe59d30eda3adb9e41b878151e756fb05ad13d14",
+//            "rtmr1": "a53c98b16f0de470338e7f072d9c5fcef6171327ec6c78b842e637251b1de6e37354c47fb68de27ef14bb67caf288d9b",
+//            "rtmr2": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+//            "rtmr3": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+//            "seamsvn": 0,
+//            "enforce_tcb_upto_date": false
+//        },
+//        "policy_ids": [
+//            "37965f5f-ccaf-4cdc-a356-a8ed5268a5bf", "9846bf40-e380-4842-ae15-1b60996d1190"
+//        ]
+//      }
+//    }
+// x-tdx-sample-call-output: |
+//    {
+//      "id": "d0c3f191-80f9-408f-a690-0dde00ba65ac",
+//      "created_at": "2021-08-20T05:51:39.588320016Z",
+//      "updated_at": "2021-09-20T06:30:35.085644391Z",
+//      "attestation_type": [
+//          "TDX"
+//      ],
+//      "tdx": {
+//        "attributes": {
+//            "mrsignerseam": [
+//                "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+//            ],
+//            "mrseam": [
+//                "0f3b72d0f9606086d6a7800e7d50b82fa6cb5ec64c7210353a0696c1eef343679bf5b9e8ec0bf58ab3fce10f2c166ebe"
+//            ],
+//            "seamsvn": 0,
+//            "mrtd": [
+//                "cf656414fc0f49b23e2ae64b6f23b82901e2206aab36b671e360ebd414899dab51bbb60134bbe6ad8dcc70b995d9dc50"
+//            ],
+//            "rtmr0": "b90abd43736381b12fc9b038924c73e31c8371674905e7fcb7941d69fe59d30eda3adb9e41b878151e756fb05ad13d14",
+//            "rtmr1": "a53c98b16f0de470338e7f072d9c5fcef6171327ec6c78b842e637251b1de6e37354c47fb68de27ef14bb67caf288d9b",
+//            "rtmr2": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+//            "rtmr3": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+//            "enforce_tcb_upto_date": false
+//        },
+//        "policy_ids": [
+//            "37965f5f-ccaf-4cdc-a356-a8ed5268a5bf",
+//            "9846bf40-e380-4842-ae15-1b60996d1190"
+//        ]
+//      }
+//    }
+
+// ---
+
 // swagger:operation GET /key-transfer-policies/{id} KeyTransferPolicies RetrieveKeyTransferPolicy
 // ---
 //
