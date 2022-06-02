@@ -32,7 +32,7 @@ const (
 func getDuplicateCipherAnnotation(t *testing.T) string {
 
 	jwtHeader := JwtHeader{
-		KeyId:     "C1Chxrgz1/Bk+4N9RE3ZRw9YPH0=",
+		KeyId:     "9VEIrsLPkhR4DWDMNRTsZmBVfJVcjLsXHOHgt5K/jvWLWqEWlZhrDG5VwOEIwlPa",
 		Type:      "",
 		Algorithm: "HS256",
 	}
@@ -102,7 +102,6 @@ func TestFilteredHost(t *testing.T) {
 	pubkey, _ := ioutil.ReadFile(EnvelopePublickeyLocationIseclk8sScheduler)
 
 	label := make(map[string]string)
-	//	annotation := make(map[string]string)
 	hvsannotation := map[string]string{"HvsSignedTrustReport": ann}
 	sgxannotation := map[string]string{"SgxSignedTrustReport": ann}
 	fakeannotation := map[string]string{"FakeReport": ann}
@@ -351,7 +350,7 @@ func TestFilteredHost(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Test 5 SGX attestation with nil pubkey",
+			name: "Test 6 SGX attestation with nil pubkey",
 			args: args{
 				args: &schedulerapi.ExtenderArgs{
 					Pod:       testPod,
@@ -364,7 +363,7 @@ func TestFilteredHost(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Test 6 HVS and SGX attestation together",
+			name: "Test 7 HVS and SGX attestation together",
 			args: args{
 				args: &schedulerapi.ExtenderArgs{
 					Pod:       testPod,
@@ -377,7 +376,7 @@ func TestFilteredHost(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Test 7 NodeSelector nil pod",
+			name: "Test 8 NodeSelector nil pod",
 			args: args{
 				args: &schedulerapi.ExtenderArgs{
 					Pod:   testPodWithNil,
@@ -387,7 +386,7 @@ func TestFilteredHost(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Test 8 nodeListWithFakeAnnotation",
+			name: "Test 9 nodeListWithFakeAnnotation",
 			args: args{
 				args: &schedulerapi.ExtenderArgs{
 					Pod:   testPod,
