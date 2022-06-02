@@ -16,23 +16,23 @@ K8S_EXTENSIONS_TARGETS = admission-controller isecl-k8s-controller isecl-k8s-sch
 K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls tagent wlagent $(K8S_EXTENSIONS_TARGETS)
 
 $(TARGETS):
-	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=https://proxy.golang.org,direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=https://proxy.golang.org,direct \
+	cd cmd/$@ && env GOOS=linux GOSUMDB=off go mod tidy && env GOOS=linux GOSUMDB=off  \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 tagent:
-	cd cmd/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct CGO_CFLAGS_ALLOW="-f.*"  \
+	cd cmd/$@ && env GOOS=linux GOSUMDB=off go mod tidy && env GOOS=linux GOSUMDB=off CGO_CFLAGS_ALLOW="-f.*"  \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 wlagent:
-	cd cmd/wlagent && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct CGO_CFLAGS_ALLOW="-f.*"  \
+	cd cmd/wlagent && env GOOS=linux GOSUMDB=off go mod tidy && env GOOS=linux GOSUMDB=off CGO_CFLAGS_ALLOW="-f.*"  \
 		go build -ldflags "-extldflags=-Wl,--allow-multiple-definition -X github.com/intel-secl/intel-secl/v5/pkg/wlagent/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/wlagent/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/wlagent/version.GitHash=$(GITCOMMIT)" -o wlagent
 
 $(K8S_EXTENSIONS_TARGETS):
-	cd cmd/isecl-k8s-extensions/$@ && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct \
+	cd cmd/isecl-k8s-extensions/$@ && env GOOS=linux GOSUMDB=off go mod tidy && env GOOS=linux GOSUMDB=off \
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 config-upgrade-binary:
-	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o config-upgrade
+	cd pkg/lib/common/upgrades && env GOOS=linux GOSUMDB=off go mod tidy && env GOOS=linux GOSUMDB=off go build -o config-upgrade
 
 %-pre-installer: % config-upgrade-binary
 	mkdir -p installer
@@ -105,7 +105,7 @@ tagent-docker: tagent config-upgrade-binary
 	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/tagent/Dockerfile -t $(DOCKER_REGISTRY)isecl/tagent:$(VERSION)-$(GITCOMMIT) .
 
 %-swagger:
-	env GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
+	env GOOS=linux GOSUMDB=off go mod tidy
 	mkdir -p docs/swagger
 	swagger generate spec -w ./docs/shared/$* -o ./docs/swagger/$*-openapi.yml
 	swagger validate ./docs/swagger/$*-openapi.yml
@@ -118,7 +118,7 @@ docker: $(patsubst %, %-docker, $(K8S_TARGETS))
 	skopeo copy docker-daemon:isecl/$*:$(VERSION)-$(GITCOMMIT) oci-archive:deployments/container-archive/oci/$*-$(VERSION)-$(GITCOMMIT).tar:$(VERSION)
 
 populate-users:
-	cd tools/aas-manager && env GOOS=linux GOSUMDB=off GOPROXY=direct go build -o populate-users
+	cd tools/aas-manager && env GOOS=linux GOSUMDB=off go build -o populate-users
 
 aas-manager: populate-users
 	cp tools/aas-manager/populate-users deployments/installer/populate-users.sh
@@ -137,9 +137,9 @@ download-eca:
 	rm -rf certs
 
 test:
-	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct go mod tidy
-	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct go build github.com/intel-secl/pkg/tagent/...
-	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off GOPROXY=direct go test ./... -coverprofile cover.out
+	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off go mod tidy
+	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off go build github.com/intel-secl/pkg/tagent/...
+	env CGO_CFLAGS_ALLOW="-f.*" GOOS=linux GOSUMDB=off go test ./... -coverprofile cover.out
 	go tool cover -func cover.out
 	go tool cover -html=cover.out -o cover.html
 
