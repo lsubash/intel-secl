@@ -90,7 +90,7 @@ func TestDownloadSamlCertRun(t *testing.T) {
 	server := testutility.MockServer(t)
 	defer server.Close()
 	time.Sleep(1 * time.Second)
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	tempSamlFile, err := ioutil.TempFile("", "samlCert.pem")

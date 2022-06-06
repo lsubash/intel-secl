@@ -21,6 +21,11 @@ const (
 	IhubServicePassword = "ihub.service-password"
 	HvsBaseUrl          = "attestation-service.hvs-base-url"
 	FdsBaseUrl          = "attestation-service.fds-base-url"
+	Tenant              = "tenant"
+	KubernetesUrl       = "kubernetes-url"
+	KubernetesCrd       = "kubernetes-crd"
+	KubernetesToken     = "kubernetes-token"
+	KubernetesCertFile  = "kubernetes-cert-file"
 )
 
 // Configuration is the global configuration struct that is marshalled/unmarshalled to a persisted yaml file
@@ -32,8 +37,8 @@ type Configuration struct {
 
 	Log                commConfig.LogConfig     `yaml:"log"`
 	IHUB               commConfig.ServiceConfig `yaml:"ihub"`
-	AttestationService AttestationConfig        `yaml:"attestation-service"`
-	Endpoint           Endpoint                 `yaml:"end-point"`
+	AttestationService AttestationConfig        `yaml:"attestation-service" mapstructure:"attestation-service"`
+	Endpoint           Endpoint                 `yaml:"end-point" mapstructure:"end-point"`
 	TLS                commConfig.TLSCertConfig `yaml:"tls"`
 }
 

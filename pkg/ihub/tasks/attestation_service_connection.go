@@ -29,16 +29,16 @@ type AttestationServiceConnection struct {
 func (attestationService AttestationServiceConnection) Run() error {
 	fmt.Fprintln(attestationService.ConsoleWriter, "Setting up Attestation Service Connection...")
 
-	attestationHVSURL := viper.GetString("hvs-base-url")
-	FdsUrl := viper.GetString("fds-base-url")
+	HvsUrl := viper.GetString(config.HvsBaseUrl)
+	FdsUrl := viper.GetString(config.FdsBaseUrl)
 
-	if attestationHVSURL == "" && FdsUrl == "" {
+	if HvsUrl == "" && FdsUrl == "" {
 		return errors.New("tasks/attestation_service_connection:Run() Missing HVS and FDS endpoint urls in environment")
 	}
 
-	if attestationHVSURL != "" && !strings.HasSuffix(attestationHVSURL, "/") {
-		attestationHVSURL = attestationHVSURL + "/"
-		if _, err := url.Parse(attestationHVSURL); err != nil {
+	if HvsUrl != "" && !strings.HasSuffix(HvsUrl, "/") {
+		HvsUrl = HvsUrl + "/"
+		if _, err := url.Parse(HvsUrl); err != nil {
 			return errors.Wrap(err, "tasks/attestation_service_connection:Run() HVS URL is invalid")
 		}
 	}
@@ -50,7 +50,7 @@ func (attestationService AttestationServiceConnection) Run() error {
 		}
 	}
 
-	attestationService.AttestationConfig.HVSBaseURL = attestationHVSURL
+	attestationService.AttestationConfig.HVSBaseURL = HvsUrl
 	attestationService.AttestationConfig.FDSBaseURL = FdsUrl
 
 	return nil

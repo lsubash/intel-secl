@@ -23,7 +23,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 	defer server.Close()
 
 	time.Sleep(1 * time.Second)
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	tests := []struct {
@@ -40,7 +40,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"HVS_BASE_URL": server.URL + "/hvs/v2/",
+				"ATTESTATION_SERVICE_HVS_BASE_URL": server.URL + "/hvs/v2/",
 			},
 
 			wantErr: false,
@@ -53,7 +53,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"FDS_BASE_URL": server.URL + "/fds/v1/",
+				"ATTESTATION_SERVICE_FDS_BASE_URL": server.URL + "/fds/v1/",
 			},
 
 			wantErr: false,
@@ -66,7 +66,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"HVS_BASE_URL": "",
+				"ATTESTATION_SERVICE_HVS_BASE_URL": "",
 			},
 
 			wantErr: true,
@@ -90,7 +90,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"HVS_BASE_URL": server.URL + "hvs/v2",
+				"ATTESTATION_SERVICE_HVS_BASE_URL": server.URL + "hvs/v2",
 			},
 
 			wantErr: true,
@@ -103,7 +103,7 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 				ConsoleWriter:     os.Stdout,
 			},
 			EnvValues: map[string]string{
-				"FDS_BASE_URL": server.URL + "fds/v1",
+				"ATTESTATION_SERVICE_FDS_BASE_URL": server.URL + "fds/v1",
 			},
 
 			wantErr: true,

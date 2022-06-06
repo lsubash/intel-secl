@@ -81,7 +81,7 @@ func TestTenantConnectionRun(t *testing.T) {
 	server := testutility.MockServer(t)
 	defer server.Close()
 
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	k8sConfig := testutility.SetupMockK8sConfiguration(t, server.URL)

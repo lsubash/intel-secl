@@ -67,15 +67,15 @@ type Configuration struct {
 	CmsTlsCertDigest string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 
 	HVS      commConfig.ServiceConfig `yaml:"hvs"`
-	AuditLog AuditLogConfig           `yaml:"audit-log"`
+	AuditLog AuditLogConfig           `yaml:"audit-log" mapstructure:"audit-log"`
 
 	TLS           commConfig.TLSCertConfig     `yaml:"tls"`
 	SAML          SAMLConfig                   `yaml:"saml"`
-	FlavorSigning commConfig.SigningCertConfig `yaml:"flavor-signing"`
+	FlavorSigning commConfig.SigningCertConfig `yaml:"flavor-signing" mapstructure:"flavor-signing"`
 
-	PrivacyCA     commConfig.SelfSignedCertConfig `yaml:"privacy-ca"`
-	EndorsementCA commConfig.SelfSignedCertConfig `yaml:"endorsement-ca"`
-	TagCA         commConfig.SelfSignedCertConfig `yaml:"tag-ca"`
+	PrivacyCA     commConfig.SelfSignedCertConfig `yaml:"privacy-ca" mapstructure:"privacy-ca"`
+	EndorsementCA commConfig.SelfSignedCertConfig `yaml:"endorsement-ca" mapstructure:"endorsement-ca"`
+	TagCA         commConfig.SelfSignedCertConfig `yaml:"tag-ca" mapstructure:"tag-ca"`
 
 	Dek             string `yaml:"data-encryption-key" mapstructure:"data-encryption-key"`
 	AikCertValidity int    `yaml:"aik-certificate-validity-years" mapstructure:"aik-certificate-validity-years"`

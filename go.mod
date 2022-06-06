@@ -20,7 +20,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/mattermost/xml-roundtrip-validator v0.0.0-20201213122252-bcd7e1b9601e
 	github.com/nats-io/jwt/v2 v2.2.1-0.20220330180145-442af02fd36a
-	github.com/nats-io/nats.go v1.14.0
+	github.com/nats-io/nats.go v1.15.0
 	github.com/nats-io/nkeys v0.3.0
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/ginkgo/v2 v2.1.3

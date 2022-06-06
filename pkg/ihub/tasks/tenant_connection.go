@@ -32,7 +32,7 @@ type TenantConnection struct {
 func (tenantConnection TenantConnection) Run() error {
 	fmt.Fprintln(tenantConnection.ConsoleWriter, "Setting up Tenant Connection ...")
 
-	endPointType := viper.GetString("tenant")
+	endPointType := viper.GetString(config.Tenant)
 	if endPointType == "" {
 		return errors.New("tasks/tenant_connection:Run() TENANT is not defined in environment")
 	}
@@ -41,10 +41,10 @@ func (tenantConnection TenantConnection) Run() error {
 	tenantConf.Type = endPointType
 
 	if endPointType == constants.K8sTenant {
-		k8sURL := viper.GetString("kubernetes-url")
-		k8sCRDName := viper.GetString("kubernetes-crd")
-		k8sToken := viper.GetString("kubernetes-token")
-		k8sCertFileSrc := viper.GetString("kubernetes-cert-file")
+		k8sURL := viper.GetString(config.KubernetesUrl)
+		k8sCRDName := viper.GetString(config.KubernetesCrd)
+		k8sToken := viper.GetString(config.KubernetesToken)
+		k8sCertFileSrc := viper.GetString(config.KubernetesCertFile)
 		k8sCertFile := tenantConnection.K8SCertFile
 
 		if k8sURL == "" {

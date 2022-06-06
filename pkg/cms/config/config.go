@@ -35,7 +35,7 @@ const (
 type Configuration struct {
 	Log               commConfig.LogConfig    `yaml:"log"`
 	AASApiUrl         string                  `yaml:"aas-base-url" mapstructure:"aas-base-url"`
-	CACert            CACertConfig            `yaml:"cms-ca"`
+	CACert            CACertConfig            `yaml:"cms-ca" mapstructure:"cms-ca"`
 	TlsCertDigest     string                  `yaml:"tls-cert-digest" mapstructure:"tls-cert-digest"`
 	TlsSanList        string                  `yaml:"san-list" mapstructure:"san-list"`
 	TokenDurationMins int                     `yaml:"token-duration-mins" mapstructure:"token-duration-mins"`
