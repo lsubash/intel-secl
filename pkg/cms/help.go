@@ -21,6 +21,7 @@ Available Commands:
     status                         Show the status of cms
     stop                           Stop cms
     tlscertsha384                  Show the SHA384 digest of the certificate used for TLS
+    authtoken                      Show the JWT Token of cms
     uninstall [--purge]            Uninstall cms. --purge option needs to be applied to remove configuration and data files
     -v|--version | version         Show the version of cms
 
@@ -35,7 +36,6 @@ Available Tasks for setup:
     root-ca                   Creates a self signed Root CA key pair in /etc/cms/root-ca/ for quality of life
     intermediate-ca           Creates a Root CA signed intermediate CA key pair(signing, tls-server and tls-client) in /etc/cms/intermediate-ca/ for quality of life
     tls                       Creates an intermediate-ca signed TLS key pair in /etc/cms for quality of life
-    cms-auth-token            Create its own self signed JWT key pair in /etc/cms/jwt for quality of life
     update-service-config     Sets or Updates the Service configuration 
 `
 

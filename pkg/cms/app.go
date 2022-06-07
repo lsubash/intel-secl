@@ -5,16 +5,21 @@
 package cms
 
 import (
+	"encoding/pem"
 	"fmt"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
+	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
+	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
@@ -132,6 +137,20 @@ func (a *App) Run(args []string) error {
 		}
 		fmt.Println(hash)
 		return nil
+	case "authtoken":
+		loadAlias()
+		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+		viper.AutomaticEnv()
+
+		if a.configuration() == nil {
+			a.Config = defaultConfig()
+		}
+		jwt, err := createCmsAuthToken(a.Config, constants.TrustedJWTSigningCertsDir, constants.TokenKeyFile, constants.DefaultKeyAlgorithm, constants.CertApproverGroupName, constants.DefaultKeyAlgorithmLength)
+		if err != nil {
+			return errors.Wrap(err, "app:Run() Could not create CMS auth token")
+		}
+		fmt.Println(jwt)
+		return nil
 	case "run":
 		if len(args) != 2 {
 			return errInvalidCmd
@@ -226,4 +245,42 @@ func (a *App) status() error {
 	cmd.Stderr = os.Stderr
 	cmd.Env = os.Environ()
 	return cmd.Run()
+}
+
+func createCmsAuthToken(conf *config.Configuration, jwtSigningCertsDir, tokenKeyFile, keyAlgorithm, certApproverGroupName string, keyAlgorithmLength int) (jwt string, err error) {
+	log.Trace("app:createCmsAuthToken() Entering")
+	defer log.Trace("app:createCmsAuthToken() Leaving")
+
+	cert, key, err := crypt.CreateKeyPairAndCertificate("CMS JWT Signing", "", keyAlgorithm, keyAlgorithmLength)
+	if err != nil {
+		return "", errors.Wrap(err, "app:createCmsAuthToken() Could not create CMS JWT certificate")
+	}
+
+	err = crypt.SavePrivateKeyAsPKCS8(key, jwtSigningCertsDir+tokenKeyFile)
+	if err != nil {
+		return "", errors.Wrap(err, "app:createCmsAuthToken() Could not save CMS JWT private key")
+	}
+	certPemBytes := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert})
+	err = crypt.SavePemCertWithShortSha1FileName(certPemBytes, jwtSigningCertsDir)
+	if err != nil {
+		return "", errors.Wrap(err, "app:createCmsAuthToken() Could not save CMS JWT certificate")
+	}
+
+	factory, err := jwtauth.NewTokenFactory(key, true, certPemBytes, "CMS JWT Signing", time.Duration(conf.TokenDurationMins)*time.Minute)
+	if err != nil {
+		return "", errors.Wrap(err, "app:createCmsAuthToken() Could not get instance of Token factory")
+	}
+
+	ur := []ct.RoleInfo{
+		{Service: "CMS", Name: certApproverGroupName, Context: "CN=" + conf.AasJwtCn + ";CERTTYPE=JWT-Signing"},
+		{Service: "CMS", Name: certApproverGroupName, Context: "CN=" + conf.AasTlsCn + ";SAN=" + conf.AasTlsSan + ";CERTTYPE=TLS"},
+	}
+	claims := ct.RoleSlice{Roles: ur}
+
+	log.Infof("app:createCmsAuthToken() AAS setup JWT token claims - %v", claims)
+	jwt, err = factory.Create(&claims, "CMS JWT Token", 0)
+	if err != nil {
+		return "", errors.Wrap(err, "app:createCmsAuthToken() Could not create CMS JWT token")
+	}
+	return jwt, nil
 }

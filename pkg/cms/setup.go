@@ -147,15 +147,6 @@ func (a *App) setupTaskRunner() (*setup.Runner, error) {
 		SerialNumberPath: constants.SerialNumberPath,
 		CaAttribs:        constants.CertStoreMap,
 	})
-	runner.AddTask("cms-auth-token", "", &tasks.CmsAuthToken{
-		ConsoleWriter:             a.consoleWriter(),
-		AasTlsCn:                  a.Config.AasTlsCn,
-		AasJwtCn:                  a.Config.AasJwtCn,
-		AasTlsSan:                 a.Config.AasTlsSan,
-		TokenDuration:             a.Config.TokenDurationMins,
-		TrustedJWTSigningCertsDir: constants.TrustedJWTSigningCertsDir,
-		TokenKeyFile:              constants.TokenKeyFile,
-	})
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: a.consoleWriter(),
 		ServerConfig: commConfig.ServerConfig{
