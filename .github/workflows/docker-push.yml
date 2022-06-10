@@ -7,7 +7,7 @@ on:
 jobs:
   docker-push:
     runs-on: RHEL8
-    # TODO: push tagent and wlagent images
+
     env:
       http_proxy: ${{ secrets.HTTP_PROXY }}
       https_proxy: ${{ secrets.HTTPS_PROXY }}
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
            go-version: 1.16.7
-
+                 
       - name: Build-cms-docker
         run: |
           make cms-docker
@@ -51,6 +51,16 @@ jobs:
         run: |
           make kbs-docker
           docker push `docker images | grep kbs | awk '{print $1":"$2}' | awk 'NR==1'`
+          
+      - name: Build-tagent-docker
+        run: |
+          make tagent-docker
+          docker push `docker images | grep tagent | awk '{print $1":"$2}' | awk 'NR==1'`
+          
+      - name: Build-wlagent-docker
+        run: |
+          make wlagent-docker
+          docker push `docker images | grep wlagent | awk '{print $1":"$2}' | awk 'NR==1'`
 
       - name: Build-admission-controller-docker
         run: |
