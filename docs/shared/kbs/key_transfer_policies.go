@@ -202,7 +202,7 @@ type KeyTransferPolicyCollection struct {
 
 // ---
 
-// swagger:operation PUT /key-transfer-policies/<policy-id> KeyTransferPolicies UpdateKeyTransferPolicy
+// swagger:operation PUT /key-transfer-policies/{id} KeyTransferPolicies UpdateKeyTransferPolicy
 // ---
 //
 // description: |
@@ -242,6 +242,12 @@ type KeyTransferPolicyCollection struct {
 //   in: body
 //   schema:
 //    "$ref": "#/definitions/KeyTransferPolicy"
+// - name: id
+//   description: Unique ID of the key transfer policy.
+//   in: path
+//   required: true
+//   type: string
+//   format: uuid
 // - name: Content-Type
 //   description: Content-Type header
 //   in: header
