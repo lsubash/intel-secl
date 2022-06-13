@@ -6,7 +6,6 @@ package common
 
 import (
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/util"
 	"github.com/pkg/errors"
 )
@@ -19,7 +18,7 @@ func (handler *requestHandlerImpl) GetHostInfo(platformInfoFilePath string) (*ta
 
 	hostInfo, err := util.ReadHostInfo(platformInfoFilePath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error reading host-info file %s", constants.PlatformInfoFilePath)
+		return nil, errors.Wrapf(err, "Error reading host-info file %s", platformInfoFilePath)
 	}
 
 	return hostInfo, nil

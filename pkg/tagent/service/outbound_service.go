@@ -24,15 +24,16 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func newOutboundService(natsParameters *NatsParameters, handler common.RequestHandler) (TrustAgentService, error) {
+func newOutboundService(natsParameters *NatsParameters, handler common.RequestHandler, platformInfoFilePath string) (TrustAgentService, error) {
 
 	if natsParameters.HostID == "" {
 		return nil, errors.New("The configuration does not have a 'nats-host-id'.")
 	}
 
 	return &trustAgentOutboundService{
-		handler:        handler,
-		natsParameters: *natsParameters,
+		handler:              handler,
+		natsParameters:       *natsParameters,
+		platformInfoFilePath: platformInfoFilePath,
 	}, nil
 }
 

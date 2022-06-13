@@ -50,7 +50,7 @@ func NewTrustAgentService(parameters *ServiceParameters) (TrustAgentService, err
 
 	if strings.ToLower(parameters.Mode) == constants.CommunicationModeOutbound {
 
-		service, err = newOutboundService(&parameters.Nats, parameters.RequestHandler)
+		service, err = newOutboundService(&parameters.Nats, parameters.RequestHandler, constants.PlatformInfoFilePath)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Error creating the HVS subscriber")
 		}

@@ -11,19 +11,18 @@ import (
 
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
-	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 	"github.com/pkg/errors"
 )
 
 func ReadHostInfo(platformInfoFilePath string) (*taModel.HostInfo, error) {
 	var hostInfo taModel.HostInfo
 	if _, err := os.Stat(platformInfoFilePath); os.IsNotExist(err) {
-		return nil, errors.Wrapf(err, "util/ReadHostInfo() %s - %s does not exist", message.AppRuntimeErr, constants.PlatformInfoFilePath)
+		return nil, errors.Wrapf(err, "util/ReadHostInfo() %s - %s does not exist", message.AppRuntimeErr, platformInfoFilePath)
 	}
 
 	jsonData, err := ioutil.ReadFile(platformInfoFilePath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "util/ReadHostInfo() %s - There was an error reading %s", message.AppRuntimeErr, constants.PlatformInfoFilePath)
+		return nil, errors.Wrapf(err, "util/ReadHostInfo() %s - There was an error reading %s", message.AppRuntimeErr, platformInfoFilePath)
 	}
 
 	err = json.Unmarshal(jsonData, &hostInfo)
