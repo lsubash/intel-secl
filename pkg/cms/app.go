@@ -12,6 +12,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	jwtauth "github.com/intel-secl/intel-secl/v5/pkg/lib/common/jwt"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
+	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/setup"
 	ct "github.com/intel-secl/intel-secl/v5/pkg/model/aas"
 	"github.com/sirupsen/logrus"
@@ -149,6 +150,7 @@ func (a *App) Run(args []string) error {
 		if err != nil {
 			return errors.Wrap(err, "app:Run() Could not create CMS auth token")
 		}
+		cos.ChownDirForUser(constants.ServiceUserName, constants.TrustedJWTSigningCertsDir)
 		fmt.Println(jwt)
 		return nil
 	case "run":

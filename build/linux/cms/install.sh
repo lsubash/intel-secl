@@ -169,20 +169,24 @@ if [ "${CMS_NOSETUP,,}" == "true" ]; then
 else 
     $COMPONENT_NAME setup all -f $env_file --force
     SETUPRESULT=$?
-    chown -R cms:cms /etc/cms/
-    if [ ${SETUPRESULT} == 0 ]; then 
-        systemctl start $COMPONENT_NAME
-        echo "Waiting for daemon to settle down before checking status"
-        sleep 3
-        systemctl status $COMPONENT_NAME 2>&1 > /dev/null
-        if [ $? != 0 ]; then
-            echo "Installation completed with Errors - $COMPONENT_NAME daemon not started."
-            echo "Please check errors in syslog using \`journalctl -u $COMPONENT_NAME\`"
-            exit 1
-        fi
-        echo "$COMPONENT_NAME daemon is running"
-        echo "Installation completed successfully!"
-    else 
-        echo "Installation completed with errors"
+    if [ ${SETUPRESULT} == 0 ]; then
+      echo "Generating JWT authentication token....."
+      $COMPONENT_NAME authtoken
+      if [ $? != 0 ]; then
+        echo "Could not generate CMS authentication token... Please run cms authtoken command"
+      fi
+      systemctl start $COMPONENT_NAME
+      echo "Waiting for daemon to settle down before checking status"
+      sleep 3
+      systemctl status $COMPONENT_NAME 2>&1 > /dev/null
+      if [ $? != 0 ]; then
+        echo "Installation completed with Errors - $COMPONENT_NAME daemon not started."
+        echo "Please check errors in syslog using \`journalctl -u $COMPONENT_NAME\`"
+        exit 1
+      fi
+      echo "$COMPONENT_NAME daemon is running"
+      echo "Installation completed successfully!"
+    else
+      echo "Installation completed with errors"
     fi
 fi
