@@ -109,8 +109,8 @@ func TestNewKeyManager(t *testing.T) {
 			name: "Validate create new key manager with valid kmipclient, should create a new keymanager",
 			args: args{
 				cfg: &config.Configuration{
-					AASBaseUrl:  "https://aas.com:5443/aas/v1/",
-					CMSBaseURL:  "https://cms.com:5443/cms/v1/",
+					AASBaseUrl:  "https://aas.com:8444/aas/v1/",
+					CMSBaseURL:  "https://cms.com:8445/cms/v1/",
 					APSBaseUrl:  "https://aps.com:5443/aps/v1/",
 					CustomToken: token,
 					EndpointURL: "https://localhost:9443/kbs/v1",
@@ -134,8 +134,8 @@ func TestNewKeyManager(t *testing.T) {
 			name: "Validate create new key manager with empty clientkey path, should fail to create new keymanager",
 			args: args{
 				cfg: &config.Configuration{
-					AASBaseUrl:  "https://aas.com:5443/aas/v1/",
-					CMSBaseURL:  "https://cms.com:5443/cms/v1/",
+					AASBaseUrl:  "https://aas.com:8444/aas/v1/",
+					CMSBaseURL:  "https://cms.com:8445/cms/v1/",
 					APSBaseUrl:  "https://aps.com:5443/aps/v1/",
 					CustomToken: token,
 					EndpointURL: "https://localhost:9443/kbs/v1",
@@ -159,8 +159,8 @@ func TestNewKeyManager(t *testing.T) {
 			name: "Validate create new key manager with empty KeyManager type, should fail to create new keymanager",
 			args: args{
 				cfg: &config.Configuration{
-					AASBaseUrl:  "https://aas.com:5443/aas/v1/",
-					CMSBaseURL:  "https://cms.com:5443/cms/v1/",
+					AASBaseUrl:  "https://aas.com:8444/aas/v1/",
+					CMSBaseURL:  "https://cms.com:8445/cms/v1/",
 					APSBaseUrl:  "https://aps.com:5443/aps/v1/",
 					CustomToken: token,
 					EndpointURL: "https://localhost:9443/kbs/v1",

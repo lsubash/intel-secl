@@ -62,7 +62,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("Provide a SamlCertificate without CERTIFICATE headers in request", func() {
-			It("Should fail to import SamlCertificate", func() {
+			It("Should fail to import SamlCertificate with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Import))).Methods(http.MethodPost)
 
 				// Import Request body
@@ -83,7 +83,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("Provide a SamlCertificate without DER data in request", func() {
-			It("Should fail to import SamlCertificate", func() {
+			It("Should fail to import SamlCertificate with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Import))).Methods(http.MethodPost)
 
 				// Import Request body
@@ -120,7 +120,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("Retrieve SamlCertificate by non-existent ID", func() {
-			It("Should fail to retrieve SamlCertificate", func() {
+			It("Should fail to retrieve SamlCertificate with certificate not found error", func() {
 				router.Handle("/saml-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(samlCertController.Retrieve))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates/c00135a8-f5e9-4860-ae6c-4acce525d340", nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -146,7 +146,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("Delete SamlCertificate by non-existent ID", func() {
-			It("Should fail to delete SamlCertificate", func() {
+			It("Should fail to delete SamlCertificate with certificate not found error", func() {
 				router.Handle("/saml-certificates/{id}", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(samlCertController.Delete))).Methods(http.MethodDelete)
 				req, err := http.NewRequest(http.MethodDelete, "/saml-certificates"+"/c00135a8-f5e9-4860-ae6c-4acce525d340", nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -177,7 +177,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When unknown query parameters are passed", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?badparam=value", nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -206,7 +206,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When filtered by an invalid SubjectEqualTo", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?subjectEqualTo=mtwilson<>saml", nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -235,7 +235,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When filtered by an invalid SubjectContains", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?subjectContains=<>saml", nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -264,7 +264,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When filtered by an invalid IssuerEqualTo", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?issuerEqualTo=CMS<>Signing<>CA", nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -293,7 +293,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When filtered by an invalid IssuerContains", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?issuerContains=Signing<>CA", nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -322,7 +322,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When filtered by invalid ValidOn date", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?validOn="+time.Now().Format(time.RFC3339)+"0000000000000", nil)
 				Expect(err).ToNot(HaveOccurred())
@@ -351,7 +351,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When filtered by invalid ValidBefore date", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?validBefore="+time.Now().Format(time.RFC3339)+"01010101010", nil)
 				Expect(err).ToNot(HaveOccurred())
@@ -380,7 +380,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("When filtered by invalid ValidAfter date", func() {
-			It("Should fail to get SamlCertificates", func() {
+			It("Should fail to get SamlCertificates with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/saml-certificates?validAfter="+time.Now().Format(time.RFC3339)+"ABC", nil)
 				Expect(err).ToNot(HaveOccurred())
@@ -391,8 +391,8 @@ var _ = Describe("SamlCertController", func() {
 			})
 		})
 
-		Context("Provide a request with unsupported type", func() {
-			It("Should not import a new SamlCertificate", func() {
+		Context("Provide a request with unsupported media type", func() {
+			It("Should fail to import a new SamlCertificate with unsupported media type error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Import))).Methods(http.MethodPost)
 
 				// Import Request body
@@ -413,7 +413,7 @@ var _ = Describe("SamlCertController", func() {
 		})
 
 		Context("Provide a request with no content", func() {
-			It("Should not import a new SamlCertificate", func() {
+			It("Should fail to import a new SamlCertificate with bad request error", func() {
 				router.Handle("/saml-certificates", kbsRoutes.ErrorHandler(kbsRoutes.JsonResponseHandler(samlCertController.Import))).Methods(http.MethodPost)
 
 				// Import Request body

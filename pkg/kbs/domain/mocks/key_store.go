@@ -20,7 +20,8 @@ var defaultLog = log.GetDefaultLogger()
 
 // MockKeyStore provides a mocked implementation of interface domain.KeyStore
 type MockKeyStore struct {
-	KeyStore map[uuid.UUID]*models.KeyAttributes
+	KeyStore   map[uuid.UUID]*models.KeyAttributes
+	ThrowError bool
 }
 
 // Create inserts a Key into the store
@@ -33,6 +34,9 @@ func (store *MockKeyStore) Create(k *models.KeyAttributes) (*models.KeyAttribute
 func (store *MockKeyStore) Retrieve(id uuid.UUID) (*models.KeyAttributes, error) {
 	if k, ok := store.KeyStore[id]; ok {
 		return k, nil
+	}
+	if store.ThrowError {
+		return nil, errors.New("Internal Server Error")
 	}
 	return nil, errors.New(commErr.RecordNotFound)
 }

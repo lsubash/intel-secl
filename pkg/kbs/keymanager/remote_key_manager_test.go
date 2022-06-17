@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestRemoteManager_CreateKey(t *testing.T) {
+func TestRemoteManagerCreateKey(t *testing.T) {
 	var keyStore *mocks.MockKeyStore
 
 	mockClient := kmipclient.NewMockKmipClient()
@@ -66,6 +66,25 @@ func TestRemoteManager_CreateKey(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Validate create key with valid input with ip, should create a new key",
+			fields: fields{
+				store:       keyStore,
+				manager:     keyManager,
+				endpointURL: "https://127.0.0.1:9443/kbs/v1/",
+			},
+			args: args{
+				request: &kbs.KeyRequest{
+					KeyInformation: &kbs.KeyInformation{
+						ID:        url,
+						Algorithm: "AES",
+						KeyLength: 256,
+					},
+					TransferPolicyID: policyId,
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "Validate create key with empty endpointurl, should fail to create new key",
 			fields: fields{
 				store:       keyStore,
@@ -97,7 +116,7 @@ func TestRemoteManager_CreateKey(t *testing.T) {
 	}
 }
 
-func TestRemoteManager_RetrieveKey(t *testing.T) {
+func TestRemoteManagerRetrieveKey(t *testing.T) {
 	var keyStore *mocks.MockKeyStore
 
 	mockClient := kmipclient.NewMockKmipClient()
@@ -167,7 +186,7 @@ func TestRemoteManager_RetrieveKey(t *testing.T) {
 	}
 }
 
-func TestRemoteManager_DeleteKey(t *testing.T) {
+func TestRemoteManagerDeleteKey(t *testing.T) {
 	var keyStore *mocks.MockKeyStore
 
 	mockClient := kmipclient.NewMockKmipClient()
@@ -244,7 +263,7 @@ func TestRemoteManager_DeleteKey(t *testing.T) {
 	}
 }
 
-func TestRemoteManager_SearchKeys(t *testing.T) {
+func TestRemoteManagerSearchKeys(t *testing.T) {
 	var keyStore *mocks.MockKeyStore
 
 	mockClient := kmipclient.NewMockKmipClient()
@@ -305,7 +324,7 @@ func TestRemoteManager_SearchKeys(t *testing.T) {
 	}
 }
 
-func TestRemoteManager_RegisterKey(t *testing.T) {
+func TestRemoteManagerRegisterKey(t *testing.T) {
 
 	var keyStore *mocks.MockKeyStore
 
@@ -386,7 +405,7 @@ func TestRemoteManager_RegisterKey(t *testing.T) {
 	}
 }
 
-func TestRemoteManager_TransferKey(t *testing.T) {
+func TestRemoteManagerTransferKey(t *testing.T) {
 
 	var keyStore *mocks.MockKeyStore
 

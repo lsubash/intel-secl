@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestKmipManager_CreateKey(t *testing.T) {
+func TestKmipManagerCreateKey(t *testing.T) {
 
 	type args struct {
 		algorithm string
@@ -89,7 +89,7 @@ func TestKmipManager_CreateKey(t *testing.T) {
 	}
 }
 
-func TestKmipManager_DeleteKey(t *testing.T) {
+func TestKmipManagerDeleteKey(t *testing.T) {
 
 	type args struct {
 		kmipKeyID string
@@ -132,7 +132,7 @@ func TestKmipManager_DeleteKey(t *testing.T) {
 	}
 }
 
-func TestKmipManager_RegisterKey(t *testing.T) {
+func TestKmipManagerRegisterKey(t *testing.T) {
 
 	type args struct {
 		algorithm string
@@ -183,7 +183,7 @@ func TestKmipManager_RegisterKey(t *testing.T) {
 	}
 }
 
-func TestKmipManager_TransferKey(t *testing.T) {
+func TestKmipManagerTransferKey(t *testing.T) {
 
 	type args struct {
 		algorithm string
