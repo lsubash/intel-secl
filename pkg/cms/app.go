@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -120,7 +121,12 @@ func (a *App) configureLogs(isStdOut bool, isFileOut bool) error {
 }
 
 func (a *App) Run(args []string) error {
-
+	defer func() {
+		if err := recover(); err != nil {
+			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
+		}
+	}()
 	if len(args) < 2 {
 		a.printUsage()
 		return nil

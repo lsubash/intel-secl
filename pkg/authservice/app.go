@@ -18,6 +18,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime/debug"
 
 	// Import driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -46,6 +47,7 @@ func (a *App) Run(args []string) error {
 	defer func() {
 		if err := recover(); err != nil {
 			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
 		}
 	}()
 	if len(args) < 2 {

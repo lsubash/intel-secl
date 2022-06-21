@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime/debug"
 
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	commLogMsg "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
@@ -43,6 +44,7 @@ func (a *App) Run(args []string) error {
 	defer func() {
 		if err := recover(); err != nil {
 			defaultLog.Errorf("Panic occurred: %+v", err)
+			defaultLog.Error(string(debug.Stack()))
 		}
 	}()
 	if len(args) < 2 {

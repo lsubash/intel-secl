@@ -6,6 +6,7 @@ package ihub
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/constants"
@@ -41,6 +42,12 @@ type App struct {
 }
 
 func (app *App) Run(args []string) error {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Errorf("Panic occurred: %+v", err)
+			log.Error(string(debug.Stack()))
+		}
+	}()
 	if len(args) < 2 {
 		err := errors.New("Invalid usage of " + constants.ServiceName)
 		app.printUsageWithError(err)

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/log/message"
@@ -104,7 +105,12 @@ func (a *App) configureLogs(isStdOut, isFileOut bool) error {
 }
 
 func (a *App) Run(args []string) error {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Errorf("Panic occurred: %+v", err)
+			log.Error(string(debug.Stack()))
+		}
+	}()
 	if len(args) < 2 {
 		a.printUsage()
 		return nil

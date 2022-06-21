@@ -128,7 +128,8 @@ func (a *App) Run(args []string) error {
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Errorf("Panic occurred: %+v\n%s", err, string(debug.Stack()))
+			log.Errorf("Panic occurred: %+v", err)
+			log.Error(string(debug.Stack()))
 		}
 	}()
 
