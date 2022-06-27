@@ -95,7 +95,6 @@ func loadAlias() {
 		commConfig.DbSslMode:               "AAS_DB_SSL_MODE",
 		commConfig.TlsCommonName:           "AAS_TLS_CERT_CN",
 		commConfig.TlsSanList:              "SAN_LIST",
-		commConfig.ServerPort:              "AAS_PORT",
 		commConfig.ServerReadTimeout:       "AAS_SERVER_READ_TIMEOUT",
 		commConfig.ServerReadHeaderTimeout: "AAS_SERVER_READ_HEADER_TIMEOUT",
 		commConfig.ServerWriteTimeout:      "AAS_SERVER_WRITE_TIMEOUT",

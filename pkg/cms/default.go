@@ -61,7 +61,6 @@ func defaultConfig() *config.Configuration {
 
 func loadAlias() {
 	alias := map[string]string{
-		commConfig.ServerPort:              "CMS_PORT",
 		commConfig.ServerReadTimeout:       "CMS_SERVER_READ_TIMEOUT",
 		commConfig.ServerReadHeaderTimeout: "CMS_SERVER_READ_HEADER_TIMEOUT",
 		commConfig.ServerWriteTimeout:      "CMS_SERVER_WRITE_TIMEOUT",
