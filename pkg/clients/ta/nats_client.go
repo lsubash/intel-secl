@@ -162,6 +162,10 @@ func (client *natsTAClient) GetBindingKeyCertificate() ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "client/nats_client:GetBindingKeyCertificate() Error getting binding key")
 	}
+	// NATS converts nil response received from TA to null hence explicitly returning nil response
+	if string(bk) == "null" {
+		return nil, nil
+	}
 	return bk, nil
 }
 

@@ -10,10 +10,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
-	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
-
 	client "github.com/intel-secl/intel-secl/v5/pkg/clients/ta"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/util"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/vim25/mo"

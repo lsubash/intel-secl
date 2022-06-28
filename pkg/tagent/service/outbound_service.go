@@ -180,7 +180,7 @@ func (subscriber *trustAgentOutboundService) Start() error {
 		bk, err := subscriber.handler.GetBindingCertificateDerBytes(constants.BindingKeyCertificatePath)
 		if err != nil {
 			log.WithError(err).Error("Failed to handle get-binding-certificate")
-			return err
+			return subscriber.natsConnection.Publish(m.Reply, nil)
 		}
 
 		return subscriber.natsConnection.Publish(m.Reply, bk)
