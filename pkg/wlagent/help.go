@@ -23,7 +23,7 @@ const helpStr = `Usage:
 	Available Tasks for setup:
 	    download-ca-cert       Download CMS root CA certificate
 	    signing-key             Generate a TPM signing key
-	    binding-Key             Generate a TPM binding key
+	    binding-key             Generate a TPM binding key
 	    register-signing-key     Register a signing key with the host verification service
 	    register-binding-key     Register a binding key with the host verification service
 	    update-service-config  Updates service configuration`
