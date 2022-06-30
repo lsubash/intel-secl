@@ -10,13 +10,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"net/url"
 	"os"
 
-	kbsc "github.com/intel-secl/intel-secl/v5/pkg/clients/kbs"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/crypt"
 	cLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
-	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
+
 	"github.com/pkg/errors"
 )
 
@@ -82,36 +79,4 @@ func CreateRSAKeyPair() error {
 		return errors.Wrap(err, "I/O error while encoding private key file")
 	}
 	return nil
-}
-
-func NewMockKBSClient(config *config.Configuration, trustedCAPath string) (kbsc.KBSClient, error) {
-	log.Trace("pkg/wpm/util/test/util.go:NewMockKBSClient() Entering")
-	defer log.Trace("pkg/wpm/util/test/util.go:NewMockKBSClient() Leaving")
-
-	if config == nil {
-		return nil, errors.New("Error loading WPM configuration")
-	}
-
-	if trustedCAPath == "" {
-		return nil, errors.New("Error loading trusted CA Path")
-	}
-
-	aasUrl, err := url.Parse(config.AASApiUrl)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error parsing AAS url")
-	}
-
-	kbsUrl, err := url.Parse(config.KBSApiUrl)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error parsing KBS url")
-	}
-
-	//Load trusted CA certificates
-	caCerts, err := crypt.GetCertsFromDir(trustedCAPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error loading CA certificates")
-	}
-	kbsClient := kbsc.NewMockKBSClient(aasUrl, kbsUrl, config.WPM.Username, config.WPM.Password, "", caCerts)
-
-	return kbsClient, nil
 }

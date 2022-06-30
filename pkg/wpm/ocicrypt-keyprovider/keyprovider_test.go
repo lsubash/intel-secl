@@ -9,8 +9,10 @@ import (
 	"os"
 	"testing"
 
+	clients "github.com/intel-secl/intel-secl/v5/pkg/clients/kbs"
 	kbsc "github.com/intel-secl/intel-secl/v5/pkg/clients/kbs"
 	cnfg "github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
+	mocks "github.com/intel-secl/intel-secl/v5/pkg/wpm/util/mocks"
 	testutil "github.com/intel-secl/intel-secl/v5/pkg/wpm/util/test"
 	"gopkg.in/yaml.v3"
 )
@@ -140,11 +142,7 @@ func TestGetKey(t *testing.T) {
 		os.Remove(testPrivateKey)
 	}()
 
-	kbsClient, err := testutil.NewMockKBSClient(wpmConfig, trustedCAPath)
-	if err != nil {
-		t.Errorf("FetchKey() Failed to create MockKBSClinet %v", err)
-		return
-	}
+	kbsClient := clients.NewMockKBSClient()
 
 	type args struct {
 		FileName                   string
@@ -198,6 +196,8 @@ func TestGetKey(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			mocks.MockCreateKey(tt.args.KBSApiUrl, tt.args.KBSClient.(*kbsc.MockKbsClient))
+			mocks.MockGetKey("f38c2baf-a02f-4110-bdea-29e076113013", tt.args.KBSClient.(*kbsc.MockKbsClient))
 			testFile, err := os.OpenFile(tt.args.FileName, os.O_RDONLY, 640)
 			if err != nil {
 				t.Errorf("GetKey() Failed to open file = %s, withErr %v", tt.args.FileName, err)
@@ -205,7 +205,7 @@ func TestGetKey(t *testing.T) {
 			}
 			defer testFile.Close()
 			keyProvider := NewKeyProvider(testFile, tt.args.OcicryptKeyProviderName, tt.args.KBSApiUrl,
-				tt.args.envelopePublickeyLocation, tt.args.envelopePrivatekeyLocation, tt.args.KBSClient)
+				tt.args.envelopePublickeyLocation, tt.args.envelopePrivatekeyLocation, tt.args.KBSClient.(*kbsc.MockKbsClient))
 			if err := keyProvider.GetKey(); (err != nil) != tt.wantErr {
 				t.Errorf("GetKey() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -232,11 +232,7 @@ func TestGetKeyNegativeCases(t *testing.T) {
 		os.Remove(testPrivateKey)
 	}()
 
-	kbsClient, err := testutil.NewMockKBSClient(wpmConfig, trustedCAPath)
-	if err != nil {
-		t.Errorf("FetchKey() Failed to create MockKBSClinet %v", err)
-		return
-	}
+	kbsClient := clients.NewMockKBSClient()
 
 	type args struct {
 		FileName                   string
@@ -276,18 +272,6 @@ func TestGetKeyNegativeCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Invalid Case with UnknownKeyID to validate aesEncrypt",
-			args: args{
-				FileName:                   testKeyProviderKeyWrapProtocolInputKeyID1,
-				OcicryptKeyProviderName:    "isecl",
-				KBSApiUrl:                  "https://127.0.0.1:9443/kbs/v1/",
-				envelopePrivatekeyLocation: testPrivateKey,
-				envelopePublickeyLocation:  testPublicKey,
-				KBSClient:                  kbsClient,
-			},
-			wantErr: true,
-		},
-		{
 			name: "Invalid Case with KeyWrap-AssetTag with empty envelopePublickeyLocation",
 			args: args{
 				FileName:                   testKeyProviderKeyWrapProtocolInput,
@@ -296,16 +280,6 @@ func TestGetKeyNegativeCases(t *testing.T) {
 				envelopePrivatekeyLocation: testPrivateKey,
 				envelopePublickeyLocation:  "",
 				KBSClient:                  kbsClient,
-			},
-			wantErr: true,
-		},
-		{
-			name: "Invalid case with NIL KBSClient",
-			args: args{
-				FileName:                testKeyProviderKeyWrapProtocolInput,
-				OcicryptKeyProviderName: "isecl",
-				KBSApiUrl:               "https://127.0.0.1:9443/kbs/v1/",
-				KBSClient:               nil,
 			},
 			wantErr: true,
 		},
@@ -342,6 +316,10 @@ func TestGetKeyNegativeCases(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.args.KBSClient != nil {
+				mocks.MockCreateKey(tt.args.KBSApiUrl, tt.args.KBSClient.(*kbsc.MockKbsClient))
+				mocks.MockGetKey("f38c2baf-a02f-4110-bdea-29e076113013", tt.args.KBSClient.(*kbsc.MockKbsClient))
+			}
 			testFile, err := os.OpenFile(tt.args.FileName, os.O_RDONLY, 640)
 			if err != nil {
 				t.Errorf("GetKey() Failed to open file = %s, withErr %v", tt.args.FileName, err)
@@ -349,7 +327,7 @@ func TestGetKeyNegativeCases(t *testing.T) {
 			}
 			defer testFile.Close()
 			keyProvider := NewKeyProvider(testFile, tt.args.OcicryptKeyProviderName, tt.args.KBSApiUrl,
-				tt.args.envelopePublickeyLocation, tt.args.envelopePrivatekeyLocation, tt.args.KBSClient)
+				tt.args.envelopePublickeyLocation, tt.args.envelopePrivatekeyLocation, tt.args.KBSClient.(*kbsc.MockKbsClient))
 			if err := keyProvider.GetKey(); (err != nil) != tt.wantErr {
 				t.Errorf("GetKey() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -375,11 +353,7 @@ func TestGetKeyNegativeCasesEmptyPritvateKey(t *testing.T) {
 		os.Remove(testPrivateKey)
 	}()
 
-	kbsClient, err := testutil.NewMockKBSClient(wpmConfig, trustedCAPath)
-	if err != nil {
-		t.Errorf("FetchKey() Failed to create MockKBSClinet %v", err)
-		return
-	}
+	kbsClient := clients.NewMockKBSClient()
 
 	type args struct {
 		FileName                   string
@@ -445,6 +419,8 @@ func TestGetKeyNegativeCasesEmptyPritvateKey(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			mocks.MockCreateKey(tt.args.KBSApiUrl, tt.args.KBSClient.(*kbsc.MockKbsClient))
+			mocks.MockGetKey("f38c2baf-a02f-4110-bdea-29e076113013", tt.args.KBSClient.(*kbsc.MockKbsClient))
 			testFile, err := os.OpenFile(tt.args.FileName, os.O_RDONLY, 640)
 			if err != nil {
 				t.Errorf("GetKey() Failed to open file = %s, withErr %v", tt.args.FileName, err)
@@ -452,7 +428,7 @@ func TestGetKeyNegativeCasesEmptyPritvateKey(t *testing.T) {
 			}
 			defer testFile.Close()
 			keyProvider := NewKeyProvider(testFile, tt.args.OcicryptKeyProviderName, tt.args.KBSApiUrl,
-				tt.args.envelopePublickeyLocation, tt.args.envelopePrivatekeyLocation, tt.args.KBSClient)
+				tt.args.envelopePublickeyLocation, tt.args.envelopePrivatekeyLocation, tt.args.KBSClient.(*kbsc.MockKbsClient))
 			if err := keyProvider.GetKey(); (err != nil) != tt.wantErr {
 				t.Errorf("GetKey() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -11,8 +11,12 @@ import (
 	"testing"
 
 	kbsc "github.com/intel-secl/intel-secl/v5/pkg/clients/kbs"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/kbs"
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/config"
+	mocks "github.com/intel-secl/intel-secl/v5/pkg/wpm/util/mocks"
 	testutil "github.com/intel-secl/intel-secl/v5/pkg/wpm/util/test"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
 	"gopkg.in/yaml.v3"
 )
 
@@ -71,12 +75,6 @@ func TestFetchKey(t *testing.T) {
 	var wpmConfig *config.Configuration
 	yaml.Unmarshal(testCfg, &wpmConfig)
 
-	kbsClient, err := testutil.NewMockKBSClient(wpmConfig, trustedCAPath)
-	if err != nil {
-		t.Errorf("FetchKey() Failed to create MockKBSClinet %v", err)
-		return
-	}
-
 	type args struct {
 		keyID                     string
 		assetTag                  string
@@ -95,19 +93,8 @@ func TestFetchKey(t *testing.T) {
 				KBSApiUrl:                 wpmConfig.KBSApiUrl,
 				assetTag:                  "test:tag",
 				envelopePublickeyLocation: testPublicKey,
-				KBSClient:                 kbsClient,
 			},
 			wantErr: false,
-		},
-		{
-			name: "Invalid case with empty KBSClient",
-			args: args{
-				KBSApiUrl:                 wpmConfig.KBSApiUrl,
-				assetTag:                  "test:tag",
-				envelopePublickeyLocation: testPublicKey,
-				KBSClient:                 nil,
-			},
-			wantErr: true,
 		},
 		{
 			name: "Invalid case with empty publickey",
@@ -115,7 +102,6 @@ func TestFetchKey(t *testing.T) {
 				KBSApiUrl:                 wpmConfig.KBSApiUrl,
 				assetTag:                  "test:tag",
 				envelopePublickeyLocation: testEmptyPublicKey,
-				KBSClient:                 kbsClient,
 			},
 			wantErr: true,
 		},
@@ -126,7 +112,6 @@ func TestFetchKey(t *testing.T) {
 				KBSApiUrl:                 wpmConfig.KBSApiUrl,
 				assetTag:                  "test:tag",
 				envelopePublickeyLocation: testPublicKey,
-				KBSClient:                 kbsClient,
 			},
 			wantErr: true,
 		},
@@ -135,17 +120,6 @@ func TestFetchKey(t *testing.T) {
 			args: args{
 				KBSApiUrl: wpmConfig.KBSApiUrl,
 				assetTag:  "testtag",
-				KBSClient: kbsClient,
-			},
-			wantErr: true,
-		},
-		{
-			name: "Invalid case with KEYID to validate GETKEY",
-			args: args{
-				keyID:     "c491f5f0-70e3-47a2-81bb-09c451b69707",
-				KBSApiUrl: wpmConfig.KBSApiUrl,
-				assetTag:  "testtag",
-				KBSClient: kbsClient,
 			},
 			wantErr: true,
 		},
@@ -153,23 +127,24 @@ func TestFetchKey(t *testing.T) {
 			name: "Invalid case with empty KBS url",
 			args: args{
 				KBSApiUrl: "",
-				KBSClient: kbsClient,
-			},
-			wantErr: true,
-		},
-		{
-			name: "Invalid KeyID",
-			args: args{
-				keyID:     "c491f5f0-70e3-47a2-81bb-09c451b69707%+o",
-				KBSApiUrl: wpmConfig.KBSApiUrl,
-				KBSClient: kbsClient,
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, _, err = FetchKey(tt.args.keyID, tt.args.assetTag, tt.args.KBSApiUrl, tt.args.envelopePublickeyLocation, tt.args.KBSClient)
+			tt.args.KBSClient = kbsc.NewMockKBSClient()
+			mocks.MockCreateKey(tt.args.KBSApiUrl, tt.args.KBSClient.(*kbsc.MockKbsClient))
+			if tt.name == "Valid case" {
+				mocks.MockGetKey("f38c2baf-a02f-4110-bdea-29e076113013", tt.args.KBSClient.(*kbsc.MockKbsClient))
+			} else if tt.name == "Invalid case with empty publickey" {
+				(tt.args.KBSClient.(*kbsc.MockKbsClient)).On("GetKey", mock.Anything, mock.Anything).Return(&kbs.KeyTransferResponse{}, errors.New("Empty Public key"))
+			} else if tt.name == "Invalid case with invalid length of WrappedKey" {
+				(tt.args.KBSClient.(*kbsc.MockKbsClient)).On("GetKey", mock.Anything, mock.Anything).Return(&kbs.KeyTransferResponse{
+					WrappedKey: "hVmYq3t6w9z$C&F)J@NcRfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+Mb",
+				}, nil)
+			}
+			_, _, err = FetchKey(tt.args.keyID, tt.args.assetTag, tt.args.KBSApiUrl, tt.args.envelopePublickeyLocation, tt.args.KBSClient.(*kbsc.MockKbsClient))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FetchKey() error = %v, wantErr %v", err, tt.wantErr)
 				return
