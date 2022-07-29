@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"github.com/gorilla/mux"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/utils"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
@@ -206,7 +207,7 @@ func ReadCertificate(certType string, certStore *crypt.CertificatesStore) (*hvs.
 
 	if len(certCollection.CaCerts) > 0 {
 		if certType == models.CaCertTypesEndorsementCa.String() {
-			cert, err := certStore.RetrieveCertificate(certType, viper.GetString("endorsement-ca-common-name"))
+			cert, err := certStore.RetrieveCertificate(certType, viper.GetString(config.EndorsementCaCommonName))
 			if err != nil || cert == nil {
 				defaultLog.Errorf("Error while retrieving certificate and key for certType %s", models.CaCertTypesEndorsementCa.String())
 				return nil, err
