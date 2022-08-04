@@ -15,13 +15,14 @@ import (
 
 func TestProvisionAttestationIdentityKeyPrintHelp(t *testing.T) {
 	type fields struct {
-		TpmF           tpmprovider.TpmFactory
-		tpmp           tpmprovider.TpmProvider
-		ClientFactory  hvsclient.HVSClientFactory
-		OwnerSecretKey string
-		envPrefix      string
-		commandName    string
-		PrivacyCA      string
+		TpmF                 tpmprovider.TpmFactory
+		tpmp                 tpmprovider.TpmProvider
+		ClientFactory        hvsclient.HVSClientFactory
+		OwnerSecretKey       string
+		EndorsementSecretKey string
+		envPrefix            string
+		commandName          string
+		PrivacyCA            string
 	}
 	tests := []struct {
 		name   string
@@ -36,13 +37,14 @@ func TestProvisionAttestationIdentityKeyPrintHelp(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			task := &ProvisionAttestationIdentityKey{
-				TpmF:           tt.fields.TpmF,
-				tpmp:           tt.fields.tpmp,
-				ClientFactory:  tt.fields.ClientFactory,
-				OwnerSecretKey: tt.fields.OwnerSecretKey,
-				envPrefix:      tt.fields.envPrefix,
-				commandName:    tt.fields.commandName,
-				PrivacyCA:      tt.fields.PrivacyCA,
+				TpmF:                 tt.fields.TpmF,
+				tpmp:                 tt.fields.tpmp,
+				ClientFactory:        tt.fields.ClientFactory,
+				OwnerSecretKey:       tt.fields.OwnerSecretKey,
+				EndorsementSecretKey: tt.fields.EndorsementSecretKey,
+				envPrefix:            tt.fields.envPrefix,
+				commandName:          tt.fields.commandName,
+				PrivacyCA:            tt.fields.PrivacyCA,
 			}
 			w := &bytes.Buffer{}
 			task.PrintHelp(w)
@@ -95,12 +97,13 @@ func TestProvisionAttestationIdentityKeySetName(t *testing.T) {
 	}
 }
 
-func runProvisionAttestationIdentityKey(t *testing.T, mockedTpmFactory tpmprovider.MockedTpmFactory, ownerSecret string, clientFactory hvsclient.MockedVSClientFactory) error {
+func runProvisionAttestationIdentityKey(t *testing.T, mockedTpmFactory tpmprovider.MockedTpmFactory, ownerSecret, endorsementSecret string, clientFactory hvsclient.MockedVSClientFactory) error {
 	provisionAttestationIdentityKeyTask := ProvisionAttestationIdentityKey{
-		TpmF:           mockedTpmFactory,
-		OwnerSecretKey: ownerSecret,
-		ClientFactory:  clientFactory,
-		PrivacyCA:      "../test/resources/privacy-ca.cer",
+		TpmF:                 mockedTpmFactory,
+		OwnerSecretKey:       ownerSecret,
+		EndorsementSecretKey: endorsementSecret,
+		ClientFactory:        clientFactory,
+		PrivacyCA:            "../test/resources/privacy-ca.cer",
 	}
 
 	err := provisionAttestationIdentityKeyTask.Run()
@@ -124,7 +127,7 @@ func TestProvisionAttestationIdentityKey(t *testing.T) {
 
 	mockedTpmFactory := tpmprovider.MockedTpmFactory{TpmProvider: mockedTpmProvider}
 
-	assert.Error(runProvisionAttestationIdentityKey(t, mockedTpmFactory, tpmSecretKey, mockedVSClientFactory))
+	assert.Error(runProvisionAttestationIdentityKey(t, mockedTpmFactory, tpmSecretKey, endorsementSecretKey, mockedVSClientFactory))
 }
 
 func TestProvisionAttestationIdentityKeyValidate(t *testing.T) {

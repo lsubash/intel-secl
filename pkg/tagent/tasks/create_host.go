@@ -21,18 +21,11 @@ import (
 const createHostRequiredEnvHelpPrompt = "Following environment variables are required for " +
 	constants.CreateHostCommand + " setup:"
 
-const createHostOptionalEnvHelpPrompt = "Following environment variables are optional for " +
-	constants.CreateHostCommand + " setup:"
-
 var createHostRequiredEnvHelp = map[string]string{
 	constants.EnvVSAPIURL:    "VS API URL",
 	constants.EnvBearerToken: "JWT token for authenticating with VS",
 	constants.EnvCurrentIP:   "IP Address of TA deployed host for http service mode",
 	constants.EnvTAHostId:    "Host ID of TA for NATS Connection nats service mode",
-}
-
-var createHostOptionalEnvHelp = map[string]string{
-	constants.EnvTPMOwnerSecret: "When provided, setup uses the 40 character hex string for the TPM owner password. Uses empty password when not provided",
 }
 
 type CreateHost struct {
@@ -45,8 +38,6 @@ type CreateHost struct {
 
 func (task *CreateHost) PrintHelp(w io.Writer) {
 	setup.PrintEnvHelp(w, createHostRequiredEnvHelpPrompt, "", createHostRequiredEnvHelp)
-	fmt.Fprintln(w, "")
-	setup.PrintEnvHelp(w, createHostOptionalEnvHelpPrompt, "", createHostOptionalEnvHelp)
 	fmt.Fprintln(w, "")
 }
 

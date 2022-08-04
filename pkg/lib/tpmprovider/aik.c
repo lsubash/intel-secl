@@ -9,7 +9,8 @@
 // from https://github.com/tpm2-software/tpm2-tools/blob/3.1.0/tools/tpm2_getpubak.c
 //-------------------------------------------------------------------------------------------------
 static int getpubak(TSS2_SYS_CONTEXT *sys,
-                    TPM2B_AUTH *secretKey,
+                    TPM2B_AUTH *ownerSecretKey,
+                    TPM2B_AUTH *endorsementSecretKey,
                     TPM2B_AUTH *aikSecretKey)
 {
     TSS2_RC rval;
@@ -41,9 +42,15 @@ static int getpubak(TSS2_SYS_CONTEXT *sys,
 
     creation_pcr.count = 0;
 
-    if (secretKey == NULL)
+    if (ownerSecretKey == NULL)
     {
         ERROR("The owner secret key cannot be null");
+        return -1;
+    }
+
+    if (endorsementSecretKey == NULL)
+    {
+        ERROR("The endorsement secret key cannot be null");
         return -1;
     }
 
@@ -57,7 +64,7 @@ static int getpubak(TSS2_SYS_CONTEXT *sys,
     inSensitive.size = inSensitive.sensitive.userAuth.size + 2;
     memcpy(&inSensitive.sensitive.userAuth, aikSecretKey, sizeof(TPM2B_AUTH));
 
-    memcpy(&sessions_data.auths[0].hmac, secretKey, sizeof(TPM2B_AUTH));
+    memcpy(&sessions_data.auths[0].hmac, endorsementSecretKey, sizeof(TPM2B_AUTH));
 
     { // from set_key_algorithm
         inPublic.publicArea.nameAlg = TPM2_ALG_SHA256;
@@ -133,7 +140,7 @@ static int getpubak(TSS2_SYS_CONTEXT *sys,
     sessions_data.auths[0].sessionHandle = TPM2_RS_PW;
     sessions_data.auths[0].sessionAttributes &= ~TPMA_SESSION_CONTINUESESSION;
     sessions_data.auths[0].hmac.size = 0;
-    memcpy(&sessions_data.auths[0].hmac, secretKey, sizeof(TPM2B_AUTH));
+    memcpy(&sessions_data.auths[0].hmac, endorsementSecretKey, sizeof(TPM2B_AUTH));
 
     // start a second session
     rval = Tss2_Sys_StartAuthSession(sys, tpmKey, bind, 0, &nonceCaller, &encryptedSalt, TPM2_SE_POLICY, &symmetric, TPM2_ALG_SHA256, &sessionHandle, &nonceNewer, 0);
@@ -173,8 +180,8 @@ static int getpubak(TSS2_SYS_CONTEXT *sys,
     sessions_data.auths[0].sessionAttributes &= ~TPMA_SESSION_CONTINUESESSION;
     sessions_data.auths[0].hmac.size = 0;
 
-    // we use same password for endors/owner (shouldne be needed)
-    memcpy(&sessions_data.auths[0].hmac, secretKey, sizeof(TPM2B_AUTH));
+    // use password for owner
+    memcpy(&sessions_data.auths[0].hmac, ownerSecretKey, sizeof(TPM2B_AUTH));
 
     rval = Tss2_Sys_EvictControl(sys, TPM2_RH_OWNER, loaded_sha1_key_handle, &sessions_data, TPM_HANDLE_AIK, &sessions_data_out);
     if (rval != TPM2_RC_SUCCESS)
@@ -204,18 +211,28 @@ static int getpubak(TSS2_SYS_CONTEXT *sys,
 //-------------------------------------------------------------------------------------------------
 int CreateAik(const tpmCtx *ctx,
               const uint8_t *ownerSecretKey,
-              size_t ownerSecretKeyLength)
+              size_t ownerSecretKeyLength,
+              const uint8_t *endorsementSecretKey,
+              size_t endorsementSecretKeyLength)
 {
 
     TSS2_RC rval;
     TPM2_HANDLE handle2048rsa = 0;
     TPM2B_AUTH ownerAuth = {0};
+    TPM2B_AUTH endorsementAuth = {0};
     TPM2B_AUTH aikAuth = {0}; // provide empty aik secret so no password is needed
 
     rval = InitializeTpmAuth(&ownerAuth, ownerSecretKey, ownerSecretKeyLength);
     if (rval != 0)
     {
         ERROR("There was an error creating the tpm owner secret");
+        return rval;
+    }
+
+    rval = InitializeTpmAuth(&endorsementAuth, endorsementSecretKey, endorsementSecretKeyLength);
+    if (rval != 0)
+    {
+        ERROR("There was an error creating the tpm endorsement secret");
         return rval;
     }
 
@@ -235,7 +252,7 @@ int CreateAik(const tpmCtx *ctx,
     }
 
     // Provision the newly minted AIK
-    rval = getpubak(ctx->sys, &ownerAuth, &aikAuth);
+    rval = getpubak(ctx->sys, &ownerAuth, &endorsementAuth, &aikAuth);
     if (rval != TPM2_RC_SUCCESS)
     {
         return rval;

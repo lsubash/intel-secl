@@ -30,9 +30,10 @@ const provisionAttestationIdentityKeyEnvHelpPrompt = "Following environment vari
 	constants.ProvisionAttestationIdentityKeyCommand + " setup:"
 
 var provisionAttestationIdentityKeyEnvHelp = map[string]string{
-	constants.EnvVSAPIURL:       "VS API URL",
-	constants.EnvBearerToken:    "JWT token for authenticating with VS",
-	constants.EnvTPMOwnerSecret: "TPM Owner Secret",
+	constants.EnvVSAPIURL:             "VS API URL",
+	constants.EnvBearerToken:          "JWT token for authenticating with VS",
+	constants.EnvTPMOwnerSecret:       "TPM Owner Secret",
+	constants.EnvTPMEndorsementSecret: "TPM Endorsement Secret",
 }
 
 const CertificatePemBlockHeader = "CERTIFICATE"
@@ -61,14 +62,15 @@ const CertificatePemBlockHeader = "CERTIFICATE"
 //-------------------------------------------------------------------------------------------------
 
 type ProvisionAttestationIdentityKey struct {
-	TpmF           tpmprovider.TpmFactory
-	tpmp           tpmprovider.TpmProvider
-	ClientFactory  hvsclient.HVSClientFactory
-	OwnerSecretKey string
-	envPrefix      string
-	commandName    string
-	PrivacyCA      string
-	AikCert        string
+	TpmF                 tpmprovider.TpmFactory
+	tpmp                 tpmprovider.TpmProvider
+	ClientFactory        hvsclient.HVSClientFactory
+	OwnerSecretKey       string
+	EndorsementSecretKey string
+	envPrefix            string
+	commandName          string
+	PrivacyCA            string
+	AikCert              string
 }
 
 func (task *ProvisionAttestationIdentityKey) PrintHelp(w io.Writer) {
@@ -216,7 +218,7 @@ func (task *ProvisionAttestationIdentityKey) createAik() error {
 	//
 	// Create an EK that will be used to generate the AIK...
 	//
-	err := task.tpmp.CreateEk(task.OwnerSecretKey, tpmprovider.TPM_HANDLE_EK)
+	err := task.tpmp.CreateEk(task.OwnerSecretKey, task.EndorsementSecretKey, tpmprovider.TPM_HANDLE_EK)
 	if err != nil {
 		return errors.Wrap(err, "Error while creating EK")
 	}
@@ -237,7 +239,7 @@ func (task *ProvisionAttestationIdentityKey) createAik() error {
 	//
 	// create the AIK...
 	//
-	err = task.tpmp.CreateAik(task.OwnerSecretKey)
+	err = task.tpmp.CreateAik(task.OwnerSecretKey, task.EndorsementSecretKey)
 	if err != nil {
 		return errors.Wrap(err, "Error while creating AIK")
 	}
@@ -322,7 +324,7 @@ func (task *ProvisionAttestationIdentityKey) activateCredential(identityProofReq
 	//
 	// Now decrypt the symmetric key using ActivateCredential
 	//
-	symmetricKey, err := task.tpmp.ActivateCredential(task.OwnerSecretKey, credentialBytes, secretBytes)
+	symmetricKey, err := task.tpmp.ActivateCredential(task.EndorsementSecretKey, credentialBytes, secretBytes)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error while performing tpm activate credential operation")
 	}

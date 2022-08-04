@@ -61,25 +61,24 @@ type TpmProvider interface {
 	Version() C.TPM_VERSION
 
 	//
-	// Provided a 40 character hex string, takes ownership of the TPM.
+	// Provided hex string passwords, takes ownership of the TPM.
 	//
-	TakeOwnership(ownerSecretKey string) error
+	TakeOwnership(ownerSecretKey, endorsementSecretKey string) error
 
 	//
-	// Determines if the valid, 40 character hex string currently owns
-	// the TPM.
+	// Determines if the valid, hex string currently owns the TPM.
 	//
 	IsOwnedWithAuth(ownerSecretKey string) (bool, error)
 
 	//
 	// Used by the go-trust-agent allocate an EK in the TPM.
 	//
-	CreateEk(ownerSecretKey string, handle uint32) error
+	CreateEk(ownerSecretKey, endorsementSecretKey string, handle uint32) error
 
 	//
 	// Used by the go-trust-agent allocate an AIK in the TPM.
 	//
-	CreateAik(ownerSecretKey string) error
+	CreateAik(ownerSecretKey, endorsementSecretKey string) error
 
 	//
 	// Used by the go-trust-agent to facilitate handshakes with HVS
@@ -96,7 +95,7 @@ type TpmProvider interface {
 	//
 	// Used by the go-trust-agent to decrypt HVS data.
 	//
-	ActivateCredential(ownerSecretKey string, credentialBytes []byte, secretBytes []byte) ([]byte, error)
+	ActivateCredential(endorsementSecretKey string, credentialBytes []byte, secretBytes []byte) ([]byte, error)
 
 	//
 	// Used by the go-trust-agent to collect a tpm quote.

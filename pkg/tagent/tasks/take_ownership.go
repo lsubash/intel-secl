@@ -18,14 +18,16 @@ const takeOwnershipEnvHelpPrompt = "Following environment variables are required
 	constants.TakeOwnershipCommand + " setup:"
 
 var takeOwnershipEnvHelp = map[string]string{
-	constants.EnvTPMOwnerSecret: "TPM Owner Secret",
+	constants.EnvTPMOwnerSecret:       "TPM Owner Secret",
+	constants.EnvTPMEndorsementSecret: "TPM Endorsement Secret",
 }
 
 type TakeOwnership struct {
-	TpmF           tpmprovider.TpmFactory
-	OwnerSecretKey string
-	envPrefix      string
-	commandName    string
+	TpmF                 tpmprovider.TpmFactory
+	OwnerSecretKey       string
+	EndorsementSecretKey string
+	envPrefix            string
+	commandName          string
 }
 
 func (task *TakeOwnership) PrintHelp(w io.Writer) {
@@ -93,15 +95,15 @@ func (task *TakeOwnership) Run() error {
 		}
 
 		if !owned {
-			return errors.New("The TPM must be in a clear state to take ownerhsip with a new owner-secret")
+			return errors.New("The TPM must be in a clear state to take ownership with a new owner-secret")
 		}
 
-		err = tpmp.TakeOwnership(task.OwnerSecretKey)
+		err = tpmp.TakeOwnership(task.OwnerSecretKey, task.EndorsementSecretKey)
 		if err != nil {
-			return errors.Wrap(err, "Error performing take ownership with the provided owner-secret")
+			return errors.Wrap(err, "Error performing take ownership with the provided owner-secret and endorsement-secret")
 		}
 
-		fmt.Println("take-ownership: Successfully took ownership of the TPM with the provided TPM_OWNER_SECRET")
+		fmt.Println("take-ownership: Successfully took ownership of the TPM with the provided TPM_OWNER_SECRET and TPM_ENDORSEMENT_SECRET")
 	}
 
 	return nil

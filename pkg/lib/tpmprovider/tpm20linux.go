@@ -31,9 +31,10 @@ type linuxTpmFactory struct {
 }
 
 const (
-	INVALID_OWNER_SECRET_KEY = "Invalid owner secret key"
-	INVALID_AIK_SECRET_KEY   = "Invalid aik secret key"
-	Tss2RcSuccess            = 0
+	INVALID_OWNER_SECRET_KEY       = "Invalid owner secret key"
+	INVALID_ENDORSEMENT_SECRET_KEY = "Invalid endorsement secret key"
+	INVALID_AIK_SECRET_KEY         = "Invalid aik secret key"
+	Tss2RcSuccess                  = 0
 )
 
 func (linuxImpl linuxTpmFactory) NewTpmProvider() (TpmProvider, error) {
@@ -69,16 +70,23 @@ func (t *tpm20Linux) Version() C.TPM_VERSION {
 	return C.Version(t.tpmCtx)
 }
 
-func (t *tpm20Linux) TakeOwnership(ownerSecretKey string) error {
+func (t *tpm20Linux) TakeOwnership(ownerSecretKey, endorsementSecretKey string) error {
 
 	ownerSecretKeyBytes, err := validateAndConvertKey(ownerSecretKey)
 	if err != nil {
 		return errors.Wrap(err, INVALID_OWNER_SECRET_KEY)
 	}
 
+	endorsementSecretKeyBytes, err := validateAndConvertKey(endorsementSecretKey)
+	if err != nil {
+		return errors.Wrap(err, INVALID_ENDORSEMENT_SECRET_KEY)
+	}
+
 	rc := C.TakeOwnership(t.tpmCtx,
 		(*C.uint8_t)(unsafe.Pointer(&ownerSecretKeyBytes[0])),
-		C.size_t(len(ownerSecretKeyBytes)))
+		C.size_t(len(ownerSecretKeyBytes)),
+		(*C.uint8_t)(unsafe.Pointer(&endorsementSecretKeyBytes[0])),
+		C.size_t(len(endorsementSecretKeyBytes)))
 	if rc != 0 {
 		return fmt.Errorf("TakeOwnership returned error code 0x%X", rc)
 	}
@@ -152,16 +160,23 @@ func (t *tpm20Linux) GetAikName() ([]byte, error) {
 	return returnValue, nil
 }
 
-func (t *tpm20Linux) CreateAik(ownerSecretKey string) error {
+func (t *tpm20Linux) CreateAik(ownerSecretKey, endorsementSecretKey string) error {
 
 	ownerSecretKeyBytes, err := validateAndConvertKey(ownerSecretKey)
 	if err != nil {
 		return errors.Wrap(err, INVALID_OWNER_SECRET_KEY)
 	}
 
+	endorsementSecretKeyBytes, err := validateAndConvertKey(endorsementSecretKey)
+	if err != nil {
+		return errors.Wrap(err, INVALID_ENDORSEMENT_SECRET_KEY)
+	}
+
 	rc := C.CreateAik(t.tpmCtx,
 		(*C.uint8_t)(unsafe.Pointer(&ownerSecretKeyBytes[0])),
-		C.size_t(len(ownerSecretKeyBytes)))
+		C.size_t(len(ownerSecretKeyBytes)),
+		(*C.uint8_t)(unsafe.Pointer(&endorsementSecretKeyBytes[0])),
+		C.size_t(len(endorsementSecretKeyBytes)))
 
 	if rc != 0 {
 		return fmt.Errorf("An error occurred in CreateAik: %w", NewTpmProviderError(int(rc)))
@@ -281,20 +296,20 @@ func (t *tpm20Linux) GetTpmQuote(nonce []byte, pcrBanks []string, pcrs []int) ([
 	return quoteBytes, nil
 }
 
-func (t *tpm20Linux) ActivateCredential(ownerSecretKey string, credentialBytes []byte, secretBytes []byte) ([]byte, error) {
+func (t *tpm20Linux) ActivateCredential(endorsementSecretKey string, credentialBytes []byte, secretBytes []byte) ([]byte, error) {
 
 	var returnValue []byte
 	var decrypted *C.uint8_t
 	var decryptedLength C.int
 
-	ownerSecretKeyBytes, err := validateAndConvertKey(ownerSecretKey)
+	endorsementSecretKeyBytes, err := validateAndConvertKey(endorsementSecretKey)
 	if err != nil {
-		return nil, errors.Wrap(err, INVALID_OWNER_SECRET_KEY)
+		return nil, errors.Wrap(err, INVALID_ENDORSEMENT_SECRET_KEY)
 	}
 
 	rc := C.ActivateCredential(t.tpmCtx,
-		(*C.uint8_t)(unsafe.Pointer(&ownerSecretKeyBytes[0])),
-		C.size_t(len(ownerSecretKeyBytes)),
+		(*C.uint8_t)(unsafe.Pointer(&endorsementSecretKeyBytes[0])),
+		C.size_t(len(endorsementSecretKeyBytes)),
 		(*C.uint8_t)(unsafe.Pointer(&credentialBytes[0])),
 		C.size_t(len(credentialBytes)),
 		(*C.uint8_t)(unsafe.Pointer(&secretBytes[0])),
@@ -454,16 +469,23 @@ func (tpm *tpm20Linux) CreatePrimaryHandle(ownerSecretKey string, handle uint32)
 	return nil
 }
 
-func (tpm *tpm20Linux) CreateEk(ownerSecretKey string, handle uint32) error {
+func (tpm *tpm20Linux) CreateEk(ownerSecretKey, endorsementSecretKey string, handle uint32) error {
 
 	ownerSecretKeyBytes, err := validateAndConvertKey(ownerSecretKey)
 	if err != nil {
 		return errors.Wrap(err, INVALID_OWNER_SECRET_KEY)
 	}
 
+	endorsementSecretKeyBytes, err := validateAndConvertKey(endorsementSecretKey)
+	if err != nil {
+		return errors.Wrap(err, INVALID_ENDORSEMENT_SECRET_KEY)
+	}
+
 	rc := C.CreateEk(tpm.tpmCtx,
 		(*C.uint8_t)(unsafe.Pointer(&ownerSecretKeyBytes[0])),
 		C.size_t(len(ownerSecretKeyBytes)),
+		(*C.uint8_t)(unsafe.Pointer(&endorsementSecretKeyBytes[0])),
+		C.size_t(len(endorsementSecretKeyBytes)),
 		C.uint32_t(handle))
 
 	if rc != 0 {
@@ -660,7 +682,7 @@ func validateAndConvertKey(key string) ([]byte, error) {
 
 	// See if the key is a 'legacy' trust-agent password (40 characters
 	// in hex format).  If so, convert it to bytes.  This is needed for
-	// backward comapatablity and carrying forward existing secrets during
+	// backward compatibility and carrying forward existing secrets during
 	// an upgrade.
 	//
 	// Otherwise, use what was provided, including the definition of 'hex:'
@@ -680,7 +702,7 @@ func validateAndConvertKey(key string) ([]byte, error) {
 		if strings.HasPrefix(key, HEX_PREFIX) {
 			keyBytes, err = hex.DecodeString(strings.ReplaceAll(key, HEX_PREFIX, ""))
 			if err != nil {
-				return nil, errors.Wrap(err, "'hex:' was provided by could not be parsed")
+				return nil, errors.Wrap(err, "'hex:' was provided but could not be parsed")
 			}
 		} else {
 			keyBytes = []byte(key)

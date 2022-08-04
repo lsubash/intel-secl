@@ -84,8 +84,8 @@ static int Tss2ActivateCredential(TSS2_SYS_CONTEXT *sys,
 }
 
 int ActivateCredential(const tpmCtx *ctx,
-                       const uint8_t *ownerSecretKey,
-                       size_t ownerSecretKeyLength,
+                       const uint8_t *endorsementSecretKey,
+                       size_t endorsementSecretKeyLength,
                        const uint8_t *credentialBytes,
                        size_t credentialBytesLength,
                        const uint8_t *secretBytes,
@@ -104,10 +104,10 @@ int ActivateCredential(const tpmCtx *ctx,
     // populate passwords
     //
     endorsePassword.sessionHandle = TPM2_RS_PW;
-    rval = InitializeTpmAuth(&endorsePassword.hmac, ownerSecretKey, ownerSecretKeyLength);
+    rval = InitializeTpmAuth(&endorsePassword.hmac, endorsementSecretKey, endorsementSecretKeyLength);
     if (rval != 0)
     {
-        ERROR("There was an error populating the owner secret");
+        ERROR("There was an error populating the endorsement secret");
         return -1;
     }
 
@@ -154,7 +154,7 @@ int ActivateCredential(const tpmCtx *ctx,
         return -1;
     }
 
-    // this will be freed by cgo in tpmlinx20.go
+    // this will be freed by cgo in tpm20linux.go
     *decrypted = (uint8_t *)calloc(certInfoData.size, 1);
     if (!*decrypted)
     {

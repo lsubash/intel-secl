@@ -89,7 +89,9 @@ TPM_VERSION Version(tpmCtx *ctx);
 
 int TakeOwnership(const tpmCtx *ctx,
                   const uint8_t *ownerSecretKey,
-                  size_t ownerSecretKeyLength);
+                  size_t ownerSecretKeyLength,
+                  const uint8_t *endorsementSecretKey,
+                  size_t endorsementSecretKeyLength);
 
 int IsOwnedWithAuth(const tpmCtx *ctx,
                     const uint8_t *ownerSecretKey,
@@ -97,7 +99,9 @@ int IsOwnedWithAuth(const tpmCtx *ctx,
 
 int CreateAik(const tpmCtx *ctx,
               const uint8_t *ownerSecretKey,
-              size_t ownerSecretKeyLength);
+              size_t ownerSecretKeyLength,
+              const uint8_t *endorsementSecretKey,
+              size_t endorsementSecretKeyLength);
 
 int GetAikBytes(const tpmCtx *ctx,
                 uint8_t **const aikBytes,
@@ -116,8 +120,8 @@ int GetTpmQuote(const tpmCtx *ctx,
                 int *const quouteBytesLength);
 
 int ActivateCredential(const tpmCtx *ctx,
-                       const uint8_t *ownerSecretKey,
-                       size_t ownerSecretKeyLength,
+                       const uint8_t *endorsementSecretKey,
+                       size_t endorsementSecretKeyLength,
                        const uint8_t *credentialBytes,
                        size_t credentialBytesLength,
                        const uint8_t *secretBytes,
@@ -133,6 +137,8 @@ int CreatePrimaryHandle(const tpmCtx *ctx,
 int CreateEk(const tpmCtx *ctx,
              const uint8_t *ownerSecretKey,
              size_t ownerSecretKeyLength,
+             const uint8_t *endorsementSecretKey,
+             size_t endorsementSecretKeyLength,
              uint32_t ekHandle);
 
 int NvIndexExists(const tpmCtx *ctx, uint32_t nvIndex);
@@ -206,7 +212,7 @@ int ReadPublic(const tpmCtx *ctx,
 
 int IsValidEk(const tpmCtx *ctx,
               const uint8_t *ownerSecretKey,
-              size_t ownerSecretKeyLenth,
+              size_t ownerSecretKeyLength,
               uint32_t handle,
               uint32_t ekCertificateIndex);
 

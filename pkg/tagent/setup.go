@@ -312,11 +312,12 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 	}
 
 	provisionAttIdKeyTask := &tasks.ProvisionAttestationIdentityKey{
-		TpmF:           tpmFactory,
-		ClientFactory:  hvsClientFactory,
-		OwnerSecretKey: viper.GetString(constants.TpmOwnerSecretViperKey),
-		PrivacyCA:      constants.PrivacyCA,
-		AikCert:        constants.AikCert,
+		TpmF:                 tpmFactory,
+		ClientFactory:        hvsClientFactory,
+		OwnerSecretKey:       viper.GetString(constants.TpmOwnerSecretViperKey),
+		EndorsementSecretKey: viper.GetString(constants.TpmEndorsementSecretViperKey),
+		PrivacyCA:            constants.PrivacyCA,
+		AikCert:              constants.AikCert,
 	}
 
 	createHostCommandTask := &tasks.CreateHost{
@@ -337,8 +338,9 @@ func (a *App) setupTaskRunner(cmd string) (*setup.Runner, error) {
 	}
 
 	takeOwnershipTask := &tasks.TakeOwnership{
-		TpmF:           tpmFactory,
-		OwnerSecretKey: viper.GetString(constants.TpmOwnerSecretViperKey),
+		TpmF:                 tpmFactory,
+		OwnerSecretKey:       viper.GetString(constants.TpmOwnerSecretViperKey),
+		EndorsementSecretKey: viper.GetString(constants.TpmEndorsementSecretViperKey),
 	}
 
 	provisionPrimaryKeyTask := &tasks.ProvisionPrimaryKey{

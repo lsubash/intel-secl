@@ -80,6 +80,7 @@ const (
 // Env Variables
 const (
 	EnvTPMOwnerSecret            = "TPM_OWNER_SECRET"
+	EnvTPMEndorsementSecret      = "TPM_ENDORSEMENT_SECRET"
 	EnvVSAPIURL                  = "HVS_URL"
 	EnvTAPort                    = "TRUSTAGENT_PORT"
 	EnvAASBaseURL                = "AAS_API_URL"
@@ -157,6 +158,7 @@ const (
 	NatsServersViperKey             = "nats-servers"
 	HvsUrlViperKey                  = "hvs-url"
 	TpmOwnerSecretViperKey          = "tpm-owner-secret"
+	TpmEndorsementSecretViperKey    = "tpm-endorsement-secret"
 	NatsTaHostIdViperKey            = "nats-host-id"
 	TaServiceModeViperKey           = "ta-service-mode"
 	TaLogLevelViperKey              = "log.level"

@@ -41,7 +41,7 @@ type TpmSimulator interface {
 	IsRunning() bool
 	Start() error
 	Stop() error
-	ProvisionEkCertificate(tpmProvider TpmProvider, ownerSecretKey string) error
+	ProvisionEkCertificate(tpmProvider TpmProvider, ownerSecretKey, endorsementSecretKey string) error
 }
 
 type tpmSimulator struct {
@@ -105,7 +105,7 @@ func (simulator *tpmSimulator) Stop() error {
 	return nil
 }
 
-func (simulator *tpmSimulator) ProvisionEkCertificate(tpmProvider TpmProvider, ownerSecretKey string) error {
+func (simulator *tpmSimulator) ProvisionEkCertificate(tpmProvider TpmProvider, ownerSecretKey, endorsementSecretKey string) error {
 
 	if !simulator.IsRunning() {
 		return errors.New("TpmSimulator.Start must be called before ProvisionEkCertificate")
@@ -127,7 +127,7 @@ func (simulator *tpmSimulator) ProvisionEkCertificate(tpmProvider TpmProvider, o
 	// We need a public key from the TPM.  Create an EK at an unused handle and get it's
 	// modulus
 	//
-	err = tpmProvider.CreateEk(ownerSecretKey, TPM_SIMULATOR_EK)
+	err = tpmProvider.CreateEk(ownerSecretKey, endorsementSecretKey, TPM_SIMULATOR_EK)
 	if err != nil {
 		return err
 	}

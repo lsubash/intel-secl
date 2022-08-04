@@ -10,6 +10,7 @@
 //-------------------------------------------------------------------------------------------------
 static int NewEk(const tpmCtx *ctx,
                  TPM2B_AUTH *ownerAuth,
+                 TPM2B_AUTH *endorsementAuth,
                  TPMT_PUBLIC *ekTemplate,
                  uint32_t ekHandle)
 {
@@ -39,7 +40,11 @@ static int NewEk(const tpmCtx *ctx,
         return -1;
     }
 
-    memcpy(&sessionsData.auths[0].hmac, ownerAuth, sizeof(TPM2B_AUTH));
+    if (endorsementAuth == NULL)
+    {
+        ERROR("The endorsement secret key cannot be null");
+        return -1;
+    }
 
     if (ekTemplate == NULL)
     {
@@ -51,6 +56,8 @@ static int NewEk(const tpmCtx *ctx,
 
     inSensitive.sensitive.data.size = 0;
     inSensitive.size = inSensitive.sensitive.userAuth.size + 2;
+
+    memcpy(&sessionsData.auths[0].hmac, endorsementAuth, sizeof(TPM2B_AUTH));
 
     creationPCR.count = 0;
 
@@ -93,16 +100,26 @@ static int NewEk(const tpmCtx *ctx,
 int CreateEk(const tpmCtx *ctx,
              const uint8_t *ownerSecretKey,
              size_t ownerSecretKeyLength,
+             const uint8_t *endorsementSecretKey,
+             size_t endorsementSecretKeyLength,
              uint32_t ekHandle)
 {
     TSS2_RC rval;
     TPM2B_AUTH ownerAuth = {0};
+    TPM2B_AUTH endorsementAuth = {0};
     TPMT_PUBLIC ekTemplate = {0};
 
     rval = InitializeTpmAuth(&ownerAuth, ownerSecretKey, ownerSecretKeyLength);
     if (rval != 0)
     {
         ERROR("There was an error creating the tpm owner secret");
+        return rval;
+    }
+
+    rval = InitializeTpmAuth(&endorsementAuth, endorsementSecretKey, endorsementSecretKeyLength);
+    if (rval != 0)
+    {
+        ERROR("There was an error creating the tpm endorsement secret");
         return rval;
     }
 
@@ -128,7 +145,7 @@ int CreateEk(const tpmCtx *ctx,
         return rval;
     }
 
-    rval = NewEk(ctx, &ownerAuth, &ekTemplate, ekHandle);
+    rval = NewEk(ctx, &ownerAuth, &endorsementAuth, &ekTemplate, ekHandle);
     if (rval != TPM2_RC_SUCCESS)
     {
         DEBUG("Failed to create Ek at 0x%x", ekHandle);

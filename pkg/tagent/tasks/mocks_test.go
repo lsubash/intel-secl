@@ -18,34 +18,35 @@ import (
 
 func mockTpmProvider(mockedTpmProvider *tpmprovider.MockedTpmProvider) {
 	tpmSecretKey := "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+	endorsementSecretKey := "beefbeefbeefbeefbeefbeefbeefbeefbeefbeef"
 	var quoteBytes = []byte("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
 	var keyBytes = []byte("1234567890123456")
 
 	mockedTpmProvider.On("Close").Return(nil)
 	mockedTpmProvider.On("NvIndexExists", mock.Anything).Return(true, nil)
-	mockedTpmProvider.On("CreateEk", tpmSecretKey, mock.Anything).Return(nil)
-	mockedTpmProvider.On("CreateAik", tpmSecretKey).Return(nil)
+	mockedTpmProvider.On("CreateEk", tpmSecretKey, endorsementSecretKey, mock.Anything).Return(nil)
+	mockedTpmProvider.On("CreateAik", tpmSecretKey, endorsementSecretKey).Return(nil)
 	mockedTpmProvider.On("IsValidEk", tpmSecretKey, mock.Anything, mock.Anything).Return(true, nil)
 	mockedTpmProvider.On("NvRead", tpmSecretKey, mock.Anything, mock.Anything).Return(quoteBytes, nil)
 	mockedTpmProvider.On("GetAikBytes").Return(quoteBytes, nil)
 	mockedTpmProvider.On("GetAikName").Return([]byte("TestAikName"), nil)
-	mockedTpmProvider.On("ActivateCredential", tpmSecretKey, mock.Anything, mock.Anything).Return(keyBytes, nil)
+	mockedTpmProvider.On("ActivateCredential", endorsementSecretKey, mock.Anything, mock.Anything).Return(keyBytes, nil)
 
 }
 
 func mockPrivacyCaClient(t *testing.T, mockedPrivacyCaClient *hvsclient.MockedPrivacyCAClient) {
 
-	var SHORT_BYTES = 2
+	var shortBytes = 2
 	var keyBytes = []byte("1234567890123456")
 
 	credentialBlob := new(bytes.Buffer)
-	err := binary.Write(credentialBlob, binary.BigEndian, int16(SHORT_BYTES))
+	err := binary.Write(credentialBlob, binary.BigEndian, int16(shortBytes))
 	if err != nil {
 		assert.NoError(t, err)
 	}
 
 	secretsBlob := new(bytes.Buffer)
-	err = binary.Write(secretsBlob, binary.BigEndian, int16(SHORT_BYTES))
+	err = binary.Write(secretsBlob, binary.BigEndian, int16(shortBytes))
 	if err != nil {
 		assert.NoError(t, err)
 	}

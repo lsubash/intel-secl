@@ -36,8 +36,8 @@ func (mockedTpm MockedTpmProvider) Version() C.TPM_VERSION {
 	return args.Get(0).(C.TPM_VERSION)
 }
 
-func (mockedTpm MockedTpmProvider) TakeOwnership(ownerSecretKey string) error {
-	args := mockedTpm.Called(ownerSecretKey)
+func (mockedTpm MockedTpmProvider) TakeOwnership(ownerSecretKey, endorsementSecretKey string) error {
+	args := mockedTpm.Called(ownerSecretKey, endorsementSecretKey)
 	return args.Error(0)
 }
 
@@ -46,8 +46,8 @@ func (mockedTpm MockedTpmProvider) IsOwnedWithAuth(ownerSecretKey string) (bool,
 	return args.Bool(0), args.Error(1)
 }
 
-func (mockedTpm MockedTpmProvider) CreateAik(ownerSecretKey string) error {
-	args := mockedTpm.Called(ownerSecretKey)
+func (mockedTpm MockedTpmProvider) CreateAik(ownerSecretKey, endorsementSecretKey string) error {
+	args := mockedTpm.Called(ownerSecretKey, endorsementSecretKey)
 	return args.Error(0)
 }
 
@@ -61,8 +61,8 @@ func (mockedTpm MockedTpmProvider) GetAikName() ([]byte, error) {
 	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (mockedTpm MockedTpmProvider) ActivateCredential(ownerSecretKey string, credentialBytes []byte, secretBytes []byte) ([]byte, error) {
-	args := mockedTpm.Called(ownerSecretKey, credentialBytes, secretBytes)
+func (mockedTpm MockedTpmProvider) ActivateCredential(endorsementSecretKey string, credentialBytes []byte, secretBytes []byte) ([]byte, error) {
+	args := mockedTpm.Called(endorsementSecretKey, credentialBytes, secretBytes)
 	return args.Get(0).([]byte), args.Error(1)
 }
 
@@ -131,8 +131,8 @@ func (mockedTpm MockedTpmProvider) ReadPublic(handle uint32) ([]byte, error) {
 	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (mockedTpm MockedTpmProvider) CreateEk(ownerSecretKey string, handle uint32) error {
-	args := mockedTpm.Called(ownerSecretKey, handle)
+func (mockedTpm MockedTpmProvider) CreateEk(ownerSecretKey, endorsementSecretKey string, handle uint32) error {
+	args := mockedTpm.Called(ownerSecretKey, endorsementSecretKey, handle)
 	return args.Error(0)
 }
 
