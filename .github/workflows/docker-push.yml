@@ -24,55 +24,44 @@ jobs:
                  
       - name: Build-cms-docker
         run: |
-          make cms-docker
-          docker push `docker images | grep cms | awk '{print $1":"$2}' | awk 'NR==1'`
+          make cms-docker-push
 
       - name: Build-authservice-docker
         run: |
-          make authservice-docker
-          docker push `docker images | grep authservice | awk '{print $1":"$2}' | awk 'NR==1'`
+          make authservice-docker-push
 
       - name: Build-hvs-docker
         run: |
-          make hvs-docker
-          docker push `docker images | grep hvs | awk '{print $1":"$2}' | awk 'NR==1'`
+          make hvs-docker-push
 
       - name: Build-ihub-docker
         run: |
-          make ihub-docker
-          docker push `docker images | grep ihub | awk '{print $1":"$2}' | awk 'NR==1'`
+          make ihub-docker-push
 
       - name: Build-wls-docker
         run: |
-          make wls-docker
-          docker push `docker images | grep wls | awk '{print $1":"$2}' | awk 'NR==1'`
+          make wls-docker-push
 
       - name: Build-kbs-docker
         run: |
-          make kbs-docker
-          docker push `docker images | grep kbs | awk '{print $1":"$2}' | awk 'NR==1'`
-          
+          make kbs-docker-push
+
       - name: Build-tagent-docker
         run: |
-          make tagent-docker
-          docker push `docker images | grep tagent | awk '{print $1":"$2}' | awk 'NR==1'`
-          
+          make tagent-docker-push
+
       - name: Build-wlagent-docker
         run: |
-          make wlagent-docker
-          docker push `docker images | grep wlagent | awk '{print $1":"$2}' | awk 'NR==1'`
+          make wlagent-docker-push
 
       - name: Build-admission-controller-docker
         run: |
-          make admission-controller-docker
-          docker push `docker images | grep admission-controller | awk '{print $1":"$2}' | awk 'NR==1'`
+          make admission-controller-docker-push
 
       - name: Build-k8s-controller-docker
         run: |
-          make isecl-k8s-controller-docker
-          docker push `docker images | grep isecl-k8s-controller | awk '{print $1":"$2}' | awk 'NR==1'`
+          make isecl-k8s-controller-docker-push
 
       - name: Build-k8s-scheduler-docker
         run: |
-          make isecl-k8s-scheduler-docker
-          docker push `docker images | grep isecl-k8s-scheduler | awk '{print $1":"$2}' | awk 'NR==1'`
+          make isecl-k8s-scheduler-docker-push

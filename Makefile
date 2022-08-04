@@ -104,6 +104,11 @@ hvs-docker: hvs
 tagent-docker: tagent config-upgrade-binary
 	docker build ${DOCKER_PROXY_FLAGS} --label org.label-schema.build-date=$(BUILDDATE) -f build/image/tagent/Dockerfile -t $(DOCKER_REGISTRY)isecl/tagent:$(VERSION)-$(GITCOMMIT) .
 
+%-docker-push: %-docker
+	docker tag $(DOCKER_REGISTRY)isecl/$*:$(VERSION)-$(GITCOMMIT) $(DOCKER_REGISTRY)isecl/$*:$(VERSION)
+	docker push $(DOCKER_REGISTRY)isecl/$*:$(VERSION)
+	docker push $(DOCKER_REGISTRY)isecl/$*:$(VERSION)-$(GITCOMMIT)
+
 %-swagger:
 	env GOOS=linux GOSUMDB=off go mod tidy
 	mkdir -p docs/swagger
