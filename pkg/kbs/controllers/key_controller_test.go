@@ -5,11 +5,9 @@
 package controllers_test
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"io/ioutil"
@@ -19,8 +17,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	aasClient "github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
@@ -44,10 +40,6 @@ const (
 	validSamlReportPath   = "./resources/saml_report.xml"
 	invalidSamlReportPath = "./resources/invalid_saml_report.xml"
 	endpointUrl           = "https://localhost:9443/kbs/v1"
-	aasUrl                = "https://aas.com:8444/aas/v1"
-	apsUrl                = "https://aps.com:5443/aps/v1/"
-	jwtToken              = "test_token"
-	cmsRootCa             = "MIIELDCCApSgAwIBAgIBADANBgkqhkiG9w0BAQwFADBHMQswCQYDVQQGEwJVUzELMAkGA1UECBMCU0YxCzAJBgNVBAcTAlNDMQ4wDAYDVQQKEwVJTlRFTDEOMAwGA1UEAxMFQ01TQ0EwHhcNMjIwMTA0MDkzMTMwWhcNMjcwMTA0MDkzMTMwWjBHMQswCQYDVQQGEwJVUzELMAkGA1UECBMCU0YxCzAJBgNVBAcTAlNDMQ4wDAYDVQQKEwVJTlRFTDEOMAwGA1UEAxMFQ01TQ0EwggGiMA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQCfrDvpjCTgS7qdFom5xyrg80eqsT3CCtSSx7W33XJ6Y4ELDjP3L238XieEvwrQjB1l8ReHC4RspWf7Mhlu5oUioc9dWHErwLy6AdokJnnKZNCcgHTz2rRAIahFbT9iRRTAg6/B5Ya+9s9SSLZcWNe7caXAhQeABssrjZSNrh1aYj9GSq8bnExO1AVNJzFBBnYn5OzjWecvaaysMNel624wHcwRyq33u+dBITuYSeE1kXG3mTWG/gxXrW89ONuLpxAn12iWsZtJ2USzcg8dURTHNoqI63dnr3jCW9OFfFchAuFkQnIzI3PV2MI30Ku2Me6ZCk6F+1HunChbqwaGlZ/klCOgiHZCtTBqKJfqXC7BftGjynwtPTNh/HIGfWMSaPF+kxcHkpnBwNC4ZkMnhgn62GK2WKPJwGTYZ8iFZ4X3duRowZA/uMK/LiYzBpI0MRg/OgQn4vcm+FIh4CiOCcwK3QT3c83MMbRq7CdRz4cXVwD/uh7mEC6YettvqCqXSQMCAwEAAaMjMCEwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQEMBQADggGBABNWn4uDanR6uYnydUNguMEBYf5Up381RC+lwIAv51aDhMx7/mPcApBJWTIjpOTMorDUiGiXUnKkPoKx3ulNPeq+QCoAaZgvsZzK8wixuTTPDBJ2yOs34zBoRNzPFptDbf4drXZq8UeIwDFo5LVCMONFxE/wDaDfc2f/XKIJghHf6dDZZG9mCgIDpWRy/CrkHg4GYomW81QSI/rIyorMPUIHG8ydh/vpM5T7jJKaDq5fNc67ePxFo5WuNUFA+QO+0VAfpvQwYmjrD/BfxJ62Abwc7oZoFJ+iutwoe1Cap5IN7vorZ5C8idqcKnln8k6bLbFb+Ud7F9GNJwP/mSgf/rYIO+T0ovVRmyF8XFCaD3TIyT28MCsNDn0eanEveg1JHZcsh9HaryWIuFG4cQJnLRoKRROkLtpElmrwk7zvG8yM6Eus7PGyGcnSuEH/Zs8NdGxcuLCkB3IBESG/CXP261e1HpBvSOg3lxdojOvBZsHeQHStcmFJXIXV2gWVeM+Ocg=="
 )
 
 var _ = Describe("KeyController", func() {
@@ -78,21 +70,6 @@ var _ = Describe("KeyController", func() {
 	mockClient.On("GetKey", mock.Anything).Return([]byte(""), nil)
 	keyManager := keymanager.NewKmipManager(mockClient)
 
-	aasClient := aasClient.NewMockAASClient()
-	aasClient.On("GetJwtSigningCertificate", mock.Anything).Return(controllers.JwtSignCert, nil)
-
-	var caCerts []x509.Certificate
-	cmsCA, _ := base64.StdEncoding.DecodeString(cmsRootCa)
-
-	cert, _ := x509.ParseCertificate(cmsCA)
-
-	caCerts = append(caCerts, *cert)
-
-	apsClient := aps.NewMockApsClient()
-	apsClient.On("GetAttestationToken", mock.Anything, mock.Anything).Return(controllers.Token, 0, nil)
-	apsClient.On("GetJwtSigningCertificate").Return(controllers.JwtSignCert, nil)
-	apsClient.On("GetNonce", mock.Anything).Return("test_nonce", 200, nil)
-
 	newId, _ := uuid.NewRandom()
 	kcc := domain.KeyTransferControllerConfig{
 		SamlCertsDir:        samlCertsDir,
@@ -106,7 +83,7 @@ var _ = Describe("KeyController", func() {
 		policyStore = mocks.NewFakeKeyTransferPolicyStore()
 		remoteManager = keymanager.NewRemoteManager(keyStore, keyManager, endpointUrl)
 		keyController = controllers.NewKeyController(remoteManager, policyStore, newId)
-		keyTransferController = controllers.NewKeyTransferController(remoteManager, policyStore, kcc, apsClient, aasClient)
+		keyTransferController = controllers.NewKeyTransferController(remoteManager, policyStore, kcc)
 	})
 
 	// Specs for HTTP Post to "/keys"
@@ -607,301 +584,6 @@ var _ = Describe("KeyController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusNotFound))
-			})
-		})
-	})
-
-	Describe("Transfer key with evidence", func() {
-		Context("provide an invalid attestation token for SGX attestation", func() {
-			It("Should fail to transfer key with unauthorized error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Authorization", "Bearer "+controllers.Token)
-				req.Header.Set("Attestation-Type", "SGX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnauthorized))
-			})
-		})
-		Context("Provide an invalid attestation token for TDX attestation", func() {
-			It("Should fail to transfer key with unauthorized error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Attestation-Type", "TDX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnauthorized))
-			})
-		})
-		Context("Provide a valid request and trigger internal server error from backend", func() {
-			It("Should fail to transfer key with internal server error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				keyStore.ThrowError = true
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/6aa9cd48-dbf2-11ec-9d64-0242ac120002/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Authorization", "Bearer "+controllers.Token)
-				req.Header.Set("Attestation-Type", "SGX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusInternalServerError))
-			})
-		})
-		Context("Provide an empty nonce in request header", func() {
-			It("Should fail to transfer key with unauthorized error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Attestation-Type", "TDX")
-				req.Header.Set("Nonce", "")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnauthorized))
-			})
-		})
-		Context("Provide an invalid keyid", func() {
-			It("Should fail to transfer key with not found error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e4/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Authorization", "Bearer "+controllers.Token)
-				req.Header.Set("Attestation-Type", "SGX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusNotFound))
-			})
-		})
-		Context("provide an empty bearer token to transfer", func() {
-			It("Should fail to transfer key with unauthorized error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ee37c360-7eae-4250-a677-6ee12adce8e2/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Authorization", "")
-				req.Header.Set("Attestation-Type", "SGX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnauthorized))
-			})
-		})
-		Context("Provide an empty nonce and content", func() {
-			It("Should fail to transfer key with no content error ", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
-					bytes.NewBuffer([]byte("")),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Attestation-Type", "TDX")
-				req.Header.Set("Nonce", "")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusNoContent))
-			})
-		})
-		Context("Provide an empty nonce and invalid content type", func() {
-			It("Should fail to transfer key with unsupported media type error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypePemFile)
-				req.Header.Set("Attestation-Type", "TDX")
-				req.Header.Set("Nonce", "")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
-			})
-		})
-
-		Context("Provide an invalid content type", func() {
-			It("Should fail to transfer key with unsupported media type error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypePemFile)
-				req.Header.Set("Attestation-Type", "TDX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnsupportedMediaType))
-			})
-		})
-		Context("Provide an empty content", func() {
-			It("Should fail to transfer key with bad request error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
-					bytes.NewBuffer([]byte("")),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Attestation-Type", "TDX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
-			})
-		})
-		Context("Provide an unmatched attestation type", func() {
-			It("Should fail to transfer key with unauthorized error", func() {
-				router.Handle("/keys/{id}/transfer", kbsRoutes.ErrorHandler(kbsRoutes.ResponseHandler(keyTransferController.Transfer))).Methods(http.MethodPost)
-
-				request := &kbs.KeyTransferRequest{
-					AttestationToken: "test_token",
-				}
-
-				reqBytes, _ := json.Marshal(request)
-
-				req, err := http.NewRequest(
-					http.MethodPost,
-					"/keys/ed37c360-7eae-4250-a677-6ee12adce8e3/transfer",
-					bytes.NewBuffer(reqBytes),
-				)
-
-				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
-				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
-				req.Header.Set("Authorization", "Bearer "+controllers.Token)
-				req.Header.Set("Attestation-Type", "SGX")
-				req.Header.Set("Nonce", "test_token")
-
-				w = httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-				Expect(w.Code).To(Equal(http.StatusUnauthorized))
 			})
 		})
 	})

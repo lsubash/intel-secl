@@ -20,9 +20,6 @@ var defaultLog = log.GetDefaultLogger()
 // Constants for viper variable names. Will be used to set
 // default values as well as to get each value
 const (
-	ApsBaseUrl  = "aps-base-url"
-	CustomToken = "custom-token"
-
 	EndpointUrl = "endpoint-url"
 	KeyManager  = "key-manager"
 
@@ -40,8 +37,6 @@ const (
 type Configuration struct {
 	AASBaseUrl       string `yaml:"aas-base-url" mapstructure:"aas-base-url"`
 	CMSBaseURL       string `yaml:"cms-base-url" mapstructure:"cms-base-url"`
-	APSBaseUrl       string `yaml:"aps-base-url" mapstructure:"aps-base-url"`
-	CustomToken      string `yaml:"custom-token" mapstructure:"custom-token"`
 	CmsTlsCertDigest string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 
 	EndpointURL string `yaml:"endpoint-url" mapstructure:"endpoint-url"`

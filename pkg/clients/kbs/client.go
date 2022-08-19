@@ -19,9 +19,7 @@ var log = commLog.GetDefaultLogger()
 type KBSClient interface {
 	CreateKey(*kbs.KeyRequest) (*kbs.KeyResponse, error)
 	GetKey(string, string) (*kbs.KeyTransferResponse, error)
-	TransferKey(string) (string, string, error)
 	TransferKeyWithSaml(string, string) ([]byte, error)
-	TransferKeyWithEvidence(string, string, string, *kbs.KeyTransferRequest) (*kbs.KeyTransferResponse, error)
 }
 
 func NewKBSClient(aasURL, kbsURL *url.URL, username, password, token string, certs []x509.Certificate) KBSClient {

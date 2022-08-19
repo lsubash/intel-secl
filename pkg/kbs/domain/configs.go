@@ -8,9 +8,7 @@ import "github.com/google/uuid"
 
 type KeyTransferControllerConfig struct {
 	AasBaseUrl              string
-	CustomToken             string
 	AasJwtSigningCertsDir   string
-	ApsJwtSigningCertsDir   string
 	SamlCertsDir            string
 	TrustedCaCertsDir       string
 	TpmIdentityCertsDir     string

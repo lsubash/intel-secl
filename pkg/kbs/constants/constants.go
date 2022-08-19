@@ -26,7 +26,6 @@ const (
 
 	// certificates' path
 	TrustedJWTSigningCertsDir = ConfigDir + "certs/trustedjwt/"
-	ApsJWTSigningCertsDir     = ConfigDir + "certs/apsjwt/"
 	TrustedCaCertsDir         = ConfigDir + "certs/trustedca/"
 	SamlCertsDir              = ConfigDir + "certs/saml/"
 	TpmIdentityCertsDir       = ConfigDir + "certs/tpm-identity/"
@@ -79,6 +78,4 @@ const (
 	// kmip constants
 	KMIP_1_4 = "1.4"
 	KMIP_2_0 = "2.0"
-
-	TCBStatusUpToDate = "OK"
 )

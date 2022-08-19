@@ -24,8 +24,6 @@ type UpdateServiceConfig struct {
 	ServerConfig  commConfig.ServerConfig
 	DefaultPort   int
 	AASBaseUrl    string
-	APSBaseUrl    string
-	CustomToken   string
 	AppConfig     **config.Configuration
 	ConsoleWriter io.Writer
 }
@@ -70,12 +68,6 @@ func (uc UpdateServiceConfig) Run() error {
 
 	(*uc.AppConfig).Server = uc.ServerConfig
 	(*uc.AppConfig).AASBaseUrl = uc.AASBaseUrl
-
-	if !strings.HasSuffix(uc.APSBaseUrl, "/") {
-		uc.APSBaseUrl = uc.APSBaseUrl + "/"
-	}
-	(*uc.AppConfig).APSBaseUrl = uc.APSBaseUrl
-	(*uc.AppConfig).CustomToken = uc.CustomToken
 
 	(*uc.AppConfig).Log = commConfig.LogConfig{
 		MaxLength:    viper.GetInt(commConfig.LogMaxLength),

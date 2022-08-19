@@ -82,36 +82,6 @@ func (k *kbsClient) GetKey(keyId, pubKey string) (*kbs.KeyTransferResponse, erro
 	return &key, nil
 }
 
-// TransferKey performs a POST to /keys/{key_id}/transfer to retrieve the challenge data from the KBS
-func (k *kbsClient) TransferKey(keyId string) (string, string, error) {
-	log.Trace("kbs/key:TransferKey() Entering")
-	defer log.Trace("kbs/key:TransferKey() Leaving")
-
-	keyURL, _ := url.Parse("keys/" + keyId + "/transfer")
-	reqURL := k.BaseURL.ResolveReference(keyURL)
-	req, err := http.NewRequest("POST", reqURL.String(), nil)
-	if err != nil {
-		return "", "", errors.Wrap(err, "Error initializing key transfer request")
-	}
-
-	// Set the request headers
-	req.Header.Set("Accept", constants.HTTPMediaTypeJson)
-	req.Header.Set("Authorization", "Bearer "+k.JwtToken)
-	rsp, err := util.GetHTTPResponse(req, k.CaCerts, false)
-	if err != nil {
-		return "", "", errors.Wrap(err, "Error response from key transfer request")
-	}
-	defer func() {
-		derr := rsp.Body.Close()
-		if derr != nil {
-			log.WithError(derr).Error("kbs/key:TransferKey() Error closing response body")
-		}
-	}()
-
-	// Parse response headers
-	return rsp.Header.Get("Nonce"), rsp.Header.Get("Attestation-Type"), nil
-}
-
 // TransferKeyWithSaml performs a POST to /keys/{id}/transfer to retrieve the actual key data from the KBS
 func (k *kbsClient) TransferKeyWithSaml(keyId, saml string) ([]byte, error) {
 	log.Trace("kbs/client:TransferKeyWithSaml() Entering")
@@ -133,41 +103,4 @@ func (k *kbsClient) TransferKeyWithSaml(keyId, saml string) ([]byte, error) {
 	}
 
 	return rsp, nil
-}
-
-// TransferKeyWithEvidence performs a POST to /keys/{key_id}/transfer to retrieve the actual key data from the KBS
-func (k *kbsClient) TransferKeyWithEvidence(keyId, nonce, attestationType string, request *kbs.KeyTransferRequest) (*kbs.KeyTransferResponse, error) {
-	log.Trace("kbs/key:TransferKeyWithEvidence() Entering")
-	defer log.Trace("kbs/key:TransferKeyWithEvidence() Leaving")
-
-	reqBytes, err := json.Marshal(request)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error marshalling key transfer request")
-	}
-
-	keyURL, _ := url.Parse("keys/" + keyId + "/transfer")
-	reqURL := k.BaseURL.ResolveReference(keyURL)
-	req, err := http.NewRequest("POST", reqURL.String(), bytes.NewBuffer(reqBytes))
-	if err != nil {
-		return nil, errors.Wrap(err, "Error initializing key transfer request")
-	}
-
-	// Set the request headers
-	req.Header.Set("Accept", constants.HTTPMediaTypeJson)
-	req.Header.Set("Authorization", "Bearer "+k.JwtToken)
-	req.Header.Set("Content-Type", constants.HTTPMediaTypeJson)
-	req.Header.Set("Attestation-Type", attestationType)
-	req.Header.Set("Nonce", nonce)
-	rsp, err := util.SendNoAuthRequest(req, k.CaCerts)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error response from key transfer request")
-	}
-
-	var response kbs.KeyTransferResponse
-	err = json.Unmarshal(rsp, &response)
-	if err != nil {
-		return nil, errors.New("Error unmarshalling key transfer response")
-	}
-
-	return &response, nil
 }

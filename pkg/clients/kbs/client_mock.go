@@ -30,20 +30,8 @@ func (k *MockKbsClient) GetKey(keyId, pubKey string) (*kbs.KeyTransferResponse, 
 	return args.Get(0).(*kbs.KeyTransferResponse), args.Error(1)
 }
 
-// TransferKey performs a POST to /keys/{key_id}/transfer to retrieve the challenge data from the KBS
-func (k *MockKbsClient) TransferKey(keyId string) (string, string, error) {
-	args := k.Called(keyId)
-	return args.Get(0).(string), args.Get(1).(string), args.Error(2)
-}
-
 // TransferKeyWithSaml performs a POST to /keys/{id}/transfer to retrieve the actual key data from the KBS
 func (k *MockKbsClient) TransferKeyWithSaml(keyId, saml string) ([]byte, error) {
 	args := k.Called(keyId, saml)
 	return args.Get(0).([]byte), args.Error(1)
-}
-
-// TransferKeyWithEvidence performs a POST to /keys/{key_id}/transfer to retrieve the actual key data from the KBS
-func (k *MockKbsClient) TransferKeyWithEvidence(keyId, nonce, attestationType string, request *kbs.KeyTransferRequest) (*kbs.KeyTransferResponse, error) {
-	args := k.Called(keyId, nonce, attestationType, request)
-	return args.Get(0).(*kbs.KeyTransferResponse), args.Error(1)
 }

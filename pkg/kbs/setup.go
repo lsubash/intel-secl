@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
 	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/utils"
 
@@ -144,8 +143,6 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: app.consoleWriter(),
 		AASBaseUrl:    viper.GetString(commConfig.AasBaseUrl),
-		APSBaseUrl:    viper.GetString(config.ApsBaseUrl),
-		CustomToken:   viper.GetString(config.CustomToken),
 		ServerConfig: commConfig.ServerConfig{
 			Port:              viper.GetInt(commConfig.ServerPort),
 			ReadTimeout:       viper.GetDuration(commConfig.ServerReadTimeout),

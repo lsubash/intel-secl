@@ -111,8 +111,6 @@ func TestNewKeyManager(t *testing.T) {
 				cfg: &config.Configuration{
 					AASBaseUrl:  "https://aas.com:8444/aas/v1/",
 					CMSBaseURL:  "https://cms.com:8445/cms/v1/",
-					APSBaseUrl:  "https://aps.com:5443/aps/v1/",
-					CustomToken: token,
 					EndpointURL: "https://localhost:9443/kbs/v1",
 					KeyManager:  "kmip",
 					Kmip: config.KmipConfig{
@@ -136,8 +134,6 @@ func TestNewKeyManager(t *testing.T) {
 				cfg: &config.Configuration{
 					AASBaseUrl:  "https://aas.com:8444/aas/v1/",
 					CMSBaseURL:  "https://cms.com:8445/cms/v1/",
-					APSBaseUrl:  "https://aps.com:5443/aps/v1/",
-					CustomToken: token,
 					EndpointURL: "https://localhost:9443/kbs/v1",
 					KeyManager:  "kmip",
 					Kmip: config.KmipConfig{
@@ -161,8 +157,6 @@ func TestNewKeyManager(t *testing.T) {
 				cfg: &config.Configuration{
 					AASBaseUrl:  "https://aas.com:8444/aas/v1/",
 					CMSBaseURL:  "https://cms.com:8445/cms/v1/",
-					APSBaseUrl:  "https://aps.com:5443/aps/v1/",
-					CustomToken: token,
 					EndpointURL: "https://localhost:9443/kbs/v1",
 					KeyManager:  "",
 					Kmip: config.KmipConfig{

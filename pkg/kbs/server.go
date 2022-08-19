@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,7 +18,6 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients"
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/aas"
-	"github.com/intel-secl/intel-secl/v5/pkg/clients/aps"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/domain"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/keymanager"
@@ -60,21 +58,12 @@ func (app *App) startServer() error {
 		return err
 	}
 
-	apsBaseUrl, err := url.Parse(configuration.APSBaseUrl)
-	if err != nil {
-		defaultLog.WithError(err).Error("kbs/server:startServer() Error parsing APS url")
-		return err
-	}
-
 	//Load trusted CA certificates
 	caCerts, err := crypt.GetCertsFromDir(constants.TrustedCaCertsDir)
 	if err != nil {
 		defaultLog.WithError(err).Error("kbs/server:startServer() Error loading CA certificates")
 		return err
 	}
-
-	//Initialize the APS client
-	apsClient := aps.NewAPSClient(apsBaseUrl, caCerts, configuration.CustomToken)
 
 	client, err := clients.HTTPClientWithCA(caCerts)
 	if err != nil {
@@ -85,12 +74,11 @@ func (app *App) startServer() error {
 	//Initialize the AAS client
 	aasClient := &aas.Client{
 		BaseURL:    configuration.AASBaseUrl,
-		JWTToken:   []byte(configuration.CustomToken),
 		HTTPClient: client,
 	}
 
 	// Initialize routes
-	routes := router.InitRoutes(configuration, kcc, km, apsClient, aasClient)
+	routes := router.InitRoutes(configuration, kcc, km, aasClient)
 	loggerMiddleware := middleware.LogWriterMiddleware{app.logWriter()}
 	routes.Use(loggerMiddleware.WriteDurationLog())
 	defaultLog.Info("kbs/server:startServer() Starting server")
@@ -155,7 +143,6 @@ func initKeyTransferControllerConfig() (domain.KeyTransferControllerConfig, erro
 
 	kcc := domain.KeyTransferControllerConfig{
 		AasJwtSigningCertsDir:   constants.TrustedJWTSigningCertsDir,
-		ApsJwtSigningCertsDir:   constants.ApsJWTSigningCertsDir,
 		SamlCertsDir:            constants.SamlCertsDir,
 		TrustedCaCertsDir:       constants.TrustedCaCertsDir,
 		TpmIdentityCertsDir:     constants.TpmIdentityCertsDir,
