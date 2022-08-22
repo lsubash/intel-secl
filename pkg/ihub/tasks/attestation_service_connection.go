@@ -30,10 +30,9 @@ func (attestationService AttestationServiceConnection) Run() error {
 	fmt.Fprintln(attestationService.ConsoleWriter, "Setting up Attestation Service Connection...")
 
 	HvsUrl := viper.GetString(config.HvsBaseUrl)
-	FdsUrl := viper.GetString(config.FdsBaseUrl)
 
-	if HvsUrl == "" && FdsUrl == "" {
-		return errors.New("tasks/attestation_service_connection:Run() Missing HVS and FDS endpoint urls in environment")
+	if HvsUrl == "" {
+		return errors.New("tasks/attestation_service_connection:Run() Missing HVS endpoint url in environment")
 	}
 
 	if HvsUrl != "" && !strings.HasSuffix(HvsUrl, "/") {
@@ -43,15 +42,7 @@ func (attestationService AttestationServiceConnection) Run() error {
 		}
 	}
 
-	if FdsUrl != "" && !strings.HasSuffix(FdsUrl, "/") {
-		FdsUrl = FdsUrl + "/"
-		if _, err := url.Parse(FdsUrl); err != nil {
-			return errors.Wrap(err, "tasks/attestation_service_connection:Run() FDS URL is invalid")
-		}
-	}
-
 	attestationService.AttestationConfig.HVSBaseURL = HvsUrl
-	attestationService.AttestationConfig.FDSBaseURL = FdsUrl
 
 	return nil
 }
@@ -59,8 +50,8 @@ func (attestationService AttestationServiceConnection) Run() error {
 // Validate checks whether or not the Attestation Service Connection setup task was completed successfully
 func (attestationService AttestationServiceConnection) Validate() error {
 
-	if attestationService.AttestationConfig.HVSBaseURL == "" && attestationService.AttestationConfig.FDSBaseURL == "" {
-		return errors.New("tasks/attestation_service_connection:Validate() Attestation service Connection: HVS and FDS url are not set")
+	if attestationService.AttestationConfig.HVSBaseURL == "" {
+		return errors.New("tasks/attestation_service_connection:Validate() Attestation service Connection: HVS url is not set")
 	}
 
 	//validating the service url
@@ -109,7 +100,6 @@ func (attestationService AttestationServiceConnection) validateService() error {
 func (attestationService AttestationServiceConnection) PrintHelp(w io.Writer) {
 	var envHelp = map[string]string{
 		"HVS_BASE_URL": "Base URL for the Host Verification Service",
-		"FDS_BASE_URL": "Base URL for the Feature Discovery Service",
 	}
 	setup.PrintEnvHelp(w, "Following environment variables are required for attestation-service-connection setup:", "", envHelp)
 	fmt.Fprintln(w, "")

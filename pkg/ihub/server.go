@@ -46,10 +46,9 @@ func (app *App) startDaemon() error {
 	var k k8splugin.KubernetesDetails
 
 	attestationHVSURL := configuration.AttestationService.HVSBaseURL
-	attestationFDSURL := configuration.AttestationService.FDSBaseURL
 
-	if attestationHVSURL == "" && attestationFDSURL == "" {
-		return errors.New("startService:startDaemon() Neither HVS nor FDS URL are defined")
+	if attestationHVSURL == "" {
+		return errors.New("startService:startDaemon() HVS URL is not defined")
 	}
 
 	if configuration.Endpoint.Type == constants.K8sTenant {

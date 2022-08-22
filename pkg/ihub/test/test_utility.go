@@ -200,7 +200,6 @@ func SetupMockK8sConfiguration(t *testing.T, serverUrl string) *config.Configura
 	c.IHUB.Username = "admin@hub"
 	c.IHUB.Password = "hubAdminPass"
 	c.AttestationService.HVSBaseURL = serverUrl + "/hvs/v2/"
-	c.AttestationService.FDSBaseURL = serverUrl + "/fds/v1/"
 	c.Endpoint.Type = "KUBERNETES"
 	c.Endpoint.URL = serverUrl + "/"
 	c.Endpoint.CRDName = "custom-isecl"

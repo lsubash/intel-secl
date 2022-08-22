@@ -47,19 +47,6 @@ func TestAttestationServiceConnectionRun(t *testing.T) {
 		},
 
 		{
-			name: "test-attestation-service-connection valid test 2",
-			attestationService: AttestationServiceConnection{
-				AttestationConfig: &config.AttestationConfig{},
-				ConsoleWriter:     os.Stdout,
-			},
-			EnvValues: map[string]string{
-				"ATTESTATION_SERVICE_FDS_BASE_URL": server.URL + "/fds/v1/",
-			},
-
-			wantErr: false,
-		},
-
-		{
 			name: "test-attestation-service-connection negative test 1",
 			attestationService: AttestationServiceConnection{
 				AttestationConfig: &config.AttestationConfig{},
@@ -147,17 +134,6 @@ func TestAttestationServiceConnectionValidate(t *testing.T) {
 			attestationService: AttestationServiceConnection{
 				AttestationConfig: &config.AttestationConfig{
 					HVSBaseURL: server.URL + "/hvs/v2/",
-				},
-				ConsoleWriter: os.Stdout,
-			},
-
-			wantErr: false,
-		},
-		{
-			name: "test-attestation-service-connection valid test 2",
-			attestationService: AttestationServiceConnection{
-				AttestationConfig: &config.AttestationConfig{
-					FDSBaseURL: server.URL + "/fds/v1/",
 				},
 				ConsoleWriter: os.Stdout,
 			},

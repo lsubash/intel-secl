@@ -48,7 +48,6 @@ func defaultConfig() *config.Configuration {
 		},
 		AttestationService: config.AttestationConfig{
 			HVSBaseURL: viper.GetString(config.HvsBaseUrl),
-			FDSBaseURL: viper.GetString(config.FdsBaseUrl),
 		},
 		Log: commConfig.LogConfig{
 			MaxLength:    viper.GetInt(commConfig.LogMaxLength),
