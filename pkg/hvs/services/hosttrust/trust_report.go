@@ -396,6 +396,13 @@ func getHostManifestMap(hostManifest *hvs.HostManifest, flavorParts []hvs.Flavor
 					})
 				}
 				hostInfoValues[hvs.FlavorPartSoftware] = sfQueryAttrs
+			} else if fp == hvs.FlavorPartIma {
+				var imaFlavorQueryAttributes []models.FlavorMetaKv
+				imaFlavorQueryAttributes = append(imaFlavorQueryAttributes, models.FlavorMetaKv{
+					Key:   "meta.description.label",
+					Value: "Isecl_IMA",
+				})
+				hostInfoValues[hvs.FlavorPartIma] = imaFlavorQueryAttributes
 			} else {
 				return nil, errors.New("Invalid flavor part - " + fp.String())
 			}

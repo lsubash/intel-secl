@@ -6,6 +6,7 @@ for i in "${secretFiles[@]}"; do
     export $i=$(cat $SECRETS/$i)
 done
 
+export IMA_MEASURE_ENABLED=true
 COMPONENT_NAME=trustagent
 PRODUCT_HOME_DIR=/opt/$COMPONENT_NAME
 PRODUCT_BIN_DIR=$PRODUCT_HOME_DIR/bin

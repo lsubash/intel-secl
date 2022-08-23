@@ -17,7 +17,7 @@ func TestNewHostConnector(t *testing.T) {
 	sampleUrl1 := "intel:https://ta.ip.com:1443;u=admin;p=password"
 	aasurl := "https://aas.url.com:8444/aas"
 	var caCertMap []x509.Certificate
-	htcFactory := NewHostConnectorFactory(aasurl, caCertMap, nil)
+	htcFactory := NewHostConnectorFactory(aasurl, caCertMap, nil, true)
 
 	hostConnector, err := htcFactory.NewHostConnector(sampleUrl1)
 	assert.NoError(t, err, nil)

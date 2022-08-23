@@ -1,0 +1,17 @@
+{  
+    "label": "ima",
+    "condition" :[
+        "//host_info/os_name//*[text()='RedHatEnterprise'] or //host_info/os_name//*[text()='Centos'] or //host_info/os_name//*[text()='Ubuntu']"
+    ],  
+    "flavor_parts": {  
+        "IMA": {  
+            "pcr_rules": [{  
+                "pcr": {  
+                    "index": 10,  
+                    "bank": ["SHA384", "SHA256", "SHA1"]  
+                },  
+                "pcr_matches": true  
+            }]  
+        }  
+    }  
+}

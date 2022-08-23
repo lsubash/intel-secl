@@ -8,7 +8,10 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/xml"
-	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
+	"io/ioutil"
+	"os"
+
+	host_connector "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/util"
@@ -18,8 +21,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/govmomi/vim25/mo"
 	vim25Types "github.com/vmware/govmomi/vim25/types"
-	"io/ioutil"
-	"os"
 )
 
 // MockHostConnectorFactory is required for mocking the HostConnector dependency in flows involving HostConnector
@@ -38,14 +39,14 @@ func (htcFactory MockHostConnectorFactory) NewHostConnector(connectionString str
 	default:
 		return nil, errors.New("mock_host_connector_factory:NewHostConnector() Vendor not supported yet: " + vendorConnector.Vendor.String())
 	}
-	return connectorFactory.GetHostConnector(vendorConnector, "", nil)
+	return connectorFactory.GetHostConnector(vendorConnector, "", nil, true)
 }
 
 // MockIntelConnectorFactory implements the VendorConnectorFactory interface
 type MockIntelConnectorFactory struct{}
 
 // GetHostConnector returns an instance of IntelConnector passing in a MockedTAClient
-func (micf MockIntelConnectorFactory) GetHostConnector(vendorConnector types.VendorConnector, aasApiUrl string, trustedCaCerts []x509.Certificate) (host_connector.HostConnector, error) {
+func (micf MockIntelConnectorFactory) GetHostConnector(vendorConnector types.VendorConnector, aasApiUrl string, trustedCaCerts []x509.Certificate, imaMeasureEnabled bool) (host_connector.HostConnector, error) {
 	mhc := MockIntelConnector{}
 
 	// AnythingOfType allows us to wildcard the digest hash since this will be computed at runtime
@@ -84,7 +85,7 @@ func (micf MockIntelConnectorFactory) GetHostConnector(vendorConnector types.Ven
 type MockVmwareConnectorFactory struct{}
 
 // GetHostConnector returns an instance of VmwareConnector passing in a MockVMwareClient
-func (micf MockVmwareConnectorFactory) GetHostConnector(vendorConnector types.VendorConnector, aasApiUrl string, trustedCaCerts []x509.Certificate) (host_connector.HostConnector, error) {
+func (micf MockVmwareConnectorFactory) GetHostConnector(vendorConnector types.VendorConnector, aasApiUrl string, trustedCaCerts []x509.Certificate, imaMeasureEnabled bool) (host_connector.HostConnector, error) {
 	vmc := MockVmwareConnector{}
 
 	var hostInfoList []mo.HostSystem

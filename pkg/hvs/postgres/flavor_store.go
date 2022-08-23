@@ -121,6 +121,7 @@ func (f *FlavorStore) buildMultipleFlavorPartQueryString(tx *gorm.DB, fgId uuid.
 	var aTagQuery *gorm.DB
 	var softwareQuery *gorm.DB
 	var hostUniqueQuery *gorm.DB
+	var imaQuery *gorm.DB
 
 	if flavorPartsWithLatest != nil && len(flavorPartsWithLatest) >= 1 {
 		for flavorPart := range flavorPartsWithLatest {
@@ -193,6 +194,19 @@ func (f *FlavorStore) buildMultipleFlavorPartQueryString(tx *gorm.DB, fgId uuid.
 					aTagQuery = aTagQuery.Order("f.created_at desc").Limit(1)
 				}
 
+			case hvs.FlavorPartIma:
+				imaQuery = f.Store.Db
+				imaQuery = buildFlavorPartQueryStringWithFlavorParts(hvs.FlavorPartIma.String(), fgId.String(), imaQuery)
+				// build biosQuery with all the ima flavor query attributes from host manifest
+				imaFlavorQueryAttributes := flavorMetaInfo[hvs.FlavorPartIma]
+				for _, imaFlavorQueryAttribute := range imaFlavorQueryAttributes {
+					imaQuery = imaQuery.Where(convertToPgJsonqueryString("f.content", imaFlavorQueryAttribute.Key)+" = ?", imaFlavorQueryAttribute.Value)
+				}
+				// apply limit if latest
+				if flavorPartsWithLatest[hvs.FlavorPartIma] {
+					imaQuery = imaQuery.Order("f.created_at desc").Limit(1)
+				}
+
 			default:
 				defaultLog.Error("postgres/flavor_store:buildMultipleFlavorPartQueryString() Invalid flavor part")
 				return nil
@@ -242,8 +256,19 @@ func (f *FlavorStore) buildMultipleFlavorPartQueryString(tx *gorm.DB, fgId uuid.
 			subQuery = subQuery.Where("f.id IN ?", hostUniqueSubQuery)
 		}
 	}
+
+	// add ima query to sub query
+	if imaQuery != nil {
+		imaSubQuery := imaQuery.SubQuery()
+		if biosQuery != nil || osQuery != nil || softwareQuery != nil || aTagQuery != nil || hostUniqueQuery != nil {
+			subQuery = subQuery.Or("f.id IN ?", imaSubQuery)
+		} else {
+			subQuery = subQuery.Where("f.id IN ?", imaSubQuery)
+		}
+	}
+
 	// check if none of the flavor part queries are not formed,
-	if subQuery != nil && (biosQuery != nil || aTagQuery != nil || softwareQuery != nil || hostUniqueQuery != nil || osQuery != nil) {
+	if subQuery != nil && (biosQuery != nil || aTagQuery != nil || softwareQuery != nil || hostUniqueQuery != nil || osQuery != nil || imaQuery != nil) {
 		tx = subQuery
 	} else if fgId != uuid.Nil {
 		fgSubQuery := buildFlavorPartQueryStringWithFlavorgroup(fgId.String(), tx).SubQuery()

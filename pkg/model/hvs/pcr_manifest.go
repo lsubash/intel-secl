@@ -6,14 +6,17 @@
 package hvs
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"hash"
+	"unsafe"
 
 	"fmt"
-	"hash"
 	"reflect"
 	"strconv"
 	"strings"
@@ -28,6 +31,20 @@ const (
 
 const (
 	PCR_INDEX_PREFIX = "pcr_"
+)
+
+const (
+	IMA_NG_TEMPLATE  = "ima-ng"
+	IMA_SIG_TEMPLATE = "ima-sig"
+	IMA_TEMPLATE     = "ima"
+)
+
+const (
+	SUFFIX_SHA1     = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+	SUFFIX_SHA256   = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+	SHA1_ALGONAME   = "sha1:\x00"
+	SHA256_ALGONAME = "sha256:\x00"
+	SUFFIX_EMPTY    = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 )
 
 type HostManifestPcrs struct {
@@ -83,6 +100,37 @@ type PcrManifest struct {
 	Sha256Pcrs     []HostManifestPcrs `json:"sha2pcrs,omitempty"`
 	Sha384Pcrs     []HostManifestPcrs `json:"sha3pcrs,omitempty"`
 	PcrEventLogMap PcrEventLogMap     `json:"pcr_event_log_map"`
+}
+
+type ImaLogs struct {
+	Pcr           Pcr            `json:"pcr,omitempty"` //required
+	Measurements  []Measurements `json:"ima_measurements,omitempty"`
+	ImaTemplate   string         `json:"ima_template,omitempty"`
+	ExpectedValue string         `json:"expected_value,omitempty"`
+}
+
+type Measurements struct {
+	File        string `json:"file,omitempty"`
+	Measurement string `json:"measurement,omitempty"`
+}
+
+type ImaLog struct {
+	Pcr             Pcr            `json:"pcr"`
+	ImaMeasurements []Measurements `json:"ima_measurements"`
+	ImaTemplate     string         `json:"ima_template,omitempty"`
+}
+
+type ImaTemplate struct {
+}
+
+type ImaNGTemplate struct {
+}
+
+type ImaSIGTemplate struct {
+}
+
+type Template interface {
+	getTemplateHash(fileName string, fileHash []byte) ([]byte, error)
 }
 
 type PcrIndex int
@@ -397,6 +445,43 @@ func (eventLogEntry *TpmEventLog) Replay() (string, error) {
 	return cumulativeHashString, nil
 }
 
+// Returns the string value of the "cumulative" hash of the ima log.
+func (imaLog *ImaLogs) Replay() (string, error) {
+
+	cumulativeHash := make([]byte, sha256.Size)
+
+	var template Template
+	//we will use input template string instead of constant(IMA_NG_TEMPLATE)
+	switch imaLog.ImaTemplate {
+	case IMA_NG_TEMPLATE:
+		template = new(ImaNGTemplate)
+	case "":
+		return "", errors.Errorf("Empty Ima Template")
+	default:
+		return "", errors.Errorf("'%s' template is not supported", imaLog.ImaTemplate)
+	}
+
+	for i, fileMeasurements := range imaLog.Measurements {
+		hash := sha256.New()
+		fileHash, err := hex.DecodeString(fileMeasurements.Measurement)
+		if err != nil {
+			return "", errors.Wrapf(err, "Failed to decode event log %d using hex string '%s'", i, fileMeasurements.Measurement)
+		}
+
+		templateHash, err := template.getTemplateHash(fileMeasurements.File, fileHash)
+		if err != nil {
+			return "", errors.Wrapf(err, "Failed to calculate template hash %d from file hash '%s'", i, fileMeasurements.Measurement)
+		}
+
+		hash.Write(cumulativeHash)
+		hash.Write(templateHash)
+		cumulativeHash = hash.Sum(nil)
+	}
+
+	cumulativeHashString := hex.EncodeToString(cumulativeHash)
+	return cumulativeHashString, nil
+}
+
 // GetEventLogCriteria returns the EventLogs for a specific PcrBank/PcrIndex, as per latest hostmanifest
 func (pcrManifest *PcrManifest) GetEventLogCriteria(pcrBank SHAAlgorithm, pcrIndex PcrIndex) ([]EventLog, error) {
 	pI := int(pcrIndex)
@@ -486,4 +571,128 @@ func getCumulativeHash(pcrBank SHAAlgorithm) ([]byte, error) {
 	}
 
 	return cumulativeHash, nil
+}
+
+//getTemplateHash method returns the hash based on the pcr bank
+func (imaNGTemplate *ImaNGTemplate) getTemplateHash(fileName string, fileHash []byte) ([]byte, error) {
+	var paddedHash []byte
+	var templateHash []byte
+
+	paddedHash = make([]byte, sha256.Size)
+	paddedHash1 := make([]byte, sha1.Size)
+	if bytes.Compare(fileHash, paddedHash) == 0 || bytes.Compare(fileHash, paddedHash1) == 0 {
+		copy(paddedHash, SUFFIX_SHA256)
+		return paddedHash, nil
+	}
+	templateHash = sha256Templatehash(SHA256_ALGONAME, fileName, fileHash)
+
+	return templateHash, nil
+}
+
+//getEndian true = big endian, false = little endian
+func getEndian() (ret bool) {
+	var i int = 0x1
+	bs := (*[unsafe.Sizeof(i)]byte)(unsafe.Pointer(&i))
+	if bs[0] == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+//calculate sha256 template hash for sha256 file hash
+func sha256Templatehash(algoName string, fileName string, fileHash []byte) []byte {
+
+	const suffix = "\x00"
+	fileName0 := append([]byte(fileName), suffix...)
+	fileHashAlgoLen := uint32(len(fileHash) + len(algoName))
+	fileHashAlgoLenStr := make([]byte, 4)
+	fileNameLen := uint32(len(fileName0))
+	fileNameLenStr := make([]byte, 4)
+	bigEndian := getEndian()
+	if bigEndian {
+		binary.BigEndian.PutUint32(fileHashAlgoLenStr, fileHashAlgoLen)
+		binary.BigEndian.PutUint32(fileNameLenStr, fileNameLen)
+	} else {
+		binary.LittleEndian.PutUint32(fileHashAlgoLenStr, fileHashAlgoLen)
+		binary.LittleEndian.PutUint32(fileNameLenStr, fileNameLen)
+	}
+
+	h := sha1.New()
+	ss := append(fileHashAlgoLenStr, algoName...)
+	ss = append(ss, fileHash...)
+	ss = append(ss, fileNameLenStr...)
+	ss = append(ss, fileName0...)
+	h.Write([]byte(ss))
+	sum := h.Sum(nil)
+
+	sum = append(sum, SUFFIX_EMPTY...)
+	return sum
+}
+
+func (expectedImaLogs *Ima) Subtract(imaLogsToSubtract *Ima) (*Ima, *Ima, error) {
+	matched := false
+	imaLogsToSubtractMap := make(map[string][]string)
+
+	subtractedImaLogs := Ima{
+		ImaTemplate: expectedImaLogs.ImaTemplate,
+	}
+
+	mismatchedImaLogs := Ima{
+		ImaTemplate: expectedImaLogs.ImaTemplate,
+	}
+
+	//Add IMA log file name and its all posible measurements to the map
+	for _, imaLogMeasurement := range imaLogsToSubtract.Measurements {
+		value, ok := imaLogsToSubtractMap[imaLogMeasurement.File]
+		if ok {
+			val := append(value, imaLogMeasurement.Measurement)
+			imaLogsToSubtractMap[imaLogMeasurement.File] = val
+		} else {
+			imaLogsToSubtractMap[imaLogMeasurement.File] = []string{imaLogMeasurement.Measurement}
+		}
+	}
+
+	if len(expectedImaLogs.Measurements) == len(imaLogsToSubtract.Measurements) {
+		for _, imaLog := range expectedImaLogs.Measurements {
+			if imaLogMeasurement, ok := imaLogsToSubtractMap[imaLog.File]; ok {
+				for _, value := range imaLogMeasurement {
+					matched = false
+					if value == imaLog.Measurement {
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					mismatchedImaLogs.Measurements = append(mismatchedImaLogs.Measurements, imaLog)
+				}
+			} else {
+				subtractedImaLogs.Measurements = append(subtractedImaLogs.Measurements, imaLog)
+			}
+		}
+	}
+
+	lenToCatchUnexpectedEntries := len(imaLogsToSubtract.Measurements)
+	if len(expectedImaLogs.Measurements) > len(imaLogsToSubtract.Measurements) {
+		for _, imaLog := range expectedImaLogs.Measurements {
+			lenToCatchUnexpectedEntries--
+			imaLogMeasurement, ok := imaLogsToSubtractMap[imaLog.File]
+			if ok && lenToCatchUnexpectedEntries >= 0 {
+				for _, value := range imaLogMeasurement {
+					matched = false
+					if value == imaLog.Measurement {
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					mismatchedImaLogs.Measurements = append(mismatchedImaLogs.Measurements, imaLog)
+				}
+			} else {
+				subtractedImaLogs.Measurements = append(subtractedImaLogs.Measurements, imaLog)
+			}
+		}
+	}
+
+	return &subtractedImaLogs, &mismatchedImaLogs, nil
 }

@@ -258,10 +258,47 @@ function generate_grub_entry()
 	get_grub_file_location
 	detect_tpm_version
 
+        IMA_TEMPLATE=""
+        IMA_HASH=""
+        local isImaEnabled=0
+        # Check if ima is enabled in system
+        if [ "$IMA_MEASURE_ENABLED" = "true" ]; then
+                echo "IMA Enabled"
+                isImaEnabled=1
+                # Check if ima_template is set in grub
+                if grep -q -e 'ima_template=ima-ng' "/proc/cmdline"; then
+                        echo "IMA-NG template is set in grub as IMA template"
+                        IMA_TEMPLATE="ima-ng"
+                else
+                        # set default as ima-ng for now
+                        echo "Setting ima-ng as default template for IMA"
+                        IMA_TEMPLATE="ima-ng"
+                fi
+                # Checking if ima_hash is set in grub
+                if grep -q -e 'ima_hash=sha256' "/proc/cmdline"; then
+                        echo "Sha256 algorithm is set in grub as IMA hash algorithm"
+                        IMA_HASH="sha256"
+                elif grep -q -e 'ima_hash=sha1' "/proc/cmdline"; then
+                        echo "Sha1 algorithm is set in grub as IMA hash algorithm"
+                        IMA_HASH="sha1"
+                else
+                        # set default as sha256 for now
+                        echo "Setting sha256 as default hash algorithm for IMA"
+                        IMA_HASH="sha256"
+                fi
+        else
+                echo "IMA not enabled"
+        fi
+
         if isRhel8WithoutTboot; then
                 generate_rhel8_menuentry
         else
-                perl $CREATE_MENU_ENTRY_SCRIPT $MENUENTRY_FILE $(uname -r) "$INITRD_NAME" "CONFIG_FILE_PATH=\"$CONFIG_FILE_NAME\"" "$MENUENTRY_PREFIX" "$GRUB_FILE" $GRUB_VERSION "$TPM_VERSION"
+                if [ $isImaEnabled -eq 1 ]; then
+                        perl $CREATE_MENU_ENTRY_SCRIPT $MENUENTRY_FILE $(uname -r) "$INITRD_NAME" "CONFIG_FILE_PATH=\"$CONFIG_FILE_NAME\" ima_template=$IMA_TEMPLATE ima_hash=$IMA_HASH" "$MENUENTRY_PREFIX" "$GRUB_FILE" $GRUB_VERSION "$TPM_VERSION"
+                else
+                        perl $CREATE_MENU_ENTRY_SCRIPT $MENUENTRY_FILE $(uname -r) "$INITRD_NAME" "CONFIG_FILE_PATH=\"$CONFIG_FILE_NAME\"" "$MENUENTRY_PREFIX" "$GRUB_FILE" $GRUB_VERSION "$TPM_VERSION"
+                fi
+
                 if [ $? -ne 0 ]; then
                         echo "ERROR: Not able to get appropriate grub entry from $GRUB_FILE file for kernel version $KERNEL_VERSION ."
                         exit 1

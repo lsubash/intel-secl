@@ -10,12 +10,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
+	"net/http"
+	"net/url"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/util"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
-	"net/http"
-	"net/url"
 )
 
 type TAClient interface {
@@ -27,28 +28,31 @@ type TAClient interface {
 	DeploySoftwareManifest(manifest taModel.Manifest) error
 	GetMeasurementFromManifest(manifest taModel.Manifest) (taModel.Measurement, error)
 	GetBaseURL() *url.URL
+	SendImaFilelist([]string) error
 }
 
 func NewTAClient(aasApiUrl string, taApiUrl *url.URL, serviceUserName, serviceUserPassword string,
-	trustedCaCerts []x509.Certificate) (TAClient, error) {
+	trustedCaCerts []x509.Certificate, imaMeasureEnabled bool) (TAClient, error) {
 
 	taClient := taClient{
-		AasURL:          aasApiUrl,
-		BaseURL:         taApiUrl,
-		ServiceUsername: serviceUserName,
-		ServicePassword: serviceUserPassword,
-		TrustedCaCerts:  trustedCaCerts,
+		AasURL:            aasApiUrl,
+		BaseURL:           taApiUrl,
+		ServiceUsername:   serviceUserName,
+		ServicePassword:   serviceUserPassword,
+		TrustedCaCerts:    trustedCaCerts,
+		ImaMeasureEnabled: imaMeasureEnabled,
 	}
 
 	return &taClient, nil
 }
 
 type taClient struct {
-	AasURL          string
-	BaseURL         *url.URL
-	ServiceUsername string
-	ServicePassword string
-	TrustedCaCerts  []x509.Certificate
+	AasURL            string
+	BaseURL           *url.URL
+	ServiceUsername   string
+	ServicePassword   string
+	TrustedCaCerts    []x509.Certificate
+	ImaMeasureEnabled bool
 }
 
 var log = commLog.GetDefaultLogger()
@@ -105,6 +109,8 @@ func (tc *taClient) GetTPMQuote(nonce string, pcrList []int, pcrBankList []strin
 	}
 	quoteRequest.Pcrs = pcrList
 	quoteRequest.PcrBanks = pcrBankList
+	quoteRequest.ImaMeasureEnabled = tc.ImaMeasureEnabled
+
 	secLog.Debug("client/trust_agent_client:GetTPMQuote() Successfully decoded nonce from base 64 to bytes")
 	buffer := new(bytes.Buffer)
 	err = json.NewEncoder(buffer).Encode(quoteRequest)
@@ -291,4 +297,36 @@ func (tc *taClient) GetMeasurementFromManifest(manifest taModel.Manifest) (taMod
 
 func (tc *taClient) GetBaseURL() *url.URL {
 	return tc.BaseURL
+}
+
+func (tc *taClient) SendImaFilelist(imaFiles []string) error {
+	log.Trace("clients/trust_agent_client:SendImaFilelist() Entering")
+	defer log.Trace("clients/trust_agent_client:SendImaFilelist() Leaving")
+
+	requestURL, err := url.Parse(tc.BaseURL.String() + "/host/reprovision-ima")
+	if err != nil {
+		return errors.New("client/trust_agent_client:SendImaFilelist() error forming POST send ima file list URL")
+	}
+	log.Debug("client/trust_agent_client:SendImaFilelist() Request URL created for send ima file list")
+	var reprovisionImaRequest taModel.ReprovisionImaRequest
+	reprovisionImaRequest.Files = imaFiles
+
+	buffer := new(bytes.Buffer)
+	err = json.NewEncoder(buffer).Encode(reprovisionImaRequest)
+	httpRequest, err := http.NewRequest(http.MethodPost, requestURL.String(), buffer)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("clients/trust_agent_client:SendImaFilelist() Send ima file list POST request URL: %s", requestURL.String())
+	httpRequest.Header.Set("Content-Type", "application/json")
+
+	_, err = util.SendRequest(httpRequest, tc.AasURL, tc.ServiceUsername, tc.ServicePassword, tc.TrustedCaCerts)
+	if err != nil {
+		return errors.Wrap(err, "client/trust_agent_client:SendImaFilelist() Error while getting response"+
+			" from Get host info from TA API")
+	}
+
+	log.Info("client/trust_agent_client:SendImaFilelist() Successfully received response from TA")
+	return nil
 }

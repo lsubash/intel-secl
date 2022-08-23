@@ -15,6 +15,7 @@ const (
 	NatsBkRequest                     = "get-binding-certificate"
 	NatsApplicationMeasurementRequest = "application-measurement-request"
 	NatsVersionRequest                = "version-request"
+	NatsSendImaFileList               = "send-ima-filelist-request"
 )
 
 func CreateSubject(id, request string) string {

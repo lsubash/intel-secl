@@ -35,10 +35,11 @@ const (
 	FlavorTemplateSearch   = "flavor-template:search"
 	FlavorTemplateDelete   = "flavor-template:delete"
 
-	FlavorCreate   = "flavors:create"
-	FlavorRetrieve = "flavors:retrieve"
-	FlavorSearch   = "flavors:search"
-	FlavorDelete   = "flavors:delete"
+	FlavorCreate    = "flavors:create"
+	FlavorRetrieve  = "flavors:retrieve"
+	FlavorSearch    = "flavors:search"
+	FlavorDelete    = "flavors:delete"
+	ImaFlavorUpdate = "ima_flavors:update"
 
 	TagFlavorCreate        = "tag_flavors:create"
 	HostUniqueFlavorCreate = "host_unique_flavors:create"

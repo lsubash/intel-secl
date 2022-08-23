@@ -21,4 +21,5 @@ type HostConnector interface {
 	GetMeasurementFromManifest(taModel.Manifest) (taModel.Measurement, error)
 	GetTPMQuoteResponse(nonce string, pcrList []int) ([]byte, []byte, *x509.Certificate, *pem.Block, taModel.TpmQuoteResponse, error)
 	GetClusterReference(string) ([]mo.HostSystem, error)
+	SendImaFilelist([]string) error
 }

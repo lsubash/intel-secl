@@ -257,3 +257,21 @@ func TestGetHostManifest(t *testing.T) {
 	_, err = intelConnector.GetHostManifest(nil)
 	assert.Error(t, err)
 }
+
+func TestSendImaFilelist(t *testing.T) {
+	// create a mock ta client that will return dummy data to host-connector
+	mockTAClient, err := ta.NewMockTAClient()
+	assert.NoError(t, err)
+
+	files := []string{"Test1", "Test2"}
+
+	mockTAClient.On("SendImaFilelist", files).Return(nil)
+
+	// create an intel host connector and collect the manifest
+	intelConnector := IntelConnector{
+		client: mockTAClient,
+	}
+
+	err = intelConnector.SendImaFilelist(files)
+	assert.NoError(t, err)
+}

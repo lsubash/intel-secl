@@ -60,3 +60,8 @@ func (ta *MockTAClient) GetBaseURL() *url.URL {
 	args := ta.Called()
 	return args.Get(0).(*url.URL)
 }
+
+func (ta *MockTAClient) SendImaFilelist(files []string) error {
+	args := ta.Called(files)
+	return args.Error(0)
+}

@@ -6,6 +6,7 @@ package types
 
 import (
 	"encoding/xml"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 
 	hcConstants "github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
@@ -50,5 +51,5 @@ func (sf *SoftwareFlavor) GetSoftwareFlavor() (*hvs.Flavor, error) {
 	}
 	log.Debugf("flavor/types/software_flavor:GetSoftwareFlavor() New Meta Section: %v", *newMeta)
 
-	return hvs.NewFlavor(newMeta, nil, nil, nil, nil, &software), nil
+	return hvs.NewFlavor(newMeta, nil, nil, nil, nil, &software, nil), nil
 }

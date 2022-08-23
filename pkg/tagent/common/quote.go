@@ -74,7 +74,7 @@ func CreateTpmQuoteResponse(cfg *config.TrustAgentConfiguration, tpm tpmprovider
 		}
 	}
 
-	tpmQuoteResponse, err := createTpmQuote(cfg.Tpm.TagSecretKey, tpm, tpmQuoteRequest, aikCertPath, measureLogFilePath, ramfsDir)
+	tpmQuoteResponse, err := createTpmQuote(cfg.ImaMeasureEnabled, cfg.Tpm.TagSecretKey, tpm, tpmQuoteRequest, aikCertPath, measureLogFilePath, ramfsDir)
 	if err != nil {
 		return nil, errors.Wrapf(err, "common/quote:CreateTpmQuoteResponse() %s - Error while creating the tpm quote", message.AppRuntimeErr)
 	}
@@ -251,7 +251,7 @@ func getAssetTags(tagSecretKey string, tpm tpmprovider.TpmProvider) (string, err
 	return base64.StdEncoding.EncodeToString(indexBytes), nil // this data will be evaluated in 'getNonce'
 }
 
-func createTpmQuote(tagSecretKey string, tpm tpmprovider.TpmProvider, tpmQuoteRequest *taModel.TpmQuoteRequest,
+func createTpmQuote(isTAImaEnabled bool, tagSecretKey string, tpm tpmprovider.TpmProvider, tpmQuoteRequest *taModel.TpmQuoteRequest,
 	aikCertPath string, measureLogFilePath string, ramfsDir string) (*taModel.TpmQuoteResponse, error) {
 	log.Trace("common/quote:createTpmQuote() Entering")
 	defer log.Trace("common/quote:createTpmQuote() Leaving")
@@ -295,6 +295,28 @@ func createTpmQuote(tagSecretKey string, tpm tpmprovider.TpmProvider, tpmQuoteRe
 	tpmQuoteResponse.EventLog, err = readEventLog(measureLogFilePath)
 	if err != nil {
 		return nil, errors.Wrap(err, "common/quote:createTpmQuote() Error while reading event log")
+	}
+
+	switch {
+	//check here both input request from hvs and ta has ima_enabled as true, then only proceed further
+	case tpmQuoteRequest.ImaMeasureEnabled && isTAImaEnabled:
+		// imaLog: read /sys/kernel/security/ima/ascii_runtime_measurements
+		imaPath := &ImaPaths{
+			ProcFilePath:  constants.ProcFilePath,
+			AsciiFilePath: constants.AsciiRuntimeMeasurementFilePath,
+		}
+
+		imaInfo, err := imaPath.getImaMeasurements()
+		if err != nil {
+			return nil, errors.Wrap(err, "common/quote:createTpmQuote() Error while reading ima log")
+		}
+		tpmQuoteResponse.ImaLogs = imaInfo.ImaLog
+	case isTAImaEnabled == false:
+		log.Warnf("common/quote:createTpmQuote() IMA is not enabled in TrustAgent")
+	case tpmQuoteRequest.ImaMeasureEnabled == false:
+		log.Warnf("common/quote:createTpmQuote() IMA is not enabled in Tpm-Quote Request Body")
+	default:
+		log.Warnf("common/quote:createTpmQuote() IMA is not enabled in TrustAgent and Tpm-Quote Request Body")
 	}
 
 	tpmQuoteResponse.TcbMeasurements.TcbMeasurements, err = getTcbMeasurements(ramfsDir)

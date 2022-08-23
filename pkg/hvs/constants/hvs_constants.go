@@ -198,3 +198,6 @@ const (
 
 // EnableEKCertRevokeCheck
 const EnableEKCertRevokeCheck = "enable-ekcert-revoke-check"
+
+// IMA
+const IMAMeasureEnabled = "ima_measure_enabled"

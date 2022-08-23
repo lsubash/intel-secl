@@ -54,6 +54,7 @@ func (a *App) startServer() error {
 	if c == nil {
 		return errors.New("Failed to load configuration")
 	}
+
 	// initialize log
 	if err := a.configureLogs(c.Log.EnableStdout, true); err != nil {
 		return err
@@ -171,7 +172,7 @@ func initHostControllerConfig(cfg *config.Configuration, certStore *crypt.Certif
 	defer defaultLog.Trace("server:initHostControllerConfig() Leaving")
 
 	rootCAs := (*certStore)[models.CaCertTypesRootCa.String()]
-	hcProvider := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates, cfg.NATS.Servers)
+	hcProvider := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates, cfg.NATS.Servers, cfg.IMAMeasureEnabled)
 
 	hcc := domain.HostControllerConfig{
 		HostConnectorProvider:          hcProvider,
@@ -253,7 +254,7 @@ func initHostTrustManager(cfg *config.Configuration, dataStore *postgres.DataSto
 	}
 
 	// Initialize Host Fetcher service
-	htcFactory := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates, cfg.NATS.Servers)
+	htcFactory := hostconnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs.Certificates, cfg.NATS.Servers, cfg.IMAMeasureEnabled)
 
 	c := domain.HostDataFetcherConfig{
 		HostConnectorProvider: htcFactory,

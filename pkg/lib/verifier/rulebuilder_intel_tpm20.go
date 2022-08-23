@@ -142,3 +142,26 @@ func (builder *ruleBuilderIntelTpm20) GetSoftwareRules() ([]rules.Rule, error) {
 
 	return results, nil
 }
+
+func (builder *ruleBuilderIntelTpm20) GetImaRules(rule *hvs.FlavorPcrs, flavor hvs.Flavor, flavorPartName hvs.FlavorPartName) ([]rules.Rule, error) {
+
+	var results []rules.Rule
+
+	imaMeasurements := flavor.ImaLogs
+
+	if imaMeasurements != nil {
+		imaLogIntegrityRule, err := getImaLogIntegrityRules(rule, imaMeasurements, flavorPartName)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Error creating trust IMA log integrity rule for flavor '%s'", flavor.Meta.ID)
+		}
+		results = append(results, imaLogIntegrityRule...)
+
+		imaMatchesRule, err := getImaEventLogEqualsRules(rule, imaMeasurements, flavorPartName)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Error creating trust IMA event log rule for flavor '%s'", flavor.Meta.ID)
+		}
+		results = append(results, imaMatchesRule...)
+	}
+
+	return results, nil
+}

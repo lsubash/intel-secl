@@ -48,16 +48,17 @@ type TlsConfig struct {
 }
 
 type TrustAgentConfiguration struct {
-	Mode     string                  `yaml:"ta-service-mode" mapstructure:"ta-service-mode"`
-	Logging  commConfig.LogConfig    `yaml:"log" mapstructure:"log"`
-	Server   commConfig.ServerConfig `yaml:"server" mapstructure:"server"`
-	HVS      HvsConfig               `yaml:"hvs" mapstructure:"hvs"`
-	Tpm      TpmConfig               `yaml:"tpm" mapstructure:"tpm"`
-	Aas      AasConfig               `yaml:"aas" mapstructure:"aas"`
-	Cms      CmsConfig               `yaml:"cms" mapstructure:"cms"`
-	Tls      TlsConfig               `yaml:"tls" mapstructure:"tls"`
-	Nats     NatsService             `yaml:"nats" mapstructure:"nats"`
-	ApiToken string                  `yaml:"api-token" mapstructure:"api-token"`
+	Mode              string                  `yaml:"ta-service-mode" mapstructure:"ta-service-mode"`
+	Logging           commConfig.LogConfig    `yaml:"log" mapstructure:"log"`
+	Server            commConfig.ServerConfig `yaml:"server" mapstructure:"server"`
+	HVS               HvsConfig               `yaml:"hvs" mapstructure:"hvs"`
+	Tpm               TpmConfig               `yaml:"tpm" mapstructure:"tpm"`
+	Aas               AasConfig               `yaml:"aas" mapstructure:"aas"`
+	Cms               CmsConfig               `yaml:"cms" mapstructure:"cms"`
+	Tls               TlsConfig               `yaml:"tls" mapstructure:"tls"`
+	Nats              NatsService             `yaml:"nats" mapstructure:"nats"`
+	ApiToken          string                  `yaml:"api-token" mapstructure:"api-token"`
+	ImaMeasureEnabled bool                    `yaml:"ima-measure-enabled" mapstructure:"ima-measure-enabled"`
 }
 
 var log = commLog.GetDefaultLogger()

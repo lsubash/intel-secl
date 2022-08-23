@@ -7,6 +7,9 @@ package tasks
 
 import (
 	"fmt"
+	"io"
+	"strings"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hrrs"
@@ -15,8 +18,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"io"
-	"strings"
 )
 
 type UpdateServiceConfig struct {
@@ -52,6 +53,7 @@ var envHelp = map[string]string{
 	"SERVER_MAX_HEADER_BYTES":                "Max Length of Request Header in Bytes",
 	"NAT_SERVERS":                            "List of NATs servers to establish connection with outbound TAs",
 	"ENABLE_EKCERT_REVOKE_CHECK":             "If enabled, revocation checks will be performed for EK certs at the time of AIK provisioning",
+	"IMA_MEASURE_ENABLED":                    "To enable Ima-Measure support in hvs",
 }
 
 func (uc UpdateServiceConfig) Run() error {
@@ -79,6 +81,7 @@ func (uc UpdateServiceConfig) Run() error {
 	}
 	(*uc.AppConfig).Server = uc.ServerConfig
 	(*uc.AppConfig).HVS = uc.ServiceConfig
+	(*uc.AppConfig).IMAMeasureEnabled = viper.GetBool(constants.IMAMeasureEnabled)
 	(*uc.AppConfig).HRRS = hrrs.HRRSConfig{
 		RefreshPeriod: viper.GetDuration(constants.HrrsRefreshPeriod),
 	}

@@ -37,6 +37,9 @@ func init() {
 	viper.SetDefault(constants.NatsServersViperKey, nil)
 	hostName, _ := os.Hostname()
 	viper.SetDefault(constants.NatsTaHostIdViperKey, hostName)
+
+	// ima
+	viper.SetDefault(constants.ImaMeasureEnabled, true)
 }
 
 func loadAlias() {
@@ -49,6 +52,7 @@ func loadAlias() {
 		constants.ServerIdleTimeoutViperKey:    constants.EnvTAServerIdleTimeout,
 		constants.ServerMaxHeaderBytesViperKey: constants.EnvTAServerMaxHeaderBytes,
 		constants.NatsTaHostIdViperKey:         constants.EnvTAHostId,
+		constants.ImaMeasureEnabled:            constants.EnvIMAMeasureEnabled,
 	}
 	for k, v := range alias {
 		if env := os.Getenv(v); env != "" {
@@ -90,5 +94,6 @@ func defaultConfig() *config.TrustAgentConfiguration {
 			Servers: strings.Split(viper.GetString(constants.NatsServersViperKey), constants.DefaultTaTlsSanSeparator),
 			HostID:  viper.GetString(constants.NatsTaHostIdViperKey),
 		},
+		ImaMeasureEnabled: viper.GetBool(constants.ImaMeasureEnabled),
 	}
 }

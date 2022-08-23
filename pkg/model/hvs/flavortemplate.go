@@ -42,6 +42,7 @@ type FlavorParts struct {
 	Platform   *FlavorPart `json:"PLATFORM,omitempty"`
 	OS         *FlavorPart `json:"OS,omitempty"`
 	HostUnique *FlavorPart `json:"HOST_UNIQUE,omitempty"`
+	Ima        *FlavorPart `json:"IMA,omitempty"`
 }
 
 type FlavorTemplateReq struct {

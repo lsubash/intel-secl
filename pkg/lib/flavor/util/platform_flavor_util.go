@@ -159,6 +159,9 @@ func (pfutil PlatformFlavorUtil) GetMetaSectionDetails(hostDetails *taModel.Host
 		description[hvs.OsVersion] = osVersion
 		description[hvs.FlavorPartDescription] = flavorPartName.String()
 		description[hvs.Label] = pfutil.getLabelFromDetails(meta.Vendor.String(), description[hvs.HardwareUUID].(string), pfutil.getCurrentTimeStamp())
+	case hvs.FlavorPartIma:
+		description[hvs.FlavorPartDescription] = flavorPartName.String()
+		description[hvs.Label] = constants.IMA
 	default:
 		return nil, errors.Errorf("Invalid FlavorPart %s", flavorPartName.String())
 	}
@@ -478,6 +481,12 @@ func (pfutil PlatformFlavorUtil) GetPcrRulesMap(flavorPart hvs.FlavorPartName, f
 				return nil, errors.Wrap(err, "flavor/util/platform_flavor_util:getPcrRulesMap() Error getting pcr rules for host unique flavor")
 			}
 			break
+		case hvs.FlavorPartIma:
+			pcrRulesForFlavorPart, err = getPcrRulesForFlavorPart(flavorTemplate.FlavorParts.Ima, pcrRulesForFlavorPart)
+			if err != nil {
+				return nil, errors.Wrap(err, "flavor/util/platform_flavor_util:getPcrRulesMap() Error getting pcr rules for ima flavor")
+			}
+			break
 		}
 	}
 
@@ -537,4 +546,14 @@ func getPcrRulesForFlavorPart(flavorPart *hvs.FlavorPart, pcrList map[hvs.PcrInd
 	}
 
 	return pcrList, nil
+}
+
+func (pfutil PlatformFlavorUtil) GetImaDetails(imaLogs hvs.ImaLogs) hvs.Ima {
+	log.Trace("flavor/util/platform_flavor_util:GetImaDetails() Entering")
+	defer log.Trace("flavor/util/platform_flavor_util:GetImaDetails() Leaving")
+
+	var ima hvs.Ima
+	ima.Measurements = imaLogs.Measurements
+
+	return ima
 }

@@ -38,4 +38,7 @@ const (
 	SHA256 = "SHA256"
 	SHA384 = "SHA384"
 	SHA1   = "SHA1"
+
+	//IMA label
+	IMA = "Isecl_IMA"
 )

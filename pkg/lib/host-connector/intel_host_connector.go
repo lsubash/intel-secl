@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
+
 	client "github.com/intel-secl/intel-secl/v5/pkg/clients/ta"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/util"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
@@ -153,6 +154,20 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	}
 	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Successfully retrieved PCR manifest from quote")
 
+	var imaLogs hvs.ImaLogs
+	if tpmQuoteResponse.ImaLogs != "" {
+		var imaLog hvs.ImaLog
+		err = json.Unmarshal([]byte(tpmQuoteResponse.ImaLogs), &imaLog)
+		if err != nil {
+			return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error unmarshaling the imalogbytes")
+		}
+		log.Info("intel_host_connector:GetHostManifestAcceptNonce() Successfully unmarshalled IMAlog from tpmQuoteResponse")
+		imaLogs.Pcr = imaLog.Pcr
+		imaLogs.Measurements = imaLog.ImaMeasurements
+		imaLogs.ImaTemplate = imaLog.ImaTemplate
+		hostManifest.ImaLogs = &imaLogs
+	}
+
 	isWlaInstalled := false
 	for _, component := range hostManifest.HostInfo.InstalledComponents {
 		if component == taModel.HostComponentWlagent.String() {
@@ -240,4 +255,16 @@ func (ic *IntelConnector) GetMeasurementFromManifest(manifest taModel.Manifest) 
 
 func (ic *IntelConnector) GetClusterReference(clusterName string) ([]mo.HostSystem, error) {
 	return nil, errors.New("intel_host_connector :GetClusterReference() Operation not supported")
+}
+
+func (ic *IntelConnector) SendImaFilelist(imaFiles []string) error {
+	log.Trace("intel_host_connector:SendImaFilelist() Entering")
+	defer log.Trace("intel_host_connector:SendImaFilelist() Leaving")
+
+	err := ic.client.SendImaFilelist(imaFiles)
+	if err != nil {
+		return errors.Wrap(err, "intel_host_connector:SendImaFilelist() Error sending "+
+			"ima files details")
+	}
+	return nil
 }

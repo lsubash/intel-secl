@@ -35,7 +35,7 @@ func SetTagCertificateRoutes(router *mux.Router, cfg *config.Configuration, flav
 	// set up the HostConnectorProvider for the Controller
 	rootCAs := (*certStore)[models.CaCertTypesRootCa.String()].Certificates
 	var hcp hostConnector.HostConnectorProvider
-	hcp = hostConnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs, cfg.NATS.Servers)
+	hcp = hostConnector.NewHostConnectorFactory(cfg.AASApiUrl, rootCAs, cfg.NATS.Servers, cfg.IMAMeasureEnabled)
 
 	if hcp == nil {
 		defaultLog.Errorf("router/tag_certificates:SetTagCertificateRoutes() %s : Error initializing the Host Connector Factory", commLogMsg.AppRuntimeErr)

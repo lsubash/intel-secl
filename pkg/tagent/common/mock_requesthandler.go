@@ -64,3 +64,9 @@ func (mrh *MockRequestHandlerImpl) GetApplicationMeasurement(*taModel.Manifest, 
 	}
 	return nil, nil
 }
+func (mrh *MockRequestHandlerImpl) ProvisionImaFiles(reprovisionFilePath string, provisionRequest *taModel.ReprovisionImaRequest) error {
+	if mrh.cfg.Mode == "httptest" {
+		return errors.New("Failed to perform ProvisionImaFiles")
+	}
+	return nil
+}

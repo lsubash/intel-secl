@@ -225,7 +225,7 @@ var _ = Describe("FlavorController", func() {
 								"connection_string": "';alert(String.fromCharCode(88,83,83))//\\';alert(String.fromCharCode(88,83,83))//\";alert(String.fromCharCode(88,83,83))//\\\";alert(String.fromCharCode(88,83,83))//–>\">'>",
 								"tls_policy_id": "TRUST_FIRST_CERTIFICATE",
 								"flavorgroup_name": "",
-								"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","SOFTWARE"]
+								"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","SOFTWARE","IMA"]
 							}`
 				req, err := http.NewRequest(http.MethodPost, "/flavors", strings.NewReader(flavorJson))
 
@@ -248,7 +248,7 @@ var _ = Describe("FlavorController", func() {
 			It("Should return 415 response code", func() {
 				flavorJson := `{
 									"connection_string": "intel:https://another.ta.ip.com:1443",
-									"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","SOFTWARE"]
+									"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","SOFTWARE","IMA"]
 								}`
 				router.Handle("/flavors",
 					hvsRoutes.ErrorHandler(hvsRoutes.PermissionsHandler(hvsRoutes.JsonResponseHandler(flavorController.Create),
@@ -279,7 +279,7 @@ var _ = Describe("FlavorController", func() {
 
 				flavorJson := `{
 									"connection_string": "intel:https://another.ta.ip.com:1443",
-									"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","SOFTWARE"]
+									"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","SOFTWARE","IMA"]
 								}`
 				req, err := http.NewRequest(http.MethodPost, "/flavors", strings.NewReader(flavorJson))
 				permissions := aas.PermissionInfo{
@@ -329,7 +329,7 @@ var _ = Describe("FlavorController", func() {
 
 				flavorReq := `{
 					"connection_string":  "https://127.0.0.1:1443;",
-					"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","ASSET_TAG"]
+					"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","ASSET_TAG","IMA"]
 				}`
 				req, err := http.NewRequest(http.MethodPost, "/flavors", strings.NewReader(flavorReq))
 				Expect(err).NotTo(HaveOccurred())
@@ -356,7 +356,7 @@ var _ = Describe("FlavorController", func() {
 
 				flavorReq := `{
 					"connection_string":  "",
-					"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","ASSET_TAG"]
+					"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","ASSET_TAG","IMA"]
 				}`
 				req, err := http.NewRequest(http.MethodPost, "/flavors", strings.NewReader(flavorReq))
 				Expect(err).NotTo(HaveOccurred())
@@ -383,7 +383,7 @@ var _ = Describe("FlavorController", func() {
 
 				flavorReq := `{
 					"connection_string":  "https://127.0.0.1:1443;u=admin()",
-					"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","ASSET_TAG"]
+					"partial_flavor_types": ["PLATFORM","OS","HOST_UNIQUE","ASSET_TAG","IMA"]
 				}`
 				req, err := http.NewRequest(http.MethodPost, "/flavors", strings.NewReader(flavorReq))
 				Expect(err).NotTo(HaveOccurred())

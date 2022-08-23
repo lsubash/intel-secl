@@ -185,3 +185,31 @@ func getPcrEventLogIncludesRules(pcrLogData *hvs.FlavorPcrs, marker hvs.FlavorPa
 
 	return pcrRules, nil
 }
+
+//getImaLogIntegrityRules method will create PcrEventLogIntegrityRule and return the rule
+//return nil if error occurs
+func getImaLogIntegrityRules(pcrLogData *hvs.FlavorPcrs, imaLogData *hvs.Ima, marker hvs.FlavorPartName) ([]rules.Rule, error) {
+	var pcrRules []rules.Rule
+
+	rule, err := rules.NewImaEventLogIntegrity(pcrLogData, imaLogData, marker)
+	if err != nil {
+		return nil, errors.Wrapf(err, "An error occurred creating a ImaLogIntegrity rule")
+	}
+	pcrRules = append(pcrRules, rule)
+
+	return pcrRules, nil
+}
+
+//getPcrEventLogIntegrityRules method will create PcrEventLogIntegrityRule and return the rule
+//return nil if error occurs
+func getImaEventLogEqualsRules(pcrLogData *hvs.FlavorPcrs, imaLogData *hvs.Ima, marker hvs.FlavorPartName) ([]rules.Rule, error) {
+	var imaMatchesRules []rules.Rule
+
+	rule, err := rules.NewImaEventLogEquals(pcrLogData, imaLogData, marker)
+	if err != nil {
+		return nil, errors.Wrapf(err, "An error occurred creating a ImaEventLogEquals rule for bank")
+	}
+	imaMatchesRules = append(imaMatchesRules, rule)
+
+	return imaMatchesRules, nil
+}

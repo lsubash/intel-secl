@@ -6,6 +6,7 @@ package host_connector
 
 import (
 	"crypto/x509"
+
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/util"
@@ -21,13 +22,14 @@ type HostConnectorProvider interface {
 }
 
 type HostConnectorFactory struct {
-	aasApiUrl      string
-	trustedCaCerts []x509.Certificate
-	natsServers    []string
+	aasApiUrl         string
+	trustedCaCerts    []x509.Certificate
+	natsServers       []string
+	imaMeasureEnabled bool
 }
 
-func NewHostConnectorFactory(aasApiUrl string, trustedCaCerts []x509.Certificate, natsServers []string) *HostConnectorFactory {
-	return &HostConnectorFactory{aasApiUrl, trustedCaCerts, natsServers}
+func NewHostConnectorFactory(aasApiUrl string, trustedCaCerts []x509.Certificate, natsServers []string, imaMeasureEnabled bool) *HostConnectorFactory {
+	return &HostConnectorFactory{aasApiUrl, trustedCaCerts, natsServers, imaMeasureEnabled}
 }
 
 func (htcFactory *HostConnectorFactory) NewHostConnector(connectionString string) (HostConnector, error) {
@@ -50,5 +52,5 @@ func (htcFactory *HostConnectorFactory) NewHostConnector(connectionString string
 	default:
 		return nil, errors.New("host_connector_factory:NewHostConnector() Vendor not supported yet: " + vendorConnector.Vendor.String())
 	}
-	return connectorFactory.GetHostConnector(vendorConnector, htcFactory.aasApiUrl, htcFactory.trustedCaCerts)
+	return connectorFactory.GetHostConnector(vendorConnector, htcFactory.aasApiUrl, htcFactory.trustedCaCerts, htcFactory.imaMeasureEnabled)
 }

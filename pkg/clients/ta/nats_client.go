@@ -21,7 +21,7 @@ var (
 	defaultTimeout = 10 * time.Second
 )
 
-func NewNatsTAClient(natsServers []string, natsHostID string, tlsConfig *tls.Config, natsCredentials string) (TAClient, error) {
+func NewNatsTAClient(natsServers []string, natsHostID string, tlsConfig *tls.Config, natsCredentials string, imaMeasureEnabled bool) (TAClient, error) {
 
 	if len(natsServers) == 0 {
 		return nil, errors.New("client/nats_client:NewNatsTAClient() At least one nats-server must be provided.")
@@ -40,10 +40,11 @@ func NewNatsTAClient(natsServers []string, natsHostID string, tlsConfig *tls.Con
 	}
 
 	client := natsTAClient{
-		natsServers:     natsServers,
-		natsHostID:      natsHostID,
-		tlsConfig:       tlsConfig,
-		natsCredentials: natsCredentials,
+		natsServers:       natsServers,
+		natsHostID:        natsHostID,
+		tlsConfig:         tlsConfig,
+		natsCredentials:   natsCredentials,
+		imaMeasureEnabled: imaMeasureEnabled,
 	}
 
 	return &client, nil
@@ -88,11 +89,12 @@ func (client *natsTAClient) newNatsConnection() (*nats.EncodedConn, error) {
 }
 
 type natsTAClient struct {
-	natsServers     []string
-	natsConnection  *nats.EncodedConn
-	natsHostID      string
-	tlsConfig       *tls.Config
-	natsCredentials string
+	natsServers       []string
+	natsConnection    *nats.EncodedConn
+	natsHostID        string
+	tlsConfig         *tls.Config
+	natsCredentials   string
+	imaMeasureEnabled bool
 }
 
 func (client *natsTAClient) GetHostInfo() (taModel.HostInfo, error) {
@@ -221,5 +223,20 @@ func (client *natsTAClient) GetMeasurementFromManifest(manifest taModel.Manifest
 }
 
 func (client *natsTAClient) GetBaseURL() *url.URL {
+	return nil
+}
+
+func (client *natsTAClient) SendImaFilelist(imaFiles []string) error {
+	conn, err := client.newNatsConnection()
+	if err != nil {
+		return errors.Wrap(err, "client/nats_client:SendImaFilelist() Error establishing connection to nats server")
+	}
+	defer conn.Close()
+
+	err = conn.Request(taModel.CreateSubject(client.natsHostID, taModel.NatsSendImaFileList), &imaFiles, &nats.Msg{}, defaultTimeout)
+	if err != nil {
+		return errors.Wrap(err, "client/nats_client:SendImaFilelist() Error getting reprovision response from TA")
+	}
+
 	return nil
 }

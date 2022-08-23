@@ -13,6 +13,7 @@ import (
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/tpmprovider"
 	taModel "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/config"
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 )
@@ -521,12 +522,12 @@ func Test_getAssetTags(t *testing.T) {
 }
 
 func Test_createTpmQuote(t *testing.T) {
-
 	CreateTestFile(testConfigDir, RootCert, "aik.pem")
 	CreateTestFile(testVarDir, validMeasureLogFile, "measure-log.json")
 	CreateTestFile(testRamfsDir, "../test/resources/manifest_tpm20.xml", "manifest_tpm20.xml")
 
 	type args struct {
+		isTAImaEnabled     bool
 		tagSecretKey       string
 		tpm                tpmprovider.TpmProvider
 		tpmQuoteRequest    *taModel.TpmQuoteRequest
@@ -552,21 +553,26 @@ func Test_createTpmQuote(t *testing.T) {
 
 	intarr := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}
 	strarr := []string{"SHA1", "SHA256"}
+	constants.ProcFilePath = "../test/mockImaDir/procFilePath_Sha256"
+	constants.AsciiRuntimeMeasurementFilePath = "../test/mockImaDir/ascii_runtime_measurements"
 
 	tests := []struct {
 		name    string
 		args    args
+		want    *taModel.TpmQuoteResponse
 		wantErr bool
 	}{
 		{
 			name: "CreateTpmQuote from valid tpm data",
 			args: args{
-				tagSecretKey: tpmSecretKey,
-				tpm:          mockedTpmProvider1,
+				isTAImaEnabled: true,
+				tagSecretKey:   tpmSecretKey,
+				tpm:            mockedTpmProvider1,
 				tpmQuoteRequest: &taModel.TpmQuoteRequest{
-					Pcrs:     intarr,
-					PcrBanks: strarr,
-					Nonce:    []byte("ZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZiA="),
+					Pcrs:              intarr,
+					PcrBanks:          strarr,
+					Nonce:             []byte("ZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZiA="),
+					ImaMeasureEnabled: true,
 				},
 				aikCertPath:        filepath.Join(testConfigDir, "aik.pem"),
 				measureLogFilePath: filepath.Join(testVarDir, "measure-log.json"),
@@ -577,12 +583,14 @@ func Test_createTpmQuote(t *testing.T) {
 		{
 			name: "Error while retrieving asset tags",
 			args: args{
-				tagSecretKey: tpmSecretKey,
-				tpm:          mockedTpmProvider2,
+				isTAImaEnabled: true,
+				tagSecretKey:   tpmSecretKey,
+				tpm:            mockedTpmProvider2,
 				tpmQuoteRequest: &taModel.TpmQuoteRequest{
-					Pcrs:     intarr,
-					PcrBanks: strarr,
-					Nonce:    []byte("ZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZiA="),
+					Pcrs:              intarr,
+					PcrBanks:          strarr,
+					Nonce:             []byte("ZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZiA="),
+					ImaMeasureEnabled: true,
 				},
 				aikCertPath:        filepath.Join(testConfigDir, "aik.pem"),
 				measureLogFilePath: filepath.Join(testVarDir, "measure-log.json"),
@@ -593,12 +601,14 @@ func Test_createTpmQuote(t *testing.T) {
 		{
 			name: "Error while retrieving tpm quote request",
 			args: args{
-				tagSecretKey: tpmSecretKey,
-				tpm:          mockedTpmProvider3,
+				isTAImaEnabled: true,
+				tagSecretKey:   tpmSecretKey,
+				tpm:            mockedTpmProvider3,
 				tpmQuoteRequest: &taModel.TpmQuoteRequest{
-					Pcrs:     intarr,
-					PcrBanks: strarr,
-					Nonce:    nil,
+					Pcrs:              intarr,
+					PcrBanks:          strarr,
+					Nonce:             nil,
+					ImaMeasureEnabled: true,
 				},
 				aikCertPath:        filepath.Join(testConfigDir, "aik.pem"),
 				measureLogFilePath: filepath.Join(testVarDir, "measure-log.json"),
@@ -609,12 +619,32 @@ func Test_createTpmQuote(t *testing.T) {
 		{
 			name: "Error while retrieving TCB measurements",
 			args: args{
-				tagSecretKey: tpmSecretKey,
-				tpm:          mockedTpmProvider1,
+				isTAImaEnabled: true,
+				tagSecretKey:   tpmSecretKey,
+				tpm:            mockedTpmProvider1,
 				tpmQuoteRequest: &taModel.TpmQuoteRequest{
-					Pcrs:     intarr,
-					PcrBanks: strarr,
-					Nonce:    nil,
+					Pcrs:              intarr,
+					PcrBanks:          strarr,
+					Nonce:             nil,
+					ImaMeasureEnabled: true,
+				},
+				aikCertPath:        filepath.Join(testConfigDir, "aik.pem"),
+				measureLogFilePath: filepath.Join(testVarDir, "measure-log.json"),
+				ramfsDir:           testRamfsDir,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Error while getting ima measurements",
+			args: args{
+				isTAImaEnabled: true,
+				tagSecretKey:   tpmSecretKey,
+				tpm:            mockedTpmProvider1,
+				tpmQuoteRequest: &taModel.TpmQuoteRequest{
+					Pcrs:              intarr,
+					PcrBanks:          strarr,
+					Nonce:             []byte("ZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZiA="),
+					ImaMeasureEnabled: true,
 				},
 				aikCertPath:        filepath.Join(testConfigDir, "aik.pem"),
 				measureLogFilePath: filepath.Join(testVarDir, "measure-log.json"),
@@ -625,12 +655,14 @@ func Test_createTpmQuote(t *testing.T) {
 		{
 			name: "Error while reading event log",
 			args: args{
-				tagSecretKey: tpmSecretKey,
-				tpm:          mockedTpmProvider1,
+				isTAImaEnabled: true,
+				tagSecretKey:   tpmSecretKey,
+				tpm:            mockedTpmProvider1,
 				tpmQuoteRequest: &taModel.TpmQuoteRequest{
-					Pcrs:     intarr,
-					PcrBanks: strarr,
-					Nonce:    nil,
+					Pcrs:              intarr,
+					PcrBanks:          strarr,
+					Nonce:             nil,
+					ImaMeasureEnabled: true,
 				},
 				aikCertPath:        filepath.Join(testConfigDir, "aik.pem"),
 				measureLogFilePath: filepath.Join(testVarDir, "measure-log.json"),
@@ -641,12 +673,14 @@ func Test_createTpmQuote(t *testing.T) {
 		{
 			name: "Error while reading Aik as Base64",
 			args: args{
-				tagSecretKey: tpmSecretKey,
-				tpm:          mockedTpmProvider1,
+				isTAImaEnabled: true,
+				tagSecretKey:   tpmSecretKey,
+				tpm:            mockedTpmProvider1,
 				tpmQuoteRequest: &taModel.TpmQuoteRequest{
-					Pcrs:     intarr,
-					PcrBanks: strarr,
-					Nonce:    nil,
+					Pcrs:              intarr,
+					PcrBanks:          strarr,
+					Nonce:             nil,
+					ImaMeasureEnabled: true,
 				},
 				aikCertPath:        filepath.Join(testConfigDir, "aik.pem"),
 				measureLogFilePath: filepath.Join(testVarDir, "measure-log.json"),
@@ -657,7 +691,11 @@ func Test_createTpmQuote(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.name == "Error while reading Aik as Base64" {
+
+			if tt.name == "Error while getting ima measurements" {
+				constants.ProcFilePath = "../test/mockImaDir/procFilePath_Sha256"
+				constants.AsciiRuntimeMeasurementFilePath = "../test/mockImaDir/ascii_runtime_measurements"
+			} else if tt.name == "Error while reading Aik as Base64" {
 				tt.args.aikCertPath = filepath.Join(testConfigDir, "aik.pem")
 				DeleteCommonDir(testConfigDir)
 			} else if tt.name == "Error while reading event log" {
@@ -667,8 +705,8 @@ func Test_createTpmQuote(t *testing.T) {
 				tt.args.ramfsDir = testRamfsDir
 				DeleteCommonDir(testRamfsDir)
 			}
-			_, err := createTpmQuote(tt.args.tagSecretKey, tt.args.tpm, tt.args.tpmQuoteRequest,
-				tt.args.aikCertPath, tt.args.measureLogFilePath, tt.args.ramfsDir)
+
+			_, err := createTpmQuote(tt.args.isTAImaEnabled, tt.args.tagSecretKey, tt.args.tpm, tt.args.tpmQuoteRequest, tt.args.aikCertPath, tt.args.measureLogFilePath, tt.args.ramfsDir)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("createTpmQuote() error = %v, wantErr %v", err, tt.wantErr)
 				return

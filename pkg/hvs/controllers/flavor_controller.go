@@ -534,7 +534,7 @@ func (fcon *FlavorController) addFlavorToFlavorgroup(flavorFlavorPartMap map[hvs
 					}
 					fetchHostData = true
 
-				} else if flavorPart == hvs.FlavorPartPlatform || flavorPart == hvs.FlavorPartOs {
+				} else if flavorPart == hvs.FlavorPartPlatform || flavorPart == hvs.FlavorPartOs || flavorPart == hvs.FlavorPartIma {
 					flavorgroups = fgs
 					flavorgroupsForQueue = append(flavorgroupsForQueue, flavorgroups...)
 				}
@@ -966,7 +966,7 @@ func validateFlavorMetaContent(meta *hvs.Meta) error {
 	}
 	var fp hvs.FlavorPartName
 	if err := (&fp).Parse(meta.Description[hvs.FlavorPartDescription].(string)); err != nil {
-		return errors.New("Flavor Part must be ASSET_TAG, SOFTWARE, HOST_UNIQUE, PLATFORM or OS")
+		return errors.New("Flavor Part must be ASSET_TAG, SOFTWARE, HOST_UNIQUE, PLATFORM, OS or IMA")
 	}
 	return nil
 }

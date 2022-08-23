@@ -6,6 +6,7 @@ for i in "${secretFiles[@]}"; do
     export $i=$(cat $SECRETS/$i)
 done
 
+export IMA_MEASURE_ENABLED=true
 USER_ID=$(id -u)
 LOG_PATH=/var/log/hvs
 CONFIG_PATH=/etc/hvs

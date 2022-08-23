@@ -7,8 +7,6 @@ package tasks
 
 import (
 	"bytes"
-	"crypto/sha1"
-	"encoding/hex"
 	"io"
 	"os"
 	"testing"
@@ -326,7 +324,7 @@ func TestUpdateServiceConfig_PrintHelp(t *testing.T) {
 	}{
 		{
 			name:  " Print help statement",
-			wantW: "ca5a1fe5d56aa13bd66e527126daf9d123303f7f",
+			wantW: "Following environment variables are required for update-service-config setup:\n    AAS_BASE_URL\t\t\t\tAAS Base URL\n    ENABLE_EKCERT_REVOKE_CHECK\t\t\tIf enabled, revocation checks will be performed for EK certs at the time of AIK provisioning\n    FVS_NUMBER_OF_DATA_FETCHERS\t\t\tNumber of Flavor verification data fetcher threads\n    FVS_NUMBER_OF_VERIFIERS\t\t\tNumber of Flavor verification verifier threads\n    FVS_SKIP_FLAVOR_SIGNATURE_VERIFICATION\tSkips flavor signature verification when set to true\n    HOST_TRUST_CACHE_THRESHOLD\t\t\tMaximum number of entries to be cached in the Trust/Flavor caches\n    HRRS_REFRESH_PERIOD\t\t\t\tHost report refresh service period\n    IMA_MEASURE_ENABLED\t\t\t\tTo enable Ima-Measure support in hvs\n    LOG_ENABLE_STDOUT\t\t\t\tEnable console log\n    LOG_LEVEL\t\t\t\t\tLog level\n    LOG_MAX_LENGTH\t\t\t\tMax length of log statement\n    NAT_SERVERS\t\t\t\t\tList of NATs servers to establish connection with outbound TAs\n    SERVER_IDLE_TIMEOUT\t\t\t\tRequest Idle Timeout in Seconds\n    SERVER_MAX_HEADER_BYTES\t\t\tMax Length of Request Header in Bytes\n    SERVER_PORT\t\t\t\t\tThe Port on which Server listens to\n    SERVER_READ_HEADER_TIMEOUT\t\t\tRequest Read Header Timeout Duration in Seconds\n    SERVER_READ_TIMEOUT\t\t\t\tRequest Read Timeout Duration in Seconds\n    SERVER_WRITE_TIMEOUT\t\t\tRequest Write Timeout Duration in Seconds\n    SERVICE_PASSWORD\t\t\t\tThe service password as configured in AAS\n    SERVICE_USERNAME\t\t\t\tThe service username as configured in AAS\n    VCSS_REFRESH_PERIOD\t\t\t\tVCenter refresh service period\n\n",
 		},
 	}
 	for _, tt := range tests {
@@ -343,10 +341,7 @@ func TestUpdateServiceConfig_PrintHelp(t *testing.T) {
 			w := &bytes.Buffer{}
 			uc.PrintHelp(w)
 			gotW := w.String()
-			h := sha1.New()
-			h.Write([]byte(gotW))
-			bs := h.Sum(nil)
-			if hex.EncodeToString(bs) != tt.wantW {
+			if gotW != tt.wantW {
 				t.Errorf("UpdateServiceConfig.PrintHelp() = %v, want %v", gotW, tt.wantW)
 			}
 		})

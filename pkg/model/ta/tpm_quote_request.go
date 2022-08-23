@@ -5,7 +5,8 @@
 package model
 
 type TpmQuoteRequest struct {
-	Nonce    []byte   `json:"nonce"`
-	Pcrs     []int    `json:"pcrs"`
-	PcrBanks []string `json:"pcrbanks"`
+	Nonce             []byte   `json:"nonce"`
+	Pcrs              []int    `json:"pcrs"`
+	PcrBanks          []string `json:"pcrbanks"`
+	ImaMeasureEnabled bool     `json:"ima_measure_enabled"`
 }

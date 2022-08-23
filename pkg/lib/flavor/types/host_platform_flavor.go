@@ -71,6 +71,8 @@ func (pf HostPlatformFlavor) GetFlavorPartRaw(name hvs.FlavorPartName) ([]hvs.Fl
 		} else {
 			return nil, cf.UNKNOWN_FLAVOR_PART()
 		}
+	case hvs.FlavorPartIma:
+		return pf.getImaFlavor()
 	}
 	return nil, cf.UNKNOWN_FLAVOR_PART()
 }
@@ -84,7 +86,7 @@ func (pf HostPlatformFlavor) GetFlavorPartNames() ([]hvs.FlavorPartName, error) 
 		return []hvs.FlavorPartName{
 			hvs.FlavorPartPlatform, hvs.FlavorPartOs,
 			hvs.FlavorPartHostUnique, hvs.FlavorPartSoftware,
-			hvs.FlavorPartAssetTag}, nil
+			hvs.FlavorPartAssetTag, hvs.FlavorPartIma}, nil
 	} else {
 		return []hvs.FlavorPartName{
 			hvs.FlavorPartPlatform, hvs.FlavorPartOs,
@@ -141,7 +143,7 @@ func (pf HostPlatformFlavor) getPlatformFlavor() ([]hvs.Flavor, error) {
 	log.Debugf("flavor/types/host_platform_flavor:getPlatformFlavor() New Hardware Section: %v", *newHW)
 
 	// Assemble the Platform Flavor
-	platformFlavor := hvs.NewFlavor(newMeta, newBios, newHW, allPcrDetails, nil, nil)
+	platformFlavor := hvs.NewFlavor(newMeta, newBios, newHW, allPcrDetails, nil, nil, nil)
 
 	log.Debugf("flavor/types/host_platform_flavor:getPlatformFlavor()  New PlatformFlavor: %v", platformFlavor)
 
@@ -180,7 +182,7 @@ func (pf HostPlatformFlavor) getOsFlavor() ([]hvs.Flavor, error) {
 	log.Debugf("flavor/types/host_platform_flavor:getOsFlavor() New Bios Section: %v", *newBios)
 
 	// Assemble the OS Flavor
-	osFlavor := hvs.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil)
+	osFlavor := hvs.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil, nil)
 
 	log.Debugf("flavor/types/host_platform_flavor:getOSFlavor()  New OS Flavor: %v", osFlavor)
 
@@ -222,11 +224,52 @@ func (pf HostPlatformFlavor) getHostUniqueFlavor() ([]hvs.Flavor, error) {
 	log.Debugf("flavor/types/host_platform_flavor:getHostUniqueFlavor() New Bios Section: %v", *newBios)
 
 	// Assemble the Host Unique Flavor
-	hostUniqueFlavor := hvs.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil)
+	hostUniqueFlavor := hvs.NewFlavor(newMeta, newBios, nil, allPcrDetails, nil, nil, nil)
 
 	log.Debugf("flavor/types/host_platform_flavor:getHostUniqueFlavor() New Host unique flavor: %v", hostUniqueFlavor)
 
 	return []hvs.Flavor{*hostUniqueFlavor}, nil
+}
+
+func (pf HostPlatformFlavor) getImaFlavor() ([]hvs.Flavor, error) {
+	log.Trace("flavor/types/host_platform_flavor:getImaFlavor() Entering")
+	defer log.Trace("flavor/types/host_platform_flavor:getImaFlavor() Leaving")
+
+	var errorMessage = "Error during creation of IMA flavor"
+	var err error
+
+	if pf.HostManifest.ImaLogs == nil {
+		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getImaFlavor() %s No imalogs present in host manifest", errorMessage)
+	}
+
+	imaPcrs, err := pfutil.GetPcrRulesMap(hvs.FlavorPartIma, pf.FlavorTemplates)
+	if err != nil {
+		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getImaFlavor() %s Failure in getting pcrlist", errorMessage)
+	}
+
+	var allPcrDetails = pfutil.GetPcrDetails(pf.HostManifest.PcrManifest, imaPcrs)
+
+	var allImaDetails = pfutil.GetImaDetails(*pf.HostManifest.ImaLogs)
+
+	newMeta, err := pfutil.GetMetaSectionDetails(nil, nil, "", hvs.FlavorPartIma, pf.getVendorName())
+	if err != nil {
+		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getImaFlavor() %s Failure in Meta section details", errorMessage)
+	}
+	newMeta.Description[hvs.DigestAlgorithm] = pf.HostManifest.ImaLogs.Pcr.Bank
+	log.Debugf("flavor/types/host_platform_flavor:getImaFlavor() New Meta Section: %v", *newMeta)
+
+	newMeta = UpdateMetaSectionDetails(hvs.FlavorPartIma, newMeta, pf.FlavorTemplates)
+	if err != nil {
+		return nil, errors.Wrapf(err, "flavor/types/host_platform_flavor:getImaFlavor() %s failure in Updating Meta section details", errorMessage)
+	}
+	log.Debugf("flavor/types/host_platform_flavor:getImaFlavor() New Meta Section: %v", *newMeta)
+
+	// Assemble the Ima Flavor
+	imaFlavor := hvs.NewFlavor(newMeta, nil, nil, allPcrDetails, nil, nil, &allImaDetails)
+
+	log.Debugf("flavor/types/host_platform_flavor:getImaFlavor() New Ima flavor: %v", imaFlavor)
+
+	return []hvs.Flavor{*imaFlavor}, nil
 }
 
 // getAssetTagFlavor Retrieves the asset tag part of the flavor including the certificate and all the key-value pairs
@@ -305,9 +348,9 @@ func (pf HostPlatformFlavor) getAssetTagFlavor() ([]hvs.Flavor, error) {
 	// Assemble the Asset Tag Flavor
 	var assetTagFlavor *hvs.Flavor
 	if strings.ToUpper(pf.HostManifest.HostInfo.OSName) == constants.OsLinux {
-		assetTagFlavor = hvs.NewFlavor(newMeta, newBios, nil, nil, newExt, nil)
+		assetTagFlavor = hvs.NewFlavor(newMeta, newBios, nil, nil, newExt, nil, nil)
 	} else {
-		assetTagFlavor = hvs.NewFlavor(newMeta, newBios, nil, pcrDetails, newExt, nil)
+		assetTagFlavor = hvs.NewFlavor(newMeta, newBios, nil, pcrDetails, newExt, nil, nil)
 	}
 
 	log.Debugf("flavor/types/host_platform_flavor:getAssetTagFlavor() New Asset Tag Flavor: %v", assetTagFlavor)
@@ -382,6 +425,8 @@ func UpdateMetaSectionDetails(flavorPart hvs.FlavorPartName, newMeta *hvs.Meta, 
 			flavor = flavorTemplate.FlavorParts.OS
 		case hvs.FlavorPartHostUnique:
 			flavor = flavorTemplate.FlavorParts.HostUnique
+		case hvs.FlavorPartIma:
+			flavor = flavorTemplate.FlavorParts.Ima
 		}
 
 		// Update the meta section in the flavor part with the meta section provided in the flavor template

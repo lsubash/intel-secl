@@ -22,20 +22,28 @@ type TrustReport struct {
 }
 
 type RuleResult struct {
-	Rule          RuleInfo        `json:"rule"`
-	FlavorId      *uuid.UUID      `json:"flavor_id,omitempty"`
-	MismatchField []MismatchField `json:"mismatch_fields,omitempty"`
-	Faults        []Fault         `json:"faults,omitempty"`
-	Trusted       bool            `json:"trusted"`
+	Rule           RuleInfo        `json:"rule"`
+	FlavorId       *uuid.UUID      `json:"flavor_id,omitempty"`
+	MismatchField  []MismatchField `json:"mismatch_fields,omitempty"`
+	Faults         []Fault         `json:"faults,omitempty"`
+	Trusted        bool            `json:"trusted"`
+	AdditionalInfo *AdditionalInfo `json:"additional_info,omitempty"`
+}
+
+type AdditionalInfo struct {
+	FileList    []string `json:"file_list,omitempty"`
+	Description string   `json:"description,omitempty"`
 }
 
 type MismatchField struct {
-	Name              string        `json:"name"`
-	Description       string        `json:"description"`
-	PcrIndex          *PcrIndex     `json:"pcr_index,omitempty"`
-	PcrBank           *SHAAlgorithm `json:"pcr_bank,omitempty"`
-	MissingEntries    []EventLog    `json:"missing_entries,omitempty"`
-	UnexpectedEntries []EventLog    `json:"unexpected_entries,omitempty"`
+	Name                 string         `json:"name"`
+	Description          string         `json:"description"`
+	PcrIndex             *PcrIndex      `json:"pcr_index,omitempty"`
+	PcrBank              *SHAAlgorithm  `json:"pcr_bank,omitempty"`
+	MissingEntries       []EventLog     `json:"missing_entries,omitempty"`
+	UnexpectedEntries    []EventLog     `json:"unexpected_entries,omitempty"`
+	UnexpectedImaEntries []Measurements `json:"unexpected_ima_entries,omitempty"`
+	MismatchedImaEntries []Measurements `json:"mismatched_ima_entries,omitempty"`
 }
 
 type RuleInfo struct {
@@ -53,6 +61,7 @@ type RuleInfo struct {
 	Exclude_Tags             []string               `json:"excluding_tag,omitempty"`
 	ExpectedTag              []byte                 `json:"expected_tag,omitempty"`
 	Tags                     map[string]string      `json:"tags,omitempty"`
+	ExpectedImaLogEntry      *Ima                   `json:"expected_imavalues,omitempty"`
 }
 
 type Fault struct {
@@ -64,6 +73,8 @@ type Fault struct {
 	ActualPcrValue         *string                `json:"actual_pcrvalue,omitempty"`
 	MissingEntries         []EventLog             `json:"missing_entries,omitempty"`
 	UnexpectedEntries      []EventLog             `json:"unexpected_entries,omitempty"`
+	UnexpectedImaEntries   *ImaLog                `json:"unexpected_ima_entries,omitempty"`
+	MissingImaEntries      *ImaLog                `json:"missing_ima_entries,omitempty"`
 	ExcludeTags            []string               `json:"exclude_tags,omitempty"`
 	FlavorId               *uuid.UUID             `json:"flavor_id,omitempty"`
 	UnexpectedMeasurements []ta.FlavorMeasurement `json:"unexpected_measurements,omitempty"`
@@ -75,6 +86,7 @@ type Fault struct {
 	MeasurementId          *string                `json:"measurement_id,omitempty"`
 	FlavorDigestAlg        *string                `json:"flavor_digest_alg,omitempty"`
 	MeasurementDigestAlg   *string                `json:"measurement_digest_alg,omitempty"`
+	FileName               string                 `json:"file_name,omitempty"`
 }
 
 func NewTrustReport(report TrustReport) *TrustReport {

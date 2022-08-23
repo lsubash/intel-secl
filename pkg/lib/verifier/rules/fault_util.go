@@ -105,3 +105,49 @@ func newPcrManifestMissingFault() hvs.Fault {
 		Description: "Host report does not include a PCR Manifest",
 	}
 }
+
+func newImaLogsMissingFault() hvs.Fault {
+	return hvs.Fault{
+		Name:        faultsConst.FaultPcrEventLogMissing,
+		Description: "Host report does not include a IMA log",
+	}
+}
+
+func newImaLogContainsUnexpectedEntries(imaLogEntry *hvs.Ima, pcrIndex int, pcrBank string) hvs.Fault {
+	return hvs.Fault{
+		Name:        faultsConst.FaultPcrEventLogContainsUnexpectedEntries,
+		Description: fmt.Sprintf("Module manifest for PCR %d of %s value contains %d unexpected entries", pcrIndex, pcrBank, len(imaLogEntry.Measurements)),
+		UnexpectedImaEntries: &hvs.ImaLog{
+			Pcr: hvs.Pcr{
+				Index: pcrIndex,
+				Bank:  pcrBank,
+			},
+			ImaMeasurements: imaLogEntry.Measurements,
+			ImaTemplate:     imaLogEntry.ImaTemplate,
+		},
+	}
+}
+
+func newImaLogMissingExpectedEntries(imaLogEntry *hvs.Ima, pcrIndex int, pcrBank string) hvs.Fault {
+	return hvs.Fault{
+		Name:        faultsConst.FaultPcrEventLogMissingExpectedEntries,
+		Description: fmt.Sprintf("Module manifest for PCR %d of %s value missing %d expected entries", pcrIndex, pcrBank, len(imaLogEntry.Measurements)),
+		MissingImaEntries: &hvs.ImaLog{
+			Pcr: hvs.Pcr{
+				Index: pcrIndex,
+				Bank:  pcrBank,
+			},
+			ImaMeasurements: imaLogEntry.Measurements,
+			ImaTemplate:     imaLogEntry.ImaTemplate,
+		},
+	}
+}
+
+func newImaLogMismatchFault(expectedMeasurement hvs.Measurements, actualMeasurement hvs.Measurements, pcrIndex int, pcrBank string) hvs.Fault {
+	return hvs.Fault{
+		Name:        faultsConst.FaultPcrValueMismatch,
+		Description: fmt.Sprintf("Host IMA log %s with value '%s' does not match expected value %s", expectedMeasurement.File, actualMeasurement.Measurement, expectedMeasurement.Measurement),
+		PcrIndex:    (*hvs.PcrIndex)(&pcrIndex),
+		PcrBank:     (*hvs.SHAAlgorithm)(&pcrBank),
+	}
+}

@@ -20,6 +20,8 @@ const (
 	ConfigFileName                  = "config"
 	ConfigFilePath                  = ConfigDir + ConfigFileName + ".yml"
 	ExecLinkPath                    = "/usr/bin/tagent"
+	ImaProvisionScript              = InstallationDir + "ima-provision.sh"
+	ReprovisonFileList              = ConfigDir + "reprovision-file-list.txt"
 	LogDir                          = "/var/log/trustagent/"
 	HttpLogFile                     = LogDir + "http.log"
 	DefaultLogFilePath              = LogDir + "trustagent.log"
@@ -102,6 +104,7 @@ const (
 	EnvServicePassword           = "SERVICE_PASSWORD"
 	EnvFlavorUUIDs               = "FLAVOR_UUIDS"
 	EnvFlavorLabels              = "FLAVOR_LABELS"
+	EnvIMAMeasureEnabled         = "IMA_MEASURE_ENABLED"
 )
 
 // "TODO" comment -- the SHA constants should live in intel-secl/pkg/model/
@@ -167,4 +170,22 @@ const (
 	ViperKeyDashSeparator           = "-"
 	ViperDotSeparator               = "."
 	EnvNameSeparator                = "_"
+	ImaMeasureEnabled               = "ima-measure-enabled"
+)
+
+// IMA Log constants
+const (
+	ImaHashSha1   = "ima_hash=sha1"
+	ImaHashSha256 = "ima_hash=sha256"
+	ImaHashSha512 = "ima_hash=sha512"
+	ImaPolicyTCB  = "ima_policy=tcb"
+	PCR10         = 10
+	TemplateNG    = "ima_template=ima-ng"
+	TemplateSIG   = "ima_template=ima-sig"
+	TemplateIMA   = "ima_template=ima"
+)
+
+var (
+	AsciiRuntimeMeasurementFilePath = "/opt/ima/ascii_runtime_measurements"
+	ProcFilePath                    = "/proc/cmdline"
 )

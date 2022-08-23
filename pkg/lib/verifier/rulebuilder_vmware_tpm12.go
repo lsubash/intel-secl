@@ -64,3 +64,9 @@ func (builder *ruleBuilderVMWare12) GetAikCertificateTrustedRule(fp hvs.FlavorPa
 func (builder *ruleBuilderVMWare12) GetSoftwareRules() ([]rules.Rule, error) {
 	return nil, nil
 }
+
+// From 'design' repo at isecl/libraries/verifier/verifier.md...
+// (none)
+func (builder *ruleBuilderVMWare12) GetImaRules(rule *hvs.FlavorPcrs, flavor hvs.Flavor, flavorPartName hvs.FlavorPartName) ([]rules.Rule, error) {
+	return nil, nil
+}

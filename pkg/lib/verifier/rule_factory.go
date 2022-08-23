@@ -10,6 +10,7 @@ import (
 	hvsconstants "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants/verifier-rules-and-faults"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/verifier/rules"
+	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	flavormodel "github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/pkg/errors"
 )
@@ -20,6 +21,7 @@ type ruleBuilder interface {
 	GetAssetTagRules() ([]rules.Rule, error)
 	GetAikCertificateTrustedRule(flavormodel.FlavorPartName) ([]rules.Rule, error)
 	GetSoftwareRules() ([]rules.Rule, error)
+	GetImaRules(*hvs.FlavorPcrs, hvs.Flavor, flavormodel.FlavorPartName) ([]rules.Rule, error)
 	GetName() string
 }
 
@@ -72,9 +74,10 @@ func (factory *ruleFactory) GetVerificationRules() ([]rules.Rule, string, error)
 		requiredRules, err = ruleBuilder.GetAssetTagRules()
 	case flavormodel.FlavorPartSoftware:
 		requiredRules, err = ruleBuilder.GetSoftwareRules()
+	case flavormodel.FlavorPartIma:
+		//To avoid throwing default error, added case for IMA here. We are getting ima rules below while iterating pcr section
 	default:
 		return nil, "", errors.Errorf("Cannot build requiredRules for unknown flavor part %s", flavorPartName)
-
 	}
 
 	log.Infof("requiredRules: %v", requiredRules)

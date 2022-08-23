@@ -7,10 +7,11 @@ package host_connector
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
-	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"net/url"
 	"strings"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 
 	client "github.com/intel-secl/intel-secl/v5/pkg/clients/ta"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/types"
@@ -22,7 +23,7 @@ type IntelConnectorFactory struct {
 }
 
 func (icf *IntelConnectorFactory) GetHostConnector(vendorConnector types.VendorConnector, aasApiUrl string,
-	trustedCaCerts []x509.Certificate) (HostConnector, error) {
+	trustedCaCerts []x509.Certificate, imaMeasureEnabled bool) (HostConnector, error) {
 
 	var taClient client.TAClient
 
@@ -60,7 +61,7 @@ func (icf *IntelConnectorFactory) GetHostConnector(vendorConnector types.VendorC
 			RootCAs:            rootCAs,
 		}
 		// in the form: intel:nats://<nats-host-id> (where nats-host-id could be 'foo' or 'host1.intel.com')
-		taClient, err = client.NewNatsTAClient(icf.natsServers, taApiURL.Host, tlsConfig, constants.NatsCredentials)
+		taClient, err = client.NewNatsTAClient(icf.natsServers, taApiURL.Host, tlsConfig, constants.NatsCredentials, imaMeasureEnabled)
 		if err != nil {
 			return nil, errors.Wrap(err, "intel_host_connector_factory:GetHostConnector() Could not create nats Trust Agent client")
 		}
@@ -71,7 +72,7 @@ func (icf *IntelConnectorFactory) GetHostConnector(vendorConnector types.VendorC
 			taApiURL,
 			vendorConnector.Configuration.Username,
 			vendorConnector.Configuration.Password,
-			trustedCaCerts)
+			trustedCaCerts, imaMeasureEnabled)
 
 		if err != nil {
 			return nil, errors.Wrap(err, "intel_host_connector_factory:GetHostConnector() Could not create Trust Agent client")

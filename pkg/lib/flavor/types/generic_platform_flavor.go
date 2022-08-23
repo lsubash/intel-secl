@@ -71,7 +71,7 @@ func (gpf GenericPlatformFlavor) getAssetTagFlavor() ([]hvs.Flavor, error) {
 	log.Debugf("flavor/types/generic_platform_flavor:getAssetTagFlavor() New External Section: %v", *newExt)
 
 	// Create flavor and
-	assetTagFlavor := hvs.NewFlavor(newMeta, nil, nil, nil, newExt, nil)
+	assetTagFlavor := hvs.NewFlavor(newMeta, nil, nil, nil, newExt, nil, nil)
 
 	log.Debugf("flavor/types/generic_platform_flavor:getAssetTagFlavor() New AssetTag Flavor: %v", assetTagFlavor)
 

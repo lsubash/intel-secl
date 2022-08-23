@@ -24,6 +24,7 @@ type RequestHandler interface {
 	GetBindingCertificateDerBytes(bindingKeyCertificatePath string) ([]byte, error)
 	DeploySoftwareManifest(manifest *taModel.Manifest, varDir string) error
 	GetApplicationMeasurement(manifest *taModel.Manifest, tBootXmMeasurePath string, logDirPath string) (*taModel.Measurement, error)
+	ProvisionImaFiles(reprovisionFilePath string, provisionRequest *taModel.ReprovisionImaRequest) error
 }
 
 func NewRequestHandler(cfg *config.TrustAgentConfiguration) RequestHandler {

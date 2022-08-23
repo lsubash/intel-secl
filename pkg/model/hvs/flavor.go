@@ -7,6 +7,7 @@ package hvs
 import (
 	"crypto/sha512"
 	"encoding/json"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/host-connector/constants"
 
 	"github.com/google/uuid"
@@ -28,10 +29,11 @@ type Flavor struct {
 	// External section is unique to AssetTag Flavor type
 	External *External `json:"external,omitempty"`
 	Software *Software `json:"software,omitempty"`
+	ImaLogs  *Ima      `json:"ima_logs,omitempty"`
 }
 
 // NewFlavor returns a new instance of Flavor
-func NewFlavor(meta *Meta, bios *Bios, hardware *Hardware, pcrs []FlavorPcrs, external *External, software *Software) *Flavor {
+func NewFlavor(meta *Meta, bios *Bios, hardware *Hardware, pcrs []FlavorPcrs, external *External, software *Software, imaLogs *Ima) *Flavor {
 	// Since maps are hard to marshal as JSON, let's try to convert the DigestAlgorithm and PcrIndex to strings
 	return &Flavor{
 		Meta:     *meta,
@@ -40,6 +42,7 @@ func NewFlavor(meta *Meta, bios *Bios, hardware *Hardware, pcrs []FlavorPcrs, ex
 		Pcrs:     pcrs,
 		External: external,
 		Software: software,
+		ImaLogs:  imaLogs,
 	}
 }
 
@@ -147,4 +150,10 @@ type Schema struct {
 type Software struct {
 	Measurements   map[string]model.FlavorMeasurement `json:"measurements,omitempty"`
 	CumulativeHash string                             `json:"cumulative_hash,omitempty"`
+}
+
+type Ima struct {
+	Measurements  []Measurements `json:"ima_measurements,omitempty"`
+	ImaTemplate   string         `json:"ima_template,omitempty"`
+	ExpectedValue string         `json:"expected_value,omitempty"`
 }

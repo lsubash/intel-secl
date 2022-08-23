@@ -27,6 +27,7 @@ const (
 	FlavorPartHostUnique FlavorPartName = "HOST_UNIQUE"
 	FlavorPartSoftware   FlavorPartName = "SOFTWARE"
 	FlavorPartAssetTag   FlavorPartName = "ASSET_TAG"
+	FlavorPartIma        FlavorPartName = "IMA"
 )
 
 //FlavorPartsNotFilteredForLatestFlavor is a list of flavor parts that do not need to be cleaned up
@@ -41,7 +42,7 @@ func GetFlavorTypes() []FlavorPartName {
 	log.Trace("flavor/common/flavor_part:GetFlavorTypes() Entering")
 	defer log.Trace("flavor/common/flavor_part:GetFlavorTypes() Leaving")
 
-	return []FlavorPartName{FlavorPartPlatform, FlavorPartOs, FlavorPartHostUnique, FlavorPartSoftware, FlavorPartAssetTag}
+	return []FlavorPartName{FlavorPartPlatform, FlavorPartOs, FlavorPartHostUnique, FlavorPartSoftware, FlavorPartAssetTag, FlavorPartIma}
 }
 
 func (fp FlavorPartName) String() string {
@@ -67,6 +68,8 @@ func (flavorPart *FlavorPartName) Parse(flavorPartString string) error {
 		result = FlavorPartSoftware
 	case string(FlavorPartAssetTag):
 		result = FlavorPartAssetTag
+	case string(FlavorPartIma):
+		result = FlavorPartIma
 	default:
 		err = errors.Errorf("Invalid flavor part string '%s'", flavorPartString)
 	}

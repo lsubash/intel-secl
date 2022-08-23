@@ -133,6 +133,13 @@ var defaultFlavorGroupsRaw = []string{
 					}
 				},
 				{
+					"flavor_part": "IMA",
+					"match_policy": {
+						"match_type": "ALL_OF",
+						"required": "REQUIRED_IF_DEFINED"
+					}
+				},
+				{
 					"flavor_part": "SOFTWARE",
 					"match_policy": {
 						"match_type": "ALL_OF",

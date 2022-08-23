@@ -20,6 +20,8 @@ const (
 	RuleXmlMeasurementLogEquals     = RulePrefix + "XmlMeasurementLogEquals"
 	RulePcrEventLogEqualsExcluding  = RulePrefix + "PcrEventLogEqualsExcluding"
 	RuleXmlMeasurementLogIntegrity  = RulePrefix + "XmlMeasurementLogIntegrity"
+	RuleImaMeasurementLogIntegrity  = RulePrefix + "ImaMeasurementLogIntegrity"
+	RuleImaEventLogEquals           = RulePrefix + "ImaEventLogEquals"
 )
 
 // Verifier Faults
@@ -73,3 +75,6 @@ const (
 	EventlogIncludesRule = "EventlogIncludes"
 	PCRMatchesRule       = "PCRMatches"
 )
+
+//Report AdditionalInfo message
+const AdditionalInfoDescription = "Listed files have entries with multiple measurements in IMA logs"

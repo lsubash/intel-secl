@@ -66,8 +66,9 @@ type Configuration struct {
 	CMSBaseURL       string `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	CmsTlsCertDigest string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 
-	HVS      commConfig.ServiceConfig `yaml:"hvs"`
-	AuditLog AuditLogConfig           `yaml:"audit-log" mapstructure:"audit-log"`
+	HVS               commConfig.ServiceConfig `yaml:"hvs"`
+	AuditLog          AuditLogConfig           `yaml:"audit-log" mapstructure:"audit-log"`
+	IMAMeasureEnabled bool                     `yaml:"ima-measure-enabled" mapstructure:"ima-measure-enabled"`
 
 	TLS           commConfig.TLSCertConfig     `yaml:"tls"`
 	SAML          SAMLConfig                   `yaml:"saml"`
