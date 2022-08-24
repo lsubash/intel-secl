@@ -356,14 +356,21 @@ func reprovisionImaFiles() {
 	fileScanner := bufio.NewScanner(readFile)
 	fileScanner.Split(bufio.ScanLines)
 	for fileScanner.Scan() {
-		if _, err := os.Stat(fileScanner.Text()); os.IsNotExist(err) {
-			log.Debugf("app:reprovisionImaFiles() %s does not exist to provision", fileScanner.Text())
+		filePath := fileScanner.Text()
+		err = validation.ValidateStrings([]string{filePath})
+		if err != nil {
+			log.WithError(err).Error("Invalid filepath provided")
+			return
+		}
+
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			log.Debugf("app:reprovisionImaFiles() %s does not exist to provision", filePath)
 			continue
 		}
 
-		err = changeObjectType(fileScanner.Text())
+		err = changeObjectType(filePath)
 		if err != nil {
-			log.WithError(err).Warnf("app:reprovisionImaFiles() Unable to change object type - %s", fileScanner.Text())
+			log.WithError(err).Warnf("app:reprovisionImaFiles() Unable to change object type - %s", filePath)
 			return
 		}
 	}
