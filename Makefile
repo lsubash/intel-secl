@@ -85,12 +85,6 @@ isecl-k8s-extensions-installer: isecl-k8s-extensions-pre-installer
 	cp deployments/container-archive/oci/isecl-k8s-scheduler*.tar installer/isecl-k8s-extensions/
 	cp deployments/container-archive/oci/isecl-k8s-controller*.tar installer/isecl-k8s-extensions/
 	cp deployments/container-archive/oci/admission-controller*.tar installer/isecl-k8s-extensions/
-	sed -i 's/image: isecl\/k8s-controller.*/image: isecl\/k8s-controller:'${VERSION}'/g' build/k8s/isecl-k8s-extensions/isecl-k8s-controller/isecl-controller.yaml
-	sed -i 's/image: isecl\/k8s-scheduler.*/image: isecl\/k8s-scheduler:'${VERSION}'/g' build/k8s/isecl-k8s-extensions/isecl-k8s-scheduler/isecl-scheduler.yaml
-	sed -i 's/image: isecl\/k8s-admission-controller.*/image: isecl\/k8s-admission-controller:'${VERSION}'/g' build/k8s/isecl-k8s-extensions/admission-controller/admission-controller.yaml
-	cp -r build/k8s/isecl-k8s-extensions/isecl-k8s-controller/* installer/isecl-k8s-extensions/yamls
-	cp -r build/k8s/isecl-k8s-extensions/isecl-k8s-scheduler/* installer/isecl-k8s-extensions/yamls
-	cp -r build/k8s/isecl-k8s-extensions/admission-controller/* installer/isecl-k8s-extensions/yamls
 	cp -r build/linux/isecl-k8s-extensions/config-files/* installer/isecl-k8s-extensions/
 	cd installer/ && tar -zcvf isecl-k8s-extensions-$(VERSION).tar.gz isecl-k8s-extensions
 
@@ -151,13 +145,9 @@ test:
 k8s: $(patsubst %, %-k8s, $(K8S_TARGETS))
 
 %-k8s:  %-oci-archive
-	if [ -d "build/k8s/$*" ]; then \
-		cp -r build/k8s/$* deployments/k8s/ ;\
-	fi
 	cp tools/download-tls-certs.sh deployments/k8s/
 
 authservice-k8s: authservice-oci-archive aas-manager
-	cp -r build/k8s/aas deployments/k8s/
 	cp tools/aas-manager/populate-users deployments/k8s/aas/populate-users
 	cp tools/aas-manager/populate-users.env deployments/k8s/aas/populate-users.env
 
