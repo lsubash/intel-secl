@@ -153,6 +153,7 @@ type TagWriteRequestInfo struct {
 //        "nonce": "tHgfRQED1+pYgEZpq3dZC9ONmBCZKdx10LErTZs1k/k=",
 //        "pcrs": [
 //            0,
+//            10,
 //            17,
 //            18,
 //            19
@@ -160,7 +161,8 @@ type TagWriteRequestInfo struct {
 //        "pcrbanks": [
 //            "SHA1",
 //            "SHA256"
-//        ]
+//        ],
+//        "ima_measure_enabled": true
 //    }
 // x-sample-call-output: |
 //   &lt;tpm_quote_response&gt;
@@ -171,6 +173,7 @@ type TagWriteRequestInfo struct {
 //       &lt;aik&gt;LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURUVENDQWJXZ0F3SUJBZ0lHQVhGeTBZc2lNQTBHQ1NxR1NJYjNEUUVCtCg...&lt;/aik&gt;
 //       &lt;quote&gt;AIv/VENHgBgAIgALxjsihT/qad5fq9lEOf2C+h46n4k+72CF3V8NOHXRBF0AFOLEYYGbctEyN2JIIqmIO+MOjuofAAAAAAY1Y...&lt;/quote&gt;
 //       &lt;eventLog&gt;PG1lYXN1cmVMb2c+PHR4dD48dHh0U3RhdHVzPjA8L3R4dFN0YXR1cz48L3R4dD48L21lYXN1cmVMb2c+&lt;/eventLog&gt;
+//       &lt;imaLogs&gt;AKVENHgBgAIgALxjsihT/qad5fq9lEOf2C+VzPjA8L3R4dFN0YXR1cz48L3R4dD48L21lYXN1cmVMb2c+&lt;/imaLogs&gt;
 //       &lt;tcbMeasurements&gt;&lt;/tcbMeasurements&gt;
 //       &lt;selectedPcrBanks&gt;
 //           &lt;selectedPcrBanks&gt;SHA1&lt;/selectedPcrBanks&gt;

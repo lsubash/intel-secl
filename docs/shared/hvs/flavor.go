@@ -39,8 +39,8 @@ type SignedFlavorCollection struct {
 // description: |
 //   A flavor is a set of measurements and metadata organized in a flexible format that allows for ease of further extension. The measurements included in the flavor pertain to various hardware, software and feature categories, and their respective metadata sections provide descriptive information.
 //
-//   The four current flavor categories:
-//   PLATFORM, OS, ASSET_TAG, HOST_UNIQUE, SOFTWARE (See the product guide for a detailed explanation)
+//   The six current flavor categories:
+//   PLATFORM, OS, ASSET_TAG, HOST_UNIQUE, IMA, SOFTWARE (See the product guide for a detailed explanation)
 //
 //   When a flavor is created, it is associated with a flavor group. This means that the measurements for that flavor type are deemed acceptable to obtain a trusted status. If a host, associated with the same flavor group, matches the measurements contained within that flavor, the host is trusted for that particular flavor category (dependent on the flavor group policy). Searches for Flavor records. The identifying parameter can be specified as query to search flavors which will return flavor collection as a result.
 //
@@ -163,7 +163,7 @@ type SignedFlavorCollection struct {
 //    | flavors                        | (Optional) A collection of flavors in the defined flavor format. No other parameters are needed in this case.
 //    | signed_flavors                 | (Optional) This is collection of signed flavors consisting of flavor and signature provided by user. |
 //    | flavorgroup_names              | (Optional) Flavor group names that the created flavor(s) will be associated with. If not provided, created flavor will be associated with automatic flavor group. |
-//    | partial_flavor_types           | (Optional) List array input of flavor types to be imported from a host. Partial flavor type can be any of the following: PLATFORM, OS, ASSET_TAG, HOST_UNIQUE, SOFTWARE. Can be provided with the host connection string. See the product guide for more details on how flavor types are broken down for each host type. |
+//    | partial_flavor_types           | (Optional) List array input of flavor types to be imported from a host. Partial flavor type can be any of the following: PLATFORM, OS, ASSET_TAG, HOST_UNIQUE, IMA, SOFTWARE. Can be provided with the host connection string. See the product guide for more details on how flavor types are broken down for each host type. |
 //
 // x-permissions: flavors:create
 // security:
