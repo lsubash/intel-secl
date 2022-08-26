@@ -87,8 +87,8 @@ func (imaSystemDetails *ImaSystemDetails) collectImaSystemDetails(procFilePath s
 	case strings.Contains(strData, constants.ImaHashSha256):
 		imaSystemDetails.ImaHashAlgorithm = string(constants.SHA256)
 	default:
-		log.Debug("common/imalog:collectImaSystemDetails() Invalid sha algorithm. Only sha256 is supported")
-		return errors.Wrapf(err, "common/imalog:collectImaSystemDetails() Invalid sha algorithm. Only sha256 is supported")
+		log.Debugf("common/imalog:collectImaSystemDetails() Invalid ima sha algorithm. Only %s is supported", constants.ImaHashSha256)
+		return errors.Errorf("common/imalog:collectImaSystemDetails() Invalid ima sha algorithm. Only %s is supported", constants.ImaHashSha256)
 	}
 
 	// Check strData contains which template

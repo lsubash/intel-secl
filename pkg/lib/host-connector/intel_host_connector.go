@@ -137,6 +137,9 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 	}
 
 	verificationNonceInBytes, tpmQuoteInBytes, aikCertificate, aikPem, tpmQuoteResponse, err := ic.GetTPMQuoteResponse(nonce, pcrList)
+	if err != nil {
+		return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error in getting TPM Quote response")
+	}
 
 	log.Info("intel_host_connector:GetHostManifestAcceptNonce() Verifying quote and retrieving PCR manifest from TPM quote " +
 		"response ...")
