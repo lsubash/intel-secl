@@ -5,7 +5,6 @@
 package tagent
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/base64"
 	"encoding/pem"
@@ -280,109 +279,6 @@ func (a *App) status() error {
 	return cmd.Run()
 }
 
-func changeObjectType(fileName string) error {
-	log.Trace("app:changeObjectType() Entering")
-	defer log.Trace("app:changeObjectType() Leaving")
-
-	chcon, err := exec.LookPath("chcon")
-	if err != nil {
-		return err
-	}
-
-	cmd := exec.Command(chcon, "-R", "-t", "isecl_t", fileName)
-	cmd.Stdout = os.Stdout
-	var errbuf strings.Builder
-	cmd.Stderr = &errbuf
-	cmd.Env = os.Environ()
-	err = cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func labelSystem() error {
-	log.Trace("app:labelSystem() Entering")
-	defer log.Trace("app:labelSystem() Leaving")
-
-	cmd := &exec.Cmd{
-		Path:   constants.ImaProvisionScript,
-		Args:   []string{constants.ImaProvisionScript, "gen-measurements"},
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-	}
-
-	err := cmd.Start()
-	if err != nil {
-		return err
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func reprovisionImaFiles() {
-	log.Trace("app:reprovisionImaFiles() Entering")
-	defer log.Trace("app:reprovisionImaFiles() Leaving")
-
-	fInfo, err := os.Stat(constants.ReprovisonFileList)
-	if err != nil {
-		log.WithError(err).Warnf("app:reprovisionImaFiles() Error while checking the existence of %s", constants.ReprovisonFileList)
-		return
-	}
-
-	if fInfo.Size() == 0 {
-		log.Infof("app:reprovisionImaFiles() %s is empty", constants.ReprovisonFileList)
-		return
-	}
-
-	readFile, err := os.Open(constants.ReprovisonFileList)
-	if err != nil {
-		log.WithError(err).Warnf("app:reprovisionImaFiles() Error while opening %s", constants.ReprovisonFileList)
-		return
-	}
-	defer func() {
-		derr := readFile.Close()
-		if derr != nil {
-			log.WithError(derr).Warnf("app:reprovisionImaFiles() Error while closing %s", constants.ReprovisonFileList)
-		}
-	}()
-
-	fileScanner := bufio.NewScanner(readFile)
-	fileScanner.Split(bufio.ScanLines)
-	for fileScanner.Scan() {
-		filePath := fileScanner.Text()
-		err = validation.ValidateStrings([]string{filePath})
-		if err != nil {
-			log.WithError(err).Error("Invalid filepath provided")
-			return
-		}
-
-		if _, err := os.Stat(filePath); os.IsNotExist(err) {
-			log.Debugf("app:reprovisionImaFiles() %s does not exist to provision", filePath)
-			continue
-		}
-
-		err = changeObjectType(filePath)
-		if err != nil {
-			log.WithError(err).Warnf("app:reprovisionImaFiles() Unable to change object type - %s", filePath)
-			return
-		}
-	}
-
-	// label entire system
-	err = labelSystem()
-	if err != nil {
-		log.WithError(err).Warnf("app:reprovisionImaFiles() Unable to label entire system")
-		return
-	}
-}
-
 // Function to set group ownership of root owned file
 func updateGroupOwnership(fileName string, rootUserName string, gid int) {
 	log.Trace("app:updateGroupOwnership() Entering")
@@ -533,7 +429,6 @@ func (a *App) Run(args []string) error {
 		if c.ImaMeasureEnabled {
 			// update group ownership of /sys/kernel/security/ima/ascii_runtime_measurements to provide read access to tagent for ima-log
 			updateGroupOwnership(constants.AsciiRuntimeMeasurementFilePath, constants.RootUserName, int(gid))
-			reprovisionImaFiles()
 		}
 
 		// take ownership of all the files in /opt/trustagent before forking the

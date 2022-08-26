@@ -54,8 +54,3 @@ func (vhc *MockVmwareConnector) GetClusterReference(clusterName string) ([]mo.Ho
 	args := vhc.Called(clusterName)
 	return args.Get(0).([]mo.HostSystem), args.Error(1)
 }
-
-func (ihc *MockVmwareConnector) SendImaFilelist(fileDetails []string) error {
-	args := ihc.Called(fileDetails)
-	return args.Error(0)
-}

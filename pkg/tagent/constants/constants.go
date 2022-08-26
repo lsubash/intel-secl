@@ -20,8 +20,6 @@ const (
 	ConfigFileName                  = "config"
 	ConfigFilePath                  = ConfigDir + ConfigFileName + ".yml"
 	ExecLinkPath                    = "/usr/bin/tagent"
-	ImaProvisionScript              = InstallationDir + "ima-provision.sh"
-	ReprovisonFileList              = ConfigDir + "reprovision-file-list.txt"
 	LogDir                          = "/var/log/trustagent/"
 	HttpLogFile                     = LogDir + "http.log"
 	DefaultLogFilePath              = LogDir + "trustagent.log"

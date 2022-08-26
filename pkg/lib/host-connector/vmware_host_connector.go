@@ -361,7 +361,3 @@ func getBootUUIDFromCL(commandLine string) string {
 	}
 	return ""
 }
-
-func (vc *VmwareConnector) SendImaFilelist(imaFiles []string) error {
-	return errors.New("vmware_host_connector :SendImaFilelist() Operation not supported")
-}

@@ -225,18 +225,3 @@ func (client *natsTAClient) GetMeasurementFromManifest(manifest taModel.Manifest
 func (client *natsTAClient) GetBaseURL() *url.URL {
 	return nil
 }
-
-func (client *natsTAClient) SendImaFilelist(imaFiles []string) error {
-	conn, err := client.newNatsConnection()
-	if err != nil {
-		return errors.Wrap(err, "client/nats_client:SendImaFilelist() Error establishing connection to nats server")
-	}
-	defer conn.Close()
-
-	err = conn.Request(taModel.CreateSubject(client.natsHostID, taModel.NatsSendImaFileList), &imaFiles, &nats.Msg{}, defaultTimeout)
-	if err != nil {
-		return errors.Wrap(err, "client/nats_client:SendImaFilelist() Error getting reprovision response from TA")
-	}
-
-	return nil
-}

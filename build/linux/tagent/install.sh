@@ -83,7 +83,6 @@ TRUSTAGENT_LOG_DIR=/var/log/trustagent
 TRUSTAGENT_CFG_DIR=/etc/trustagent
 TRUSTAGENT_VAR_DIR=$TRUSTAGENT_HOME/var/
 TRUSTAGENT_YUM_PACKAGES="tpm2-tss-2.0.0-4.el8.x86_64 logrotate"
-IMA_PROVISION_SCRIPT=ima-provision.sh
 
 #--------------------------------------------------------------------------------------------------
 # 1. Load environment variable file
@@ -311,7 +310,6 @@ ln -sfT $TRUSTAGENT_BIN_DIR/$TRUSTAGENT_EXE /usr/bin/$TRUSTAGENT_EXE
 # Install systemd scripts
 cp $TRUSTAGENT_SERVICE $TRUSTAGENT_HOME
 cp $TRUSTAGENT_INIT_SERVICE $TRUSTAGENT_HOME
-cp $IMA_PROVISION_SCRIPT $TRUSTAGENT_HOME
 
 # copy default and workload software manifest to /opt/trustagent/var/ (application-agent)
 if ! stat $TRUSTAGENT_VAR_DIR/manifest_* 1>/dev/null 2>&1; then
@@ -331,7 +329,6 @@ fi
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_HOME
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_LOG_DIR
 chmod 700 $TRUSTAGENT_BIN_DIR/*
-chmod 740 $TRUSTAGENT_HOME/$IMA_PROVISION_SCRIPT
 
 # log file permission change
 chmod 740 $TRUSTAGENT_LOG_DIR

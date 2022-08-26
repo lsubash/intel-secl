@@ -28,7 +28,6 @@ const (
 	postAppMeasurementPerm = "application_measurement:create"
 	postDeployTagPerm      = "deploy_tag:create"
 	postQuotePerm          = "quote:create"
-	reprovisionIma         = "reprovision_ima:update"
 )
 
 var (
@@ -65,7 +64,6 @@ func defineSubRoutes(router *mux.Router, trustedJWTSigningCertsDir, trustedCaCer
 	subRouter.HandleFunc("/tag", ErrorHandler(RequiresPermission(controllers.SetAssetTag(requestHandler), []string{postDeployTagPerm}))).Methods(http.MethodPost)
 	subRouter.HandleFunc("/host/application-measurement", ErrorHandler(RequiresPermission(controllers.GetApplicationMeasurement(requestHandler), []string{postAppMeasurementPerm}))).Methods(http.MethodPost)
 	subRouter.HandleFunc("/deploy/manifest", ErrorHandler(RequiresPermission(controllers.DeployManifest(requestHandler), []string{postDeployManifestPerm}))).Methods(http.MethodPost)
-	subRouter.HandleFunc("/host/reprovision-ima", ErrorHandler(RequiresPermission(controllers.ReprovisionImaPolicy(requestHandler), []string{reprovisionIma}))).Methods(http.MethodPost)
 }
 
 func setVersionRoutes(router *mux.Router) *mux.Router {

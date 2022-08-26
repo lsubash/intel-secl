@@ -86,7 +86,6 @@ func defineSubRoutes(router *mux.Router, service string, cfg *config.Configurati
 	subRouter = SetESXiClusterRoutes(subRouter, dataStore, hostTrustManager, hostControllerConfig)
 	subRouter = SetDeploySoftwareManifestRoute(subRouter, dataStore, hostTrustManager, hostControllerConfig)
 	subRouter = SetManifestsRoute(subRouter, dataStore)
-	subRouter = SetImaFlavorRoutes(subRouter, dataStore, hostControllerConfig)
 	return nil
 }
 

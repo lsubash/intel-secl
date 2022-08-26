@@ -259,15 +259,3 @@ func (ic *IntelConnector) GetMeasurementFromManifest(manifest taModel.Manifest) 
 func (ic *IntelConnector) GetClusterReference(clusterName string) ([]mo.HostSystem, error) {
 	return nil, errors.New("intel_host_connector :GetClusterReference() Operation not supported")
 }
-
-func (ic *IntelConnector) SendImaFilelist(imaFiles []string) error {
-	log.Trace("intel_host_connector:SendImaFilelist() Entering")
-	defer log.Trace("intel_host_connector:SendImaFilelist() Leaving")
-
-	err := ic.client.SendImaFilelist(imaFiles)
-	if err != nil {
-		return errors.Wrap(err, "intel_host_connector:SendImaFilelist() Error sending "+
-			"ima files details")
-	}
-	return nil
-}

@@ -77,8 +77,3 @@ func (ihc *MockIntelConnector) GetClusterReference(clusterName string) ([]mo.Hos
 	args := ihc.Called(clusterName)
 	return args.Get(0).([]mo.HostSystem), args.Error(1)
 }
-
-func (ihc *MockIntelConnector) SendImaFilelist(fileDetails []string) error {
-	args := ihc.Called(fileDetails)
-	return args.Error(0)
-}
