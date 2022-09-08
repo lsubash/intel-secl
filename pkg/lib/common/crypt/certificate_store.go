@@ -47,17 +47,22 @@ func (cs *CertificatesStore) GetPath(certType string) string {
 	certStore := (*cs)[certType]
 	return certStore.CertPath
 }
-func LoadCertificates(certificatePaths *CertificatesPathStore, certType []string) *CertificatesStore {
+func LoadCertificates(certificatePaths *CertificatesPathStore, certType []string) (*CertificatesStore, error) {
 	defaultLog.Trace("crypt/certificate_store:LoadCertificates() Entering")
 	defer defaultLog.Trace("crypt/certificate_store:LoadCertificates() Leaving")
 
 	certificateStore := make(CertificatesStore)
+	var err error
 	for _, certType := range certType {
 		certloc := (*certificatePaths)[certType]
 		if certType == CaCertTypesRootCa.String() || certType == CaCertTypesEndorsementCa.String() {
 			certificateStore[certType] = loadCertificatesFromDir(&certloc)
 		} else {
-			certificateStore[certType] = loadCertificatesFromFile(&certloc)
+			certificateStore[certType], err = loadCertificatesFromFile(&certloc)
+			if err != nil {
+				return &certificateStore, errors.Wrap(err, "cry"+
+					"pt/certificate_store:LoadCertificates() Could not load certificate from file - "+certloc.CertPath)
+			}
 		}
 	}
 	defaultLog.Debug("crypt/certificate_store:LoadCertificates() Loaded certificates")
@@ -70,24 +75,28 @@ func LoadCertificates(certificatePaths *CertificatesPathStore, certType []string
 			}
 		}
 	}
-	return &certificateStore
+	return &certificateStore, nil
 }
 
-func loadCertificatesFromFile(certLocation *CertLocation) *CertificateStore {
+func loadCertificatesFromFile(certLocation *CertLocation) (*CertificateStore, error) {
 	defaultLog.Trace("crypt/certificate_store:loadCertificatesFromFile() Entering")
 	defer defaultLog.Trace("crypt/certificate_store:loadCertificatesFromFile() Leaving")
 
+	key := loadKey(certLocation.KeyFile)
 	certs, err := GetSubjectCertsMapFromPemFile(certLocation.CertPath)
 	if err != nil {
-		defaultLog.WithError(err).Warnf("crypt/certificate_store:loadCertificatesFromFile() Error while reading certs from file - " + certLocation.CertPath)
+		return &CertificateStore{
+			Key:          key,
+			CertPath:     certLocation.CertPath,
+			Certificates: certs,
+		}, errors.Wrapf(err, "crypt/certificate_store:loadCertificatesFromFile() Error while reading certs from file - "+certLocation.CertPath)
 	}
 
-	key := loadKey(certLocation.KeyFile)
 	return &CertificateStore{
 		Key:          key,
 		CertPath:     certLocation.CertPath,
 		Certificates: certs,
-	}
+	}, nil
 }
 
 func loadCertificatesFromDir(certLocation *CertLocation) *CertificateStore {

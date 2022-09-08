@@ -41,7 +41,10 @@ func (a *App) startServer() error {
 		return err
 	}
 
-	certStore := crypt.LoadCertificates(a.loadCertPathStore(), wlsModel.GetUniqueCertTypes())
+	certStore, err := crypt.LoadCertificates(a.loadCertPathStore(), wlsModel.GetUniqueCertTypes())
+	if err != nil {
+		return errors.Wrap(err, "Error while loading required certificates")
+	}
 	// Initialize routes
 	routes, err := router.InitRoutes(c, certStore)
 	if err != nil {

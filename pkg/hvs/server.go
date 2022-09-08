@@ -71,7 +71,10 @@ func (a *App) startServer() error {
 	alw, _ := auditlog.NewAuditLogDBWriter(als, c.AuditLog.BufferSize)
 
 	// Load Certificates
-	certStore := crypt.LoadCertificates(a.loadCertPathStore(), models.GetUniqueCertTypes())
+	certStore, err := crypt.LoadCertificates(a.loadCertPathStore(), models.GetUniqueCertTypes())
+	if err != nil {
+		return errors.Wrap(err, "Error while loading required certificates")
+	}
 
 	// Initialize Host trust manager
 	fgs := postgres.NewFlavorGroupStore(dataStore)

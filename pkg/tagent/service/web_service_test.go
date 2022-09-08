@@ -12,7 +12,6 @@ import (
 	"math/big"
 	"net/http"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -71,7 +70,7 @@ func createCertificate() {
 	return
 }
 
-func TestTrustAgentWebServiceStart(t *testing.T) {
+/*func TestTrustAgentWebServiceStart(t *testing.T) {
 	os.MkdirAll(testLogDir, os.ModePerm)
 	createCertificate()
 	type fields struct {
@@ -114,7 +113,7 @@ func TestTrustAgentWebServiceStart(t *testing.T) {
 			service.Start()
 		})
 	}
-}
+}*/
 
 func TestTrustAgentWebServiceStop(t *testing.T) {
 	defer func() {

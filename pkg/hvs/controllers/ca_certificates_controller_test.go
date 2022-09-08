@@ -27,7 +27,7 @@ import (
 var _ = Describe("CaCertificatesController", func() {
 	var router *mux.Router
 	var w *httptest.ResponseRecorder
-	certStore := crypt.LoadCertificates(mocks2.NewFakeCertificatesPathStore(), models.GetUniqueCertTypes())
+	certStore, _ := crypt.LoadCertificates(mocks2.NewFakeCertificatesPathStore(), models.GetUniqueCertTypes())
 	var caCertificatesController *controllers.CaCertificatesController
 	BeforeEach(func() {
 		router = mux.NewRouter()
