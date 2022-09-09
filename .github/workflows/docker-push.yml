@@ -1,10 +1,56 @@
-name: dockerpush
+name: push
 
 on:
   push:
     branches: [ v*/develop, master ]
 
+env:
+  HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
+  HTTPS_PROXY: ${{ secrets.HTTPS_PROXY }}
+  NO_PROXY: ${{ secrets.NO_PROXY }}
+  GITHUB_TOKEN: ${{secrets.GH_TOKEN}}
+  ARTIFACTORY: ${{secrets.UBIT_ARTIFACTORY}}
+  USERNAME: ${{secrets.UBIT_USERNAME}}
+  PASSWORD: ${{secrets.CHECKMARX_PASSWORD}}
+
 jobs:
+  StyleChecker:
+    if: github.event.pull_request.merged == true
+    runs-on: RHEL8
+    container: amr-registry.caas.intel.com/isecl/iseclbuilder:v5.0.0
+    env:
+      no_proxy: ${{secrets.NO_PROXY}}
+
+    steps:
+      - uses: AutoModality/action-clean@v1
+      - uses: actions/checkout@v2
+      - name: Runing Style Checker
+        run: |
+          gofmt -l . >> intel-secl.log 2>&1
+          curl -sSf --user "$USERNAME:$PASSWORD"   -X PUT -T intel-secl.log "$ARTIFACTORY"/tools/${{github.ref}}/latest/gofmt-logs/intel-secl.log
+
+  Checkmarx-scan:
+    if: github.event.pull_request.merged == true
+    runs-on: RHEL8
+    container: amr-registry.caas.intel.com/isecl/checkmarx:isecl
+    env:
+      TEAM: ${{ secrets.CHECKMARX_TEAM }}
+      CHECKMARX_BASE_URL: ${{ secrets.CHECKMARX_URL }}
+      CHECKMARX_USERNAME: ${{ secrets.CHECKMARX_USERNAME }}
+      CHECKMARX_PASSWORD: ${{ secrets.CHECKMARX_PASSWORD }}
+      CHECKMARX_CLIENT_SECRET: ${{ secrets.CHECKMARX_CLIENT_SECRET }}
+      CX_FLOW_BREAK_BUILD: false
+      CX_FLOW_ENABLED_VULNERABILITY_SCANNERS: sast
+      CX_FLOW_BUG_TRACKER: Sarif
+      CHECKMARX_SCAN_PRESET: IntelDefault
+      CXFLOW_PARAMS: "--namespace=${{ github.repository_owner }} --repo-name=${{ github.event.repository.name }} --branch=${{ github.ref }} --cx-flow.filterSeverity --cx-flow.filterCategory"
+    steps:
+      - name: Checkmarx CxFlow Action
+        uses: actions/checkout@v2
+      - name: Checkmarx CxFlow run
+        run: |
+          java ${JAVA_OPTS} -jar /app/cx-flow.jar --spring.profiles.active="${CX_FLOW_ENABLED_VULNERABILITY_SCANNERS}" --scan --github.api-url="${GITHUB_API_URL}/repos/" --cx-project="intel-secl"  --cx-team="${TEAM}" --app="${APP}" --f=. ${CXFLOW_PARAMS}
+
   docker-push:
     runs-on: RHEL8
 
