@@ -823,7 +823,7 @@ var _ = Describe("FlavorController", func() {
 		})
 
 		Context("Provide a invalid manually crafted Flavor request", func() {
-			It("Should return 500 Response code since descrption is empty", func() {
+			It("Should return status bad request request code since flavor group is not found", func() {
 
 				router.Handle("/flavors",
 					hvsRoutes.ErrorHandler(hvsRoutes.PermissionsHandler(hvsRoutes.JsonResponseHandler(flavorController.Create),
@@ -907,6 +907,107 @@ var _ = Describe("FlavorController", func() {
 						"flavorgroup_names":[
 						   "Test"
 						],
+						"partial_flavor_types":[
+						   "PLATFORM"
+						]
+					 }`
+				req, err := http.NewRequest(http.MethodPost, "/flavors", strings.NewReader(flavorJson))
+				permissions := aas.PermissionInfo{
+					Service: constants.ServiceName,
+					Rules:   []string{constants.FlavorCreate, constants.SoftwareFlavorCreate, constants.HostUniqueFlavorCreate, constants.TagFlavorCreate},
+				}
+				req = comctx.SetUserPermissions(req, []aas.PermissionInfo{permissions})
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Provide a invalid manually crafted Flavor request", func() {
+			It("Should return 500 Response code since description is empty", func() {
+
+				router.Handle("/flavors",
+					hvsRoutes.ErrorHandler(hvsRoutes.PermissionsHandler(hvsRoutes.JsonResponseHandler(flavorController.Create),
+						[]string{constants.FlavorCreate, constants.SoftwareFlavorCreate, constants.HostUniqueFlavorCreate, constants.TagFlavorCreate}))).
+					Methods(http.MethodPost)
+
+				flavorJson := `{
+						"connection_string":"",
+						"flavor_collection":{
+						   "flavors":[
+							  {
+								 "flavor":{
+									"meta":{
+									   "id":"0fcb8e8d-6fe6-46ba-9526-32b53bf3df75",
+									   "description":{},
+									   "vendor":"INTEL"
+									},
+									"bios":{
+									   "bios_name":"Intel Corporation",
+									   "bios_version":"SE5C610.86B.01.01.0016.033120161139"
+									},
+									"hardware":{
+									   "processor_info":"F1 06 04 00 FF FB EB BF",
+									   "processor_flags":"FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE-36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE",
+									   "feature":{
+										  "TXT":{
+											 "supported":"true",
+											 "enabled":"true"
+										  },
+										  "TPM":{
+											 "supported":"true",
+											 "enabled":"true",
+											 "meta":{
+												"tpm_version":"2.0",
+												"pcr_banks":[
+												   "SHA1",
+												   "SHA256"
+												]
+											 }
+										  },
+										  "CBNT":{
+											 "supported":"false",
+											 "enabled":"false",
+											 "meta":{
+												"profile":"",
+												"msr":""
+											 }
+										  },
+										  "UEFI":{
+											 "supported":"false",
+											 "enabled":"false",
+											 "meta":{
+												"secure_boot_enabled":false
+											 }
+										  },
+										  "PFR":{
+											 "supported":"false",
+											 "enabled":"false"
+										  },
+										  "BMC":{
+											 "supported":"false",
+											 "enabled":"false"
+										  }
+									   }
+									},
+									"pcrs":[
+									   {
+										  "pcr":{
+											 "index":0,
+											 "bank":"SHA256"
+										  },
+										  "measurement":"fad7981e1d16de3269667f4e84bf84a0a0c84f4f8a183e13ac5ba1c441bbfd3c",
+										  "pcr_matches":true
+									   }
+									]
+								 },
+								 "signature":"ppfkmzhhBMTcVRAztNK1qp/9Ioh8krIgcvIhvIi1xaAxh/4hKSKc4mwKqSIlYpFO64hu9qzv6j6Ap9cw5gM4ZDu3oJkli9pJ/2+9y/9XIYs7nw+sV/i1xNdgzeUbw7urvARf8PmS6/AxltNNdPslrfpPvWHtnIU8yVpwoMTCbThK9JL8ZIZQLXouTJ1Cdh2YMSfsQa8840yFoKPFMz0n2mn70lGKbaWY3wyET5KWJFMLGxTpVkkWoO5Eh+K+2g6h+R/gBo1j+GQDcG4MZ/9dtHAu0iGrFxTSJ7LtSQtlzXUH+aYUE03jmF1Hdhwdhe5WZ4PEyNCIef31ewhSwY3Xp5xlmZdqOLS7bZGdC7FomtDgiRLAzC8wEu4BVSBZqtqwg/Unf2dnqKRFVk5dayM2pc8XFRLKOzBu2FUmah4/SoXC6u1xGMpZzbkL7CWQK1JHJBvLymiQoEkxEOknzXi5hJYAtc1q21lmINPl5VPLWPGF6JWlnhxCG4XcMe9jSNIY"
+							  }
+						   ]
+						},
 						"partial_flavor_types":[
 						   "PLATFORM"
 						]

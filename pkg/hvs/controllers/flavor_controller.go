@@ -134,16 +134,22 @@ func (fcon *FlavorController) Create(w http.ResponseWriter, r *http.Request) (in
 	signedFlavors, err = fcon.createFlavors(flavorCreateReq)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavor_controller:Create() Error creating flavors")
-		if strings.Contains(err.Error(), "duplicate key") {
+		if strings.Contains(err.Error(), consts.DuplicateKeyCheck) {
 			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Flavor with same id/label already exists"}
 		}
-		if strings.Contains(err.Error(), "401") {
+		if strings.Contains(err.Error(), consts.ErrorGettingFgCheck) {
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Unable to fetch flavor groups"}
+		}
+		if strings.Contains(err.Error(), consts.FgNotFoundCheck) {
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
+		}
+		if strings.Contains(err.Error(), consts.AuthenticationCheck) {
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Authentication with trust agent failed"}
 		}
-		if strings.Contains(err.Error(), "403") {
+		if strings.Contains(err.Error(), consts.InternalServerCheck) {
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Authorization with trust agent failed"}
 		}
-		if strings.Contains(err.Error(), "No templates found") {
+		if strings.Contains(err.Error(), consts.TemplateNotFoundCheck) {
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "No templates found to create flavors"}
 		}
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Error creating flavors, error connecting to trust agent"}
@@ -180,10 +186,10 @@ func (fcon *FlavorController) createFlavors(flavorReq dm.FlavorCreateRequest) ([
 		flavorReq.FlavorgroupNames = []string{dm.FlavorGroupsAutomatic.String()}
 	}
 
-	// check if the flavorgroup is already created, else create flavorgroup
-	flavorgroups, err := CreateMissingFlavorgroups(fcon.FGStore, flavorReq.FlavorgroupNames, nil)
+	// check if the flavorgroup is already created or not
+	flavorgroups, err := GetFlavorGroups(fcon.FGStore, flavorReq.FlavorgroupNames, nil)
 	if err != nil {
-		defaultLog.Error("controllers/flavor_controller:createFlavors() Error getting flavorgroups")
+		defaultLog.Error("controllers/flavor_controller:createFlavors() Error getting flavor groups " + err.Error())
 		return nil, err
 	}
 

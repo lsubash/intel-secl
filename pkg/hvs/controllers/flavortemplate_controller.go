@@ -86,9 +86,14 @@ func (ftc *FlavorTemplateController) Create(w http.ResponseWriter, r *http.Reque
 		defaultLog.Debug("Flavorgroup names not present in request, associating with default ones")
 		fgNames = append(fgNames, models.FlavorGroupsAutomatic.String())
 	}
+	flavorGroups, err := GetFlavorGroups(ftc.FGStore, fgNames, nil)
+	if err != nil {
+		defaultLog.Error("controllers/flavor_controller: createFlavors() Host FlavorGroup not found " + err.Error())
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
+	}
 	defaultLog.Debugf("Associating Flavor-Template %s with flavorgroups %+q", flavorTemplate.ID, fgNames)
 	if len(fgNames) > 0 {
-		if err := ftc.linkFlavorgroupsToFlavorTemplate(fgNames, flavorTemplate.ID); err != nil {
+		if err := ftc.linkFlavorgroupsToFlavorTemplate(flavorTemplate.ID, flavorGroups); err != nil {
 			defaultLog.WithError(err).Error("controllers/flavortemplate_controller:Create() Flavor-Template FlavorGroup association failed")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to associate Flavor-Template with flavorgroups"}
 		}
@@ -97,15 +102,11 @@ func (ftc *FlavorTemplateController) Create(w http.ResponseWriter, r *http.Reque
 	return flavorTemplate, http.StatusCreated, nil
 }
 
-func (ftc *FlavorTemplateController) linkFlavorgroupsToFlavorTemplate(flavorgroupNames []string, templateId uuid.UUID) error {
+func (ftc *FlavorTemplateController) linkFlavorgroupsToFlavorTemplate(templateId uuid.UUID, flavorgroups []hvs.FlavorGroup) error {
 	defaultLog.Trace("controllers/flavortemplate_controller:linkFlavorgroupsToFlavorTemplate() Entering")
 	defer defaultLog.Trace("controllers/flavortemplate_controller:linkFlavorgroupsToFlavorTemplate() Leaving")
 
 	flavorgroupIds := []uuid.UUID{}
-	flavorgroups, err := CreateMissingFlavorgroups(ftc.FGStore, flavorgroupNames, []uuid.UUID{templateId})
-	if err != nil {
-		return errors.Wrapf(err, "Could not fetch flavorgroup Ids")
-	}
 	for _, flavorgroup := range flavorgroups {
 		linkExists, err := ftc.flavorGroupFlavorTemplateLinkExists(templateId, flavorgroup.ID)
 		if err != nil {

@@ -16,11 +16,10 @@ import (
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 
-	"net/http"
-	"net/http/httptest"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"net/http"
+	"net/http/httptest"
 )
 
 var _ = Describe("FlavorTemplateController", func() {
@@ -93,8 +92,7 @@ var _ = Describe("FlavorTemplateController", func() {
 								]
 							}
 						}
-					},
-					"flavorgroup_names":["hvs_flavorgroup_test1"]
+					}
                 }`
 
 				req, err := http.NewRequest(
@@ -108,6 +106,145 @@ var _ = Describe("FlavorTemplateController", func() {
 				w = httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				Expect(w.Code).To(Equal(http.StatusCreated))
+			})
+		})
+		Context("Provide a invalid FlavorTemplate data", func() {
+			It("Should return HTTP Status: 400", func() {
+				router.Handle("/flavor-templates", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.Create))).Methods(http.MethodPost)
+				flavorTemplateJson := `{
+                   "flavor_template":{
+						"label": "test-uefi",
+						"condition": [
+							"//host_info/vendor='Linux'",
+							"//host_info/tpm_version='2.0'",
+							"//host_info/uefi_enabled='true'",
+							"//host_info/suefi_enabled='true'"
+						],
+						"flavor_parts": {
+							"PLATFORM": {
+								"meta": {
+									"tpm_version": "2.0",
+									"uefi_enabled": true,
+									"vendor": "Linux"
+								},
+								"pcr_rules": [
+									{
+										"pcr": {
+											"index": 0,
+											"bank": ["SHA384", "SHA256", "SHA1"]
+										},
+										"pcr_matches": true,
+										"eventlog_equals": {}
+									}
+								]
+							},
+							"OS": {
+								"meta": {
+									"tpm_version": "2.0",
+									"uefi_enabled": true,
+									"vendor": "Linux"
+								},
+								"pcr_rules": [
+									{
+										"pcr": {
+											"index": 7,
+											"bank": ["SHA384", "SHA256", "SHA1"]
+										},
+										"pcr_matches": true,
+										"eventlog_includes": [
+											"shim",
+											"db",
+											"kek",
+											"vmlinuz"
+										]
+									}
+								]
+							}
+						}
+					}, "flavorgroup_names": ["hvs_flavorgroup_test1"]
+                }`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/flavor-templates",
+					strings.NewReader(flavorTemplateJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Provide a invalid flavor group ", func() {
+			It("Should return HTTP Status: 400", func() {
+				router.Handle("/flavor-templates", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorTemplateController.Create))).Methods(http.MethodPost)
+				flavorTemplateJson := `{
+                   "flavor_template":{
+						"label": "test-uefi",
+						"condition": [
+							"//host_info/vendor='Linux'",
+							"//host_info/tpm_version='2.0'",
+							"//host_info/uefi_enabled='true'",
+							"//host_info/suefi_enabled='true'"
+						],
+						"flavor_parts": {
+							"PLATFORM": {
+								"meta": {
+									"tpm_version": "2.0",
+									"uefi_enabled": true,
+									"vendor": "Linux"
+								},
+								"pcr_rules": [
+									{
+										"pcr": {
+											"index": 0,
+											"bank": ["SHA384", "SHA256", "SHA1"]
+										},
+										"pcr_matches": true,
+										"eventlog_equals": {}
+									}
+								]
+							},
+							"OS": {
+								"meta": {
+									"tpm_version": "2.0",
+									"uefi_enabled": true,
+									"vendor": "Linux"
+								},
+								"pcr_rules": [
+									{
+										"pcr": {
+											"index": 7,
+											"bank": ["SHA384", "SHA256", "SHA1"]
+										},
+										"pcr_matches": true,
+										"eventlog_includes": [
+											"shim",
+											"db",
+											"kek",
+											"vmlinuz"
+										]
+									}
+								]
+							}
+						}
+					}, "flavorgroup_names": ["hvs_flavorgroup_test5"]
+                }`
+
+				req, err := http.NewRequest(
+					http.MethodPost,
+					"/flavor-templates",
+					strings.NewReader(flavorTemplateJson),
+				)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				req.Header.Set("Content-Type", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 
@@ -175,10 +312,7 @@ var _ = Describe("FlavorTemplateController", func() {
 							]
 						 }
 					  }
-				   },
-				   "flavorgroup_names":[
-					  "hvs_flavorgroup_test1"
-				   ]
+				   }
 				}`
 
 				req, err := http.NewRequest(

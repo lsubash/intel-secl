@@ -339,7 +339,14 @@ func (hc *HostController) CreateHost(reqHost hvs.HostCreateRequest) (interface{}
 		swFgs := utils.GetDefaultSoftwareFlavorGroups(hostInfo.InstalledComponents)
 		fgNames = append(fgNames, swFgs...)
 	}
-
+	var flavorGroups []hvs.FlavorGroup
+	if len(fgNames) > 0 {
+		flavorGroups, err = GetFlavorGroups(hc.FGStore, fgNames, nil)
+		if err != nil {
+			defaultLog.WithError(err).Error("controllers/host_controller:CreateHost() Host FlavorGroup not found ")
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
+		}
+	}
 	// remove credentials from connection string for host table storage
 	csWithoutCredentials := utils.GetConnectionStringWithoutCredentials(connectionString)
 	defaultLog.Debugf("connection string without credentials : %s", csWithoutCredentials)
@@ -375,7 +382,7 @@ func (hc *HostController) CreateHost(reqHost hvs.HostCreateRequest) (interface{}
 
 	defaultLog.Debugf("Associating host %s with flavorgroups %+q", reqHost.HostName, fgNames)
 	if len(fgNames) > 0 {
-		if err := hc.linkFlavorgroupsToHost(fgNames, createdHost.Id); err != nil {
+		if err := hc.linkFlavorgroupsToHost(createdHost.Id, flavorGroups); err != nil {
 			defaultLog.WithError(err).Error("controllers/host_controller:CreateHost() Host FlavorGroup association failed")
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to associate Host with flavorgroups"}
 		}
@@ -460,7 +467,12 @@ func (hc *HostController) UpdateHost(reqHost hvs.Host) (interface{}, int, error)
 
 	if len(reqHost.FlavorgroupNames) != 0 {
 		defaultLog.Debugf("Associating host %s with flavorgroups : %+q", updatedHost.HostName, reqHost.FlavorgroupNames)
-		if err := hc.linkFlavorgroupsToHost(reqHost.FlavorgroupNames, updatedHost.Id); err != nil {
+
+		fgroup, err := GetFlavorGroups(hc.FGStore, reqHost.FlavorgroupNames, nil)
+		if err != nil {
+			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
+		}
+		if err := hc.linkFlavorgroupsToHost(updatedHost.Id, fgroup); err != nil {
 			return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Failed to associate Host with flavorgroups"}
 		}
 
@@ -564,16 +576,12 @@ func (hc *HostController) getHostInfo(cs string) (*model.HostInfo, error) {
 	return &hostInfo, err
 }
 
-func (hc *HostController) linkFlavorgroupsToHost(flavorgroupNames []string, hostId uuid.UUID) error {
+func (hc *HostController) linkFlavorgroupsToHost(hostId uuid.UUID, fgroups []hvs.FlavorGroup) error {
 	defaultLog.Trace("controllers/host_controller:linkFlavorgroupsToHost() Entering")
 	defer defaultLog.Trace("controllers/host_controller:linkFlavorgroupsToHost() Leaving")
 
 	flavorgroupIds := []uuid.UUID{}
-	flavorgroups, err := CreateMissingFlavorgroups(hc.FGStore, flavorgroupNames, nil)
-	if err != nil {
-		return errors.Wrapf(err, "Could not fetch flavorgroup Ids")
-	}
-	for _, flavorgroup := range flavorgroups {
+	for _, flavorgroup := range fgroups {
 		linkExists, err := hc.flavorGroupHostLinkExists(hostId, flavorgroup.ID)
 		if err != nil {
 			return errors.Wrap(err, "Could not check host-flavorgroup link existence")
@@ -627,40 +635,26 @@ func (hc *HostController) linkHostUniqueFlavorsToHost(newHost *hvs.Host) error {
 	return nil
 }
 
-func CreateMissingFlavorgroups(fGStore domain.FlavorGroupStore, flavorgroupNames []string, flavorTemplateIds []uuid.UUID) ([]hvs.FlavorGroup, error) {
+func GetFlavorGroups(fGStore domain.FlavorGroupStore, flavorgroupNames []string, flavorTemplateIds []uuid.UUID) ([]hvs.FlavorGroup, error) {
 	flavorgroups := []hvs.FlavorGroup{}
+	var missingFlavorGroups []string
 	for _, flavorgroupName := range flavorgroupNames {
 		existingFlavorGroups, err := fGStore.Search(&models.FlavorGroupFilterCriteria{
 			NameEqualTo: flavorgroupName,
 		})
 		if err != nil {
-			return nil, errors.Wrapf(err, "Could not find flavorgroup with name : %s", flavorgroupName)
+			return nil, errors.New("Error when searching flavor group")
 		}
 		if existingFlavorGroups == nil || len(existingFlavorGroups) == 0 {
-			flavorgroup, err := createNewFlavorGroup(fGStore, flavorgroupName, flavorTemplateIds)
-			if err != nil {
-				return nil, errors.Wrapf(err, "Could not create flavorgroup with name : %s", flavorgroupName)
-			}
-			flavorgroups = append(flavorgroups, *flavorgroup)
+			missingFlavorGroups = append(missingFlavorGroups, flavorgroupName)
 		} else {
 			flavorgroups = append(flavorgroups, existingFlavorGroups...)
 		}
 	}
-	return flavorgroups, nil
-}
-
-func createNewFlavorGroup(fGStore domain.FlavorGroupStore, flavorgroupName string, flavorTemplateIds []uuid.UUID) (*hvs.FlavorGroup, error) {
-	defaultLog.Trace("controllers/host_controller:createNewFlavorGroup() Entering")
-	defer defaultLog.Trace("controllers/host_controller:createNewFlavorGroup() Leaving")
-
-	fg := utils.CreateFlavorGroupByName(flavorgroupName)
-	fg.FlavorTemplateIds = flavorTemplateIds
-	flavorGroup, err := fGStore.Create(&fg)
-	if err != nil {
-		return nil, err
+	if len(missingFlavorGroups) > 0 {
+		return nil, errors.New("Flavor group record not found: " + strings.Join(missingFlavorGroups[:], ", "))
 	}
-
-	return flavorGroup, nil
+	return flavorgroups, nil
 }
 
 func (hc *HostController) flavorGroupHostLinkExists(hostId, flavorgroupId uuid.UUID) (bool, error) {

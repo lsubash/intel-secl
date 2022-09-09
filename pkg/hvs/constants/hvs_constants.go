@@ -199,5 +199,15 @@ const (
 // EnableEKCertRevokeCheck
 const EnableEKCertRevokeCheck = "enable-ekcert-revoke-check"
 
+//Default checks
+const (
+	DuplicateKeyCheck     = "duplicate key"
+	ErrorGettingFgCheck   = "Error when searching flavor group"
+	FgNotFoundCheck       = "Flavor group record not found"
+	AuthenticationCheck   = "401"
+	InternalServerCheck   = "403"
+	TemplateNotFoundCheck = "No templates found"
+)
+
 // IMA
 const IMAMeasureEnabled = "ima_measure_enabled"
