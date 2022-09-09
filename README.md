@@ -14,7 +14,6 @@ use-cases. It applies the remote attestation fundamentals and standard specifica
 collection service, and an efficient verification engine to perform comprehensive trust evaluations. These trust
 evaluations can be used to govern different trust and security policies applied to any given workload.
 
-For more details please visit : <https://01.org/intel-secl>
 
 ## Architecture
 
@@ -27,9 +26,9 @@ The below diagram depicts the high level architecture of the Intel<sup>®</sup>S
 | Component | Abbreviation | Github Repository URL |
 |-----------|--------------|-----------------------|
 | Certificate Management Service           | CMS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/cms](https://github.com/intel-secl/intel-secl/tree/master/pkg/cms) |
-| Authentication and Authorization Service | AAS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/aas](https://github.com/intel-secl/intel-secl/tree/master/pkg/aas) |
+| Authentication and Authorization Service | AAS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/authservice](https://github.com/intel-secl/intel-secl/tree/master/pkg/authservice) |
 | Workload Policy Management               | WPM         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/wpm](https://github.com/intel-secl/intel-secl/tree/master/pkg/wpm) |
-| Key Broker Service                       | KBS         | [https://github.com/intel-secl/tree/master/pkg/kbs](https://github.com/intel-secl/tree/master/pkg/kbs) |
+| Key Broker Service                       | KBS         | [https://github.com/intel-secl/intel-secl/tree/master/pkg/kbs](https://github.com/intel-secl/intel-secl/tree/master/pkg/kbs) |
 | Trust Agent                              | TA          | [https://github.com/intel-secl/go-trustagent](https://github.com/intel-secl/go-trustagent) |
 | Application Agent                        | AA          | [https://github.com/intel-secl/go-trustagent/tree/master/tboot-xm](https://github.com/intel-secl/go-trustagent/tree/master/tboot-xm) |
 | Workload Agent                           | WLA         | [https://github.com/intel-secl/workload-agent](https://github.com/intel-secl/workload-agent) |
@@ -67,11 +66,7 @@ example:
 
 For more details on the product, installation and deployment strategies, please go through following, (Refer to latest and use case wise guide)
 
-[https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-product-guide](https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-product-guide)
-
-### Release Notes
-
-[https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-release-notes](https://01.org/intel-secl/documentation/intel%C2%AE-secl-dc-release-notes)
+[https://intel-secl.github.io/docs](https://intel-secl.github.io/docs)
 
 ### Issues
 
