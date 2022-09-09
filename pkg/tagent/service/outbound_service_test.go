@@ -35,6 +35,7 @@ func TestTrustAgentOutboundServiceStart(t *testing.T) {
 					NatsService: config.NatsService{
 						HostID: "1000",
 					},
+					TrustedCaCertsDir: "../test/mockCACertsDir",
 				},
 			},
 			wantErr: false,
@@ -91,6 +92,7 @@ func TestTrustAgentOutboundServiceStop(t *testing.T) {
 					NatsService: config.NatsService{
 						HostID: "1000",
 					},
+					TrustedCaCertsDir: "../test/mockCACertsDir",
 				},
 			},
 			wantErr: false,

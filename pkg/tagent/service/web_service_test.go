@@ -12,6 +12,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -20,7 +21,7 @@ import (
 )
 
 const (
-	privacyCA  = "../test/resources/service-privacy-ca.cer"
+	privacyCA  = "../test/resources/service-privacy-ca.pem"
 	testLogDir = "../test/resources/var/log/"
 )
 
@@ -70,7 +71,7 @@ func createCertificate() {
 	return
 }
 
-/*func TestTrustAgentWebServiceStart(t *testing.T) {
+func TestTrustAgentWebServiceStart(t *testing.T) {
 	os.MkdirAll(testLogDir, os.ModePerm)
 	createCertificate()
 	type fields struct {
@@ -92,9 +93,9 @@ func createCertificate() {
 						ReadTimeout: time.Duration(time.Hour),
 					},
 					TLSCertFilePath:           privacyCA,
-					TLSKeyFilePath:            "../test/mockCACertsDir/681de0eca.pem",
-					TrustedJWTSigningCertsDir: "../test/mockCACertsDir/",
-					TrustedCaCertsDir:         "../test/mockCACertsDir/",
+					TLSKeyFilePath:            "../test/mockWebCACertsDir/681de0eca.pem",
+					TrustedJWTSigningCertsDir: "../test/mockWebCACertsDir/",
+					TrustedCaCertsDir:         "../test/mockWebCACertsDir/",
 				},
 				router: mux.NewRouter(),
 				server: &http.Server{},
@@ -113,7 +114,7 @@ func createCertificate() {
 			service.Start()
 		})
 	}
-}*/
+}
 
 func TestTrustAgentWebServiceStop(t *testing.T) {
 	defer func() {
