@@ -2,7 +2,7 @@ name: push
 
 on:
   push:
-    branches: [ v*/develop, master ]
+    branches: [ v*/develop, master]
 
 env:
   HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
@@ -14,8 +14,7 @@ env:
   PASSWORD: ${{secrets.CHECKMARX_PASSWORD}}
 
 jobs:
-  StyleChecker:
-    if: github.event.pull_request.merged == true
+  StyleChecker:    
     runs-on: RHEL8
     container: amr-registry.caas.intel.com/isecl/iseclbuilder:v5.0.0
     env:
@@ -27,10 +26,9 @@ jobs:
       - name: Runing Style Checker
         run: |
           gofmt -l . >> intel-secl.log 2>&1
-          curl -sSf --user "$USERNAME:$PASSWORD"   -X PUT -T intel-secl.log "$ARTIFACTORY"/tools/${{github.ref}}/latest/gofmt-logs/intel-secl.log
+          curl -sSf --user "$USERNAME:$PASSWORD"   -X PUT -T intel-secl.log "$ARTIFACTORY"/tools/${{github.ref_name}}/latest/gofmt-logs/intel-secl.log
 
-  Checkmarx-scan:
-    if: github.event.pull_request.merged == true
+  Checkmarx-scan:    
     runs-on: RHEL8
     container: amr-registry.caas.intel.com/isecl/checkmarx:isecl
     env:
@@ -49,11 +47,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkmarx CxFlow run
         run: |
-          java ${JAVA_OPTS} -jar /app/cx-flow.jar --spring.profiles.active="${CX_FLOW_ENABLED_VULNERABILITY_SCANNERS}" --scan --github.api-url="${GITHUB_API_URL}/repos/" --cx-project="intel-secl"  --cx-team="${TEAM}" --app="${APP}" --f=. ${CXFLOW_PARAMS}
+          java ${JAVA_OPTS} -jar /app/cx-flow.jar --spring.profiles.active="${CX_FLOW_ENABLED_VULNERABILITY_SCANNERS}" --scan --github.api-url="${GITHUB_API_URL}/repos/" --cx-project="intel-secl-${{github.ref_name}}"  --cx-team="${TEAM}" --app="${APP}" --f=. ${CXFLOW_PARAMS}
 
   docker-push:
     runs-on: RHEL8
-
     env:
       http_proxy: ${{ secrets.HTTP_PROXY }}
       https_proxy: ${{ secrets.HTTPS_PROXY }}
