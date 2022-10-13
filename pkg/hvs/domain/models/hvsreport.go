@@ -12,6 +12,7 @@ import (
 )
 
 type HVSReport struct {
+	RowId       int
 	ID          uuid.UUID
 	HostID      uuid.UUID
 	TrustReport hvs.TrustReport

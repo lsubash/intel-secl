@@ -30,7 +30,7 @@ type FlavorgroupController struct {
 	HTManager           domain.HostTrustManager
 }
 
-var flavorGroupSearchParams = map[string]bool{"id": true, "nameEqualTo": true, "nameContains": true, "includeFlavorContent": true}
+var flavorGroupSearchParams = map[string]bool{"id": true, "nameEqualTo": true, "nameContains": true, "includeFlavorContent": true, "limit": true, "afterId": true}
 
 func (controller FlavorgroupController) Create(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/flavorgroup_controller:Create() Entering")
@@ -95,30 +95,18 @@ func (controller FlavorgroupController) Search(w http.ResponseWriter, r *http.Re
 	id := r.URL.Query().Get("id")
 	nameEqualTo := r.URL.Query().Get("nameEqualTo")
 	nameContains := r.URL.Query().Get("nameContains")
+	limit := r.URL.Query().Get("limit")
+	afterId := r.URL.Query().Get("afterId")
+
 	includeFlavorContent, err := strconv.ParseBool(r.URL.Query().Get("includeFlavorContent"))
 	if err != nil {
 		includeFlavorContent = false
 	}
 
-	var filter *models.FlavorGroupFilterCriteria = nil
-
-	if id != "" || nameEqualTo != "" || nameContains != "" {
-		filter = &models.FlavorGroupFilterCriteria{
-			NameEqualTo:  nameEqualTo,
-			NameContains: nameContains,
-		}
-		if id != "" {
-			flavorgroupId, err := uuid.Parse(id)
-			if err != nil {
-				secLog.WithError(err).Error("controllers/flavorgroup_controller:Search() Invalid id query param value, must be UUID")
-				return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid id query param value, must be UUID"}
-			}
-			filter.Ids = []uuid.UUID{flavorgroupId}
-		}
-		if err := ValidateFgCriteria(*filter); err != nil {
-			secLog.WithError(err).Errorf("controllers/flavorgroup_controller:Search()  %s", commLogMsg.InvalidInputBadParam)
-			return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid filter criteria"}
-		}
+	filter, err := ValidateFgCriteria(id, nameEqualTo, nameContains, limit, afterId)
+	if err != nil {
+		secLog.WithError(err).Errorf("controllers/flavorgroup_controller:Search()  %s", commLogMsg.InvalidInputBadParam)
+		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: "Invalid filter criteria"}
 	}
 
 	flavorgroups, err := controller.FlavorGroupStore.Search(filter)
@@ -127,7 +115,7 @@ func (controller FlavorgroupController) Search(w http.ResponseWriter, r *http.Re
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Unable to search Flavorgroups"}
 	}
 
-	flavorgroupCollection, err := controller.getAssociatedFlavorAndTemplates(flavorgroups, includeFlavorContent)
+	flavorgroupCollection, err := controller.getAssociatedFlavorAndTemplates(flavorgroups, includeFlavorContent, *filter)
 	if err != nil {
 		defaultLog.WithError(err).Error("controllers/flavorgroup_controller:Search() Error getting flavor(s) " +
 			"associated with flavor group")
@@ -245,21 +233,42 @@ func (controller FlavorgroupController) ValidateFlavorGroup(flavorGroup hvs.Flav
 	return nil
 }
 
-func ValidateFgCriteria(filterCriteria models.FlavorGroupFilterCriteria) error {
+func ValidateFgCriteria(id string, nameEqualTo string, nameContains string, limitString string, afterIdString string) (*models.FlavorGroupFilterCriteria, error) {
 	defaultLog.Trace("controllers/flavorgroup_controller:ValidateFgCriteria() Entering")
 	defer defaultLog.Trace("controllers/flavorgroup_controller:ValidateFgCriteria() Leaving")
 
-	if filterCriteria.NameEqualTo != "" {
-		if errs := validation.ValidateStrings([]string{filterCriteria.NameEqualTo}); errs != nil {
-			return errors.Wrap(errs, "Valid contents for NameEqualTo must be specified")
+	filter := models.FlavorGroupFilterCriteria{}
+
+	if id != "" {
+		flavorgroupId, err := uuid.Parse(id)
+		if err != nil {
+			secLog.WithError(err).Error("controllers/flavorgroup_controller:Search() Invalid id query param value, must be UUID")
+			return nil, errors.New("Invalid id query param value, must be UUID")
 		}
+		filter.Ids = []uuid.UUID{flavorgroupId}
 	}
-	if filterCriteria.NameContains != "" {
-		if errs := validation.ValidateStrings([]string{filterCriteria.NameContains}); errs != nil {
-			return errors.Wrap(errs, "Valid contents for NameContains must be specified")
+
+	if nameEqualTo != "" {
+		if errs := validation.ValidateStrings([]string{nameEqualTo}); errs != nil {
+			return nil, errors.Wrap(errs, "Valid contents for NameEqualTo must be specified")
 		}
+		filter.NameEqualTo = nameEqualTo
 	}
-	return nil
+	if nameContains != "" {
+		if errs := validation.ValidateStrings([]string{nameContains}); errs != nil {
+			return nil, errors.Wrap(errs, "Valid contents for NameContains must be specified")
+		}
+		filter.NameContains = nameContains
+	}
+
+	limit, afterId, err := validation.ValidatePaginationValues(limitString, afterIdString)
+	if err != nil {
+		return nil, err
+	}
+	filter.Limit = limit
+	filter.AfterId = afterId
+
+	return &filter, nil
 }
 
 // AddFlavor creates the FlavorGroupFlavor link in the FlavorGroupStore
@@ -505,7 +514,7 @@ func (controller FlavorgroupController) getAssociatedFlavorTemplates(flavorGroup
 	return templateIds, nil
 }
 
-func (controller FlavorgroupController) getAssociatedFlavorAndTemplates(flavorgroupList []hvs.FlavorGroup, includeFlavorContent bool) (*hvs.
+func (controller FlavorgroupController) getAssociatedFlavorAndTemplates(flavorgroupList []hvs.FlavorGroup, includeFlavorContent bool, filter models.FlavorGroupFilterCriteria) (*hvs.
 	FlavorgroupCollection, error) {
 	defaultLog.Trace("controllers/flavorgroup_controller:getAssociatedFlavorAndTemplates() Entering")
 	defer defaultLog.Trace("controllers/flavorgroup_controller:getAssociatedFlavorAndTemplates() Leaving")
@@ -533,6 +542,13 @@ func (controller FlavorgroupController) getAssociatedFlavorAndTemplates(flavorgr
 		}
 	}
 
-	flavorgroupCollection := &hvs.FlavorgroupCollection{Flavorgroups: flavorgroupList}
+	var next, prev string
+	if len(flavorgroupList) > 0 {
+		lastRowId := flavorgroupList[len(flavorgroupList)-1].RowId
+		next, prev = GetNextAndPrevValues(filter.Limit, filter.AfterId, lastRowId, len(flavorgroupList))
+	}
+
+	flavorgroupCollection := &hvs.FlavorgroupCollection{
+		Flavorgroups: flavorgroupList, Next: next, Previous: prev}
 	return flavorgroupCollection, nil
 }

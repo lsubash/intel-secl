@@ -69,7 +69,7 @@ func (hss *HostStatusStore) Retrieve(hostStatusId uuid.UUID) (*hvs.HostStatus, e
 
 	row := hss.Store.Db.Model(&hostStatus{}).Where("id = ?", hostStatusId).Row()
 	result := hvs.HostStatus{}
-	if err := row.Scan(&result.ID, &result.HostID, (*PGHostStatusInformation)(&result.HostStatusInformation), (*PGHostManifest)(&result.HostManifest), &result.Created); err != nil {
+	if err := row.Scan(&result.ID, &result.HostID, (*PGHostStatusInformation)(&result.HostStatusInformation), (*PGHostManifest)(&result.HostManifest), &result.Created, &result.RowId); err != nil {
 		return nil, errors.Wrap(err, "postgres/hoststatus_store:Retrieve() failed to retrieve hostStatus")
 	}
 
@@ -106,7 +106,7 @@ func (hss *HostStatusStore) Search(hsFilter *models.HostStatusFilterCriteria) ([
 		for rows.Next() {
 			var result hvs.HostStatus
 
-			if err := rows.Scan(&result.ID, &result.HostID, (*PGHostStatusInformation)(&result.HostStatusInformation), (*PGHostManifest)(&result.HostManifest), &result.Created); err != nil {
+			if err := rows.Scan(&result.ID, &result.HostID, (*PGHostStatusInformation)(&result.HostStatusInformation), (*PGHostManifest)(&result.HostManifest), &result.Created, &result.RowId); err != nil {
 				return nil, errors.Wrap(err, "postgres/hoststatus_store:Search() failed to scan record")
 			}
 			hostStatuses = append(hostStatuses, result)
@@ -130,7 +130,7 @@ func (hss *HostStatusStore) Search(hsFilter *models.HostStatusFilterCriteria) ([
 
 		for rows.Next() {
 			result := models.AuditLogEntry{}
-			if err := rows.Scan(&result.ID, &result.EntityID, &result.EntityType, &result.CreatedAt, &result.Action, (*PGAuditLogData)(&result.Data)); err != nil {
+			if err := rows.Scan(&result.ID, &result.EntityID, &result.EntityType, &result.CreatedAt, &result.Action, (*PGAuditLogData)(&result.Data), &result.RowId); err != nil {
 				return nil, errors.Wrap(err, "postgres/hoststatus_store:Search() failed to scan record")
 			}
 			if reflect.DeepEqual(models.AuditTableData{}, result.Data) || len(result.Data.Columns) == 0 {
@@ -351,12 +351,16 @@ func buildHostStatusSearchQuery(tx *gorm.DB, hsFilter *models.HostStatusFilterCr
 		formattedQuery = fmt.Sprintf("%s %s", formattedQuery, additionalOptionsQueryString)
 	}
 
-	if hsFilter.Limit == 0 {
-		hsFilter.Limit = constants.DefaultSearchResultRowLimit
-	}
-
 	// finalize query
-	tx = tx.Raw(formattedQuery).Limit(hsFilter.Limit)
+	tx = tx.Raw(formattedQuery)
+
+	if hsFilter.AfterId > 0 {
+		tx = tx.Where("rowid > ?", hsFilter.AfterId)
+	}
+	tx = tx.Order("rowid asc")
+	if hsFilter.Limit > 0 {
+		tx = tx.Limit(hsFilter.Limit)
+	}
 
 	return tx
 }
@@ -409,13 +413,13 @@ func buildLatestHostStatusSearchQuery(tx *gorm.DB, hsFilter *models.HostStatusFi
 		tx = tx.Where(`status @> '{"host_state": "` + strings.ToUpper(hsFilter.HostStatus) + `"}'`)
 	}
 
-	// Apply default row limit when called internally
-	if hsFilter.Limit == 0 {
-		hsFilter.Limit = constants.DefaultSearchResultRowLimit
+	if hsFilter.AfterId > 0 {
+		tx = tx.Where("rowid > ?", hsFilter.AfterId)
 	}
-
-	// apply result limits
-	tx = tx.Limit(hsFilter.Limit)
+	tx = tx.Order("rowid asc")
+	if hsFilter.Limit > 0 {
+		tx = tx.Limit(hsFilter.Limit)
+	}
 
 	return tx
 }

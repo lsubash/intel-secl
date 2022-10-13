@@ -34,7 +34,7 @@ func (controller ManifestsController) GetManifest(w http.ResponseWriter, r *http
 	ids := r.URL.Query()["id"]
 	key := r.URL.Query().Get("key")
 	value := r.URL.Query().Get("value")
-	filterCriteria, err := validateFlavorFilterCriteria(key, value, "", ids, nil)
+	filterCriteria, err := validateFlavorFilterCriteria(key, value, "", ids, nil, "", "")
 	if err != nil {
 		secLog.Errorf("controllers/manifests_controller:GetManifest()  %s", err.Error())
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}

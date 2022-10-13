@@ -76,7 +76,7 @@ func (f *FlavorGroupStore) Retrieve(flavorGroupId uuid.UUID) (*hvs.FlavorGroup, 
 
 	fg := hvs.FlavorGroup{}
 	row := f.Store.Db.Model(&flavorGroup{}).Where(&flavorGroup{ID: flavorGroupId}).Row()
-	if err := row.Scan(&fg.ID, &fg.Name, (*PGFlavorMatchPolicies)(&fg.MatchPolicies)); err != nil {
+	if err := row.Scan(&fg.ID, &fg.Name, (*PGFlavorMatchPolicies)(&fg.MatchPolicies), &fg.RowId); err != nil {
 		return nil, errors.Wrap(err, "postgres/flavorgroup_store:Retrieve() failed to scan record")
 	}
 	return &fg, nil
@@ -119,7 +119,7 @@ func (f *FlavorGroupStore) Search(fgFilter *models.FlavorGroupFilterCriteria) ([
 	flavorgroupList := []hvs.FlavorGroup{}
 	for rows.Next() {
 		fg := hvs.FlavorGroup{}
-		if err := rows.Scan(&fg.ID, &fg.Name, (*PGFlavorMatchPolicies)(&fg.MatchPolicies)); err != nil {
+		if err := rows.Scan(&fg.ID, &fg.Name, (*PGFlavorMatchPolicies)(&fg.MatchPolicies), &fg.RowId); err != nil {
 			return nil, errors.Wrap(err, "postgres/flavorgroup_store:Search() failed to scan record")
 		}
 		flavorgroupList = append(flavorgroupList, fg)
@@ -181,6 +181,15 @@ func buildFlavorGroupSearchQuery(tx *gorm.DB, fgFilter *models.FlavorGroupFilter
 	} else if fgFilter.NameContains != "" {
 		tx = tx.Where("name like ? ", "%"+fgFilter.NameContains+"%")
 	}
+
+	if fgFilter.AfterId > 0 {
+		tx = tx.Where("rowid > ?", fgFilter.AfterId)
+	}
+	tx = tx.Order("rowid asc")
+	if fgFilter.Limit > 0 {
+		tx = tx.Limit(fgFilter.Limit)
+	}
+
 	return tx
 }
 

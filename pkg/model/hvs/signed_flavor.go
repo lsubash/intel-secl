@@ -20,6 +20,7 @@ import (
 
 // SignedFlavor combines the Flavor along with the cryptographically signed hash that authenticates its source
 type SignedFlavor struct {
+	RowId     int    `json:"-"`
 	Flavor    Flavor `json:"flavor"`
 	Signature string `json:"signature"`
 }

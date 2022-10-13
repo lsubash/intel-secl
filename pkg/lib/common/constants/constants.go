@@ -57,3 +57,8 @@ const (
 	AuthorizationKey  = "Authorization"
 	BearerTokenPrefix = "Bearer "
 )
+
+const (
+	Limit   = 1000
+	AfterId = 0
+)

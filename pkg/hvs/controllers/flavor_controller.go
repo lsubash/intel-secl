@@ -51,7 +51,7 @@ type FlavorController struct {
 	IsExsi    bool
 }
 
-var flavorSearchParams = map[string]bool{"id": true, "key": true, "value": true, "flavorgroupId": true, "flavorParts": true}
+var flavorSearchParams = map[string]bool{"id": true, "key": true, "value": true, "flavorgroupId": true, "flavorParts": true, "limit": true, "afterId": true}
 
 func NewFlavorController(fs domain.FlavorStore, fgs domain.FlavorGroupStore, hs domain.HostStore, tcs domain.TagCertificateStore, htm domain.HostTrustManager, certStore *crypt.CertificatesStore, hcConfig domain.HostControllerConfig, fts domain.FlavorTemplateStore) *FlavorController {
 	// certStore should have an entry for Flavor Signing CA
@@ -755,9 +755,11 @@ func (fcon *FlavorController) Search(w http.ResponseWriter, r *http.Request) (in
 	key := r.URL.Query().Get("key")
 	value := r.URL.Query().Get("value")
 	flavorgroupId := r.URL.Query().Get("flavorgroupId")
+	limit := r.URL.Query().Get("limit")
+	afterId := r.URL.Query().Get("afterId")
 	flavorParts := r.URL.Query()["flavorParts"]
 
-	filterCriteria, err := validateFlavorFilterCriteria(key, value, flavorgroupId, ids, flavorParts)
+	filterCriteria, err := validateFlavorFilterCriteria(key, value, flavorgroupId, ids, flavorParts, limit, afterId)
 	if err != nil {
 		secLog.Errorf("controllers/flavor_controller:Search()  %s", err.Error())
 		return nil, http.StatusBadRequest, &commErr.ResourceError{Message: err.Error()}
@@ -771,8 +773,16 @@ func (fcon *FlavorController) Search(w http.ResponseWriter, r *http.Request) (in
 		return nil, http.StatusInternalServerError, errors.Errorf("Unable to search Flavors")
 	}
 
+	var next, prev string
+	if len(signedFlavors) > 0 {
+		lastRowId := signedFlavors[len(signedFlavors)-1].RowId
+		next, prev = GetNextAndPrevValues(filterCriteria.Limit, filterCriteria.AfterId, lastRowId, len(signedFlavors))
+	}
+
+	signedFlavoursCollection := hvs.SignedFlavorCollection{
+		SignedFlavors: signedFlavors, Next: next, Previous: prev}
 	secLog.Infof("%s: Return flavor query to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
-	return hvs.SignedFlavorCollection{SignedFlavors: signedFlavors}, http.StatusOK, nil
+	return signedFlavoursCollection, http.StatusOK, nil
 }
 
 func (fcon *FlavorController) Delete(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
@@ -882,7 +892,7 @@ func (fcon *FlavorController) Retrieve(w http.ResponseWriter, r *http.Request) (
 
 }
 
-func validateFlavorFilterCriteria(key, value, flavorgroupId string, ids, flavorParts []string) (*dm.FlavorFilterCriteria, error) {
+func validateFlavorFilterCriteria(key, value, flavorgroupId string, ids, flavorParts []string, limitString string, afterIdString string) (*dm.FlavorFilterCriteria, error) {
 	defaultLog.Trace("controllers/flavor_controller:validateFlavorFilterCriteria() Entering")
 	defer defaultLog.Trace("controllers/flavor_controller:validateFlavorFilterCriteria() Leaving")
 
@@ -917,6 +927,11 @@ func validateFlavorFilterCriteria(key, value, flavorgroupId string, ids, flavorP
 		if err != nil {
 			return nil, errors.Wrap(err, "Valid contents of filter flavor_parts must be given")
 		}
+	}
+
+	filterCriteria.Limit, filterCriteria.AfterId, err = validation.ValidatePaginationValues(limitString, afterIdString)
+	if err != nil {
+		return nil, err
 	}
 
 	return &filterCriteria, nil

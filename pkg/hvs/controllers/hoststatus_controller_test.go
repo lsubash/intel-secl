@@ -296,10 +296,27 @@ var _ = Describe("HostStatusController", func() {
 			})
 		})
 
-		Context("When limiting the number of rows returned from HostStatus search with an invalid value", func() {
-			It("Should get a 400 error", func() {
+		Context("Get host status when limit provided is invalid", func() {
+			It("Should return 400 error", func() {
 				router.Handle("/host-status", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostStatusController.Search))).Methods(http.MethodGet)
 				req, err := http.NewRequest(http.MethodGet, "/host-status?limit=-2", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+
+				var hsCollection *hvs.HostStatusCollection
+				err = json.Unmarshal(w.Body.Bytes(), &hsCollection)
+				Expect(err).To(HaveOccurred())
+				Expect(hsCollection).To(BeNil())
+			})
+		})
+
+		Context("Get host-status when after id is provided with invalid value", func() {
+			It("Should retrun a 400 error", func() {
+				router.Handle("/host-status", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostStatusController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/host-status?afterId=aaa", nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
 				w = httptest.NewRecorder()

@@ -31,7 +31,7 @@ type TpmEndorsementController struct {
 }
 
 var tpmEndorsementSearchParams = map[string]bool{"id": true, "hardwareUuidEqualTo": true, "issuerEqualTo": true, "revokedEqualTo": true,
-	"issuerContains": true, "commentEqualTo": true, "commentContains": true, "certificateDigestEqualTo": true}
+	"issuerContains": true, "commentEqualTo": true, "commentContains": true, "certificateDigestEqualTo": true, "afterId": true, "limit": true}
 
 func (controller TpmEndorsementController) Create(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/tpm_endorsement_controller:Create() Entering")
@@ -201,6 +201,15 @@ func (controller TpmEndorsementController) Search(w http.ResponseWriter, r *http
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Unable to search TpmEndorsement"}
 	}
 
+	var next, prev string
+	if len(tpmEndorsementCollection.TpmEndorsement) > 0 {
+		lastRowId := tpmEndorsementCollection.TpmEndorsement[len(tpmEndorsementCollection.TpmEndorsement)-1].RowId
+		next, prev = GetNextAndPrevValues(filter.Limit, filter.AfterId, lastRowId, len(tpmEndorsementCollection.TpmEndorsement))
+	}
+
+	tpmEndorsementCollection.Next = next
+	tpmEndorsementCollection.Previous = prev
+
 	secLog.Infof("%s: Return tpm-endorsement query to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
 	return tpmEndorsementCollection, http.StatusOK, nil
 }
@@ -358,6 +367,13 @@ func getAndValidateFilterCriteria(params url.Values) (*models.TpmEndorsementFilt
 		}
 		criteria.CertificateDigestEqualTo = certificateDigestEqualTo
 	}
+
+	limit, afterId, err := validation.ValidatePaginationValues(params.Get("limit"), params.Get("afterId"))
+	if err != nil {
+		return nil, err
+	}
+	criteria.Limit = limit
+	criteria.AfterId = afterId
 
 	return &criteria, nil
 }

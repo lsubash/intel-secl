@@ -8,9 +8,12 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -272,4 +275,47 @@ func ValidateJWT(token string) error {
 		return nil
 	}
 	return errors.New("Invalid jwt token format")
+}
+
+// Validates positive integer
+func ValidatePositiveInt(value int) error {
+	if value >= 0 {
+		return nil
+	}
+	return errors.New("Value cannot be negative")
+}
+
+func ValidatePaginationValues(limitString string, afterIdString string) (int, int, error) {
+	var limitFilter, afterIdFilter int = 0, 0
+
+	limitString = strings.TrimSpace(limitString)
+	if limitString != "" {
+		limit, err := strconv.Atoi(limitString)
+		if err != nil {
+			return limit, afterIdFilter, errors.New("Limit has to be of type integer")
+		}
+		err = ValidatePositiveInt(limit)
+		if err != nil {
+			return limit, afterIdFilter, errors.New("Limit must be a positive integer")
+		}
+		limitFilter = limit
+	} else {
+		limitFilter = consts.Limit
+	}
+
+	afterIdString = strings.TrimSpace(afterIdString)
+	if afterIdString != "" {
+		afterId, err := strconv.Atoi(afterIdString)
+		if err != nil {
+			return limitFilter, afterId, errors.New("Afterid has to be of type integer")
+		}
+		err = ValidatePositiveInt(afterId)
+		if err != nil {
+			return limitFilter, afterId, errors.New("After ID must be a positive integer")
+		}
+		afterIdFilter = afterId
+	} else {
+		afterIdFilter = consts.AfterId
+	}
+	return limitFilter, afterIdFilter, nil
 }

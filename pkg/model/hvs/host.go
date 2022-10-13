@@ -11,11 +11,14 @@ import (
 )
 
 type HostCollection struct {
-	Hosts []*Host `json:"hosts" xml:"host"`
+	Next     string  `json:"next,omitempty" xml:"next"`
+	Previous string  `json:"prev,omitempty" xml:"prev"`
+	Hosts    []*Host `json:"hosts" xml:"host"`
 }
 
 type Host struct {
 	// swagger:strfmt uuid
+	RowId            int       `json:"-"`
 	Id               uuid.UUID `json:"id,omitempty"`
 	HostName         string    `json:"host_name"`
 	Description      string    `json:"description,omitempty"`

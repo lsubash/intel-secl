@@ -62,7 +62,7 @@ func (e *ESXiClusterStore) Retrieve(id uuid.UUID) (*hvs.ESXiCluster, error) {
 	cluster := hvs.ESXiCluster{}
 
 	row := e.Store.Db.Model(&esxiCluster{}).Where(&esxiCluster{Id: id}).Row()
-	err := row.Scan(&cluster.Id, &cluster.ConnectionString, &cluster.ClusterName)
+	err := row.Scan(&cluster.Id, &cluster.ConnectionString, &cluster.ClusterName, &cluster.RowId)
 	if err != nil {
 		return nil, errors.Wrap(err, "postgres/esxi_cluster_store:Retrieve() Failed to scan record")
 	}
@@ -100,7 +100,7 @@ func (e *ESXiClusterStore) Search(ecFilter *models.ESXiClusterFilterCriteria) ([
 	clusters := []hvs.ESXiCluster{}
 	for rows.Next() {
 		cluster := hvs.ESXiCluster{}
-		if err := rows.Scan(&cluster.Id, &cluster.ConnectionString, &cluster.ClusterName); err != nil {
+		if err := rows.Scan(&cluster.Id, &cluster.ConnectionString, &cluster.ClusterName, &cluster.RowId); err != nil {
 			return nil, errors.Wrap(err, "postgres/esxi_cluster_store:Search() Failed to scan record")
 		}
 		decryptedCS, err := utils.DecryptString(cluster.ConnectionString, e.Dek)
@@ -209,6 +209,13 @@ func buildESXiClusterSearchQuery(tx *gorm.DB, criteria *models.ESXiClusterFilter
 		tx = tx.Where("id = ?", criteria.Id)
 	} else if criteria.ClusterName != "" {
 		tx = tx.Where("cluster_name = ?", criteria.ClusterName)
+	}
+	if criteria.AfterId > 0 {
+		tx = tx.Where("rowid > ?", criteria.AfterId)
+	}
+	tx = tx.Order("rowid asc")
+	if criteria.Limit > 0 {
+		tx = tx.Limit(criteria.Limit)
 	}
 
 	return tx

@@ -30,7 +30,7 @@ type HostStatusController struct {
 }
 
 var hostStatusSearchParams = map[string]bool{"id": true, "hostId": true, "hostHardwareId": true, "hostName": true, "hostStatus": true,
-	"fromDate": true, "toDate": true, "latestPerHost": true, "numberOfDays": true, "limit": true}
+	"fromDate": true, "toDate": true, "latestPerHost": true, "numberOfDays": true, "limit": true, "afterId": true}
 
 // Search returns a collection of HostStatus based on HostStatusFilter criteria
 func (controller HostStatusController) Search(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
@@ -55,8 +55,18 @@ func (controller HostStatusController) Search(w http.ResponseWriter, r *http.Req
 		return nil, http.StatusInternalServerError, errors.Errorf("Host Status search operation failed")
 	}
 
+	var next, prev string
+	if len(hostStatusCollection) > 0 {
+		lastRowId := hostStatusCollection[len(hostStatusCollection)-1].RowId
+		next, prev = GetNextAndPrevValues(filter.Limit, filter.AfterId, lastRowId, len(hostStatusCollection))
+	}
+
+	hostCollection := hvs.HostStatusCollection{
+		HostStatuses: hostStatusCollection, Next: next, Previous: prev,
+	}
+
 	secLog.Infof("%s: Return Host Status Search query to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
-	return hvs.HostStatusCollection{HostStatuses: hostStatusCollection}, http.StatusOK, nil
+	return hostCollection, http.StatusOK, nil
 }
 
 // Retrieve returns an existing HostStatus entry from the HostStatusStore
@@ -189,17 +199,12 @@ func getHSFilterCriteria(params url.Values) (*models.HostStatusFilterCriteria, e
 		hfc.NumberOfDays = numDays
 	}
 
-	// rowLimit - defaults per set limit
-	rowLimit := strings.TrimSpace(params.Get("limit"))
-	if rowLimit != "" {
-		rLimit, err := strconv.Atoi(rowLimit)
-		if err != nil || rLimit <= 0 {
-			return nil, errors.New("Limit must be an integer > 0")
-		}
-		hfc.Limit = rLimit
-	} else {
-		hfc.Limit = constants.DefaultSearchResultRowLimit
+	limit, afterId, err := validation.ValidatePaginationValues(params.Get("limit"), params.Get("afterId"))
+	if err != nil {
+		return nil, err
 	}
+	hfc.Limit = limit
+	hfc.AfterId = afterId
 
 	return &hfc, nil
 }

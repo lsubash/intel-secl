@@ -10,4 +10,6 @@ import "github.com/google/uuid"
 type ESXiClusterFilterCriteria struct {
 	Id          uuid.UUID
 	ClusterName string
+	Limit       int
+	AfterId     int
 }

@@ -56,7 +56,9 @@ func (store *MockESXiClusterStore) Search(criteria *models.ESXiClusterFilterCrit
 
 	var ecFiltered []hvs.ESXiCluster
 	// ESXi cluster ID filter
-	if criteria.Id != uuid.Nil {
+	if criteria.Limit == 1 || criteria.AfterId == 1 {
+		return store.ESXiClusterStore[:1], nil
+	} else if criteria.Id != uuid.Nil {
 		for _, ec := range store.ESXiClusterStore {
 			if ec.Id == criteria.Id {
 				ecFiltered = append(ecFiltered, ec)

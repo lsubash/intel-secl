@@ -103,8 +103,8 @@ func (store *MockHostStatusStore) Retrieve(id uuid.UUID) (*hvs.HostStatus, error
 	// Mock Retrieve Query Response
 	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(id = \$1\)`).
 		WithArgs("afed7372-18c3-42af-bd9a-70b7f44c11ad").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow("afed7372-18c3-42af-bd9a-70b7f44c11ad", hs1.HostID.String(), hsi1, hsm1, hs1.Created))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow("afed7372-18c3-42af-bd9a-70b7f44c11ad", hs1.HostID.String(), hsi1, hsm1, hs1.Created, 1))
 
 	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(id = \$1\)`).
 		WithArgs("84755fda-c910-46be-821f-e8ddeab189e9").
@@ -112,7 +112,7 @@ func (store *MockHostStatusStore) Retrieve(id uuid.UUID) (*hvs.HostStatus, error
 
 	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(id = \$1\)`).
 		WithArgs("73755fda-c910-46be-821f-e8ddeab189e9").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}))
 
 	return store.HostStatusStore.Retrieve(id)
 }
@@ -152,29 +152,29 @@ func (store *MockHostStatusStore) Search(criteria *models.HostStatusFilterCriter
 	store.Mock.MatchExpectationsInOrder(false)
 
 	// Search No filters
-	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" LIMIT (.+)`).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created).
-			AddRow(hs2.ID.String(), hs2.HostID.String(), hsi2, hsm2, hs2.Created).
-			AddRow(hs3.ID.String(), hs3.HostID.String(), hsi3, hsm3, hs3.Created).
-			AddRow(hs4.ID.String(), hs4.HostID.String(), hsi4, hsm4, hs4.Created))
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" ORDER BY (.+) asc LIMIT (.+) `).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created, 1).
+			AddRow(hs2.ID.String(), hs2.HostID.String(), hsi2, hsm2, hs2.Created, 2).
+			AddRow(hs3.ID.String(), hs3.HostID.String(), hsi3, hsm3, hs3.Created, 3).
+			AddRow(hs4.ID.String(), hs4.HostID.String(), hsi4, hsm4, hs4.Created, 4))
 
 	// Search by ID
-	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(id = (.+) LIMIT (.+)`).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created))
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(id = (.+) ORDER BY (.+) asc LIMIT (.+) `).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created, 1))
 
 	// Search by an existing Host ID
-	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(host_id = \$1\) LIMIT (.+)`).
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(host_id = \$1\) ORDER BY (.+) asc LIMIT (.+)`).
 		WithArgs("47a3b602-f321-4e03-b3b2-8f3ca3cde128").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(hs1.ID.String(), "47a3b602-f321-4e03-b3b2-8f3ca3cde128", hsi1, hsm1, hs1.Created).
-			AddRow(hs2.ID.String(), "47a3b602-f321-4e03-b3b2-8f3ca3cde128", hsi2, hsm2, hs2.Created))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(hs1.ID.String(), "47a3b602-f321-4e03-b3b2-8f3ca3cde128", hsi1, hsm1, hs1.Created, 1).
+			AddRow(hs2.ID.String(), "47a3b602-f321-4e03-b3b2-8f3ca3cde128", hsi2, hsm2, hs2.Created, 2))
 
 	// Search by a non-existent Host ID - empty result
-	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(host_id = \$1\) LIMIT (.+)`).
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(host_id = \$1\) ORDER BY (.+) asc LIMIT (.+)`).
 		WithArgs("13885605-a0ee-41f2-b6fc-fd82edc487ad").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}))
 
 	newUuid, err := uuid.NewRandom()
 	if err != nil {
@@ -182,40 +182,40 @@ func (store *MockHostStatusStore) Search(criteria *models.HostStatusFilterCriter
 	}
 	// Mock query for Reports Controller
 	// Scenario: Host in Connected State
-	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(host_id = \$1\) LIMIT (.+)`).
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(host_id = \$1\) ORDER BY (.+) asc LIMIT (.+)`).
 		WithArgs("ee37c360-7eae-4250-a677-6ee12adce8e2").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(newUuid, "e57e5ea0-d465-461e-882d-1600090caa0d", hsi1, hsm1, hs1.Created))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(newUuid, "e57e5ea0-d465-461e-882d-1600090caa0d", hsi1, hsm1, hs1.Created, 1))
 
 	// Search by existing HostHardareUUID
-	store.Mock.ExpectQuery(`SELECT "host_status"\.\* FROM "host_status" INNER JOIN host h on h\.id = host_id WHERE \(h\.hardware_uuid = \$1\) LIMIT (.+)`).
+	store.Mock.ExpectQuery(`SELECT "host_status"\.\* FROM "host_status" INNER JOIN host h on h\.id = host_id WHERE \(h\.hardware_uuid = \$1\) ORDER BY (.+) asc LIMIT (.+)`).
 		WithArgs("1ad9c003-b0e0-4319-b2b3-06053dfd1407").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created).
-			AddRow(hs2.ID.String(), hs2.HostID.String(), hsi2, hsm2, hs2.Created))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created, 1).
+			AddRow(hs2.ID.String(), hs2.HostID.String(), hsi2, hsm2, hs2.Created, 2))
 
 	// Search by non-existent HostHardareUUID
-	store.Mock.ExpectQuery(`SELECT "host_status"\.\* FROM "host_status" INNER JOIN host h on h\.id = host_id WHERE \(h\.hardware_uuid = \$1\) LIMIT (.+)`).
+	store.Mock.ExpectQuery(`SELECT "host_status"\.\* FROM "host_status" INNER JOIN host h on h\.id = host_id WHERE \(h\.hardware_uuid = \$1\) ORDER BY (.+) asc LIMIT (.+)`).
 		WithArgs("7f71bff0-3c12-4f92-9a77-d380eb9ad2e2").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}))
 
 	// Search by HostStatus
-	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(status(.+)host_state(.+)CONNECTED(.+)LIMIT (.+)`).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created).
-			AddRow(hs3.ID.String(), hs3.HostID.String(), hsi3, hsm3, hs3.Created))
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(status(.+)host_state(.+)CONNECTED(.+) LIMIT (.+)`).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created, 1).
+			AddRow(hs3.ID.String(), hs3.HostID.String(), hsi3, hsm3, hs3.Created, 3))
 
 	// Search by HostState UNKNOWN
-	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(status(.+)host_state(.+)UNKNOWN(.+)LIMIT (.+)`).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(hs4.ID.String(), hs4.HostID.String(), hsi4, hsm4, hs4.Created))
+	store.Mock.ExpectQuery(`SELECT \* FROM "host_status" WHERE \(status(.+)host_state(.+)UNKNOWN(.+)ORDER BY (.+) asc LIMIT (.+)`).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(hs4.ID.String(), hs4.HostID.String(), hsi4, hsm4, hs4.Created, 4))
 
 	// Search by HostName
-	store.Mock.ExpectQuery(`SELECT "host_status"\.\* FROM "host_status" INNER JOIN host h on h\.id = host_id WHERE \(h\.name = \$1\) LIMIT 10000`).
+	store.Mock.ExpectQuery(`SELECT "host_status"\.\* FROM "host_status" INNER JOIN host h on h\.id = host_id WHERE \(h\.name = \$1\) ORDER BY (.+) asc LIMIT (.+)`).
 		WithArgs("computepurley1").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created"}).
-			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created).
-			AddRow(hs2.ID.String(), hs2.HostID.String(), hsi2, hsm2, hs2.Created))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "host_id", "status", "host_report", "created", "rowid"}).
+			AddRow(hs1.ID.String(), hs1.HostID.String(), hsi1, hsm1, hs1.Created, 1).
+			AddRow(hs2.ID.String(), hs2.HostID.String(), hsi2, hsm2, hs2.Created, 2))
 
 	newUuid1, err := uuid.NewRandom()
 	if err != nil {
@@ -231,11 +231,11 @@ func (store *MockHostStatusStore) Search(criteria *models.HostStatusFilterCriter
 	}
 	// Search by numberOfDays
 	store.Mock.ExpectQuery(`
-SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY au.Created DESC LIMIT (.+)`).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "entity_id", "entity_type", "created", "action", "data"}).
-			AddRow(newUuid1.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData)).
-			AddRow(newUuid2.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData)).
-			AddRow(newUuid3.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -2), "create", []byte(auditData)))
+SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY au.Created DESC ORDER BY (.+) asc LIMIT (.+)`).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "entity_id", "entity_type", "created", "action", "data", "rowid"}).
+			AddRow(newUuid1.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 1).
+			AddRow(newUuid2.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 2).
+			AddRow(newUuid3.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -2), "create", []byte(auditData), 3))
 
 	newUuid1, err = uuid.NewRandom()
 	if err != nil {
@@ -250,11 +250,11 @@ SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.cre
 		return nil, errors.Wrap(err, "failed to create new UUID")
 	}
 	// Search by fromDate and toDate
-	store.Mock.ExpectQuery(`SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY au.Created DESC LIMIT (.+)`).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "entity_id", "entity_type", "created", "action", "data"}).
-			AddRow(newUuid1.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData)).
-			AddRow(newUuid2.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData)).
-			AddRow(newUuid3.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -2), "create", []byte(auditData)))
+	store.Mock.ExpectQuery(`SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY au.Created DESC ORDER BY (.+) asc LIMIT (.+)`).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "entity_id", "entity_type", "created", "action", "data", "rowid"}).
+			AddRow(newUuid1.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 1).
+			AddRow(newUuid2.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 2).
+			AddRow(newUuid3.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -2), "create", []byte(auditData), 3))
 	return store.HostStatusStore.Search(criteria)
 }
 

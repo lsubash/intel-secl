@@ -328,7 +328,7 @@ func TestPcrEventLogIncludesPcrEventLogMissingFault(t *testing.T) {
 	t.Logf("Fault description: %s", result.Faults[0].Description)
 }
 
-// Create a host event log that wihtout an event log to invoke a
+// Create a host event log that without an event log to invoke a
 // 'PcrEventLogMissing' fault.
 func TestPcrEventLogIncludesNoEventLogInHostManifest(t *testing.T) {
 	// Create a HostManifest without any event logs to invoke PcrEventLogMissing fault.

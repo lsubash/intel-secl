@@ -53,7 +53,7 @@ func NewHostController(hs domain.HostStore, hss domain.HostStatusStore, fs domai
 }
 
 var hostSearchParams = map[string]bool{"id": true, "nameEqualTo": true, "nameContains": true, "hostHardwareId": true,
-	"key": true, "value": true, "trusted": true, "getTrustStatus": true, "getHostStatus": true, "orderBy": true}
+	"key": true, "value": true, "trusted": true, "getTrustStatus": true, "getHostStatus": true, "orderBy": true, "limit": true, "afterId": true}
 
 var hostRetrieveParams = map[string]bool{"getReport": true, "getHostStatus": true}
 
@@ -265,7 +265,16 @@ func (hc *HostController) Search(w http.ResponseWriter, r *http.Request) (interf
 		defaultLog.WithError(err).Error("controllers/host_controller:Search() Host search failed")
 		return nil, http.StatusInternalServerError, errors.Errorf("Failed to search Hosts")
 	}
-	hostCollection := hvs.HostCollection{Hosts: hosts}
+
+	var next, prev string
+	if hostFilterCriteria.OrderBy == "" && len(hosts) > 0 {
+		lastRowId := hosts[len(hosts)-1].RowId
+		next, prev = GetNextAndPrevValues(hostFilterCriteria.Limit, hostFilterCriteria.AfterId, lastRowId, len(hosts))
+	}
+
+	hostCollection := hvs.HostCollection{
+		Hosts: hosts, Next: next, Previous: prev,
+	}
 
 	secLog.Infof("%s: Hosts searched by: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
 	return hostCollection, http.StatusOK, nil
@@ -756,6 +765,10 @@ func populateHostFilterCriteria(params url.Values) (*models.HostFilterCriteria, 
 		criteria.Trusted = &trustStatus
 	}
 
+	if params.Get("orderBy") != "" && (params.Get("limit") != "" || params.Get("afterId") != "") {
+		return nil, errors.New("Both Orderby and Limit/Afterid cannot be set together")
+	}
+
 	if params.Get("orderBy") != "" {
 		orderType, err := models.GetOrderType(params.Get("orderBy"))
 		if err != nil {
@@ -763,6 +776,13 @@ func populateHostFilterCriteria(params url.Values) (*models.HostFilterCriteria, 
 		}
 		criteria.OrderBy = orderType
 	}
+
+	limit, afterId, err := validation.ValidatePaginationValues(params.Get("limit"), params.Get("afterId"))
+	if err != nil {
+		return nil, err
+	}
+	criteria.Limit = limit
+	criteria.AfterId = afterId
 
 	return &criteria, nil
 }
@@ -964,4 +984,17 @@ func (hc *HostController) retrieveFlavorgroup(hId, fgId uuid.UUID) (interface{},
 		}
 	}
 	return hostFlavorgroup, http.StatusOK, nil
+}
+
+func GetNextAndPrevValues(limit int, afterId int, rowId int, lenOfResponse int) (string, string) {
+	var next, prev string
+	if lenOfResponse == limit {
+		next = "limit=" + strconv.Itoa(limit) + "&afterId=" + strconv.Itoa(rowId)
+	}
+	if (afterId - limit) > 0 {
+		prev = "limit=" + strconv.Itoa(limit) + "&afterId=" + strconv.Itoa(afterId-limit)
+	} else if afterId > 0 {
+		prev = "limit=" + strconv.Itoa(limit) + "&afterId=" + strconv.Itoa(0)
+	}
+	return next, prev
 }

@@ -62,7 +62,7 @@ func (f *FlavorStore) Search(flavorFilter *models.FlavorVerificationFC) ([]hvs.S
 	var tx *gorm.DB
 	var err error
 
-	tx = f.Store.Db.Table("flavor f").Select("f.id, f.content, f.signature")
+	tx = f.Store.Db.Table("flavor f").Select("f.id, f.content, f.signature, f.rowid")
 	// build partial query with all the given flavor Id's
 	if len(flavorFilter.FlavorFC.Ids) > 0 {
 		var flavorIds []string
@@ -89,6 +89,14 @@ func (f *FlavorStore) Search(flavorFilter *models.FlavorVerificationFC) ([]hvs.S
 			" object in flavor Search function")
 	}
 
+	if flavorFilter.FlavorFC.AfterId > 0 {
+		tx = tx.Where("f.rowid > ?", flavorFilter.FlavorFC.AfterId)
+	}
+	tx = tx.Order("f.rowid asc")
+	if flavorFilter.FlavorFC.Limit > 0 {
+		tx = tx.Limit(flavorFilter.FlavorFC.Limit)
+	}
+
 	rows, err := tx.Rows()
 	if err != nil {
 		return nil, errors.Wrap(err, "postgres/flavor_store:Search() failed to retrieve records from db")
@@ -104,7 +112,7 @@ func (f *FlavorStore) Search(flavorFilter *models.FlavorVerificationFC) ([]hvs.S
 
 	for rows.Next() {
 		sf := hvs.SignedFlavor{}
-		if err := rows.Scan(&sf.Flavor.Meta.ID, (*PGFlavorContent)(&sf.Flavor), &sf.Signature); err != nil {
+		if err := rows.Scan(&sf.Flavor.Meta.ID, (*PGFlavorContent)(&sf.Flavor), &sf.Signature, &sf.RowId); err != nil {
 			return nil, errors.Wrap(err, "postgres/flavor_store:Search() failed to scan record")
 		}
 		signedFlavors = append(signedFlavors, sf)

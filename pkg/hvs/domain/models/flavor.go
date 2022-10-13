@@ -28,6 +28,8 @@ type FlavorFilterCriteria struct {
 	Value         string
 	FlavorgroupID uuid.UUID
 	FlavorParts   []hvs.FlavorPartName
+	Limit         int
+	AfterId       int
 }
 
 type FlavorVerificationFC struct {

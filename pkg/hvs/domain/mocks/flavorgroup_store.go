@@ -53,8 +53,10 @@ func (store *MockFlavorgroupStore) Search(criteria *models.FlavorGroupFilterCrit
 		flvrGroups = append(flvrGroups, *fg)
 	}
 
-	if criteria == nil {
+	if criteria.Ids == nil && criteria.NameEqualTo == "" && criteria.NameContains == "" && (criteria.Limit == 1000 || criteria.Limit == 0) {
 		return flvrGroups, nil
+	} else if criteria.Limit == 2 || criteria.AfterId == 2 {
+		return flvrGroups[:2], nil
 	} else if len(criteria.Ids) > 0 {
 		flavorgroups := []hvs.FlavorGroup{}
 		for _, id := range criteria.Ids {
@@ -200,8 +202,9 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 	}
 
 	_, err := store.Create(&hvs.FlavorGroup{
-		ID:   uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e2"),
-		Name: "automatic",
+		RowId: 1,
+		ID:    uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e2"),
+		Name:  "automatic",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
 				FlavorPart: hvs.FlavorPartOs,
@@ -231,8 +234,9 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 	}
 
 	_, err = store.Create(&hvs.FlavorGroup{
-		ID:   uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e3"),
-		Name: "test",
+		RowId: 2,
+		ID:    uuid.MustParse("ee37c360-7eae-4250-a677-6ee12adce8e3"),
+		Name:  "test",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
 				FlavorPart: hvs.FlavorPartOs,
@@ -261,8 +265,9 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 		defaultLog.WithError(err).Error("Error creating Flavorgroup")
 	}
 	_, err = store.Create(&hvs.FlavorGroup{
-		ID:   uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0d"),
-		Name: "platform_software",
+		RowId: 3,
+		ID:    uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0d"),
+		Name:  "platform_software",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
 				FlavorPart: hvs.FlavorPartSoftware,
@@ -281,8 +286,9 @@ func NewFakeFlavorgroupStore() *MockFlavorgroupStore {
 		defaultLog.WithError(err).Error("Error creating Flavorgroup")
 	}
 	_, err = store.Create(&hvs.FlavorGroup{
-		ID:   uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0e"),
-		Name: "workload_software",
+		RowId: 4,
+		ID:    uuid.MustParse("e57e5ea0-d465-461e-882d-1600090caa0e"),
+		Name:  "workload_software",
 		MatchPolicies: []hvs.FlavorMatchPolicy{
 			{
 				FlavorPart: hvs.FlavorPartSoftware,

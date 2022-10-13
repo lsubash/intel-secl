@@ -91,8 +91,72 @@ var _ = Describe("ESXiClusterController", func() {
 			})
 		})
 
-	})
+		Context("Search esxi cluster records when limit arguments are passed is invalid", func() {
+			It("Status bad request to be thrown", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?limit=-1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
 
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("Search esxi cluster records when limit arguments are passed is valid", func() {
+			It("Records must be returned with limit set", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?limit=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var ecCollection *hvs.ESXiClusterCollection
+				err = json.Unmarshal(w.Body.Bytes(), &ecCollection)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(len(ecCollection.ESXiCluster)).To(Equal(1))
+			})
+		})
+
+		Context("Search esxi cluster records when afterid arguments are passed is valid", func() {
+			It("Records must be returned with rowid after afterid", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?afterId=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var ecCollection *hvs.ESXiClusterCollection
+				err = json.Unmarshal(w.Body.Bytes(), &ecCollection)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(len(ecCollection.ESXiCluster)).To(Equal(1))
+			})
+		})
+
+		Context("Search esxi cluster records when afterId arguments are passed is invalid", func() {
+			It("Status bad request to be thrown", func() {
+				router.Handle("/esxi-cluster", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(
+					esxiClusterController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/esxi-cluster?afterId=aaa", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+	})
 })
 
 var _ = Describe("ESXiClusterController", func() {

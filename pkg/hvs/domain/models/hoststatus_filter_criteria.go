@@ -21,4 +21,5 @@ type HostStatusFilterCriteria struct {
 	LatestPerHost  bool
 	NumberOfDays   int
 	Limit          int
+	AfterId        int
 }

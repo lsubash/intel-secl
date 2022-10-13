@@ -13,11 +13,14 @@ import (
 )
 
 type ReportCollection struct {
-	Reports []*Report `json:"reports" xml:"reports"`
+	Reports  []*Report `json:"reports" xml:"reports"`
+	Next     string    `json:"next,omitempty" xml:"next"`
+	Previous string    `json:"prev,omitempty" xml:"prev"`
 }
 
 type Report struct {
 	// swagger:strfmt uuid
+	RowId            int              `json:"-"`
 	ID               uuid.UUID        `json:"id"`
 	TrustInformation TrustInformation `json:"trust_information"`
 	// swagger:strfmt uuid

@@ -19,6 +19,8 @@ type HostFilterCriteria struct {
 	IdList         []uuid.UUID
 	Trusted        *bool
 	OrderBy        OrderType
+	Limit          int
+	AfterId        int
 }
 
 type OrderType string

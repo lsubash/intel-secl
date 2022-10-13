@@ -542,6 +542,62 @@ var _ = Describe("HostController", func() {
 				Expect(len(hostCollection.Hosts)).To(Equal(2))
 			})
 		})
+		Context("Get all the Hosts with specifies limit", func() {
+			It("Should get list of all the Hosts with limit", func() {
+				router.Handle("/hosts", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts?limit=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				w = httptest.NewRecorder()
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var hostCollection hvs.HostCollection
+				err = json.Unmarshal(w.Body.Bytes(), &hostCollection)
+				Expect(err).NotTo(HaveOccurred())
+				// Verifying mocked data of 1 host
+				Expect(len(hostCollection.Hosts)).To(Equal(1))
+			})
+		})
+		Context("Get all the Hosts after given afterid", func() {
+			It("Should get list of all the Hosts with afterId", func() {
+				router.Handle("/hosts", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts?afterId=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				w = httptest.NewRecorder()
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var hostCollection hvs.HostCollection
+				err = json.Unmarshal(w.Body.Bytes(), &hostCollection)
+				Expect(err).NotTo(HaveOccurred())
+				// Verifying mocked data of 1 host
+				Expect(len(hostCollection.Hosts)).To(Equal(1))
+			})
+		})
+		Context("Get all the Hosts when limit is invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/hosts", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts?limit=-4", nil)
+				Expect(err).NotTo(HaveOccurred())
+				w = httptest.NewRecorder()
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Get all the Hosts when afterid is invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/hosts", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/hosts?afterId=-4", nil)
+				Expect(err).NotTo(HaveOccurred())
+				w = httptest.NewRecorder()
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Context("Get all the Hosts with key value params", func() {
 			It("Should get list of all the filtered Hosts", func() {
 				router.Handle("/hosts", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(hostController.Search))).Methods(http.MethodGet)

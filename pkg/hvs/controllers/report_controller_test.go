@@ -249,7 +249,62 @@ var _ = Describe("ReportController", func() {
 				Expect(len(reportCollection.Reports)).To(Equal(2))
 			})
 		})
+		Context("Get all the Reports", func() {
+			It("Should get list of all the Reports with limit", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?limit=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
 
+				var reportCollection hvs.ReportCollection
+				err = json.Unmarshal(w.Body.Bytes(), &reportCollection)
+				Expect(err).NotTo(HaveOccurred())
+				// Verifying mocked data of reports
+				Expect(len(reportCollection.Reports)).To(Equal(1))
+			})
+		})
+		Context("Get all the Reports", func() {
+			It("Should get list of all the Reports with afterid", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?afterId=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var reportCollection hvs.ReportCollection
+				err = json.Unmarshal(w.Body.Bytes(), &reportCollection)
+				Expect(err).NotTo(HaveOccurred())
+				// Verifying mocked data of reports
+				Expect(len(reportCollection.Reports)).To(Equal(1))
+			})
+		})
+		Context("When limit is set invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?limit=-2", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("When afterid is set invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/reports?afterId=-2", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", constants.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Context("Get all the Report for host with given hardware UUID", func() {
 			It("Should get list of all the filtered Reports", func() {
 				router.Handle("/reports", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(reportController.Search))).Methods(http.MethodGet)
@@ -318,7 +373,7 @@ var _ = Describe("ReportController", func() {
 				err = json.Unmarshal(w.Body.Bytes(), &reportCollection)
 				Expect(err).NotTo(HaveOccurred())
 				// Verifying mocked data of reports
-				Expect(len(reportCollection.Reports)).To(Equal(1))
+				Expect(len(reportCollection.Reports)).To(Equal(0))
 			})
 		})
 

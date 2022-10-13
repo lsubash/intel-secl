@@ -13,6 +13,8 @@ import (
 
 type FlavorgroupCollection struct {
 	Flavorgroups []FlavorGroup `json:"flavorgroups" xml:"flavorgroup"`
+	Next         string        `json:"next,omitempty" xml:"next"`
+	Previous     string        `json:"prev,omitempty" xml:"prev"`
 }
 
 type FlavorMatchPolicies []FlavorMatchPolicy
@@ -23,8 +25,9 @@ type FlavorMatchPolicyCollection struct {
 
 type FlavorGroup struct {
 	// swagger:strfmt uuid
-	ID   uuid.UUID `json:"id,omitempty"`
-	Name string    `json:"name,omitempty"`
+	RowId int       `json:"-"`
+	ID    uuid.UUID `json:"id,omitempty"`
+	Name  string    `json:"name,omitempty"`
 	// swagger:strfmt uuid
 	FlavorIds []uuid.UUID `json:"flavorIds,omitempty"`
 	// swagger:strfmt uuid

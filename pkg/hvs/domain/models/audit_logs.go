@@ -12,6 +12,7 @@ import (
 )
 
 type AuditLogEntry struct {
+	RowId      int
 	ID         uuid.UUID
 	EntityID   uuid.UUID
 	EntityType string

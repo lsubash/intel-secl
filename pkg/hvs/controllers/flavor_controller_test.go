@@ -109,6 +109,61 @@ var _ = Describe("FlavorController", func() {
 				Expect(len(sfs.SignedFlavors)).To(Equal(0))
 			})
 		})
+
+		Context("When limit arguments are passed", func() {
+			It("only 1 record is returned", func() {
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?limit=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var sfs *hvs.SignedFlavorCollection
+				err = json.Unmarshal(w.Body.Bytes(), &sfs)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(len(sfs.SignedFlavors)).To(Equal(1))
+			})
+		})
+		Context("When afterid arguments are passed", func() {
+			It("only records after afterid 1 are returned", func() {
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?afterId=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var sfs *hvs.SignedFlavorCollection
+				err = json.Unmarshal(w.Body.Bytes(), &sfs)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(len(sfs.SignedFlavors)).To(Equal(1))
+			})
+		})
+		Context("When invalid limit is passed", func() {
+			It("Should return bad request", func() {
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?limit=-4", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("When invalid afterid is passed", func() {
+			It("Should return bad request", func() {
+				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavors?afterId=-aaa", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Context("When filtered by Flavor id", func() {
 			It("Should get a single flavor entry", func() {
 				router.Handle("/flavors", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorController.Search))).Methods(http.MethodGet)

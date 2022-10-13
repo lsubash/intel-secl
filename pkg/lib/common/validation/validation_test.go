@@ -965,3 +965,18 @@ func TestValidateConnectionString(t *testing.T) {
 		})
 	}
 }
+
+func TestPagination(t *testing.T) {
+	limit, afterid, err := ValidatePaginationValues("5", "6")
+	if !(limit == 5 && afterid == 6 && err == nil) {
+		t.Errorf("Error validating values")
+	}
+	_, _, err = ValidatePaginationValues("-5", "6")
+	if err == nil {
+		t.Errorf("Error validating values")
+	}
+	_, _, err = ValidatePaginationValues("5", "aaaa")
+	if err == nil {
+		t.Errorf("Error validating values")
+	}
+}

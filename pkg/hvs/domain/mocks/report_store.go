@@ -114,11 +114,16 @@ func (store *MockReportStore) Search(criteria *models.ReportFilterCriteria) ([]m
 				reports = append(reports, r)
 			}
 		}
-	} else { // criteria is all empty return all records
+	} else if criteria.Limit == 1 || criteria.AfterId == 1 {
 		for _, r := range store.reportStore {
 			reports = append(reports, r)
 		}
-
+		reports = reports[:1]
+	} else {
+		// criteria is all empty return all records
+		for _, r := range store.reportStore {
+			reports = append(reports, r)
+		}
 	}
 
 	return reports, nil

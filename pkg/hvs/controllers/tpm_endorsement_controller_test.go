@@ -52,7 +52,58 @@ var _ = Describe("TpmEndorsementController", func() {
 				Expect(len(teCollection.TpmEndorsement)).To(Equal(1))
 			})
 		})
-
+		Context("Get all TpmEndorsements from data store", func() {
+			It("Should get list of TpmEndorsements with limit", func() {
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?limit=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+				var teCollection *hvs.TpmEndorsementCollection
+				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(teCollection.TpmEndorsement)).To(Equal(1))
+			})
+		})
+		Context("Get all TpmEndorsements from data store", func() {
+			It("Should get list of TpmEndorsements with afterId", func() {
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?afterId=1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+				var teCollection *hvs.TpmEndorsementCollection
+				err = json.Unmarshal(w.Body.Bytes(), &teCollection)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(teCollection.TpmEndorsement)).To(Equal(1))
+			})
+		})
+		Context("Get the list of TPM endorsement certs when limit set is invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?limit=-1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Get the list of TPM endorsement certs when afterid set is invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/tpm-endorsements?afterId=aaa", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Context("Search TpmEndorsements from data store based on issuerEqualTo as filter criteria", func() {
 			It("Should get filtered list of TpmEndorsements", func() {
 				router.Handle("/tpm-endorsements", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(tpmEndorsmentController.Search))).Methods(http.MethodGet)

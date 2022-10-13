@@ -14,7 +14,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	mocks2 "github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
 	smocks "github.com/intel-secl/intel-secl/v5/pkg/hvs/services/hosttrust/mocks"
 	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
@@ -82,6 +81,60 @@ var _ = Describe("FlavorgroupController", func() {
 				err = json.Unmarshal(w.Body.Bytes(), &fgCollection)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(fgCollection.Flavorgroups)).To(Equal(4))
+			})
+		})
+		Context("Get FlavorGroups from data store with limit", func() {
+			It("Should get only 2 FlavorGroups", func() {
+				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?limit=2", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var fgCollection *hvs.FlavorgroupCollection
+				err = json.Unmarshal(w.Body.Bytes(), &fgCollection)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(fgCollection.Flavorgroups)).To(Equal(2))
+			})
+		})
+		Context("Get FlavorGroups from data store with afterId", func() {
+			It("Should get only values after afterid", func() {
+				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?afterId=2&limit=5", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusOK))
+
+				var fgCollection *hvs.FlavorgroupCollection
+				err = json.Unmarshal(w.Body.Bytes(), &fgCollection)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(fgCollection.Flavorgroups)).To(Equal(2))
+			})
+		})
+		Context("Get FlavorGroups from data store when limit is invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?limit=-1", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("Get FlavorGroups from data store when afterid is invalid", func() {
+			It("Should return bad request", func() {
+				router.Handle("/flavorgroups", hvsRoutes.ErrorHandler(hvsRoutes.JsonResponseHandler(flavorgroupController.Search))).Methods(http.MethodGet)
+				req, err := http.NewRequest(http.MethodGet, "/flavorgroups?afterId=aa", nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.Header.Set("Accept", consts.HTTPMediaTypeJson)
+				w = httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				Expect(w.Code).To(Equal(http.StatusBadRequest))
 			})
 		})
 		Context("Search FlavorGroups from data store", func() {
@@ -512,23 +565,25 @@ var _ = Describe("FlavorgroupController", func() {
 	Describe("FlavorGroupFilterCriteria Validation", func() {
 		Context("FlavorGroupFilterCriteria with correct/empty content", func() {
 			It("should pass FlavorGroupFilterCriteria validation", func() {
-				filterCriteria := models.FlavorGroupFilterCriteria{}
-				err := controllers.ValidateFgCriteria(filterCriteria)
+				_, err := controllers.ValidateFgCriteria("", "", "", "", "")
+				Ω(err).ShouldNot(HaveOccurred())
+				_, err = controllers.ValidateFgCriteria("", "", "id", "", "")
+				Ω(err).ShouldNot(HaveOccurred())
+				_, err = controllers.ValidateFgCriteria("", "", "", "1", "")
+				Ω(err).ShouldNot(HaveOccurred())
+				_, err = controllers.ValidateFgCriteria("", "", "", "", "1")
 				Ω(err).ShouldNot(HaveOccurred())
 			})
 		})
 		Context("FlavorGroupFilterCriteria with incorrect content", func() {
 			It("should fail FlavorGroupFilterCriteria validation", func() {
-				filterCriteria := models.FlavorGroupFilterCriteria{
-					NameContains: "####",
-				}
-				err := controllers.ValidateFgCriteria(filterCriteria)
+				_, err := controllers.ValidateFgCriteria("####", "", "", "", "")
 				Ω(err).Should(HaveOccurred())
-
-				filterCriteria = models.FlavorGroupFilterCriteria{
-					NameEqualTo: "####",
-				}
-				err = controllers.ValidateFgCriteria(filterCriteria)
+				_, err = controllers.ValidateFgCriteria("", "####", "", "", "")
+				Ω(err).Should(HaveOccurred())
+				_, err = controllers.ValidateFgCriteria("", "", "", "-1", "")
+				Ω(err).Should(HaveOccurred())
+				_, err = controllers.ValidateFgCriteria("", "", "", "", "-1")
 				Ω(err).Should(HaveOccurred())
 			})
 		})

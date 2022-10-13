@@ -21,6 +21,7 @@ type ReportFilterCriteria struct {
 	ToDate         time.Time
 	LatestPerHost  bool
 	Limit          int
+	AfterId        int
 }
 
 type ReportLocator struct {

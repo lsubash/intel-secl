@@ -8,7 +8,7 @@ package postgres
 import (
 	"encoding/json"
 	"fmt"
-	consts "github.com/intel-secl/intel-secl/v5/pkg/hvs/constants"
+	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"reflect"
 	"strings"
 	"sync"
@@ -40,7 +40,7 @@ func (r *ReportStore) Retrieve(reportId uuid.UUID) (*models.HVSReport, error) {
 
 	row := r.Store.Db.Model(&report{}).Where(&report{ID: reportId}).Row()
 	ignoreMe := false //The new 'Trusted' field was introduced to v3.5, ignore that field in the query so it returns the correct results
-	if err := row.Scan(&re.ID, &re.HostID, (*PGTrustReport)(&re.TrustReport), &ignoreMe, &re.CreatedAt, &re.Expiration, &re.Saml); err != nil {
+	if err := row.Scan(&re.ID, &re.HostID, (*PGTrustReport)(&re.TrustReport), &ignoreMe, &re.CreatedAt, &re.Expiration, &re.Saml, &re.RowId); err != nil {
 		return nil, errors.Wrap(err, "postgres/report_store:Retrieve() failed to scan record")
 	}
 
@@ -153,7 +153,7 @@ func (r *ReportStore) Search(criteria *models.ReportFilterCriteria) ([]models.HV
 		fromDate = criteria.FromDate
 	}
 	if criteria.Limit == 0 && criteria.LatestPerHost {
-		criteria.Limit = consts.DefaultSearchResultRowLimit
+		criteria.Limit = constants.Limit
 	}
 	latestPerHost = criteria.LatestPerHost
 
@@ -164,7 +164,7 @@ func (r *ReportStore) Search(criteria *models.ReportFilterCriteria) ([]models.HV
 
 	var tx *gorm.DB
 	if fromDate.IsZero() && toDate.IsZero() && criteria.LatestPerHost {
-		tx = buildLatestReportSearchQuery(r.Store.Db, reportID, hostID, hostHardwareUUID, hostName, hostStatus, criteria.Limit)
+		tx = buildLatestReportSearchQuery(r.Store.Db, reportID, hostID, hostHardwareUUID, hostName, hostStatus, criteria.Limit, criteria.AfterId)
 
 		if tx == nil {
 			return nil, errors.New("postgres/report_store:Search() Unexpected Error. Could not build" +
@@ -187,7 +187,7 @@ func (r *ReportStore) Search(criteria *models.ReportFilterCriteria) ([]models.HV
 		for rows.Next() {
 			result := models.HVSReport{}
 			ignoreMe := false //The new 'Trusted' field was introduced to v3.5, ignore that field in the query so it returns the correct results
-			if err := rows.Scan(&result.ID, &result.HostID, (*PGTrustReport)(&result.TrustReport), &ignoreMe, &result.CreatedAt, &result.Expiration, &result.Saml); err != nil {
+			if err := rows.Scan(&result.ID, &result.HostID, (*PGTrustReport)(&result.TrustReport), &ignoreMe, &result.CreatedAt, &result.Expiration, &result.Saml, &result.RowId); err != nil {
 				return nil, errors.Wrap(err, "postgres/report_store:Search() failed to scan record")
 			}
 			reports = append(reports, result)
@@ -195,7 +195,7 @@ func (r *ReportStore) Search(criteria *models.ReportFilterCriteria) ([]models.HV
 
 		return reports, nil
 	} else {
-		tx = buildReportSearchQuery(r.Store.Db, hostID, hostHardwareUUID, hostName, hostStatus, fromDate, toDate, latestPerHost, criteria.Limit)
+		tx = buildReportSearchQuery(r.Store.Db, hostID, hostHardwareUUID, hostName, hostStatus, fromDate, toDate, latestPerHost, criteria.Limit, criteria.AfterId)
 		if tx == nil {
 			return nil, errors.New("postgres/report_store:Search() Unexpected Error. Could not build" +
 				" a gorm query object in HVSReport Search function.")
@@ -215,7 +215,7 @@ func (r *ReportStore) Search(criteria *models.ReportFilterCriteria) ([]models.HV
 		var reports []models.HVSReport
 		for rows.Next() {
 			result := models.AuditLogEntry{}
-			if err := rows.Scan(&result.ID, &result.EntityID, &result.EntityType, &result.CreatedAt, &result.Action, (*PGAuditLogData)(&result.Data)); err != nil {
+			if err := rows.Scan(&result.ID, &result.EntityID, &result.EntityType, &result.CreatedAt, &result.Action, (*PGAuditLogData)(&result.Data), &result.RowId); err != nil {
 				return nil, errors.Wrap(err, "postgres/report_store:Search() failed to scan record")
 			}
 			if reflect.DeepEqual(models.AuditTableData{}, result.Data) || len(result.Data.Columns) == 0 {
@@ -343,7 +343,7 @@ func (r *ReportStore) Delete(reportId uuid.UUID) error {
 }
 
 // buildReportSearchQuery is a helper function to build the query object for a report search.
-func buildReportSearchQuery(tx *gorm.DB, hostHardwareID, hostID uuid.UUID, hostName, hostState string, fromDate, toDate time.Time, latestPerHost bool, limit int) *gorm.DB {
+func buildReportSearchQuery(tx *gorm.DB, hostHardwareID, hostID uuid.UUID, hostName, hostState string, fromDate, toDate time.Time, latestPerHost bool, limit int, afterId int) *gorm.DB {
 	defaultLog.Trace("postgres/report_store:buildReportSearchQuery() Entering")
 	defer defaultLog.Trace("postgres/report_store:buildReportSearchQuery() Leaving")
 	if tx == nil {
@@ -361,7 +361,14 @@ func buildReportSearchQuery(tx *gorm.DB, hostHardwareID, hostID uuid.UUID, hostN
 		tx = tx.Table("audit_log_entry au").Select("au.*")
 		tx = buildReportSearchQueryWithCriteria(tx, hostHardwareID, hostID, entity, hostName, hostState, fromDate, toDate)
 	}
-	tx = tx.Limit(limit)
+
+	if afterId > 0 {
+		tx = tx.Where("rowid > ?", afterId)
+	}
+	tx = tx.Order("rowid asc")
+	if limit > 0 {
+		tx = tx.Limit(limit)
+	}
 	return tx
 }
 
@@ -408,7 +415,7 @@ func buildReportSearchQueryWithCriteria(tx *gorm.DB, hostHardwareID, hostID uuid
 }
 
 // buildLatestReportSearchQuery is a helper function to build the query object for a latest report search.
-func buildLatestReportSearchQuery(tx *gorm.DB, reportID, hostID, hostHardwareID uuid.UUID, hostName, hostState string, limit int) *gorm.DB {
+func buildLatestReportSearchQuery(tx *gorm.DB, reportID, hostID, hostHardwareID uuid.UUID, hostName, hostState string, limit int, afterId int) *gorm.DB {
 	defaultLog.Trace("postgres/report_store:buildLatestReportSearchQuery() Entering")
 	defer defaultLog.Trace("postgres/report_store:buildLatestReportSearchQuery() Leaving")
 
@@ -444,6 +451,15 @@ func buildLatestReportSearchQuery(tx *gorm.DB, reportID, hostID, hostHardwareID 
 		tx = tx.Where("host_id = ?", hostID.String())
 	}
 
-	tx = tx.Limit(limit)
+	if afterId > 0 {
+		tx = tx.Where("rowid > ?", afterId)
+	}
+
+	tx = tx.Order("rowid asc")
+
+	if limit > 0 {
+		tx = tx.Limit(limit)
+	}
+
 	return tx
 }

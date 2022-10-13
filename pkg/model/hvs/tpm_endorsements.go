@@ -10,7 +10,8 @@ import "github.com/google/uuid"
 // TpmEndorsement struct
 type TpmEndorsement struct {
 	// swagger:strfmt uuid
-	ID uuid.UUID `json:"id,omitempty"`
+	RowId int       `json:"-"`
+	ID    uuid.UUID `json:"id,omitempty"`
 	// swagger:strfmt uuid
 	HardwareUUID      uuid.UUID `json:"hardware_uuid"`
 	Issuer            string    `json:"issuer,omitempty"`
@@ -22,4 +23,6 @@ type TpmEndorsement struct {
 
 type TpmEndorsementCollection struct {
 	TpmEndorsement []*TpmEndorsement `json:"tpmendorsements"`
+	Next           string            `json:"next,omitempty"`
+	Previous       string            `json:"prev,omitempty"`
 }

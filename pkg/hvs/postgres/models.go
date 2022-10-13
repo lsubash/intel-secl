@@ -30,6 +30,7 @@ type (
 		ID                    uuid.UUID             `json:"id" gorm:"primary_key;type:uuid"`
 		Name                  string                `json:"name" gorm:"type:varchar(255);not null;index:idx_flavorgroup_name"`
 		FlavorTypeMatchPolicy PGFlavorMatchPolicies `json:"flavor_type_match_policy,omitempty" sql:"type:JSONB"`
+		Rowid                 int                   `json:"-" gorm:"auto_increment;not null"`
 	}
 
 	flavor struct {
@@ -39,6 +40,7 @@ type (
 		Label      string          `gorm:"unique;not null"`
 		FlavorPart string          `json:"flavor_part"`
 		Signature  string          `json:"signature"`
+		Rowid      int             `json:"-" gorm:"auto_increment;not null"`
 	}
 
 	host struct {
@@ -47,6 +49,7 @@ type (
 		Description      string
 		ConnectionString string        `gorm:"not null"`
 		HardwareUuid     models.HwUUID `gorm:"type:uuid;index:idx_host_hardware_uuid"`
+		Rowid            int           `gorm:"auto_increment;not null"`
 	}
 
 	hostFlavorgroup struct {
@@ -97,12 +100,14 @@ type (
 		Status     PGHostStatusInformation `gorm:"column:status" sql:"type:JSONB"`
 		HostReport PGHostManifest          `gorm:"column:host_report" sql:"type:JSONB"`
 		CreatedAt  time.Time               `gorm:"column:created;not null"`
+		Rowid      int                     `gorm:"auto_increment;not null"`
 	}
 
 	esxiCluster struct {
 		Id               uuid.UUID `gorm:"primary_key;type:uuid"`
 		ConnectionString string    `gorm:"column:connection_string;not null"`
 		ClusterName      string    `gorm:"column:cluster_name;type:varchar(255);not null;index:idx_esxi_cluster_name"`
+		Rowid            int       `gorm:"auto_increment;not null"`
 	}
 
 	esxiClusterHost struct {
@@ -129,6 +134,7 @@ type (
 		CreatedAt   time.Time     `gorm:"column:created;not null"`
 		Expiration  time.Time     `gorm:"column:expiration;not null"`
 		Saml        string        `gorm:"column:saml;not null"`
+		Rowid       int           `gorm:"auto_increment;not null"`
 	}
 
 	tpmEndorsement struct {
@@ -139,6 +145,7 @@ type (
 		Certificate       string    `gorm:"column:certificate;not null"`
 		Comment           string    `gorm:"column:comment"`
 		CertificateDigest string    `gorm:"column:certificate_digest;not null"`
+		Rowid             int       `gorm:"auto_increment;not null"`
 	}
 
 	//TODO add triggers
@@ -150,6 +157,7 @@ type (
 		CreatedAt  time.Time      `gorm:"column:created; not null"`
 		Action     string         `gorm:"type:varchar(50)"`
 		Data       PGAuditLogData `sql:"type:JSONB"`
+		Rowid      int            `gorm:"auto_increment;not null"`
 	}
 
 	tagCertificate struct {

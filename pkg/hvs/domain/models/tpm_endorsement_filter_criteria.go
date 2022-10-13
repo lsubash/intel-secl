@@ -16,4 +16,6 @@ type TpmEndorsementFilterCriteria struct {
 	CommentEqualTo           string
 	CommentContains          string
 	CertificateDigestEqualTo string
+	Limit                    int
+	AfterId                  int
 }

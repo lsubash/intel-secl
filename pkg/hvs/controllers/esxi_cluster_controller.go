@@ -38,7 +38,7 @@ func NewESXiClusterController(ec domain.ESXiClusterStore, hc HostController) *ES
 	}
 }
 
-var esxiClusterSearchParams = map[string]bool{"id": true, "clusterName": true}
+var esxiClusterSearchParams = map[string]bool{"id": true, "clusterName": true, "afterId": true, "limit": true}
 
 func (controller ESXiClusterController) Create(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	defaultLog.Trace("controllers/esxi_cluster_controller:Create() Entering")
@@ -167,8 +167,13 @@ func (controller ESXiClusterController) Search(w http.ResponseWriter, r *http.Re
 		}
 		esxiClusters[index].ConnectionString = utils.GetConnectionStringWithoutCredentials(esxiClusters[index].ConnectionString)
 	}
+	var next, prev string
+	if len(esxiClusters) > 0 {
+		lastRowId := esxiClusters[len(esxiClusters)-1].RowId
+		next, prev = GetNextAndPrevValues(filter.Limit, filter.AfterId, lastRowId, len(esxiClusters))
+	}
 
-	esxiClusterCollection := hvs.ESXiClusterCollection{ESXiCluster: esxiClusters}
+	esxiClusterCollection := hvs.ESXiClusterCollection{ESXiCluster: esxiClusters, Next: next, Previous: prev}
 
 	secLog.Infof("%s: Return ESXi cluster query result to: %s", commLogMsg.AuthorizedAccess, r.RemoteAddr)
 	return esxiClusterCollection, http.StatusOK, nil
@@ -304,6 +309,13 @@ func getECCriteria(params url.Values) (*models.ESXiClusterFilterCriteria, error)
 		}
 		ecfc.ClusterName = params.Get("clusterName")
 	}
+
+	limit, afterid, err := validation.ValidatePaginationValues(params.Get("limit"), params.Get("afterId"))
+	if err != nil {
+		return nil, err
+	}
+	ecfc.Limit = limit
+	ecfc.AfterId = afterid
 
 	return &ecfc, nil
 }

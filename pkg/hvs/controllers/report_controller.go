@@ -227,8 +227,14 @@ func (controller ReportController) Search(w http.ResponseWriter, r *http.Request
 		return nil, http.StatusInternalServerError, errors.Errorf("HVSReport search operation failed")
 	}
 
+	var next, prev string
+	if len(hvsReportCollection) > 0 {
+		lastRowId := hvsReportCollection[len(hvsReportCollection)-1].RowId
+		next, prev = GetNextAndPrevValues(reportFilterCriteria.Limit, reportFilterCriteria.AfterId, lastRowId, len(hvsReportCollection))
+	}
+
 	reportCollection := hvs.ReportCollection{
-		Reports: []*hvs.Report{},
+		Reports: []*hvs.Report{}, Next: next, Previous: prev,
 	}
 	for _, hvsReport := range hvsReportCollection {
 		reportCollection.Reports = append(reportCollection.Reports, ConvertToReport(&hvsReport))
@@ -373,16 +379,12 @@ func getReportFilterCriteria(params url.Values) (*models.ReportFilterCriteria, e
 		rfc.NumberOfDays = numDays
 	}
 
-	rowLimit := strings.TrimSpace(params.Get("limit"))
-	if rowLimit != "" {
-		rLimit, err := strconv.Atoi(rowLimit)
-		if err != nil || rLimit <= 0 {
-			return nil, errors.New("Limit must be an integer > 0")
-		}
-		rfc.Limit = rLimit
-	} else {
-		rfc.Limit = consts.DefaultSearchResultRowLimit
+	limit, afterId, err := validation.ValidatePaginationValues(params.Get("limit"), params.Get("afterId"))
+	if err != nil {
+		return nil, err
 	}
+	rfc.Limit = limit
+	rfc.AfterId = afterId
 
 	return &rfc, nil
 }

@@ -82,6 +82,8 @@ type Flavors struct {
 // SignedFlavorCollection is a list of SignedFlavor objects
 type SignedFlavorCollection struct {
 	SignedFlavors []SignedFlavor `json:"signed_flavors"`
+	Next          string         `json:"next,omitempty"`
+	Previous      string         `json:"prev,omitempty"`
 }
 
 func (s SignedFlavorCollection) GetFlavors(flavorPart string) []SignedFlavor {

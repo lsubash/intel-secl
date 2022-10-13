@@ -602,6 +602,8 @@ func (store *MockFlavorStore) Search(criteria *models.FlavorVerificationFC) ([]h
 				}
 			}
 		}
+	} else if criteria.FlavorFC.Limit == 1 || criteria.FlavorFC.AfterId == 1 {
+		sfs = store.flavorStore[:1]
 	}
 	return sfs, nil
 }

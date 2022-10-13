@@ -8,6 +8,7 @@ package postgres
 import (
 	"github.com/google/uuid"
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/model/hvs"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -70,7 +71,7 @@ func (t *TpmEndorsementStore) Retrieve(id uuid.UUID) (*hvs.TpmEndorsement, error
 
 	row := t.Store.Db.Model(tpmEndorsement{}).Where(tpmEndorsement{ID: id}).Row()
 	te := hvs.TpmEndorsement{}
-	if err := row.Scan(&te.ID, &te.HardwareUUID, &te.Issuer, &te.Revoked, &te.Certificate, &te.Comment, &te.CertificateDigest); err != nil {
+	if err := row.Scan(&te.ID, &te.HardwareUUID, &te.Issuer, &te.Revoked, &te.Certificate, &te.Comment, &te.CertificateDigest, &te.RowId); err != nil {
 		return nil, errors.Wrap(err, "postgres/tpm_endorsement_store:Retrieve() - Could not scan record ")
 	}
 
@@ -113,7 +114,7 @@ func (t *TpmEndorsementStore) Search(teFilter *models.TpmEndorsementFilterCriter
 
 	for rows.Next() {
 		te := hvs.TpmEndorsement{}
-		if err := rows.Scan(&te.ID, &te.HardwareUUID, &te.Issuer, &te.Revoked, &te.Certificate, &te.Comment, &te.CertificateDigest); err != nil {
+		if err := rows.Scan(&te.ID, &te.HardwareUUID, &te.Issuer, &te.Revoked, &te.Certificate, &te.Comment, &te.CertificateDigest, &te.RowId); err != nil {
 			return nil, errors.Wrap(err, "postgres/tpm_endorsement_store:Search() - Could not scan record ")
 		}
 		tpmEndorsementCollection.TpmEndorsement = append(tpmEndorsementCollection.TpmEndorsement, &te)
@@ -150,6 +151,17 @@ func buildTpmEndorsementSearchQuery(tx *gorm.DB, teFilter *models.TpmEndorsement
 		tx = tx.Where("issuer like ? ", "%"+teFilter.IssuerContains+"%")
 	} else if teFilter.CertificateDigestEqualTo != "" {
 		tx = tx.Where("certificate_digest = ? ", teFilter.CertificateDigestEqualTo)
+	}
+	if teFilter.Limit == 0 {
+		teFilter.Limit = consts.Limit
+	}
+
+	if teFilter.AfterId > 0 {
+		tx = tx.Where("rowid > ?", teFilter.AfterId)
+	}
+	tx = tx.Order("rowid asc")
+	if teFilter.Limit > 0 {
+		tx = tx.Limit(teFilter.Limit)
 	}
 	return tx
 }

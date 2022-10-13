@@ -11,4 +11,6 @@ type FlavorGroupFilterCriteria struct {
 	FlavorId     *uuid.UUID
 	NameEqualTo  string
 	NameContains string
+	Limit        int
+	AfterId      int
 }
