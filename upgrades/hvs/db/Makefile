@@ -1,8 +1,16 @@
-TEMPLATE_REL_VERSION := v4.0.0
+TEMPLATE_REL_VERSION_FLAVOR := v4.0.0
+TEMPLATE_REL_VERSION_PAGINATION := v5.0.0
+
+.PHONY: flavor-template hvs-pagination
+
+all: flavor-template hvs-pagination
 
 flavor-template:
-	rm -rf out && mkdir -p out
-	cd src/flavor-template && go build -ldflags "-X main.BuildVersion=$(TEMPLATE_REL_VERSION)" -o $(TEMPLATE_REL_VERSION)_flavor_convert && mv $(TEMPLATE_REL_VERSION)_flavor_convert ../../out
-	$ echo "upgrades/hvs/db/out/$(TEMPLATE_REL_VERSION)_flavor_convert successfully created"
+	mkdir -p out
+	cd src/flavor-template && go build -ldflags "-X main.BuildVersion=$(TEMPLATE_REL_VERSION_FLAVOR)" -o $(TEMPLATE_REL_VERSION_FLAVOR)_flavor_convert && mv $(TEMPLATE_REL_VERSION_FLAVOR)_flavor_convert ../../out
+	$ echo "upgrades/hvs/db/out/$(TEMPLATE_REL_VERSION_FLAVOR)_flavor_convert successfully created"
 
-all: flavor-template
+hvs-pagination:
+	mkdir -p out
+	cd src/hvs-pagination && go build -ldflags "-X main.BuildVersion=$(TEMPLATE_REL_VERSION_PAGINATION)" -o $(TEMPLATE_REL_VERSION_PAGINATION)_hvs_pagination && mv $(TEMPLATE_REL_VERSION_PAGINATION)_hvs_pagination ../../out
+	$ echo "upgrades/hvs/db/out/$(TEMPLATE_REL_VERSION_PAGINATION)_hvs_pagination successfully created"
