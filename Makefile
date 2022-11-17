@@ -17,7 +17,7 @@ K8S_TARGETS = cms kbs ihub hvs authservice aas-manager wls tagent wlagent $(K8S_
 
 $(TARGETS):
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off go mod tidy && env GOOS=linux GOSUMDB=off  \
-		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
+		go build -ldflags "-X intel/isecl/go-trust-agent/v5/eventlog.uefiEventLogFile=/sys/kernel/security/tpm0/binary_bios_measurements -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 tagent:
 	cd cmd/$@ && env GOOS=linux GOSUMDB=off && env GOOS=linux GOSUMDB=off CGO_CFLAGS_ALLOW="-f.*"  \
