@@ -13,12 +13,11 @@ on:
 
 jobs:
   sanity-test-build:
-    runs-on: RHEL8
+    runs-on: [ self-hosted ]
     # TODO: inject using secret
     container: amr-registry.caas.intel.com/isecl/iseclbuilder:v5.0.0
 
-    steps:
-      - uses: AutoModality/action-clean@v1
+    steps:  
       - uses: actions/checkout@v2
 
       - name: Add Running Label

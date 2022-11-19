@@ -15,13 +15,12 @@ env:
 
 jobs:
   StyleChecker:    
-    runs-on: RHEL8
+    runs-on: [ self-hosted ]
     container: amr-registry.caas.intel.com/isecl/iseclbuilder:v5.0.0
     env:
       no_proxy: ${{secrets.NO_PROXY}}
 
     steps:
-      - uses: AutoModality/action-clean@v1
       - uses: actions/checkout@v2
       - name: Runing Style Checker
         run: |
