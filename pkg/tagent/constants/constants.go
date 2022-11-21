@@ -16,7 +16,7 @@ const (
 const (
 	TlsKey                          = "tls"
 	InstallationDir                 = "/home/root/tep_luks_dev/trustagent/"
-	ConfigDir                       = "/etc/trustagent/"
+	ConfigDir                       = "/home/root/tep_luks_dev/trustagent/"
 	ConfigFileName                  = "config"
 	ConfigFilePath                  = ConfigDir + ConfigFileName + ".yml"
 	ExecLinkPath                    = "/usr/bin/tagent"
@@ -184,6 +184,6 @@ const (
 )
 
 var (
-	AsciiRuntimeMeasurementFilePath = "/opt/ima/ascii_runtime_measurements"
+	AsciiRuntimeMeasurementFilePath = "//home/root/tep_luks_dev/ima/ascii_runtime_measurements"
 	ProcFilePath                    = "/proc/cmdline"
 )
