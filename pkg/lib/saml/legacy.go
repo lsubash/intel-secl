@@ -219,7 +219,7 @@ func signXMLTreeLegacy(ks dsig.X509KeyStore, e *etree.Element) (*etree.Element, 
 		Hash:          crypto.SHA256,
 		KeyStore:      ks,
 		IdAttribute:   dsig.DefaultIdAttr,
-		Canonicalizer: dsig.MakeC14N10CommentCanonicalizer(),
+		Canonicalizer: dsig.MakeC14N10WithCommentsCanonicalizer(),
 	}
 	signedElement, err := ctx.SignEnveloped(e)
 	if err != nil {

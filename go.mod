@@ -27,7 +27,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
-	github.com/russellhaering/goxmldsig v1.1.1-0.20210828032938-dfbd95396ace
+	github.com/russellhaering/goxmldsig v1.2.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
