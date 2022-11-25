@@ -25,7 +25,6 @@ jobs:
       - name: Runing Style Checker
         run: |
           gofmt -l . >> intel-secl.log 2>&1
-          curl -sSf --user "$USERNAME:$PASSWORD"   -X PUT -T intel-secl.log "$ARTIFACTORY"/tools/${{github.ref_name}}/latest/gofmt-logs/intel-secl.log
 
   Checkmarx-scan:    
     runs-on: RHEL8
