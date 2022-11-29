@@ -355,9 +355,9 @@ func buildHostStatusSearchQuery(tx *gorm.DB, hsFilter *models.HostStatusFilterCr
 	tx = tx.Raw(formattedQuery)
 
 	if hsFilter.AfterId > 0 {
-		tx = tx.Where("rowid > ?", hsFilter.AfterId)
+		tx = tx.Where("au.rowid > ?", hsFilter.AfterId)
 	}
-	tx = tx.Order("rowid asc")
+	tx = tx.Order("au.rowid asc")
 	if hsFilter.Limit > 0 {
 		tx = tx.Limit(hsFilter.Limit)
 	}
