@@ -27,7 +27,7 @@ jobs:
           gofmt -l . >> intel-secl.log 2>&1
 
   Checkmarx-scan:    
-    runs-on: RHEL8
+    runs-on: [ self-hosted ]
     container: amr-registry.caas.intel.com/isecl/checkmarx:isecl
     env:
       TEAM: ${{ secrets.CHECKMARX_TEAM }}
@@ -48,7 +48,7 @@ jobs:
           java ${JAVA_OPTS} -jar /app/cx-flow.jar --spring.profiles.active="${CX_FLOW_ENABLED_VULNERABILITY_SCANNERS}" --scan --github.api-url="${GITHUB_API_URL}/repos/" --cx-project="intel-secl-${{github.ref_name}}"  --cx-team="${TEAM}" --app="${APP}" --f=. ${CXFLOW_PARAMS}
 
   docker-push:
-    runs-on: RHEL8
+    runs-on: [ self-hosted ]
     env:
       http_proxy: ${{ secrets.HTTP_PROXY }}
       https_proxy: ${{ secrets.HTTPS_PROXY }}
