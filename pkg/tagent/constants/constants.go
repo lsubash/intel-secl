@@ -184,6 +184,6 @@ const (
 )
 
 var (
-	AsciiRuntimeMeasurementFilePath = "//home/root/tep_luks_dev/ima/ascii_runtime_measurements"
+	AsciiRuntimeMeasurementFilePath = "/sys/kernel/security/ima/ascii_runtime_measurements"
 	ProcFilePath                    = "/proc/cmdline"
 )

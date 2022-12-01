@@ -57,6 +57,7 @@ func NewEventLogParser() EventLogParser {
 		uefiParser = &uefiEventLogParser{
 			tpm2FilePath:   constants.Tpm2FilePath,
 			devMemFilePath: constants.DevMemFilePath,
+			//log.Infof("Configured to use UEFI event log file to TPM2 ACPI tables");
 		}
 	}
 	eventLogParser.parsers = append(eventLogParser.parsers, uefiParser)
