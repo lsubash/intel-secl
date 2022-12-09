@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package k8splugin
@@ -9,11 +9,12 @@ import (
 	"crypto"
 	"crypto/sha512"
 	"encoding/json"
-	"github.com/intel-secl/intel-secl/v5/pkg/ihub/util"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/ihub/util"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/clients/k8s"
 	vsPlugin "github.com/intel-secl/intel-secl/v5/pkg/ihub/attestationPlugin"
@@ -294,7 +295,7 @@ func populateHostDetailsInCRD(k8sDetails *KubernetesDetails) ([]model.Host, erro
 		t := time.Now().UTC()
 		host.Updated = new(time.Time)
 		*host.Updated = t
-		if reportHostDetails.AgentType != "tee" {
+		if reportHostDetails.AgentType != "sgx" {
 			host.AssetTags = reportHostDetails.AssetTags
 			host.HardwareFeatures = reportHostDetails.HardwareFeatures
 			host.Trusted = new(bool)
@@ -308,7 +309,7 @@ func populateHostDetailsInCRD(k8sDetails *KubernetesDetails) ([]model.Host, erro
 			host.HvsSignedTrustReport = signedtrustReport
 
 		}
-		if reportHostDetails.AgentType == "tee" || reportHostDetails.AgentType == "both" {
+		if reportHostDetails.AgentType == "sgx" || reportHostDetails.AgentType == "both" {
 			host.EpcSize = strings.Replace(reportHostDetails.EpcSize, " ", "", -1)
 			host.FlcEnabled = strconv.FormatBool(reportHostDetails.FlcEnabled)
 			host.SgxEnabled = strconv.FormatBool(reportHostDetails.SgxEnabled)
@@ -411,6 +412,8 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 	log.Trace("k8splugin/k8s_plugin:SendDataToEndPoint() Entering")
 	defer log.Trace("k8splugin/k8s_plugin:SendDataToEndPoint() Leaving")
 
+	var sgxData types.PlatformDataSGX
+
 	log.Debug("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching hosts from Kubernetes")
 	err := GetHosts(&kubernetes)
 	if err != nil {
@@ -420,7 +423,7 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 	log.Infof("k8splugin/k8s_plugin:SendDataToEndPoint() Fetched %d hosts from Kubernetes", len(kubernetes.HostDetailsMap))
 	for key := range kubernetes.HostDetailsMap {
 		hvsFail := true
-		fdsFail := true
+		shvsFail := true
 
 		hostDetails := kubernetes.HostDetailsMap[key]
 
@@ -435,50 +438,43 @@ func SendDataToEndPoint(kubernetes KubernetesDetails) error {
 				hostDetails.AgentType = "ta"
 			}
 		}
-		if kubernetes.Config.AttestationService.FDSBaseURL != "" {
-			log.Debugf("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching PlatformData for host %s from FDS", hostDetails.HostName)
-			platformData, err := vsPlugin.GetHostPlatformData(hostDetails.HostID, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
+		if kubernetes.Config.AttestationService.SHVSBaseURL != "" {
+			log.Debugf("k8splugin/k8s_plugin:SendDataToEndPoint() Fetching PlatformData for host %s from SHVS", hostDetails.HostName)
+			platformData, err := vsPlugin.GetHostPlatformDataSGX(hostDetails.HostName, kubernetes.Config, kubernetes.TrustedCAsStoreDir)
 			if err != nil {
-				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get PlatformData for host %s from FDS", hostDetails.HostName)
+				log.WithError(err).Warnf("k8splugin/k8s_plugin:SendDataToEndPoint() Could not get PlatformData for host %s from SHVS", hostDetails.HostName)
 			} else {
-				fdsFail = false
-				// mark TEE agent as running on this host
-				hostDetails.AgentType = "tee"
+				shvsFail = false
+				// mark SGX agent as running on this host
+				hostDetails.AgentType = "sgx"
 
-				if len(platformData) <= 0 {
-					log.Debugf("TEE Data not found for host %s", hostDetails.HostName)
+				err = json.Unmarshal(platformData, &sgxData)
+				if err != nil {
+					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() SGX Platform data unmarshal failed")
 					continue
 				}
 
-				if platformData[0].HostInfo.HardwareFeatures.SGX != nil {
-					// need to validate contents of EpcSize
-					if !osRegexEpcSize.MatchString(*platformData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize) {
-						log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
-						continue
-					}
-
-					hostDetails.EpcSize = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.EpcSize
-					hostDetails.FlcEnabled = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.FlcEnabled
-					hostDetails.SgxEnabled = *platformData[0].HostInfo.HardwareFeatures.SGX.Enabled
-					hostDetails.SgxSupported = true
-					hostDetails.TcbUpToDate = *platformData[0].HostInfo.HardwareFeatures.SGX.Meta.TcbUptoDate
-					validTo := util.EvaluateValidTo(platformData[0].ValidTo, kubernetes.Config.PollIntervalMinutes)
-					hostDetails.ValidTo = validTo
+				// need to validate contents of EpcSize
+				if !osRegexEpcSize.MatchString(sgxData[0].EpcSize) {
+					log.WithError(err).Error("k8splugin/k8s_plugin:SendDataToEndPoint() Invalid EPC Size value")
+					continue
 				}
+				hostDetails.EpcSize = sgxData[0].EpcSize
+				hostDetails.FlcEnabled = sgxData[0].FlcEnabled
+				hostDetails.SgxEnabled = sgxData[0].SgxEnabled
+				hostDetails.SgxSupported = sgxData[0].SgxSupported
+				hostDetails.TcbUpToDate = strconv.FormatBool(sgxData[0].TcbUpToDate)
+				util.EvaluateValidTo(sgxData[0].ValidTo, kubernetes.Config.PollIntervalMinutes)
+				hostDetails.ValidTo = sgxData[0].ValidTo
 
-				if platformData[0].HostInfo.HardwareFeatures.TDX != nil {
-					hostDetails.TdxEnabled = *platformData[0].HostInfo.HardwareFeatures.TDX.Enabled
-					hostDetails.TdxSupported = true
-					hostDetails.TcbUpToDate = *platformData[0].HostInfo.HardwareFeatures.TDX.Meta.TcbUptoDate
-				}
 			}
 		}
-		if !hvsFail && !fdsFail {
-			// both TEE agent and Trust agent are running on same host
+		if !hvsFail && !shvsFail {
+			// both SGX agent and Trust agent are running on same host
 			hostDetails.AgentType = "both"
 		}
-		// cannot find this host in HVS or FDS, remove host from map
-		if hvsFail && fdsFail {
+		// cannot find this host in HVS or SHVS, remove host from map
+		if hvsFail && shvsFail {
 			delete(kubernetes.HostDetailsMap, key)
 		} else {
 			kubernetes.HostDetailsMap[key] = hostDetails

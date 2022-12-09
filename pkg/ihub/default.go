@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package ihub
@@ -47,7 +47,8 @@ func defaultConfig() *config.Configuration {
 			SANList:    viper.GetString(commConfig.TlsSanList),
 		},
 		AttestationService: config.AttestationConfig{
-			HVSBaseURL: viper.GetString(config.HvsBaseUrl),
+			HVSBaseURL:  viper.GetString(config.HvsBaseUrl),
+			SHVSBaseURL: viper.GetString(config.ShvsBaseUrl),
 		},
 		Log: commConfig.LogConfig{
 			MaxLength:    viper.GetInt(commConfig.LogMaxLength),
@@ -62,7 +63,7 @@ func loadAlias() {
 		commConfig.TlsSanList: "SAN_LIST",
 		commConfig.AasBaseUrl: "AAS_API_URL",
 		config.HvsBaseUrl:     "HVS_BASE_URL",
-		config.FdsBaseUrl:     "FDS_BASE_URL",
+		config.ShvsBaseUrl:    "SHVS_BASE_URL",
 	}
 	for k, v := range alias {
 		if env := os.Getenv(v); env != "" {

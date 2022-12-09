@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package testutility
@@ -39,8 +39,8 @@ var CustomCRDFilePath = "../test/resources/custom_crd.json"
 // K8scertFilePath sample for k8sCertFilePath
 var K8scertFilePath = "../test/resources/k8scert.pem"
 
-// TEEPlatformDataFilePath sample json
-var TEEPlatformDataFilePath = "../../ihub/test/resources/tee_platform_data.json"
+// SGXPlatformDataFilePath sample json
+var SGXPlatformDataFilePath = "../../ihub/test/resources/sgx_platform_data.json"
 
 // MockServer for IHUB unit testing
 func MockServer(t *testing.T) *httptest.Server {
@@ -153,35 +153,35 @@ func MockServer(t *testing.T) *httptest.Server {
 		}
 	}).Methods(http.MethodGet)
 
-	r.HandleFunc("/fds/v1/hosts", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/sgx-hvs/v2/platform-data", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 
-		TEEPlatformData, err := ioutil.ReadFile(TEEPlatformDataFilePath)
+		SGXPlatformData, err := ioutil.ReadFile(SGXPlatformDataFilePath)
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to read file", err)
 		}
-		_, err = w.Write(TEEPlatformData)
+		_, err = w.Write(SGXPlatformData)
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
 	}).Methods(http.MethodGet)
 
-	r.HandleFunc("/fds/v1/hosts?HostName=ArcherCity1", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/sgx-hvs/v2/platform-data?HostName=worker-node1", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 
-		TEEPlatformData, err := ioutil.ReadFile(TEEPlatformDataFilePath)
+		SGXPlatformData, err := ioutil.ReadFile(SGXPlatformDataFilePath)
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to read file", err)
 		}
-		_, err = w.Write(TEEPlatformData)
+		_, err = w.Write(SGXPlatformData)
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
 		}
 	}).Methods(http.MethodGet)
 
-	r.HandleFunc("/fds/v1/version", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/sgx-hvs/v2/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 	}).Methods(http.MethodGet)
@@ -204,6 +204,7 @@ func SetupMockK8sConfiguration(t *testing.T, serverUrl string) *config.Configura
 	c.IHUB.Username = "admin@hub"
 	c.IHUB.Password = "hubAdminPass"
 	c.AttestationService.HVSBaseURL = serverUrl + "/hvs/v2/"
+	c.AttestationService.SHVSBaseURL = serverUrl + "/sgx-hvs/v2/"
 	c.Endpoint.Type = "KUBERNETES"
 	c.Endpoint.URL = serverUrl + "/"
 	c.Endpoint.CRDName = "custom-isecl"

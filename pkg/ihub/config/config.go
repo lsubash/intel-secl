@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package config
@@ -20,7 +20,7 @@ const (
 	IhubServiceUsername = "ihub.service-username"
 	IhubServicePassword = "ihub.service-password"
 	HvsBaseUrl          = "attestation-service.hvs-base-url"
-	FdsBaseUrl          = "attestation-service.fds-base-url"
+	ShvsBaseUrl         = "attestation-service.shvs-base-url"
 	Tenant              = "tenant"
 	KubernetesUrl       = "kubernetes-url"
 	KubernetesCrd       = "kubernetes-crd"
@@ -43,8 +43,8 @@ type Configuration struct {
 }
 
 type AttestationConfig struct {
-	HVSBaseURL string `yaml:"hvs-base-url" mapstructure:"hvs-base-url"`
-	FDSBaseURL string `yaml:"fds-base-url" mapstructure:"fds-base-url"`
+	HVSBaseURL  string `yaml:"hvs-base-url" mapstructure:"hvs-base-url"`
+	SHVSBaseURL string `yaml:"shvs-base-url" mapstructure:"shvs-base-url"`
 }
 
 type Endpoint struct {
@@ -62,7 +62,7 @@ func init() {
 	viper.AddConfigPath(constants.ConfigDir)
 }
 
-//SaveConfiguration method used to save the configuration
+// SaveConfiguration method used to save the configuration
 func (c *Configuration) SaveConfiguration(filename string) error {
 	configFile, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 	if err != nil {
@@ -85,7 +85,7 @@ func (c *Configuration) SaveConfiguration(filename string) error {
 	return nil
 }
 
-//LoadConfiguration method used to load the configuration
+// LoadConfiguration method used to load the configuration
 func LoadConfiguration() (*Configuration, error) {
 	ret := Configuration{}
 	// Find and read the config file

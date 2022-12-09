@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package ihub
@@ -46,9 +46,10 @@ func (app *App) startDaemon() error {
 	var k k8splugin.KubernetesDetails
 
 	attestationHVSURL := configuration.AttestationService.HVSBaseURL
+	attestationSHVSURL := configuration.AttestationService.SHVSBaseURL
 
-	if attestationHVSURL == "" {
-		return errors.New("startService:startDaemon() HVS URL is not defined")
+	if attestationHVSURL == "" && attestationSHVSURL == "" {
+		return errors.New("startService:startDaemon() Neither HVS nor SHVS Attestation URL are defined")
 	}
 
 	if configuration.Endpoint.Type == constants.K8sTenant {
