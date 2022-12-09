@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package router
@@ -51,6 +51,8 @@ func defineSubRoutes(router *mux.Router, serviceApi string, cfg *config.Configur
 	subRouter := router.PathPrefix(serviceApi).Subrouter()
 	subRouter = setVersionRoutes(subRouter)
 	subRouter = setKeyTransferRoutes(subRouter, cfg.EndpointURL, keyTransferConfig, keyManager)
+	subRouter = setSKCKeyTransferRoutes(subRouter, cfg, keyManager)
+	subRouter = setSessionRoutes(subRouter, cfg)
 	subRouter = router.PathPrefix(serviceApi).Subrouter()
 	cfgRouter := Router{aasClient: aasClient}
 	var cacheTime, _ = time.ParseDuration(constants.JWTCertsCacheTime)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -22,6 +22,7 @@ import (
 
 type UpdateServiceConfig struct {
 	ServerConfig  commConfig.ServerConfig
+	ServiceConfig commConfig.ServiceConfig
 	DefaultPort   int
 	AASBaseUrl    string
 	AppConfig     **config.Configuration
@@ -30,13 +31,16 @@ type UpdateServiceConfig struct {
 
 const envHelpPrompt = "Following environment variables are required for update-service-config setup:"
 
+var allowedSKCChallengeTypes = map[string]bool{"sgx": true}
 var allowedKeyManagers = map[string]bool{"kmip": true}
 
 var envHelp = map[string]string{
-	"AAS_BASE_URL":               "AAS Base URL",
+	"SERVICE_USERNAME":           "The service username as configured in AAS",
+	"SERVICE_PASSWORD":           "The service password as configured in AAS",
 	"LOG_LEVEL":                  "Log level",
 	"LOG_MAX_LENGTH":             "Max length of log statement",
 	"LOG_ENABLE_STDOUT":          "Enable console log",
+	"AAS_BASE_URL":               "AAS Base URL",
 	"KMIP_SERVER_IP":             "IP of KMIP server",
 	"KMIP_SERVER_PORT":           "PORT of KMIP server",
 	"KMIP_HOSTNAME":              "HOSTNAME of KMIP server",
@@ -45,6 +49,9 @@ var envHelp = map[string]string{
 	"KMIP_CLIENT_CERT_PATH":      "KMIP Client certificate path",
 	"KMIP_CLIENT_KEY_PATH":       "KMIP Client key path",
 	"KMIP_ROOT_CERT_PATH":        "KMIP Root Certificate path",
+	"SKC_CHALLENGE_TYPE":         "SKC challenge type",
+	"SQVS_URL":                   "SQVS URL",
+	"SESSION_EXPIRY_TIME":        "Session Expiry Time",
 	"SERVER_PORT":                "The Port on which Server Listens to",
 	"SERVER_READ_TIMEOUT":        "Request Read Timeout Duration in Seconds",
 	"SERVER_READ_HEADER_TIMEOUT": "Request Read Header Timeout Duration in Seconds",
@@ -68,6 +75,7 @@ func (uc UpdateServiceConfig) Run() error {
 
 	(*uc.AppConfig).Server = uc.ServerConfig
 	(*uc.AppConfig).AASBaseUrl = uc.AASBaseUrl
+	(*uc.AppConfig).KBS = uc.ServiceConfig
 
 	(*uc.AppConfig).Log = commConfig.LogConfig{
 		MaxLength:    viper.GetInt(commConfig.LogMaxLength),
@@ -87,10 +95,22 @@ func (uc UpdateServiceConfig) Run() error {
 		RootCertificateFilePath:   viper.GetString(config.KmipRootCertPath),
 	}
 	(*uc.AppConfig).KeyManager = viper.GetString(config.KeyManager)
+
+	(*uc.AppConfig).Skc = config.SKCConfig{
+		StmLabel:          viper.GetString("skc-challenge-type"),
+		SQVSUrl:           viper.GetString("sqvs-url"),
+		SessionExpiryTime: viper.GetInt("session-expiry-time"),
+	}
 	return nil
 }
 
 func (uc UpdateServiceConfig) Validate() error {
+	if (*uc.AppConfig).KBS.Username == "" {
+		return errors.New("KBS username is not set in the configuration")
+	}
+	if (*uc.AppConfig).KBS.Password == "" {
+		return errors.New("KBS password is not set in the configuration")
+	}
 	if uc.AASBaseUrl == "" {
 		return errors.New("KBS configuration not provided: AAS_BASE_URL is not set")
 	}
@@ -103,6 +123,11 @@ func (uc UpdateServiceConfig) Validate() error {
 	}
 	if _, validInput := allowedKeyManagers[strings.ToLower((*uc.AppConfig).KeyManager)]; !validInput {
 		return errors.New("Invalid value provided for KEY_MANAGER. Value should be kmip")
+	}
+	if (*uc.AppConfig).Skc.StmLabel != "" {
+		if _, validInput := allowedSKCChallengeTypes[strings.ToLower((*uc.AppConfig).Skc.StmLabel)]; !validInput {
+			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. allowed value is SGX")
+		}
 	}
 	return nil
 }

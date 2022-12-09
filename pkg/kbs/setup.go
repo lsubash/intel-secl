@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package kbs
@@ -12,6 +12,7 @@ import (
 	cos "github.com/intel-secl/intel-secl/v5/pkg/lib/common/os"
 	"github.com/intel-secl/intel-secl/v5/pkg/lib/common/utils"
 
+	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/tasks"
 	commConfig "github.com/intel-secl/intel-secl/v5/pkg/lib/common/config"
@@ -122,8 +123,8 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 		TlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 	})
 	runner.AddTask("download-cert-tls", "tls", &setup.DownloadCert{
-		KeyFile:      viper.GetString(commConfig.TlsKeyFile),
-		CertFile:     viper.GetString(commConfig.TlsCertFile),
+		KeyFile:      app.configDir() + constants.DefaultTLSKeyFile,
+		CertFile:     app.configDir() + constants.DefaultTLSCertFile,
 		KeyAlgorithm: constants.DefaultKeyAlgorithm,
 		KeyLength:    constants.DefaultKeyLength,
 		Subject: pkix.Name{
@@ -143,6 +144,10 @@ func (app *App) setupTaskRunner() (*setup.Runner, error) {
 	runner.AddTask("update-service-config", "", &tasks.UpdateServiceConfig{
 		ConsoleWriter: app.consoleWriter(),
 		AASBaseUrl:    viper.GetString(commConfig.AasBaseUrl),
+		ServiceConfig: commConfig.ServiceConfig{
+			Username: viper.GetString(config.KBSServiceUsername),
+			Password: viper.GetString(config.KBSServicePassword),
+		},
 		ServerConfig: commConfig.ServerConfig{
 			Port:              viper.GetInt(commConfig.ServerPort),
 			ReadTimeout:       viper.GetDuration(commConfig.ServerReadTimeout),

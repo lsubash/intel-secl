@@ -5,39 +5,41 @@
 package testutility
 
 import (
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
 	"github.com/intel-secl/intel-secl/v5/pkg/ihub/config"
 )
 
-//AASToken token for AAS
+// AASToken token for AAS
 var AASToken = "eyJhbGciOiJSUzM4NCIsImtpZCI6ImU5NjI1NzI0NTUwNzMwZGI3N2I2YmEyMjU1OGNjZTEyOTBkNjRkNTciLCJ0eXAiOiJKV1QifQ.eyJyb2xlcyI6W3sic2VydmljZSI6IkFBUyIsIm5hbWUiOiJSb2xlTWFuYWdlciJ9LHsic2VydmljZSI6IkFBUyIsIm5hbWUiOiJVc2VyTWFuYWdlciJ9LHsic2VydmljZSI6IkFBUyIsIm5hbWUiOiJVc2VyUm9sZU1hbmFnZXIifSx7InNlcnZpY2UiOiJUQSIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIn0seyJzZXJ2aWNlIjoiVlMiLCJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9LHsic2VydmljZSI6IktNUyIsIm5hbWUiOiJLZXlDUlVEIn0seyJzZXJ2aWNlIjoiQUgiLCJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9LHsic2VydmljZSI6IldMUyIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIn1dLCJwZXJtaXNzaW9ucyI6W3sic2VydmljZSI6IkFIIiwicnVsZXMiOlsiKjoqOioiXX0seyJzZXJ2aWNlIjoiS01TIiwicnVsZXMiOlsiKjoqOioiXX0seyJzZXJ2aWNlIjoiVEEiLCJydWxlcyI6WyIqOio6KiJdfSx7InNlcnZpY2UiOiJWUyIsInJ1bGVzIjpbIio6KjoqIl19LHsic2VydmljZSI6IldMUyIsInJ1bGVzIjpbIio6KjoqIl19XSwiZXhwIjoxNTk0NDgxMjAxLCJpYXQiOjE1OTQ0NzQwMDEsImlzcyI6IkFBUyBKV1QgSXNzdWVyIiwic3ViIjoiZ2xvYmFsX2FkbWluX3VzZXIifQ.euPkZEv0P9UC8ni05hb5wczFa9_C2G4mNAl4nVtBQ0oS-00qK4wC52Eg1UZqAjkVWXafHRcEjjsdQHs1LtjECFmU6zUNOMEtLLIOZwhnD7xlHkC-flpzLMT0W5162nsW4xSp-cF-r_05C7PgFcK9zIfMtn6_MUMcxlSXkX21AJWwfhVfz4ogEY2mqt73Ramd1tvhGbsz7i3XaljnopSTV7djNMeMZ33MPzJYGl5ph_AKBZwhBTA0DV3JAPTE9jXqrhtOG1iR1yM9kHChskzxAaRDm0v3V07ySgkxyv7dAzMW5Ek_NGCulyjP5N_WgSeuTkw26A8kZpSrNRWdbnyOr_EZ4y6wDX9GMARrR4PyTb6hU9x3ejahxs3L_Z7BzbYpO4WF1CvlYl5BoH71PnFPNKMkvbIFv1XcLPwKeLQpohEOr7zEN4EeltjpqBGCgiCFz4vHu5rk2iFCu1JJPDTVR3jJplJRZgCFiwsh42R3oomP-q43k8_PPLIMjaxAADgd"
 
-//K8sToken token for k8s
+// K8sToken token for k8s
 var K8sToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ik9RZFFsME11UVdfUnBhWDZfZG1BVTIzdkI1cHNETVBsNlFoYUhhQURObmsifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tbnZtNmIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjdhNWFiNzIzLTA0NWUtNGFkOS04MmM4LTIzY2ExYzM2YTAzOSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.MV6ikR6OiYGdZ8lGuVlIzIQemxHrEX42ECewD5T-RCUgYD3iezElWQkRt_4kElIKex7vaxie3kReFbPp1uGctC5proRytLpHrNtoPR3yVqROGtfBNN1rO_fVh0uOUEk83Fj7LqhmTTT1pRFVqLc9IHcaPAwus4qRX8tbl7nWiWM896KqVMo2NJklfCTtsmkbaCpv6Q6333wJr7imUWegmNpC2uV9otgBOiaCJMUAH5A75dkRRup8fT8Jhzyk4aC-kWUjBVurRkxRkBHReh6ZA-cHMvs6-d3Z8q7c8id0X99bXvY76d3lO2uxcVOpOu1505cmcvD3HK6pTqhrOdV9LQ"
 
-//SampleSamlCertPath sample Certificate Path
+// SampleSamlCertPath sample Certificate Path
 var SampleSamlCertPath = "../test/resources/saml_certificate.pem"
 
-//SampleSamlReportPath  sample Report Path
+// SampleSamlReportPath  sample Report Path
 var SampleSamlReportPath = "../test/resources/saml_report.xml"
 
-//SampleListOfNodesFilePath sample json for K8s Nodes
+// SampleListOfNodesFilePath sample json for K8s Nodes
 var SampleListOfNodesFilePath = "../test/resources/list_of_nodes.json"
 
-//CustomCRDFilePath sample json for custom CRD
+// CustomCRDFilePath sample json for custom CRD
 var CustomCRDFilePath = "../test/resources/custom_crd.json"
 
-//K8scertFilePath sample for k8sCertFilePath
+// K8scertFilePath sample for k8sCertFilePath
 var K8scertFilePath = "../test/resources/k8scert.pem"
 
-//TEEPlatformDataFilePath sample json
+// TEEPlatformDataFilePath sample json
 var TEEPlatformDataFilePath = "../../ihub/test/resources/tee_platform_data.json"
 
 // MockServer for IHUB unit testing
@@ -69,6 +71,8 @@ func MockServer(t *testing.T) *httptest.Server {
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to read file", err)
 		}
+		pattern := regexp.MustCompile(`( *)<`)
+		samlReport = []byte(pattern.ReplaceAllString(string(samlReport), "<"))
 		_, err = w.Write(samlReport)
 		if err != nil {
 			t.Log("test/test_utility:mockServer(): Unable to write data")
@@ -185,7 +189,7 @@ func MockServer(t *testing.T) *httptest.Server {
 	return httptest.NewServer(r)
 }
 
-//SetupMockK8sConfiguration setting up mock k8s configurations
+// SetupMockK8sConfiguration setting up mock k8s configurations
 func SetupMockK8sConfiguration(t *testing.T, serverUrl string) *config.Configuration {
 
 	temp, _ := ioutil.TempFile("", "config.yml")

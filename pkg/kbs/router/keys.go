@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package router
@@ -7,6 +7,7 @@ package router
 import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/intel-secl/intel-secl/v5/pkg/kbs/config"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/constants"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/controllers"
 	"github.com/intel-secl/intel-secl/v5/pkg/kbs/directory"
@@ -45,6 +46,23 @@ func setKeyRoutes(router *mux.Router, endpointUrl string, defaultPolicyId uuid.U
 	router.Handle(keyIdExpr,
 		ErrorHandler(permissionsHandler(JsonResponseHandler(keyController.Transfer),
 			[]string{constants.KeyTransfer}))).Methods(http.MethodPost)
+
+	return router
+}
+
+func setSKCKeyTransferRoutes(router *mux.Router, kbsConfig *config.Configuration, keyManager keymanager.KeyManager) *mux.Router {
+	defaultLog.Trace("router/keys:setSKCKeyTransferRoutes() Entering")
+	defer defaultLog.Trace("router/keys:setSKCKeyTransferRoutes() Leaving")
+
+	keyStore := directory.NewKeyStore(constants.KeysDir)
+	policyStore := directory.NewKeyTransferPolicyStore(constants.KeysTransferPolicyDir)
+	remoteManager := keymanager.NewRemoteManager(keyStore, keyManager, kbsConfig.EndpointURL)
+	skcController := controllers.NewSKCController(remoteManager, policyStore, kbsConfig, constants.TrustedCaCertsDir)
+	keyIdExpr := "/keys/" + validation.IdReg
+
+	router.Handle(keyIdExpr+"/dhsm2-transfer",
+		ErrorHandler(permissionsHandlerUsingTLSMAuth(JsonResponseHandler(skcController.TransferApplicationKey),
+			kbsConfig.AASBaseUrl, kbsConfig.KBS))).Methods("GET")
 
 	return router
 }

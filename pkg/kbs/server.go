@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package kbs
@@ -108,6 +108,9 @@ func (app *App) startServer() error {
 
 	tlsCert := configuration.TLS.CertFile
 	tlsKey := configuration.TLS.KeyFile
+
+	defaultLog.Info(tlsCert)
+	defaultLog.Info(tlsKey)
 	// Dispatch web server go routine
 	go func() {
 		if err := httpServer.ListenAndServeTLS(tlsCert, tlsKey); err != nil {

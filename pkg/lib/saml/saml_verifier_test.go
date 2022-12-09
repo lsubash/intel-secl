@@ -7,6 +7,7 @@ package saml
 import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"regexp"
 	"testing"
 )
 
@@ -23,6 +24,8 @@ func TestSAMLSignatureVerification(t *testing.T) {
 
 	// validate
 	reportBytes, _ := ioutil.ReadFile(sampleValidSamlReportPath)
+	pattern := regexp.MustCompile(`( *)<`)
+	reportBytes = []byte(pattern.ReplaceAllString(string(reportBytes), "<"))
 	trusted := VerifySamlSignature(string(reportBytes), sampleValidSamlCertPath, sampleRootCertDirPath)
 	assert.Equal(t, trusted, true)
 }

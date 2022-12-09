@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package kbs
@@ -44,14 +44,50 @@ func init() {
 func defaultConfig() *config.Configuration {
 	loadAlias()
 	return &config.Configuration{
+		AASBaseUrl:       viper.GetString(commConfig.AasBaseUrl),
 		CMSBaseURL:       viper.GetString(commConfig.CmsBaseUrl),
 		CmsTlsCertDigest: viper.GetString(commConfig.CmsTlsCertSha384),
 
+		EndpointURL: viper.GetString("endpoint-url"),
+		KeyManager:  viper.GetString("key-manager"),
+		KBS: commConfig.ServiceConfig{
+			Username: viper.GetString(config.KBSServiceUsername),
+			Password: viper.GetString(config.KBSServicePassword),
+		},
 		TLS: commConfig.TLSCertConfig{
 			CertFile:   viper.GetString(commConfig.TlsCertFile),
 			KeyFile:    viper.GetString(commConfig.TlsKeyFile),
 			CommonName: viper.GetString(commConfig.TlsCommonName),
 			SANList:    viper.GetString(commConfig.TlsSanList),
+		},
+		Log: commConfig.LogConfig{
+			MaxLength:    viper.GetInt("log-max-length"),
+			EnableStdout: viper.GetBool("log-enable-stdout"),
+			Level:        viper.GetString("log-level"),
+		},
+		Server: commConfig.ServerConfig{
+			Port:              viper.GetInt("server-port"),
+			ReadTimeout:       viper.GetDuration("server-read-timeout"),
+			ReadHeaderTimeout: viper.GetDuration("server-read-header-timeout"),
+			WriteTimeout:      viper.GetDuration("server-write-timeout"),
+			IdleTimeout:       viper.GetDuration("server-idle-timeout"),
+			MaxHeaderBytes:    viper.GetInt("server-max-header-bytes"),
+		},
+		Kmip: config.KmipConfig{
+			Version:                   viper.GetString("kmip-version"),
+			ServerIP:                  viper.GetString("kmip-server-ip"),
+			ServerPort:                viper.GetString("kmip-server-port"),
+			Hostname:                  viper.GetString("kmip-hostname"),
+			Username:                  viper.GetString("kmip-username"),
+			Password:                  viper.GetString("kmip-password"),
+			ClientKeyFilePath:         viper.GetString("kmip-client-key-path"),
+			ClientCertificateFilePath: viper.GetString("kmip-client-cert-path"),
+			RootCertificateFilePath:   viper.GetString("kmip-root-cert-path"),
+		},
+		Skc: config.SKCConfig{
+			StmLabel:          viper.GetString("skc-challenge-type"),
+			SQVSUrl:           viper.GetString("sqvs-url"),
+			SessionExpiryTime: viper.GetInt("session-expiry-time"),
 		},
 	}
 }

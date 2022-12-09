@@ -39,7 +39,7 @@ const (
 
 	// default locations for tls certificate and key
 	DefaultTLSCertPath = ConfigDir + "tls-cert.pem"
-	DefaultTLSKeyPath  = ConfigDir + "tls.key"
+	DefaultTLSKeyPath  = ConfigDir + "tls-key.pem"
 
 	// service remove command
 	ServiceRemoveCmd = "systemctl disable kbs"
@@ -76,6 +76,26 @@ const (
 	CRYPTOALG_EC  = "EC"
 
 	// kmip constants
-	KMIP_1_4 = "1.4"
-	KMIP_2_0 = "2.0"
+	KMIP_1_4           = "1.4"
+	KMIP_2_0           = "2.0"
+	KMIP_CRYPTOALG_AES = 0x03
+	KMIP_CRYPTOALG_RSA = 0x04
+	KMIP_CRYPTOALG_EC  = 0x06
+
+	NonceLength = 32
+)
+
+const (
+	DefaultSGXLabel         = "SGX"
+	VerifyQuote             = "/sgx_qv_verify_quote"
+	KeyTransferOpertaion    = "transfer key"
+	SessionOperation        = "establish session key"
+	SuccessStatus           = "success"
+	FailureStatus           = "failure"
+	SGXAlgorithmType        = "AES256-GCM"
+	TransferRoleType        = "KeyTransfer"
+	ContextPermissionsRegex = "^(permissions=)(.*)$"
+	TCBLevelOutOfDate       = "OutOfDate"
+	DefaultTLSCertFile      = "tls-cert.pem"
+	DefaultTLSKeyFile       = "tls-key.pem"
 )

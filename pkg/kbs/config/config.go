@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Intel Corporation
+ * Copyright (C) 2022 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package config
@@ -32,6 +32,8 @@ const (
 	KmipClientKeyPath  = "kmip.client-key-path"
 	KmipClientCertPath = "kmip.client-cert-path"
 	KmipRootCertPath   = "kmip.root-cert-path"
+	KBSServiceUsername = "kbs.service-username"
+	KBSServicePassword = "kbs.service-password"
 )
 
 type Configuration struct {
@@ -39,14 +41,21 @@ type Configuration struct {
 	CMSBaseURL       string `yaml:"cms-base-url" mapstructure:"cms-base-url"`
 	CmsTlsCertDigest string `yaml:"cms-tls-cert-sha384" mapstructure:"cms-tls-cert-sha384"`
 
-	EndpointURL string `yaml:"endpoint-url" mapstructure:"endpoint-url"`
-	KeyManager  string `yaml:"key-manager" mapstructure:"key-manager"`
+	EndpointURL string                   `yaml:"endpoint-url" mapstructure:"endpoint-url"`
+	KeyManager  string                   `yaml:"key-manager" mapstructure:"key-manager"`
+	KBS         commConfig.ServiceConfig `yaml:"kbs"`
 
 	TLS    commConfig.TLSCertConfig `yaml:"tls"`
 	Log    commConfig.LogConfig     `yaml:"log"`
 	Server commConfig.ServerConfig  `yaml:"server"`
 
-	Kmip KmipConfig `yaml:"kmip"`
+	Kmip KmipConfig `yaml:"kmip" mapstructure:"kmip"`
+	Skc  SKCConfig  `yaml:"skc" mapstructure:"skc"`
+}
+
+type KBSConfig struct {
+	UserName string `yaml:"service-username" mapstructure:"service-username"`
+	Password string `yaml:"service-password" mapstructure:"service-password"`
 }
 
 type KmipConfig struct {
@@ -59,6 +68,12 @@ type KmipConfig struct {
 	ClientKeyFilePath         string `yaml:"client-key-path" mapstructure:"client-key-path"`
 	ClientCertificateFilePath string `yaml:"client-cert-path" mapstructure:"client-cert-path"`
 	RootCertificateFilePath   string `yaml:"root-cert-path" mapstructure:"root-cert-path"`
+}
+
+type SKCConfig struct {
+	StmLabel          string `yaml:"challenge-type" mapstructure:"challenge-type"`
+	SQVSUrl           string `yaml:"sqvs-url" mapstructure:"sqvs-url"`
+	SessionExpiryTime int    `yaml:"session-expiry-time" mapstructure:"session-expiry-time"`
 }
 
 // init sets the configuration file name and type
