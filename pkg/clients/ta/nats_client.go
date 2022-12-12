@@ -119,9 +119,10 @@ func (client *natsTAClient) GetTPMQuote(nonce string, pcrList []int, pcrBankList
 		return quoteResponse, errors.Wrap(err, "client/nats_client:GetTPMQuote() Error decoding nonce from base64 to bytes")
 	}
 	quoteRequest := taModel.TpmQuoteRequest{
-		Nonce:    nonceBytes,
-		Pcrs:     pcrList,
-		PcrBanks: pcrBankList,
+		Nonce:             nonceBytes,
+		Pcrs:              pcrList,
+		PcrBanks:          pcrBankList,
+		ImaMeasureEnabled: client.imaMeasureEnabled,
 	}
 
 	conn, err := client.newNatsConnection()
