@@ -231,7 +231,7 @@ func (store *MockHostStatusStore) Search(criteria *models.HostStatusFilterCriter
 	}
 	// Search by numberOfDays
 	store.Mock.ExpectQuery(`
-SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY au.Created DESC ORDER BY (.+) asc LIMIT (.+)`).
+SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY (.+) asc LIMIT (.+)`).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "entity_id", "entity_type", "created", "action", "data", "rowid"}).
 			AddRow(newUuid1.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 1).
 			AddRow(newUuid2.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 2).
@@ -250,7 +250,7 @@ SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.cre
 		return nil, errors.Wrap(err, "failed to create new UUID")
 	}
 	// Search by fromDate and toDate
-	store.Mock.ExpectQuery(`SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY au.Created DESC ORDER BY (.+) asc LIMIT (.+)`).
+	store.Mock.ExpectQuery(`SELECT au.\* FROM audit_log_entry au INNER JOIN \(SELECT entity_id, max\(auj.created\) AS max_date FROM audit_log_entry auj WHERE auj.entity_type = 'host_status' AND CAST\(auj.created AS TIMESTAMP\) >= CAST\('(.+)' AS TIMESTAMP\) AND CAST\(auj.created AS TIMESTAMP\) <= CAST\('(.+)' AS TIMESTAMP\)  GROUP BY entity_id\) a ON a.entity_id = au.entity_id AND a.max_date = au.created ORDER BY (.+) asc LIMIT (.+)`).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "entity_id", "entity_type", "created", "action", "data", "rowid"}).
 			AddRow(newUuid1.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 1).
 			AddRow(newUuid2.String(), hs1.ID.String(), "host_status", time.Now().AddDate(0, 0, -1), "create", []byte(auditData), 2).

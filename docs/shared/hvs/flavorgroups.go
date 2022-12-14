@@ -107,6 +107,17 @@ type FlavorgroupFlavorLinkCollection struct {
 //   type: string
 //   format: uuid
 //   required: false
+// - name: limit
+//   description: Limit of the number of items in a page.
+//   in: query
+//   type: integer
+//   required: false
+//   default: 1000
+// - name: afterId
+//   description: Next row id after which db must be queried
+//   in: query
+//   type: integer
+//   required: false
 // - name: nameEqualTo
 //   description: Flavor group name.
 //   in: query

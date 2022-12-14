@@ -346,14 +346,13 @@ func buildHostStatusSearchQuery(tx *gorm.DB, hsFilter *models.HostStatusFilterCr
 			"FROM audit_log_entry auj %s GROUP BY entity_id) a "+
 			"ON a.entity_id = au.entity_id "+
 			"AND a.max_date = au.created", additionalOptionsQueryString)
-		formattedQuery = fmt.Sprintf("%s %s ORDER BY au.Created DESC", formattedQuery, maxDateQueryString)
+		formattedQuery = fmt.Sprintf("%s %s", formattedQuery, maxDateQueryString)
 	} else {
 		formattedQuery = fmt.Sprintf("%s %s", formattedQuery, additionalOptionsQueryString)
 	}
 
 	// finalize query
 	tx = tx.Raw(formattedQuery)
-
 	if hsFilter.AfterId > 0 {
 		tx = tx.Where("au.rowid > ?", hsFilter.AfterId)
 	}

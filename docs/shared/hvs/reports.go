@@ -58,6 +58,17 @@ type ReportCreateRequest struct {
 //   type: string
 //   format: uuid
 //   required: false
+// - name: limit
+//   description: Limit of the number of items in a page.
+//   in: query
+//   type: integer
+//   required: false
+//   default: 1000
+// - name: afterId
+//   description: Lext row id after which db must be queried
+//   in: query
+//   type: integer
+//   required: false
 // - name: hostId
 //   description: host Id of the host. If this parameter is specified, it will return report only for active host with specified host id.
 //   in: query
@@ -117,12 +128,6 @@ type ReportCreateRequest struct {
 //   type: boolean
 //   required: false
 //   default: true
-// - name: limit
-//   description: This limits the overall number of results (all hosts included).
-//   in: query
-//   type: integer
-//   required: false
-//   default: 2000
 // - name: Accept
 //   description: Accept header
 //   in: header

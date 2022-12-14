@@ -54,6 +54,17 @@ type HostStatusCollection struct {
 //      type: string
 //      format: uuid
 //      required: false
+//    - name: limit
+//      description: Limit of the number of items in a page.
+//      in: query
+//      type: integer
+//      required: false
+//      default: 1000
+//    - name: afterId
+//      description: Next row id after which db must be queried
+//      in: query
+//      type: integer
+//      required: false
 //    - name: hostHardwareId
 //      description: Hardware UUID of host.
 //      in: query
@@ -112,13 +123,6 @@ type HostStatusCollection struct {
 //      in: query
 //      type: integer
 //      minimum: 1
-//      required: false
-//    - name: limit
-//      description: Limits the number of HostStatus records in the response.
-//      in: query
-//      type: integer
-//      minimum: 1
-//      default: 10000
 //      required: false
 //    - name: Accept
 //      description: Accept header
