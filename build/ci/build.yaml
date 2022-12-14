@@ -2,7 +2,7 @@
   stage: build
   tags:
     - k8s
-  image: golang:1.16
+  image: golang:1.18
   rules:
     - when: on_success
   before_script:

@@ -9,7 +9,7 @@
 
 ## System Requirements
 
-- RHEL 8.1
+- RHEL 8.4 or ubuntu 20.04
 - Epel 8 Repo
 - Proxy settings if applicable
 
@@ -17,7 +17,7 @@
 
 - git
 - makeself
-- `go` version 1.16.7
+- `go` version 1.18.8
 - docker 18.06 or higher
 
 ### Additional software requirements for building GTA container image in oci format
@@ -34,15 +34,15 @@
 sudo yum install -y git wget makeself
 ```
 
-### Install `go` version 1.16.7
+### Install `go` version 1.18.8
 
-The `Workload Agent` requires Go version 1.16.7 that has support for `go modules`. The build was validated with the
-latest version go1.16.7 of `go`. It is recommended that you use go1.16.7 version of `go`. You can use the following to
+The `Workload Agent` requires Go version 1.18.8 that has support for `go modules`. The build was validated with the
+latest version go1.18.8 of `go`. It is recommended that you use go1.18.8 version of `go`. You can use the following to
 install `go`.
 
 ```shell
-wget https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
-tar -xzf go1.16.7.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.18.8.linux-amd64.tar.gz
+tar -xzf go1.18.8.linux-amd64.tar.gz
 sudo mv go /usr/local
 export GOROOT=/usr/local/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH

@@ -15,7 +15,8 @@ true" `TAINT_REGISTERED_NODES`  to "true" in isecl-controller.yml.
 
 ## System Requirements
 
--RHEL 8.2 -Epel 8 Repo -Proxy settings if applicable.
+-RHEL 8.4 or ubuntu 20.04
+-Epel 8 Repo -Proxy settings if applicable.
 
 Note In no_proxy, add .svc,.svc.cluster.local and then do
 
@@ -25,7 +26,7 @@ Note In no_proxy, add .svc,.svc.cluster.local and then do
 
 ## Software requirements
 
--git -makeself -go version 1.16 -Kubernetes 19.0 or later.
+-git -makeself -go version 1.18.8 -Kubernetes 19.0 or later.
 
 ## Deploy using boostrap script
 

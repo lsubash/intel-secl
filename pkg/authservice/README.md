@@ -26,14 +26,14 @@ make aas-installer
 
 | Name     | Repo URL                    | Minimum Version Required           |
 | -------- | --------------------------- | :--------------------------------: |
-| uuid     | github.com/google/uuid      | v1.1.1                             |
+| uuid     | github.com/google/uuid      | v1.2.0                             |
 | handlers | github.com/gorilla/handlers | v1.4.0                             |
-| mux      | github.com/gorilla/mux      | v1.7.0                             |
-| gorm     | github.com/jinzhu/gorm      | v1.9.2                             |
-| logrus   | github.com/sirupsen/logrus  | v1.3.0                             |
-| testify  | github.com/stretchr/testify | v1.3.0                             |
+| mux      | github.com/gorilla/mux      | v1.7.4                             |
+| gorm     | github.com/jinzhu/gorm      | v1.9.16                             |
+| logrus   | github.com/sirupsen/logrus  | v1.7.0                             |
+| testify  | github.com/stretchr/testify | v1.6.1                             |
 | crypto   | golang.org/x/crypto         | v0.0.0-20190219172222-a4c6cb3142f2 |
-| yaml.v2  | gopkg.in/yaml.v2            | v2.2.2                             |
+| yaml.v3  | gopkg.in/yaml.v3            | v3.0.1                             |
 
 ### Indirect Dependencies
 

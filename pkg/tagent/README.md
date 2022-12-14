@@ -7,7 +7,7 @@ The Trust Agent resides on physical servers and enables both remote attestation 
 - RESTful APIs for easy and versatile access to above features
 
 ## System Requirements
-- RHEL 8.0 or greater
+- RHEL 8.4 or ubuntu 20.04
 - TPM 2.0 device
 - Packages
     - tpm2-tss (v2.0.x)
@@ -21,7 +21,7 @@ The Trust Agent resides on physical servers and enables both remote attestation 
 
 ## Software requirements
 - git
-- go version `1.16.7`
+- go version `1.18.8`
 
 ### Additional software requirements for building GTA container image in oci format
 - docker

@@ -10,7 +10,7 @@
 
 ## System Requirements
 
-- RHEL 8.x
+- RHEL 8.4 or ubuntu 20.04
 - Epel 8 Repo
 - Proxy settings if applicable
 

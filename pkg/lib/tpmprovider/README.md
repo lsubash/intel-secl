@@ -3,7 +3,7 @@
 The `tpm-provider` is a golang libary that interfaces with a TPM device to support the capabilities of the ISecL Go Trust Agent.  
 
 ## System Requirements
-- RHEL 8.0
+- RHEL 8.4 or ubuntu 20.04
 - TPM 2.0 device
 - Packages
     - tpm2-tss (v2.0.x)
@@ -11,7 +11,7 @@ The `tpm-provider` is a golang libary that interfaces with a TPM device to suppo
 
 ## Software requirements
 - git
-- go version 1.16.7
+- go version 1.18.8
 - docker
 
 # Links

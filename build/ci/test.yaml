@@ -13,7 +13,7 @@
     - yum -y install makeself gdb wget openssl-devel sudo tpm2-tools tpm2-tss-devel git
 
     # install go...
-    - export GOLANG_TAR=go1.16.7.linux-amd64.tar.gz
+    - export GOLANG_TAR=go1.18.8.linux-amd64.tar.gz
     - cd /tmp && wget https://golang.org/dl/$GOLANG_TAR && tar -C /usr/local -xzf $GOLANG_TAR && rm -rf $GOLANG_TAR
 
     # build the tpm simulator
@@ -27,7 +27,7 @@
     - go test ./... -coverprofile=cover.out
     - go tool cover -func cover.out
 
-test:go-1.16:
+test:go-1.18.8:
   retry: 2
   extends: .test-common
   image: fedora:31

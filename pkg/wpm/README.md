@@ -11,7 +11,7 @@
 
 ## System Requirements
 
-- RHEL 8.3
+- RHEL 8.4 or ubuntu 20.04
 - Epel 8 Repo
 - Proxy settings if applicable
 
@@ -19,7 +19,7 @@
 
 - git
 - makeself
-- `go` version 1.16.7
+- `go` version 1.18.8
 
 # Step-By-Step Build Instructions
 
@@ -31,11 +31,11 @@
 sudo yum install -y git wget makeself
 ```
 
-### Install `go` version >= `go1.12.2` & <= `go1.16.7`
-The `Workload Policy Manager` requires Go version 1.16.7 that has support for `go modules`. The build was validated with the latest version 1.16.7 of `go`. It is recommended that you use 1.16.7 version of `go`. You can use the following to install `go`.
+### Install `go` version >= `go1.12.2` & <= `go1.18.8`
+The `Workload Policy Manager` requires Go version 1.18.8 that has support for `go modules`. The build was validated with the latest version 1.18.8 of `go`. It is recommended that you use 1.18.8 version of `go`. You can use the following to install `go`.
 ```shell
-wget https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
-tar -xzf go1.16.7.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.18.8.linux-amd64.tar.gz
+tar -xzf go1.18.8.linux-amd64.tar.gz
 sudo mv go /usr/local
 export GOROOT=/usr/local/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
@@ -66,11 +66,11 @@ make wpm-installer
 
 | Name         | Repo URL                    | Minimum Version Required           |
 | -------------| --------------------------- | :--------------------------------: |
-| uuid         | github.com/google/uuid      | v1.1.1                             |
-| logrus       | github.com/sirupsen/logrus  | v1.4.2                             |
-| testify      | github.com/stretchr/testify | v1.3.0                             |
+| uuid         | github.com/google/uuid      | v1.2.0                             |
+| logrus       | github.com/sirupsen/logrus  | v1.7.0                             |
+| testify      | github.com/stretchr/testify | v1.6.1                             |
 | crypto       | golang.org/x/crypto         | v0.0.0-20190219172222-a4c6cb3142f2 |
-| yaml.v2      | gopkg.in/yaml.v2            | v2.2.2                             |
+| yaml.v3      | gopkg.in/yaml.v3            | v3.0.1                             |
 
 
 ### Indirect Dependencies

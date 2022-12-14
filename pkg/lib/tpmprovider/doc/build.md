@@ -4,7 +4,7 @@ image created by the Dockerfile is referred to as `tpm-devel`.
 
 ## Rationale for 'tpm-devel' 
 
-The `tpm-provider` currently targets RHEL8.0 and requires `tpm2-tss` to interface with the host's TPM.  Installing those packages on RHEL 8.0 will result in the following vesions of Tss2...
+The `tpm-provider` currently targets RHEL8.4 and requires `tpm2-tss` to interface with the host's TPM.  Installing those packages on RHEL 8.4 will result in the following vesions of Tss2...
 
     tpm2-tss-2.0.0-4.el8.x86_64
 

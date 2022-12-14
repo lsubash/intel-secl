@@ -16,7 +16,7 @@ certification generation scripts for trusted launch of containers. Key Component
 
 ## System Requirements
 
-- RHEL 8.2
+- RHEL 8.4 or ubuntu 20.04
 - Epel 8 Repo
 - Proxy settings if applicable
 
@@ -24,7 +24,7 @@ certification generation scripts for trusted launch of containers. Key Component
 
 - git
 - makeself
-- `go` version 1.16
+- `go` version 1.18.8
 
 # Step-By-Step Build Instructions
 
@@ -36,15 +36,15 @@ certification generation scripts for trusted launch of containers. Key Component
 sudo yum install -y git wget
 ```
 
-### Install `go` version 1.16
+### Install `go` version 1.18.8
 
-The `ISecL K8s Extensions` requires Go version 1.16 that has support for `go modules`. The build was validated with the
-latest version go1.16.7 of `go`. It is recommended that you use go1.16.7 version of `go`. You can use the following to
+The `ISecL K8s Extensions` requires Go version 1.18.8 that has support for `go modules`. The build was validated with the
+latest version go1.18.8 of `go`. It is recommended that you use go1.18.8 version of `go`. You can use the following to
 install `go`.
 
 ```shell
-wget https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
-tar -xzf go1.16.7.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.18.8.linux-amd64.tar.gz
+tar -xzf go1.18.8.linux-amd64.tar.gz
 sudo mv go /usr/local
 export GOROOT=/usr/local/go
 export GOPATH=<path of project workspace>

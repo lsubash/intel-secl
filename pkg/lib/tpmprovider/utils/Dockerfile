@@ -42,7 +42,7 @@ ENV BASH_ENV "/root/.bashrc"
 ARG http_proxy
 ARG https_proxy
 ARG no_proxy
-ENV GOLANG_TAR=go1.16.7.linux-amd64.tar.gz
+ENV GOLANG_TAR=go1.18.8.linux-amd64.tar.gz
 
 #  Install Development tools (gcc 8.3.1, ldd v2.28) tss2 and other dependencies
 RUN yum -y update \

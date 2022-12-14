@@ -4,15 +4,15 @@
 
 - git
 - makeself
-- `go` version 1.16.7
+- `go` version 1.18.8
 
-### Install `go` version 1.16.7
+### Install `go` version 1.18.8
 
-The `Workload Service` requires Go version 1.16.7 that has support for `go modules`. The build was validated with the latest version go1.16.7 of `go`. It is recommended that you use go1.16.7 version of `go`. More recent versions may introduce compatibility issues. You can use the following to install `go`.
+The `Workload Service` requires Go version 1.18.8 that has support for `go modules`. The build was validated with the latest version go1.18.8 of `go`. It is recommended that you use go1.18.8 version of `go`. More recent versions may introduce compatibility issues. You can use the following to install `go`.
 
 ```shell
-wget https://dl.google.com/go/go1.16.7.linux-amd64.tar.gz
-tar -xzf go1.16.7.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.18.8.linux-amd64.tar.gz
+tar -xzf go1.18.8.linux-amd64.tar.gz
 sudo mv go /usr/local
 export GOROOT=/usr/local/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
