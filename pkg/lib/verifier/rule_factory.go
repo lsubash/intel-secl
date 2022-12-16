@@ -75,9 +75,13 @@ func (factory *ruleFactory) GetVerificationRules() ([]rules.Rule, string, error)
 	case flavormodel.FlavorPartSoftware:
 		requiredRules, err = ruleBuilder.GetSoftwareRules()
 	case flavormodel.FlavorPartIma:
-		//To avoid throwing default error, added case for IMA here. We are getting ima rules below while iterating pcr section
+		requiredRules, err = ruleBuilder.GetImaRules(&factory.signedFlavor.Flavor.Pcrs[0], factory.signedFlavor.Flavor, flavorPartName)
 	default:
 		return nil, "", errors.Errorf("Cannot build requiredRules for unknown flavor part %s", flavorPartName)
+	}
+
+	if err != nil {
+		return nil, "", errors.Wrapf(err, "Error creating requiredRules for flavor '%s'", factory.signedFlavor.Flavor.Meta.ID)
 	}
 
 	log.Infof("requiredRules: %v", requiredRules)
