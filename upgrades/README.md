@@ -4,7 +4,7 @@
 
 Following is the matrix of upgrade support for different components in Intel<sup>®</sup> SecL-DC
 
-Latest release: v5.0.0
+Latest release: v:5.1.0
 #### Compatibility Matrix:
 
 | Component (v4) | CMS                            | AAS                            | WPM | KBS                            | TA     | AA  | WLA | HVS                            | iHUB | WLS                            |

@@ -51,7 +51,7 @@ technologies. To build components necessary to try out different use cases, plea
 
 [https://github.com/intel-secl/build-manifest/](https://github.com/intel-secl/build-manifest/)
 
-It makes use of repo tool which simplifies efforts to clone and build multiple repos. To build latest **v5.0.0** version
+It makes use of repo tool which simplifies efforts to clone and build multiple repos. To build latest **v5.1.0** version
 of Intel<sup>®</sup> SecL-DC with a single instruction:
 
 ```shell
@@ -59,7 +59,7 @@ of Intel<sup>®</sup> SecL-DC with a single instruction:
 
 example:
 
-# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v5.0.0 -m manifest/fs.xml
+# repo init -u https://github.com/intel-secl/build-manifest.git -b refs/tags/v5.1.0 -m manifest/fs.xml
 ```
 
 ### Product Guide
