@@ -66,6 +66,7 @@ const (
 	DefaultIdleTimeout       = 10 * time.Second
 	DefaultMaxHeaderBytes    = 1 << 20
 	DefaultKBSListenerPort   = 9443
+	DefaultSessionExpiryTime = 60 //in minutes
 
 	// keymanager constants
 	KmipKeyManager = "kmip"

@@ -39,6 +39,7 @@ func init() {
 	viper.SetDefault(commConfig.ServerWriteTimeout, constants.DefaultWriteTimeout)
 	viper.SetDefault(commConfig.ServerIdleTimeout, constants.DefaultIdleTimeout)
 	viper.SetDefault(commConfig.ServerMaxHeaderBytes, constants.DefaultMaxHeaderBytes)
+	viper.SetDefault(commConfig.SessionExpiryTime, constants.DefaultSessionExpiryTime)
 }
 
 func defaultConfig() *config.Configuration {

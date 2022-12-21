@@ -27,6 +27,7 @@ const (
 	ServerWriteTimeout      = "server.write-timeout"
 	ServerIdleTimeout       = "server.idle-timeout"
 	ServerMaxHeaderBytes    = "server.max-header-bytes"
+	SessionExpiryTime       = "session-expiry-time"
 
 	DbVendor            = "db.vendor"
 	DbHost              = "db.host"

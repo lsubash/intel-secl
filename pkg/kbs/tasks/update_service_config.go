@@ -129,6 +129,9 @@ func (uc UpdateServiceConfig) Validate() error {
 			return errors.New("Invalid value provided for SKC_CHALLENGE_TYPE. allowed value is SGX")
 		}
 	}
+	if (*uc.AppConfig).Skc.SessionExpiryTime <= 0 {
+		return errors.New("Invalid value provided for SESSION_EXPIRY_TIME. Value should be greater than 0")
+	}
 	return nil
 }
 func (uc UpdateServiceConfig) PrintHelp(w io.Writer) {
