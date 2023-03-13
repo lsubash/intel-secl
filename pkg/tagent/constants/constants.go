@@ -15,12 +15,12 @@ const (
 
 const (
 	TlsKey                          = "tls"
-	InstallationDir                 = "/opt/trustagent/"
-	ConfigDir                       = "/etc/trustagent/"
+	InstallationDir                 = "/home/root/tep_luks_dev/trustagent/"
+	ConfigDir                       = "/home/root/tep_luks_dev/trustagent/"
 	ConfigFileName                  = "config"
 	ConfigFilePath                  = ConfigDir + ConfigFileName + ".yml"
 	ExecLinkPath                    = "/usr/bin/tagent"
-	LogDir                          = "/var/log/trustagent/"
+	LogDir                          = "/home/root/tep_luks_dev/log/trustagent/"
 	HttpLogFile                     = LogDir + "http.log"
 	DefaultLogFilePath              = LogDir + "trustagent.log"
 	SecurityLogFilePath             = LogDir + "trustagent-security.log"
@@ -37,7 +37,7 @@ const (
 	Tpm2FilePath                    = "/sys/firmware/acpi/tables/TPM2"
 	AppEventFilePath                = RamfsDir + "pcr_event_log"
 	RootUserName                    = "root"
-	TagentUserName                  = "tagent"
+	TagentUserName                  = "root"
 	DefaultPort                     = 1443
 	ApiVersion                      = "v2"
 	FlavorUUIDs                     = "FLAVOR_UUIDS"
