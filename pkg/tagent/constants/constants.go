@@ -186,6 +186,6 @@ const (
 )
 
 var (
-	AsciiRuntimeMeasurementFilePath = "/opt/ima/ascii_runtime_measurements"
-	ProcFilePath                    = "/proc/cmdline"
+	AsciiRuntimeMeasurementFilePath = "/home/root/ima/ascii_runtime_measurements"
+	ProcFilePath                    = "/home/root/ima/ima_policy"
 )
