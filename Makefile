@@ -20,7 +20,7 @@ $(TARGETS):
 		go build -ldflags "-X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 tagent:
-	cd cmd/$@ && env GOOS=linux GOSUMDB=off go mod tidy && env GOOS=linux GOSUMDB=off CGO_CFLAGS_ALLOW="-f.*"  \
+	cd cmd/$@ && env GOOS=linux GOSUMDB=off && env GOOS=linux GOSUMDB=off CGO_CFLAGS_ALLOW="-f.*"  \
 		go build -ldflags "-X intel/isecl/go-trust-agent/v5/eventlog.uefiEventLogFile=/sys/kernel/security/tpm0/binary_bios_measurements -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.BuildDate=$(BUILDDATE) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.Version=$(VERSION) -X github.com/intel-secl/intel-secl/v5/pkg/$@/version.GitHash=$(GITCOMMIT)" -o $@
 
 wlagent:
