@@ -34,8 +34,7 @@ Available Tasks for setup:
 	download-ca-cert                    Download CMS root CA certificate
 	download-cert-tls                   Download CA certificate from CMS for tls
 	create-default-key-transfer-policy  Create default key transfer policy for KBS
-	update-service-config               Sets or Updates the Service configuration 
-`
+	update-service-config               Sets or Updates the Service configuration `
 
 func (app *App) printUsage() {
 	fmt.Fprintln(app.consoleWriter(), helpStr)

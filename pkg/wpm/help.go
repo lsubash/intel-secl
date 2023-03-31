@@ -7,6 +7,7 @@ package wpm
 
 import (
 	"fmt"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/wpm/version"
 )
 
@@ -37,8 +38,7 @@ Available tasks for setup:
                                                    - CMS_TLS_CERT_SHA384=<CMS TLS cert sha384 hash>  : to ensure that WPM is talking to the right CMS instance
 
    create-envelope-key                           Creates the key pair required to securely transfer key from KBS
-                                               - Option [--force] overwrites existing envelope key pairs
-`
+                                               - Option [--force] overwrites existing envelope key pairs`
 
 func (a *App) printUsage() {
 	fmt.Fprintln(a.consoleWriter(), helpStr)

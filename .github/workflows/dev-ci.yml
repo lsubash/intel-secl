@@ -19,6 +19,16 @@ jobs:
 
     steps:  
       - uses: actions/checkout@v2
+      
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+           go-version: 1.18.8
+
+      - name: Check-linting-issues
+        run: |
+          gofmt -l .
+          if [ "$(gofmt -l . | wc -l)"  -gt 0 ]; then exit 1; fi
 
       - name: Add Running Label
         if: github.event_name == 'pull_request'
@@ -32,11 +42,6 @@ jobs:
               repo: context.repo.repo,
               labels: [':arrows_counterclockwise:']
             })
-
-      - name: Check-linting-issues
-        run: |
-          gofmt -l .
-          if [ "$(gofmt -l . | wc -l)"  -gt 0 ]; then exit 1; fi
 
       - name: Run-unit-tests
         id: coverage-percent

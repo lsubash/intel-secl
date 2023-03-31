@@ -9,7 +9,7 @@ require (
 	github.com/containers/ocicrypt v1.1.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
-	github.com/gin-gonic/gin v1.7.4
+	github.com/gin-gonic/gin v1.9.0
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
@@ -34,7 +34,7 @@ require (
 	github.com/vmware/govmomi v0.22.2
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
+	golang.org/x/net v0.8.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.38.0
 	gopkg.in/yaml.v3 v3.0.1

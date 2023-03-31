@@ -6,6 +6,7 @@ package authservice
 
 import (
 	"fmt"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/authservice/version"
 )
 
@@ -36,8 +37,7 @@ Usage of authservice setup:
 		                         roles to the user
 		jwt                      Create jwt signing key and jwt certificate signed by CMS
 		create-credentials       Generates credentials to support third party authentication and authorization
-		update-service-config    Sets or Updates the Service configuration 
-`
+		update-service-config    Sets or Updates the Service configuration `
 
 func (a *App) printUsage() {
 	fmt.Fprintln(a.consoleWriter(), helpStr)

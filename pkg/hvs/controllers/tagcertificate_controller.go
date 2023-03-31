@@ -271,7 +271,7 @@ func validateTagCertCreateCriteria(tcCreateCriteria models.TagCertificateCreateC
 	return nil
 }
 
-//  getTCFilterCriteria checks for set filter params in the Search request and returns a valid TagCertificateFilterCriteria
+// getTCFilterCriteria checks for set filter params in the Search request and returns a valid TagCertificateFilterCriteria
 func getTCFilterCriteria(params url.Values) (*models.TagCertificateFilterCriteria, error) {
 	defaultLog.Trace("controllers/tagcertificate_controller:getTCFilterCriteria() Entering")
 	defer defaultLog.Trace("controllers/tagcertificate_controller:getTCFilterCriteria() Leaving")
@@ -446,7 +446,7 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 	// initialize HostConnector and test connectivity
 	hc, err := controller.HostConnectorProvider.NewHostConnector(hostConnStr)
 	if err != nil {
-		defaultLog.WithError(err).WithField("Certid", dtcReq.CertID).Error("controllers/tagcertificate_controller:Deploy() Failed "+
+		defaultLog.WithError(err).WithField("Certid", dtcReq.CertID).Errorf("controllers/tagcertificate_controller:Deploy() Failed "+
 			"to initialize HostConnector for host with hardware UUID %s", tc.HardwareUUID.String())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Deploy failure: Target Host connection failed"}
 	}
@@ -454,7 +454,7 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 	// DeployAssetTag
 	err = asset_tag.NewAssetTag().DeployAssetTag(hc, tc.TagCertDigest, targetHost.HardwareUuid.String())
 	if err != nil {
-		defaultLog.WithError(err).WithField("Certid", dtcReq.CertID).Error("controllers/tagcertificate_controller:Deploy() Failed "+
+		defaultLog.WithError(err).WithField("Certid", dtcReq.CertID).Errorf("controllers/tagcertificate_controller:Deploy() Failed "+
 			"to deploy Asset Tag on Host %s", targetHost.HardwareUuid)
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Deploy failure"}
 	}
@@ -462,7 +462,7 @@ func (controller TagCertificateController) Deploy(w http.ResponseWriter, r *http
 	// get Host Manifest
 	hmanifest, err := hc.GetHostManifest(nil)
 	if err != nil {
-		defaultLog.WithField("id", dtcReq.CertID).Error("controllers/tagcertificate_controller:Deploy() Failed "+
+		defaultLog.WithField("id", dtcReq.CertID).Errorf("controllers/tagcertificate_controller:Deploy() Failed "+
 			"to get the HostManifest from Host %s", targetHost.HardwareUuid.String())
 		return nil, http.StatusInternalServerError, &commErr.ResourceError{Message: "Tag Certificate Deploy failure"}
 	}

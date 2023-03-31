@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	privacyCA  = "../test/resources/service-privacy-ca.pem"
+	privacyCA  = "../test/mockWebCACertsDir/caCert.pem"
 	testLogDir = "../test/resources/var/log/"
 )
 
@@ -93,7 +93,7 @@ func TestTrustAgentWebServiceStart(t *testing.T) {
 						ReadTimeout: time.Duration(time.Hour),
 					},
 					TLSCertFilePath:           privacyCA,
-					TLSKeyFilePath:            "../test/mockWebCACertsDir/681de0eca.pem",
+					TLSKeyFilePath:            "../test/mockWebCACertsDir/caCert.pem",
 					TrustedJWTSigningCertsDir: "../test/mockWebCACertsDir/",
 					TrustedCaCertsDir:         "../test/mockWebCACertsDir/",
 				},

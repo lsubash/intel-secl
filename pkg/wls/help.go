@@ -29,8 +29,7 @@ Available tasks for setup:
    download-ca-cert                 Download CMS root CA certificate
    download-cert-tls                Generates Key pair and CSR, gets it signed from CMS
    download-saml-ca-cert            Setup to download SAML CA certificates from HVS
-   update-service-config            Sets or Updates the Service configuration 
-`
+   update-service-config            Sets or Updates the Service configuration `
 
 func (a *App) printUsage() {
 	fmt.Fprintln(a.consoleWriter(), helpStr)

@@ -7,6 +7,7 @@ package cms
 
 import (
 	"fmt"
+
 	"github.com/intel-secl/intel-secl/v5/pkg/cms/version"
 )
 
@@ -36,8 +37,7 @@ Available Tasks for setup:
     root-ca                   Creates a self signed Root CA key pair in /etc/cms/root-ca/ for quality of life
     intermediate-ca           Creates a Root CA signed intermediate CA key pair(signing, tls-server and tls-client) in /etc/cms/intermediate-ca/ for quality of life
     tls                       Creates an intermediate-ca signed TLS key pair in /etc/cms for quality of life
-    update-service-config     Sets or Updates the Service configuration 
-`
+    update-service-config     Sets or Updates the Service configuration `
 
 func (a *App) printUsage() {
 	fmt.Fprintln(a.consoleWriter(), helpStr)

@@ -44,8 +44,7 @@ Available Tasks for setup:
 	create-endorsement-ca           Generate self-signed endorsement certificate
 	create-privacy-ca               Generate self-signed privacy certificate
 	create-tag-ca                   Generate self-signed tag certificate
-	update-service-config           Sets or Updates the Service configuration  
-`
+	update-service-config           Sets or Updates the Service configuration  `
 
 func (a *App) printUsage() {
 	fmt.Fprintln(a.consoleWriter(), helpStr)

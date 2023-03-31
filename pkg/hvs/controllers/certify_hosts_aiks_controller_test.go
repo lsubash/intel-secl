@@ -13,14 +13,15 @@ import (
 	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/cloudflare/cfssl/crl"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
-	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
-	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"time"
+
+	"github.com/cloudflare/cfssl/crl"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/mocks"
+	"github.com/intel-secl/intel-secl/v5/pkg/hvs/domain/models"
+	consts "github.com/intel-secl/intel-secl/v5/pkg/lib/common/constants"
 
 	"github.com/intel-secl/intel-secl/v5/pkg/hvs/controllers"
 	hvsRoutes "github.com/intel-secl/intel-secl/v5/pkg/hvs/router"
@@ -148,8 +149,8 @@ var _ = Describe("CertifyHostAiksController", func() {
 				}
 
 				// create the EK leaf certificate
-				ekCertificateBytes, err := x509.CreateCertificate(rand.Reader, &ekCertTemplate, cacert,
-					cacert.PublicKey, caKey)
+				ekCertificateBytes, err := x509.CreateCertificate(rand.Reader, &ekCertTemplate, crlIssuerCertx509,
+					crlIssuerCertx509.PublicKey, caKey)
 
 				ekCertx509, _ := x509.ParseCertificate(ekCertificateBytes)
 

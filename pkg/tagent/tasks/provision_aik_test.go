@@ -153,7 +153,7 @@ func TestProvisionAttestationIdentityKeyValidate(t *testing.T) {
 		},
 		{
 			name:    "Valid ProvisionAttestationIdentityKey",
-			fields:  fields{AikCert: "../test/mockCACertsDir/681de0eca.pem"},
+			fields:  fields{AikCert: "../test/mockCACertsDir/caCert.pem"},
 			wantErr: false,
 		},
 	}
