@@ -150,11 +150,11 @@ func (builder *ruleBuilderIntelTpm20) GetImaRules(rule *hvs.FlavorPcrs, flavor h
 	imaMeasurements := flavor.ImaLogs
 
 	if imaMeasurements != nil {
-		imaLogIntegrityRule, err := getImaLogIntegrityRules(rule, imaMeasurements, flavorPartName)
-		if err != nil {
-			return nil, errors.Wrapf(err, "Error creating trust IMA log integrity rule for flavor '%s'", flavor.Meta.ID)
-		}
-		results = append(results, imaLogIntegrityRule...)
+		//imaLogIntegrityRule, err := getImaLogIntegrityRules(rule, imaMeasurements, flavorPartName)
+		//if err != nil {
+		//	return nil, errors.Wrapf(err, "Error creating trust IMA log integrity rule for flavor '%s'", flavor.Meta.ID)
+		//}
+		//results = append(results, imaLogIntegrityRule...)
 
 		imaMatchesRule, err := getImaEventLogEqualsRules(rule, imaMeasurements, flavorPartName)
 		if err != nil {
