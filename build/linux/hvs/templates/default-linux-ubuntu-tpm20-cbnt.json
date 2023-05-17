@@ -1,7 +1,7 @@
 {
   "label": "default-linux-ubuntu-tpm20-cbnt",
   "condition": [
-    "//host_info/os_name//*[text()='Ubuntu']",
+    "//host_info/os_name//*[text()='Ubuntu'] or //host_info/os_name//*[text()='OpenEmbedded'] or //host_info/os_name//*[text()='Debian GNU/Linux']",
     "//host_info/hardware_features/TPM/meta/tpm_version//*[text()='2.0']",
     "//host_info/hardware_features/CBNT/enabled//*[text()='true']"
   ],
