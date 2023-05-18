@@ -48,6 +48,7 @@ var defaultFlavorTemplateNames = []string{
 	"default-pfr",
 	"default-esxi-tpm12",
 	"default-esxi-tpm20",
+	"default-tep",
 }
 
 func (t *CreateDefaultFlavorTemplate) Run() error {
