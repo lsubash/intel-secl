@@ -9,7 +9,7 @@ require (
 	github.com/containers/ocicrypt v1.1.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gemalto/kmip-go v0.0.6-0.20210426170211-84e83580888d
-	github.com/gin-gonic/gin v1.9.0
+	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
