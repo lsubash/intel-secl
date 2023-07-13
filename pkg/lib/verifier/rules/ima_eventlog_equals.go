@@ -42,6 +42,7 @@ func (rule *imaEventLogEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleR
 	result := hvs.RuleResult{}
 	result.Trusted = true // default to true, set to false in fault logic
 	result.Rule.Name = constants.RuleImaEventLogEquals
+	result.Rule.ExpectedImaLogEntry = rule.expectedImaLogs
 	result.Rule.Markers = append(result.Rule.Markers, rule.marker)
 
 	if hostManifest.ImaLogs != nil && rule.expectedImaLogs != nil {
