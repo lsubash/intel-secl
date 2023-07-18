@@ -28,6 +28,24 @@ import (
 func (handler *requestHandlerImpl) GetTpmQuote(quoteRequest *taModel.TpmQuoteRequest,
 	aikCertPath string, measureLogFilePath string, ramfsDir string) (*taModel.TpmQuoteResponse, error) {
 
+
+	// Retrigger the verifier on host by reading AsciiRuntimeMeasurementFilePath
+	// This file read uses fuse service and trigger IMA measurements
+	// This step is specific for TEP
+	// START Retrigger
+	if _, err := os.Stat(constants.AsciiRuntimeMeasurementFilePath); os.IsNotExist(err) {
+		log.Debugf(" AsciiRuntimeMeasurementFilePath log file '%s' was not present for IMA verifier trigger in HOST", constants.AsciiRuntimeMeasurementFilePath)
+	}
+
+	eventLogBytes, err := ioutil.ReadFile(constants.AsciiRuntimeMeasurementFilePath)
+	if err != nil {
+		log.Debugf("AsciiRuntimeMeasurementFilePath  log file '%s' was not present for IMA verifer trigger on HOST", constants.AsciiRuntimeMeasurementFilePath)
+	}
+
+	log.Debugf(" IMA Retrigger: Display IMA Ascii Measurements file '%s' ", eventLogBytes)
+
+	// END Retrigger
+
 	tpmFactory, err := tpmprovider.LinuxTpmFactoryProvider{}.NewTpmFactory()
 	if err != nil {
 		return nil, err
