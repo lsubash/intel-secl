@@ -135,7 +135,7 @@ var defaultFlavorGroupsRaw = []string{
 				{
 					"flavor_part": "IMA",
 					"match_policy": {
-						"match_type": "ALL_OF",
+						"match_type": "ANY_OF",
 						"required": "REQUIRED_IF_DEFINED"
 					}
 				},

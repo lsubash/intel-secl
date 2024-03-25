@@ -29,7 +29,7 @@ func GetAutomaticFlavorMatchPolicy() []hvs.FlavorMatchPolicy {
 	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartPlatform, hvs.NewMatchPolicy(hvs.MatchTypeAnyOf, hvs.FlavorRequired)))
 	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartOs, hvs.NewMatchPolicy(hvs.MatchTypeAnyOf, hvs.FlavorRequired)))
 	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartSoftware, hvs.NewMatchPolicy(hvs.MatchTypeAllOf, hvs.FlavorRequiredIfDefined)))
-	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartIma, hvs.NewMatchPolicy(hvs.MatchTypeAllOf, hvs.FlavorRequiredIfDefined)))
+	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartIma, hvs.NewMatchPolicy(hvs.MatchTypeAnyOf, hvs.FlavorRequiredIfDefined)))
 	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartAssetTag, hvs.NewMatchPolicy(hvs.MatchTypeLatest, hvs.FlavorRequiredIfDefined)))
 	policies = append(policies, hvs.NewFlavorMatchPolicy(hvs.FlavorPartHostUnique, hvs.NewMatchPolicy(hvs.MatchTypeLatest, hvs.FlavorRequiredIfDefined)))
 
