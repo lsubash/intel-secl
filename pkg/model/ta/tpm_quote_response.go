@@ -32,6 +32,7 @@ type TpmQuoteResponse struct {
 	Quote           string   `xml:"quote"`
 	EventLog        string   `xml:"eventLog"`
 	ImaLogs         string   `xml:"imaLogs"`
+	ImaVmLogs       string   `xml:"ima_logs_vm"`
 	TcbMeasurements struct {
 		XMLName         xml.Name `xml:"tcbMeasurements"`
 		TcbMeasurements []string `xml:"tcbMeasurements"`
