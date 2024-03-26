@@ -113,6 +113,13 @@ func newImaLogsMissingFault() hvs.Fault {
 	}
 }
 
+func newImaVmLogsMissingFault() hvs.Fault {
+	return hvs.Fault{
+		Name:        faultsConst.FaultPcrEventLogMissing,
+		Description: "Host report does not include a IMA VM log",
+	}
+}
+
 func newImaLogContainsUnexpectedEntries(imaLogEntry *hvs.Ima, pcrIndex int, pcrBank string) hvs.Fault {
 	return hvs.Fault{
 		Name:        faultsConst.FaultPcrEventLogContainsUnexpectedEntries,

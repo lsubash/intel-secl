@@ -18,6 +18,7 @@ type HostManifest struct {
 	HostInfo              taModel.HostInfo `json:"host_info"`
 	PcrManifest           PcrManifest      `json:"pcr_manifest"`
 	ImaLogs               *ImaLogs         `json:"ima_logs,omitempty"`
+	ImaVmLogs             *ImaLogs         `json:"ima_logs_vm,omitempty"`
 	BindingKeyCertificate string           `json:"binding_key_certificate,omitempty"`
 	MeasurementXmls       []string         `json:"measurement_xmls,omitempty"`
 	QuoteDigest           string           `json:"quote_digest,omitempty"`
