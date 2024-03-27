@@ -178,12 +178,14 @@ const (
 	ImaHashSha512 = "ima_hash=sha512"
 	ImaPolicyTCB  = "ima_policy=tcb"
 	PCR10         = 10
+	PCR23         = 23
 	TemplateNG    = "ima_template=ima-ng"
 	TemplateSIG   = "ima_template=ima-sig"
 	TemplateIMA   = "ima_template=ima"
 )
 
 var (
-	AsciiRuntimeMeasurementFilePath = "/home/root/ima/ascii_runtime_measurements"
-	ProcFilePath                    = "/home/root/ima/ima_policy"
+	AsciiRuntimeMeasurementFilePath   = "/home/root/ima/ascii_runtime_measurements"
+	AsciiRuntimeMeasurementVmFilePath = "/home/root/ima/ascii_runtime_measurements_vm"
+	ProcFilePath                      = "/home/root/ima/ima_policy"
 )

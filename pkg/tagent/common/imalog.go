@@ -28,11 +28,13 @@ type ImaSystemDetails struct {
 type ImaPaths struct {
 	ProcFilePath  string
 	AsciiFilePath string
+	AsciiVmFilePath string
 }
 
 // ImaInfo use to store imalog and other parameter used for ima
 type ImaInfo struct {
 	ImaLog string
+	ImaVmLog string
 }
 
 // GetImaMeasurements - Function to get all IMA logs
@@ -62,6 +64,12 @@ func (imaPath *ImaPaths) getImaMeasurements() (*ImaInfo, error) {
 
 	// Read all measurement from /sys/kernel/security/ima/ascii_runtime_measurements
 	imaInfo.ImaLog, err = imaSystemDetails.getImaLog(imaPath.AsciiFilePath)
+	if err != nil {
+		log.WithError(err).Error("common/imalog:getImaMeasurements() There was an error getting ima-log")
+		return nil, err
+	}
+
+	imaInfo.ImaVmLog, err = imaSystemDetails.getImaLog(imaPath.AsciiVmFilePath)
 	if err != nil {
 		log.WithError(err).Error("common/imalog:getImaMeasurements() There was an error getting ima-log")
 		return nil, err
@@ -110,7 +118,7 @@ func (imaSystemDetails *ImaSystemDetails) getImaLog(asciiFilePath string) (strin
 	log.Trace("common/imalog:getImaLog() Entering")
 	defer log.Trace("common/imalog:getImaLog() Leaving")
 
-	imaLog, err := imaSystemDetails.readPcr10Events(asciiFilePath)
+	imaLog, err := imaSystemDetails.readPcrImaEvents(asciiFilePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "common/imalog:getImaLog() There was an error in reading ima-log from %s", asciiFilePath)
 	}
@@ -126,25 +134,45 @@ func (imaSystemDetails *ImaSystemDetails) getImaLog(asciiFilePath string) (strin
 	return string(marshalledImaLog), nil
 }
 
-// ReadPcr10Events - Function to read all pcr 10 events from specified input offset
-func (imaSystemDetails *ImaSystemDetails) readPcr10Events(asciiFilePath string) (*hvsModel.ImaLog, error) {
-	log.Trace("common/imalog:readPcr10Events() Entering")
-	defer log.Trace("common/imalog:readPcr10Events() Leaving")
+func (imaSystemDetails *ImaSystemDetails) getImaVmLog(asciiFilePath string) (string, error) {
+	log.Trace("common/imalog:getImaVmLog() Entering")
+	defer log.Trace("common/imalog:getImaVmLog() Leaving")
+
+	imaLog, err := imaSystemDetails.readPcrImaEvents(asciiFilePath)
+	if err != nil {
+		return "", errors.Wrapf(err, "common/imalog:getImaVmLog() There was an error in reading ima-log from %s", asciiFilePath)
+	}
+
+	imaLog.Pcr.Bank = imaSystemDetails.ImaHashAlgorithm
+	imaLog.Pcr.Index = constants.PCR23
+	imaLog.ImaTemplate = imaSystemDetails.ImaTemplate
+	// Marshal the structure into string
+	marshalledImaLog, err := json.Marshal(imaLog)
+	if err != nil {
+		return "", errors.Wrapf(err, "common/imalog:getImaVmLog() There was an error in marshalling IMA event log data")
+	}
+	return string(marshalledImaLog), nil
+}
+
+// readPcrImaEvents - Function to read all pcr 10 events from specified input offset
+func (imaSystemDetails *ImaSystemDetails) readPcrImaEvents(asciiFilePath string) (*hvsModel.ImaLog, error) {
+	log.Trace("common/imalog:readPcrImaEvents() Entering")
+	defer log.Trace("common/imalog:readPcrImaEvents() Leaving")
 
 	file, err := os.Open(asciiFilePath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "common/imalog:readPcr10Events() There was an error opening %s", asciiFilePath)
+		return nil, errors.Wrapf(err, "common/imalog:readPcrImaEvents() There was an error opening %s", asciiFilePath)
 	}
 	defer func() {
 		derr := file.Close()
 		if derr != nil {
-			log.WithError(derr).Errorf("common/imalog:readPcr10Events() There was an error closing %s", asciiFilePath)
+			log.WithError(derr).Errorf("common/imalog:readPcrImaEvents() There was an error closing %s", asciiFilePath)
 		}
 	}()
 
 	// Need to remove this check in future
 	if !strings.EqualFold(imaSystemDetails.ImaTemplate, hvsModel.IMA_NG_TEMPLATE) {
-		return nil, errors.Errorf("common/imalog:readPcr10Events() Unsupported template %s", imaSystemDetails.ImaTemplate)
+		return nil, errors.Errorf("common/imalog:readPcrImaEvents() Unsupported template %s", imaSystemDetails.ImaTemplate)
 	}
 
 	var imaLog hvsModel.ImaLog
@@ -159,7 +187,7 @@ func (imaSystemDetails *ImaSystemDetails) readPcr10Events(asciiFilePath string) 
 			if err == io.EOF {
 				break
 			}
-			return nil, errors.Wrapf(err, "common/imalog:readPcr10Events() There was an error in reading the line from %s", asciiFilePath)
+			return nil, errors.Wrapf(err, "common/imalog:readPcrImaEvents() There was an error in reading the line from %s", asciiFilePath)
 		}
 
 		// Parse line read in array by splitting with spaces
@@ -177,7 +205,7 @@ func (imaSystemDetails *ImaSystemDetails) readPcr10Events(asciiFilePath string) 
 		} else {
 			resMeasurement := strings.Split(array[3], ":")
 			if len(resMeasurement) != 2 {
-				return nil, errors.Errorf("common/imalog:readPcr10Events() Invalid File Hash in %s", asciiFilePath)
+				return nil, errors.Errorf("common/imalog:readPcrImaEvents() Invalid File Hash in %s", asciiFilePath)
 			}
 			imaEvent.Measurement = resMeasurement[1]
 		}

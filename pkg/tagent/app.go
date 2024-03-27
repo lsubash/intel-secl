@@ -429,6 +429,7 @@ func (a *App) Run(args []string) error {
 		if c.ImaMeasureEnabled {
 			// update group ownership of /sys/kernel/security/ima/ascii_runtime_measurements to provide read access to tagent for ima-log
 			updateGroupOwnership(constants.AsciiRuntimeMeasurementFilePath, constants.RootUserName, int(gid))
+			updateGroupOwnership(constants.AsciiRuntimeMeasurementVmFilePath, constants.RootUserName, int(gid))
 		}
 
 		// take ownership of all the files in /opt/trustagent before forking the

@@ -322,6 +322,7 @@ func createTpmQuote(isTAImaEnabled bool, tagSecretKey string, tpm tpmprovider.Tp
 		imaPath := &ImaPaths{
 			ProcFilePath:  constants.ProcFilePath,
 			AsciiFilePath: constants.AsciiRuntimeMeasurementFilePath,
+			AsciiVmFilePath: constants.AsciiRuntimeMeasurementVmFilePath,
 		}
 
 		imaInfo, err := imaPath.getImaMeasurements()
@@ -329,6 +330,7 @@ func createTpmQuote(isTAImaEnabled bool, tagSecretKey string, tpm tpmprovider.Tp
 			return nil, errors.Wrap(err, "common/quote:createTpmQuote() Error while reading ima log")
 		}
 		tpmQuoteResponse.ImaLogs = imaInfo.ImaLog
+		tpmQuoteResponse.ImaVmLogs = imaInfo.ImaVmLog
 	case isTAImaEnabled == false:
 		log.Warnf("common/quote:createTpmQuote() IMA is not enabled in TrustAgent")
 	case tpmQuoteRequest.ImaMeasureEnabled == false:
