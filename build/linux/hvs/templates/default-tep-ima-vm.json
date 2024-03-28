@@ -1,10 +1,10 @@
 {  
-    "label": "tep_ima_vm",
+    "label": "default-tep-ima-vm",
     "condition" :[
         "//host_info/os_name//*[text()='Debian GNU/Linux']"
-    ],  
-    "flavor_parts": {  
-        "IMA": {  
+    ],
+    "flavor_parts": {
+        "IMA": {
             "pcr_rules": [
                 {
                     "pcr": {
