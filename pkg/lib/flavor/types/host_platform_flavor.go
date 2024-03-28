@@ -249,7 +249,7 @@ func (pf HostPlatformFlavor) getImaFlavor() ([]hvs.Flavor, error) {
 
 	var allPcrDetails = pfutil.GetPcrDetails(pf.HostManifest.PcrManifest, imaPcrs)
 
-	var allImaDetails = pfutil.GetImaDetails(*pf.HostManifest.ImaLogs)
+	var allImaDetails = pfutil.GetImaDetails(*pf.HostManifest.ImaLogs, *pf.HostManifest.ImaVmLogs)
 
 	newMeta, err := pfutil.GetMetaSectionDetails(nil, nil, "", hvs.FlavorPartIma, pf.getVendorName())
 	if err != nil {

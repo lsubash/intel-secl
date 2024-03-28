@@ -176,7 +176,7 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
     var imaVmLogs hvs.ImaLogs
 	if tpmQuoteResponse.ImaVmLogs != "" {
 		var imaVmLog hvs.ImaLog
-		err = json.Unmarshal([]byte(tpmQuoteResponse.ImaVmLogs), &imaLog)
+		err = json.Unmarshal([]byte(tpmQuoteResponse.ImaVmLogs), &imaVmLog)
 		if err != nil {
 			return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error unmarshaling the imalogbytes")
 		}

@@ -155,7 +155,9 @@ type Software struct {
 }
 
 type Ima struct {
-	Measurements  []Measurements `json:"ima_measurements,omitempty"`
-	ImaTemplate   string         `json:"ima_template,omitempty"`
-	ExpectedValue string         `json:"expected_value,omitempty"`
+	Measurements    []Measurements `json:"ima_measurements,omitempty"`
+	MeasurementsVm  []Measurements `json:"ima_vm_measurements,omitempty"`
+	ImaTemplate     string         `json:"ima_template,omitempty"`
+	ExpectedValue   string         `json:"expected_value,omitempty"`
+	ExpectedVmValue string         `json:"expected_vm_value,omitempty"`
 }

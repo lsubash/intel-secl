@@ -105,7 +105,7 @@ func (rule *imaEventLogEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleR
 
 	if hostManifest.ImaVmLogs != nil && rule.expectedImaLogs != nil {
 		actualImaLogs := hvs.Ima{}
-		actualImaLogs.Measurements = hostManifest.ImaVmLogs.Measurements
+		actualImaLogs.MeasurementsVm = hostManifest.ImaVmLogs.Measurements
 		actualImaLogs.ExpectedValue = hostManifest.ImaVmLogs.ExpectedValue
 		actualImaLogs.ImaTemplate = hostManifest.ImaVmLogs.ImaTemplate
 		pcrIndex := hostManifest.ImaVmLogs.Pcr.Index

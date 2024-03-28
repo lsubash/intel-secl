@@ -548,12 +548,13 @@ func getPcrRulesForFlavorPart(flavorPart *hvs.FlavorPart, pcrList map[hvs.PcrInd
 	return pcrList, nil
 }
 
-func (pfutil PlatformFlavorUtil) GetImaDetails(imaLogs hvs.ImaLogs) hvs.Ima {
+func (pfutil PlatformFlavorUtil) GetImaDetails(imaLogs hvs.ImaLogs, imaVmLogs hvs.ImaLogs) hvs.Ima {
 	log.Trace("flavor/util/platform_flavor_util:GetImaDetails() Entering")
 	defer log.Trace("flavor/util/platform_flavor_util:GetImaDetails() Leaving")
 
 	var ima hvs.Ima
-	ima.Measurements = imaLogs.Measurements
+	ima.Measurements    = imaLogs.Measurements
+	ima.MeasurementsVm  = imaVmLogs.Measurements
 
 	return ima
 }
