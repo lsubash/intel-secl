@@ -171,6 +171,22 @@ func (ic *IntelConnector) GetHostManifestAcceptNonce(nonce string, pcrList []int
 		hostManifest.ImaLogs = &imaLogs
 	}
 
+
+    // Add for VM IMA
+    var imaVmLogs hvs.ImaLogs
+	if tpmQuoteResponse.ImaVmLogs != "" {
+		var imaVmLog hvs.ImaLog
+		err = json.Unmarshal([]byte(tpmQuoteResponse.ImaVmLogs), &imaLog)
+		if err != nil {
+			return hvs.HostManifest{}, errors.Wrap(err, "intel_host_connector:GetHostManifestAcceptNonce() Error unmarshaling the imalogbytes")
+		}
+		log.Info("intel_host_connector:GetHostManifestAcceptNonce() Successfully unmarshalled IMAVmlog from tpmQuoteResponse")
+		imaVmLogs.Pcr = imaVmLog.Pcr
+		imaVmLogs.Measurements = imaVmLog.ImaMeasurements
+		imaVmLogs.ImaTemplate = imaVmLog.ImaTemplate
+		hostManifest.ImaVmLogs = &imaVmLogs
+	}
+
 	isWlaInstalled := false
 	for _, component := range hostManifest.HostInfo.InstalledComponents {
 		if component == taModel.HostComponentWlagent.String() {
