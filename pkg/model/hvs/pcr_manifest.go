@@ -696,3 +696,70 @@ func (expectedImaLogs *Ima) Subtract(imaLogsToSubtract *Ima) (*Ima, *Ima, error)
 
 	return &subtractedImaLogs, &mismatchedImaLogs, nil
 }
+
+func (expectedImaLogs *Ima) SubtractVm(imaLogsToSubtract *Ima) (*Ima, *Ima, error) {
+	matched := false
+	imaLogsToSubtractMap := make(map[string][]string)
+
+	subtractedImaLogs := Ima{
+		ImaTemplate: expectedImaLogs.ImaTemplate,
+	}
+
+	mismatchedImaLogs := Ima{
+		ImaTemplate: expectedImaLogs.ImaTemplate,
+	}
+
+
+	//Add IMA log file name and its all posible measurements to the map
+	for _, imaLogMeasurement := range imaLogsToSubtract.MeasurementsVm {
+		value, ok := imaLogsToSubtractMap[imaLogMeasurement.File]
+		if ok {
+			val := append(value, imaLogMeasurement.Measurement)
+			imaLogsToSubtractMap[imaLogMeasurement.File] = val
+		} else {
+			imaLogsToSubtractMap[imaLogMeasurement.File] = []string{imaLogMeasurement.Measurement}
+		}
+	}
+	if len(expectedImaLogs.MeasurementsVm) == len(imaLogsToSubtract.MeasurementsVm) {
+		for _, imaLog := range expectedImaLogs.MeasurementsVm {
+			if imaLogMeasurement, ok := imaLogsToSubtractMap[imaLog.File]; ok {
+				for _, value := range imaLogMeasurement {
+					matched = false
+					if value == imaLog.Measurement {
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					mismatchedImaLogs.Measurements = append(mismatchedImaLogs.Measurements, imaLog)
+				}
+			} else {
+				subtractedImaLogs.Measurements = append(subtractedImaLogs.Measurements, imaLog)
+			}
+		}
+	}
+
+	lenToCatchUnexpectedEntries := len(imaLogsToSubtract.MeasurementsVm)
+	if len(expectedImaLogs.MeasurementsVm) > len(imaLogsToSubtract.MeasurementsVm) {
+		for _, imaLog := range expectedImaLogs.MeasurementsVm {
+			lenToCatchUnexpectedEntries--
+			imaLogMeasurement, ok := imaLogsToSubtractMap[imaLog.File]
+			if ok && lenToCatchUnexpectedEntries >= 0 {
+				for _, value := range imaLogMeasurement {
+					matched = false
+					if value == imaLog.Measurement {
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					mismatchedImaLogs.MeasurementsVm = append(mismatchedImaLogs.MeasurementsVm, imaLog)
+				}
+			} else {
+				subtractedImaLogs.MeasurementsVm = append(subtractedImaLogs.MeasurementsVm, imaLog)
+			}
+		}
+	}
+
+	return &subtractedImaLogs, &mismatchedImaLogs, nil
+}

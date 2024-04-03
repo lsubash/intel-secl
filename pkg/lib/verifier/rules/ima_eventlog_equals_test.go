@@ -23,6 +23,12 @@ func TestImaEventLogEqualsNoFault(t *testing.T) {
 						Bank:  "SHA256",
 					},
 				},
+				{
+					Pcr: hvs.Pcr{
+						Index: 23,
+						Bank:  "SHA256",
+					},
+				},
 			},
 			ImaLogs: &hvs.Ima{
 				Measurements: []hvs.Measurements{
@@ -36,6 +42,20 @@ func TestImaEventLogEqualsNoFault(t *testing.T) {
 					},
 					{
 						File:        "/root/testFiles1/testfile1.txt",
+						Measurement: "d66f10063e36554432b6694f245068dd7d573fddb15d22ed51c4c5c6686fc4b9",
+					},
+				},
+				MeasurementsVm: []hvs.Measurements{
+					{
+						File:        "boot_aggregate",
+						Measurement: "d9ea73d04dc53931c8729429295ccc4bd3f613612d6732334982781da6b25893",
+					},
+					{
+						File:        "/root/testFiles1/testfile2vm.txt",
+						Measurement: "d5685ed4d41fdeeac6658eb7b6bc524d5c61e2e86fb96e512be32ec6ec1c0e36",
+					},
+					{
+						File:        "/root/testFiles1/testfile1vm.txt",
 						Measurement: "d66f10063e36554432b6694f245068dd7d573fddb15d22ed51c4c5c6686fc4b9",
 					},
 				},
@@ -68,10 +88,36 @@ func TestImaEventLogEqualsNoFault(t *testing.T) {
 				},
 			},
 		},
+		ImaVmLogs: &hvs.ImaLogs{
+			Pcr: hvs.Pcr{
+				Index: 23,
+				Bank:  "SHA256",
+			},
+			ImaTemplate: "ima-ng",
+			Measurements: []hvs.Measurements{
+				{
+					File:        "boot_aggregate",
+					Measurement: "d9ea73d04dc53931c8729429295ccc4bd3f613612d6732334982781da6b25893",
+				},
+				{
+					File:        "/root/testFiles1/testfile2vm.txt",
+					Measurement: "d5685ed4d41fdeeac6658eb7b6bc524d5c61e2e86fb96e512be32ec6ec1c0e36",
+				},
+				{
+					File:        "/root/testFiles1/testfile1vm.txt",
+					Measurement: "d66f10063e36554432b6694f245068dd7d573fddb15d22ed51c4c5c6686fc4b9",
+				},
+			},
+		},
 		PcrManifest: hvs.PcrManifest{
 			Sha256Pcrs: []hvs.HostManifestPcrs{
 				{
 					Index:   10,
+					Value:   "c29a8dd3b4c545129431d25bb0a3d22929101c6630028b06684a20aff944e02f",
+					PcrBank: "SHA256",
+				},
+				{
+					Index:   23,
 					Value:   "c29a8dd3b4c545129431d25bb0a3d22929101c6630028b06684a20aff944e02f",
 					PcrBank: "SHA256",
 				},

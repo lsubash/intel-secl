@@ -106,13 +106,13 @@ func (rule *imaEventLogEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleR
 	if hostManifest.ImaVmLogs != nil && rule.expectedImaLogs != nil {
 		actualImaLogs := hvs.Ima{}
 		actualImaLogs.MeasurementsVm = hostManifest.ImaVmLogs.Measurements
-		actualImaLogs.ExpectedValue = hostManifest.ImaVmLogs.ExpectedValue
+		actualImaLogs.ExpectedVmValue = hostManifest.ImaVmLogs.ExpectedValue
 		actualImaLogs.ImaTemplate = hostManifest.ImaVmLogs.ImaTemplate
 		pcrIndex := hostManifest.ImaVmLogs.Pcr.Index
 		pcrBank := hostManifest.ImaVmLogs.Pcr.Bank
 
 		//Subtract flavor data from hostmanifest
-		unexpectedImaLogs, mismatchedImaLogs, err := actualImaLogs.Subtract(rule.expectedImaLogs)
+		unexpectedImaLogs, mismatchedImaLogs, err := actualImaLogs.SubtractVm(rule.expectedImaLogs)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error in subtracting expected IMA logs from actual in hostmanifest IMA logs")
 		}
@@ -125,18 +125,18 @@ func (rule *imaEventLogEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleR
 
 		//Subtract hostmanifest data from flavor
 		//leave catching mismatch entries, as they were captured already in above subtract call
-		missingImaLogs, _, err := rule.expectedImaLogs.Subtract(&actualImaLogs)
+		missingImaLogs, _, err := rule.expectedImaLogs.SubtractVm(&actualImaLogs)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error in subtracting actual IMA logs from expected IMA logs")
 		}
 
 		// if there are any remaining events, then there were missing entries...
-		if len(missingImaLogs.Measurements) > 0 {
+		if len(missingImaLogs.MeasurementsVm) > 0 {
 			log.Debug("Missing Imalogs in IMA event logs equal rule :", missingImaLogs.Measurements)
 			result.Faults = append(result.Faults, newImaLogMissingExpectedEntries(missingImaLogs, hostManifest.ImaVmLogs.Pcr.Index, hostManifest.ImaVmLogs.Pcr.Bank))
 		}
 
-		if len(mismatchedImaLogs.Measurements) > 0 {
+		if len(mismatchedImaLogs.MeasurementsVm) > 0 {
 			log.Debug("Mismatched Imalogs in IMA event logs equals rule :", mismatchedImaLogs.Measurements)
 
 			for _, expectedMeasurement := range mismatchedImaLogs.Measurements {
@@ -157,9 +157,9 @@ func (rule *imaEventLogEquals) Apply(hostManifest *hvs.HostManifest) (*hvs.RuleR
 			result.MismatchField = append(result.MismatchField, mismatchInfo)
 		}
 
-	} else {
+	} /*else {
 		result.Faults = append(result.Faults, newImaVmLogsMissingFault())
-	}
+	}*/
 
 	return &result, nil
 }
