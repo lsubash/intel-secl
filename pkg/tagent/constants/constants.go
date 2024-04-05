@@ -103,6 +103,8 @@ const (
 	EnvFlavorUUIDs               = "FLAVOR_UUIDS"
 	EnvFlavorLabels              = "FLAVOR_LABELS"
 	EnvIMAMeasureEnabled         = "IMA_MEASURE_ENABLED"
+	EnvUEFIEventLog              = "UEFI_EVENT_LOGFILE"
+	EnvMSRPath		     = "MSR_PATH"
 )
 
 // "TODO" comment -- the SHA constants should live in intel-secl/pkg/model/
