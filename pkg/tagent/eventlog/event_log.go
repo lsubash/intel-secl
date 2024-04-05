@@ -5,6 +5,8 @@
 package eventlog
 
 import (
+	"fmt"
+	"os"
 	commLog "github.com/intel-secl/intel-secl/v5/pkg/lib/common/log"
 	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
 )
@@ -45,6 +47,13 @@ func NewEventLogParser() EventLogParser {
 	// build an 'aggregate' event-log parser that has an array of
 	// 'sub' parsers.
 	eventLogParser := aggregateEventLogParser{}
+	
+       fmt.Println("eventlog/event_log:NewEventLogParser() Entering")
+       defer fmt.Printf("eventlog/event_log:NewEventLogParser() Leaving")
+
+       newuefiEventLogPath := os.Getenv(constants.EnvUEFIEventLog)
+ 
+       log.Trace("UEFI event log file path or content:", newuefiEventLogPath)
 
 	// If the Trust-Agent has been compiled with a different 'uefiEventLogFile'
 	// use that to create the event-logs.  Otherwise, fall back to parsing
@@ -53,6 +62,13 @@ func NewEventLogParser() EventLogParser {
 	if uefiEventLogFile != "" {
 		log.Infof("Configured to use UEFI event log file %q", uefiEventLogFile)
 		uefiParser = &fileEventLogParser{file: uefiEventLogFile}
+
+		newuefiEventLogPath := os.Getenv(constants.EnvUEFIEventLog)
+		log.Trace("UEFI event log file path or content:", newuefiEventLogPath)
+
+		value, ok := os.LookupEnv(constants.EnvUEFIEventLog)
+		log.Trace("Configured to use UEFI event log file %q", uefiEventLogFile)
+		log.Trace("Event log file value:", value, " Is present:", ok)
 	} else {
 		uefiParser = &uefiEventLogParser{
 			tpm2FilePath:   constants.Tpm2FilePath,

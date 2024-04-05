@@ -10,6 +10,9 @@ import (
 
 	model "github.com/intel-secl/intel-secl/v5/pkg/model/ta"
 	"github.com/pkg/errors"
+
+	"github.com/intel-secl/intel-secl/v5/pkg/tagent/constants"
+        "fmt"
 )
 
 const (
@@ -53,6 +56,11 @@ func (msrInfoParser *msrInfoParser) Parse(hostInfo *model.HostInfo) error {
 	if msrInfoParser.msrReader == nil {
 		return errors.New("The MSR reader has not been initialized.")
 	}
+	fmt.Println("MSRlog/msrpasrser:NewEventLogParser() Entering")
+        defer fmt.Printf("MSRlog/msrpasrser:NewEventLogParser() Leaving")
+
+        newMSRPath := os.Getenv(constants.EnvMSRPath)
+        log.Trace("FROM VM -- MSR event log file path :", newMSRPath)
 
 	err := msrInfoParser.parseTxt(hostInfo)
 	if err != nil {
@@ -138,8 +146,17 @@ type msrReaderImpl struct{}
 func (msrReaderImpl *msrReaderImpl) ReadAt(offset int64) (uint64, error) {
 
 	var results uint64
+	
+	newMSRPath := os.Getenv(constants.EnvMSRPath)
 
-	msr, err := os.Open(msrFile)
+        log.Trace("MSR event log file path or content:", newMSRPath)
+
+        msr, err := os.Open(newMSRPath)
+
+        if err != nil  {
+    		return 0, errors.Wrapf(err, "Failed to open MSR from %q", newMSRPath)
+    		log.Trace("Error from  VM MSR filea path   ", newMSRPath)
+        } 
 	if err != nil {
 		return 0, errors.Wrapf(err, "Failed to open MSR from %q", msrFile)
 	}
