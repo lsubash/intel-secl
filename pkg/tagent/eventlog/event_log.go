@@ -47,7 +47,7 @@ func NewEventLogParser() EventLogParser {
 	// build an 'aggregate' event-log parser that has an array of
 	// 'sub' parsers.
 	eventLogParser := aggregateEventLogParser{}
-	
+
 	// If the Trust-Agent has been compiled with a different 'uefiEventLogFile'
 	// use that to create the event-logs.  Otherwise, fall back to parsing
 	// /dev/mem (default)

@@ -170,8 +170,8 @@ func (msrReaderImpl *msrReaderImpl) ReadAt(offset int64) (uint64, error) {
 	if err != nil {
 		return 0, errors.Wrapf(err, "Failed to read results from MSR file %q", msrFile)
 	}
-	return results, nil
 
+	return results, nil
 }
 
 func bitShift(value uint64, hibit uint, lowbit uint) (uint64, error) {
