@@ -40,7 +40,6 @@ type msrInfoParser struct {
 
 // initialize 'msrReaderImpl' so that it can be mocked in unit tests.
 func (msrInfoParser *msrInfoParser) Init() error {
-
 	if _, err := os.Stat(msrFile); os.IsNotExist(err) {
 		return errors.Wrapf(err, "Failed to find MSR file %q", msrFile)
 	}
@@ -56,11 +55,6 @@ func (msrInfoParser *msrInfoParser) Parse(hostInfo *model.HostInfo) error {
 	if msrInfoParser.msrReader == nil {
 		return errors.New("The MSR reader has not been initialized.")
 	}
-	fmt.Println("MSRlog/msrpasrser:NewEventLogParser() Entering")
-        defer fmt.Printf("MSRlog/msrpasrser:NewEventLogParser() Leaving")
-
-        newMSRPath := os.Getenv(constants.EnvMSRPath)
-        log.Trace("FROM VM -- MSR event log file path :", newMSRPath)
 
 	err := msrInfoParser.parseTxt(hostInfo)
 	if err != nil {
@@ -148,16 +142,15 @@ func (msrReaderImpl *msrReaderImpl) ReadAt(offset int64) (uint64, error) {
 	var results uint64
 	
 	newMSRPath := os.Getenv(constants.EnvMSRPath)
+	fmt.Println("FROM VM -- MSR event log file path or content :", newMSRPath)
+	if newMSRPath == "" {
+	      fmt.Println("Error opening  KVM file path for MSR :")
+        } else {
+              msrFile = newMSRPath
+        }
 
-        log.Trace("MSR event log file path or content:", newMSRPath)
-
-        msr, err := os.Open(newMSRPath)
-
-        if err != nil  {
-    		return 0, errors.Wrapf(err, "Failed to open MSR from %q", newMSRPath)
-    		log.Trace("Error from  VM MSR filea path   ", newMSRPath)
-        } 
-	if err != nil {
+        msr, err := os.Open(msrFile)
+        if err != nil {
 		return 0, errors.Wrapf(err, "Failed to open MSR from %q", msrFile)
 	}
 
@@ -177,8 +170,8 @@ func (msrReaderImpl *msrReaderImpl) ReadAt(offset int64) (uint64, error) {
 	if err != nil {
 		return 0, errors.Wrapf(err, "Failed to read results from MSR file %q", msrFile)
 	}
-
 	return results, nil
+
 }
 
 func bitShift(value uint64, hibit uint, lowbit uint) (uint64, error) {

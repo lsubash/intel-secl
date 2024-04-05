@@ -48,23 +48,21 @@ func NewEventLogParser() EventLogParser {
 	// 'sub' parsers.
 	eventLogParser := aggregateEventLogParser{}
 	
-       fmt.Println("eventlog/event_log:NewEventLogParser() Entering")
-       defer fmt.Printf("eventlog/event_log:NewEventLogParser() Leaving")
-
-       newuefiEventLogPath := os.Getenv(constants.EnvUEFIEventLog)
- 
-       log.Trace("UEFI event log file path or content:", newuefiEventLogPath)
-
 	// If the Trust-Agent has been compiled with a different 'uefiEventLogFile'
 	// use that to create the event-logs.  Otherwise, fall back to parsing
 	// /dev/mem (default)
 	var uefiParser EventLogParser
 	if uefiEventLogFile != "" {
 		log.Infof("Configured to use UEFI event log file %q", uefiEventLogFile)
-		uefiParser = &fileEventLogParser{file: uefiEventLogFile}
-
-		newuefiEventLogPath := os.Getenv(constants.EnvUEFIEventLog)
+		vmefiEventLogPath := os.Getenv(constants.EnvUEFIEventLog)
 		log.Trace("UEFI event log file path or content:", newuefiEventLogPath)
+		if vmuefiEventLogPath == "" {
+                     fmt.Println("Error opening  KVM file path for UEFI Event :")
+                } else {
+                      uefiEvetLogFile = vmuefiEventLogPath
+                }
+
+		uefiParser = &fileEventLogParser{file: uefiEventLogFile}
 
 		value, ok := os.LookupEnv(constants.EnvUEFIEventLog)
 		log.Trace("Configured to use UEFI event log file %q", uefiEventLogFile)
